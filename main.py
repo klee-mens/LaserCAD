@@ -29,13 +29,13 @@ if freecad_da:
 from basic_optics.tests import Telescope_4beam, Lens_4beam_Fokus, Parallel_ray_bundle_tilted_lens, grating_ray_bundle_test
 
 # Telescope_4beam()
-# Lens_4beam_Fokus()
+Lens_4beam_Fokus()
 # Parallel_ray_bundle_tilted_lens()
 # grating_ray_bundle_test()
 
 from basic_optics.tests import all_moduls_test
 
-peris, teles, amp, stretch, wcell = all_moduls_test()
+# peris, teles, amp, stretch, wcell = all_moduls_test()
 
 from basic_optics.moduls import Make_Amplifier_Typ_II_simple
 
