@@ -45,7 +45,7 @@ from basic_optics.moduls import Make_Amplifier_Typ_II_simple
 # rgs = amp.compute_ray_groups()
 # r0 = rgs[0][0]
 # amp.draw()
-
+print("Hello world")
 
 if freecad_da:
   setview()
