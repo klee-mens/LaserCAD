@@ -1,0 +1,465 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Sun Aug 21 20:47:17 2022
+
+@author: mens
+"""
+
+# from basic_optics import Opt_Element, Beam, Ray, Lens, Propagation, Mirror
+# from basic_optics.freecad_models import warning, freecad_da, initialize_composition, add_to_composition
+from .ray import Ray
+from .beam import Beam
+from .optical_element import Opt_Element
+from .lens import Lens
+from .mirror import Mirror, Curved_Mirror
+from .freecad_models import warning, freecad_da, initialize_composition, add_to_composition, make_to_ray_part
+import numpy as np
+from copy import deepcopy
+
+
+class Composition(Opt_Element):
+  """
+  Komposition von Elementen, besitzt optical Axis die mit jedem Element und
+  jedem .propagate erweitert wird und sequence, die die Reihenfolge der
+  Elemente angibt (meist trivial außer bei multipass)
+  """
+  def __init__(self, name="NewComposition", **kwargs):
+    super().__init__(name=name,**kwargs)
+    oA = Ray(name=self.name+"__oA_0", pos=self.pos, normal=self.normal)
+    oA.length = 0
+    self.__optical_axis = [oA]
+    self._elements = []
+    self._sequence = []
+    self._last_prop = 0 #für den Fall, dass eine letzte Propagation nach einem Element noch erwünscht ist
+    # self._last_geom = self.get_geom()
+
+    self._lightsource = Beam(radius=1, angle=0)
+    self._lightsource.set_geom(self.get_geom())
+    self._lightsource.name = self.name + "_Lighsource"
+    self._beams = [self._lightsource]
+    group_ls = self._lightsource.get_all_rays()
+    counter = 0
+    for ray in group_ls:
+      ray.name = self._lightsource.name + "_" + str(counter)
+      counter += 1
+    self._ray_groups = [group_ls]
+    self._catalogue = {}
+    self._drawing_part = -1
+
+
+  def propagate(self, x):
+    """
+    propagiert das System um x mm vorwärts, updated damit opt_axis,
+    self._matrix, ersetzt früheres add(Propagation)
+
+    Parameters
+    ----------
+    x : float
+      Länge um die propagiert wird
+    """
+    end_of_axis = self.__optical_axis[-1]
+    end_of_axis.length += x
+    # self._last_geom = (end_of_axis.endpoint(), end_of_axis.normal)
+    # self._matrix = np.matmul( np.array([[1,x], [0,1]]), self._matrix) #braucht keine Sau
+    self._last_prop = x #endet mit Propagation
+
+  def last_geom(self):
+    end_of_axis = self.__optical_axis[-1]
+    return (end_of_axis.endpoint(), end_of_axis.normal)
+
+  def __add_raw(self, item):
+    # #checken ob Elm schon mal eingefügt
+    self.__no_double_integration_check(item)
+    # # Namen ändern, geom setzen, hinzufügen
+    item.name = self.new_catalogue_entry(item)
+    # item.set_geom(self.last_geom())
+    self._elements.append(item)
+    # self._matrix = np.matmul(item._matrix, self._matrix) #braucht keine Sau
+    self._sequence.append(len(self._elements)-1) #neues <item> am Ende der seq
+    self._last_prop = 0 #endet mit Element
+
+  def add_on_axis(self, item):
+    """
+    fügt <item> an der Stelle _last_geom (und damit) auf der optAx ein,
+    checkt ob nicht ausversehen doppelt eingefügt, ändert namen, geom
+
+    updatet _matrix, opt_axis
+    """
+    # #checken ob Elm schon mal eingefügt
+    # self.__no_double_integration_check(item)
+    # # Namen ändern, geom setzen, hinzufügen
+    # item.name = self.new_catalogue_entry(item)
+    item.set_geom(self.last_geom())
+    self.__add_raw(item)
+    newoA = item.next_ray(self.__optical_axis[-1])
+    newoA.length = 0
+    self.__optical_axis.append(newoA)
+
+  def add_fixed_elm(self, item):
+    """
+    fügt <item> genau an der Stelle <item.get_geom()> ein
+
+    updated entsprechend add_on_axis
+    """
+    # #checken ob Elm schon mal eingefügt
+    # self.__no_double_integration_check(item)
+    # # Namen ändern, geom setzen, hinzufügen
+    # item.name = self.new_catalogue_entry(item)
+    # item.set_geom(self.last_geom())
+    # last_pos = self.last_geom()[0] #wird eh auf Neuberechnung der Matrix mit sequence raus laufen
+    # dist = np.linalg.norm(item.pos - last_pos)
+    # self._matrix = np.matmul( np.array([[1,dist], [0,1]]), self._matrix)
+    self.__add_raw(item)
+
+
+  def redefine_optical_axis(self, ray):
+    # zB wenn die wavelength angepasst werden muss
+    print("sollte nur gemacht werden, wenn absolut noch kein Element eingefügt wurde")
+    print("kann die ganze Geometrie hart abfucken")
+    self.set_geom(ray.get_geom())
+    oA = deepcopy(ray)
+    oA.name = self.name +"__oA_0"
+    self.__optical_axis = [oA]
+    self.recompute_optical_axis()
+
+  def recompute_optical_axis(self):
+    self.__optical_axis = [self.__optical_axis[0]]
+    counter = 1
+    for ind in self._sequence:
+      elm = self._elements[ind]
+      # print("-----", elm)
+      newoA = elm.next_ray(self.__optical_axis[-1])
+      counter += 1
+      newoA.name = self.name + "__oA_" + str(counter)
+      self.__optical_axis.append(newoA)
+    newoA.length = self._last_prop
+
+
+  def get_matrix(self):
+   self._matrix = np.eye(2)
+   self.recompute_optical_axis()
+   for ind in self._sequence:
+     B = self.__optical_axis[ind].length
+     M = self._elements[ind]._matrix
+     self._matrix = np.matmul(np.array([[1,B], [0,1]]), self._matrix )
+     self._matrix = np.matmul(M, self._matrix )
+   self._matrix = np.matmul(np.array([[1,self._last_prop], [0,1]]), self._matrix )
+   return np.array(self._matrix)
+
+  def get_sequence(self):
+    return list(self._sequence)
+
+  def set_sequence(self, seq):
+    self._sequence = list(seq)
+    self.recompute_optical_axis()
+
+
+  def compute_ray_groups(self):
+    """
+    berechnet von einer ray_groups[0] aus alle folgenden Strahlen, default ist
+    die Gruppe der Lightsource
+
+    Returns
+    -------
+    array of computed ray_groups
+    """
+    self._ray_groups = [self._lightsource.get_all_rays()] #erst mal nullen
+    for n in self._sequence:
+      elm = self._elements[n]
+      newgroup = []
+      newgroup_name = self.name + "__ray_group" + str(n)
+      raycounter = 1
+      for oldray in self._ray_groups[-1]:
+        ray = elm.next_ray(oldray)
+        if not ray == None:
+          # manche Elemente geben keien validen rays zurück (?)
+          ray.name = newgroup_name + "_ray" + str(raycounter)
+          raycounter += 1
+          newgroup.append(ray)
+          # self._rays.append(ray)
+      if len(newgroup) > 0:
+        self._ray_groups.append(newgroup)
+    for ray in self._ray_groups[-1]:
+      ray.length = self._last_prop
+      # ray.length = 200
+    return deepcopy(self._ray_groups)
+
+  def compute_beams(self):
+    beamcount = 0
+    self._beams = [self._lightsource]
+    for n in self._sequence:
+      elm = self._elements[n]
+      beam = elm.next_beam(self._beams[-1])
+      if beam.is_valid():
+        # manche Elemente wie Prop geben keine validen beams zurück
+        beamcount += 1
+        beam.name = self.name + "_beam_" + str(beamcount)
+        self._beams.append(beam)
+    beam.set_length(self._last_prop)
+    return self._beams
+
+
+  def draw_elements(self):
+    self.__init_parts()
+    container = []
+    for elm in self._elements:
+      obj = elm.draw()
+      container.append(obj)
+    return self.__container_to_part(self._elements_part, container)
+
+  def draw_beams(self):
+    self.__init_parts()
+    self.compute_beams()
+    container = []
+    for beam in self._beams:
+      obj = beam.draw()
+      container.append(obj)
+    return self.__container_to_part(self._beams_part, container)
+
+  def draw_mounts(self):
+    self.__init_parts()
+    container = []
+    for elm in self._elements:
+      obj = elm.draw_mount()
+      container.append(obj)
+    return self.__container_to_part(self._mounts_part, container)
+
+  def draw_rays(self):
+    self.__init_parts()
+    self.compute_ray_groups()
+    container = []
+    for raygroup in self._ray_groups:
+      subgr = []
+      for ray in raygroup:
+        obj = ray.draw()
+        subgr.append(obj)
+      container.append(subgr)
+    if freecad_da:
+      return make_to_ray_part(self.name, self._rays_part, container)
+    self._rays_part = container
+    self._drawing_part[2] = self._rays_part
+    return container
+
+  def draw(self):
+    self.draw_elements()
+    self.draw_beams()
+    self.draw_mounts()
+    self.draw_rays()
+
+  def __container_to_part(self, part, container):
+    if freecad_da:
+      part = add_to_composition(part, container)
+    else:
+      for x in container:
+        part.append(x)
+    return part
+
+  def __init_parts(self):
+    if self._drawing_part == -1:
+      if freecad_da:
+        d,e,m,b,r = initialize_composition(self.name)
+        self._drawing_part = d
+        self._elements_part = e
+        self._mounts_part = m
+        self._beams_part = b
+        self._rays_part = r
+      else:
+        self._elements_part = []
+        self._mounts_part = []
+        self._rays_part = []
+        self._beams_part = []
+        self._drawing_part = [self._elements_part, self._mounts_part,
+                                self._rays_part, self._beams_part]
+
+
+  def set_light_source(self, ls):
+    """
+    setzt neue Lightsource (meistens ein Beam) für die Composition und passt
+    deren Geom und Namen an
+    danach werden _beams[] und raygroups[] neu initialisiert
+    """
+
+    self._lightsource = ls
+    # self.set_geom(ls.get_geom())
+    ls.set_geom(self.get_geom())
+    ls.name = self.name + "_Lightsource"
+    self._beams = [self._lightsource]
+    group_ls = self._lightsource.get_all_rays()
+    counter = 0
+    for ray in group_ls:
+      ray.name = self._lightsource.name + "_" + str(counter)
+      counter += 1
+    self._ray_groups = [group_ls]
+
+
+  def new_catalogue_entry(self, item):
+    #gibt jedem neuen Element einen Namen entsprechend seiner Klasse
+    key = item.Klassenname()
+    if key in self._catalogue:
+         anz, names = self._catalogue[key]
+         anz += 1
+         itname = next_name(names[-1])
+         names.append(itname)
+    else:
+         itname = self.name + "_" + item.Klassenname() + "_01"
+         anz = 1
+    self._catalogue[key] = [anz, [itname]]
+    return itname
+
+  def __no_double_integration_check(self, item):
+    #checken ob Elm schon mal eingefügt
+    if self in item.group:
+      warning("Das Element -" + str(item) + "- wurde bereits in <" +
+            self.name + "> eingefügt.")
+    item.group.append(self)
+
+  def _pos_changed(self, old_pos, new_pos):
+    """
+    wird aufgerufen, wen die Position von <self> verändert wird
+    ändert die Position aller __rays mit
+    """
+    # print("---pos---geändert---")
+    super()._pos_changed(old_pos, new_pos)
+    self._rearange_subobjects_pos(old_pos, new_pos, self._elements)
+    self._rearange_subobjects_pos(old_pos, new_pos, [self._lightsource]) #sonst wird ls doppelt geshifted
+    self._rearange_subobjects_pos(old_pos, new_pos, self._beams[1::])
+    self._rearange_subobjects_pos(old_pos, new_pos, [r for rg in self._ray_groups[1::] for r in rg])
+    self._rearange_subobjects_pos(old_pos, new_pos, self.__optical_axis)
+
+
+  # def _normal_changed(self, old_normal, new_normal):
+  #   """
+  #   wird aufgerufen, wen die Normale von <self> verändert wird
+  #   dreht die Normale aller __rays mit
+
+  #   dreht außerdem das eigene Koordiantensystem
+  #   """
+  #   super()._normal_changed(old_normal, new_normal)
+  #   self._rearange_subobjects_normal(old_normal, new_normal, [self._lightsource]) #sonst wird ls doppelt geshifted
+  #   self._rearange_subobjects_normal(old_normal, new_normal, self._elements)
+  #   self._rearange_subobjects_normal(old_normal, new_normal, self._beams[1::])
+  #   self._rearange_subobjects_normal(old_normal, new_normal, [r for rg in self._ray_groups[1::] for r in rg])
+  #   self._rearange_subobjects_normal(old_normal, new_normal, self.__optical_axis)
+    
+  def _axes_changed(self, old_axes, new_axes):
+    """
+    wird aufgerufen, wen die axese von <self> verändert wird
+    dreht die axese aller __rays mit
+
+    dreht außerdem das eigene Koordiantensystem
+    """
+    super()._axes_changed(old_axes, new_axes)
+    self._rearange_subobjects_axes(old_axes, new_axes, [self._lightsource]) #sonst wird ls doppelt geshifted
+    self._rearange_subobjects_axes(old_axes, new_axes, self._elements)
+    self._rearange_subobjects_axes(old_axes, new_axes, self._beams[1::])
+    self._rearange_subobjects_axes(old_axes, new_axes, [r for rg in self._ray_groups[1::] for r in rg])
+    self._rearange_subobjects_axes(old_axes, new_axes, self.__optical_axis)
+
+
+
+
+def next_name(name, prefix=""):
+  # generiert einen neuen namen aus dem alten Element
+  ind = name.rfind("_")
+  try:
+    num = int(name[ind+1::])+1
+  except:
+    num = 1
+  suffix = str(num) if num>9 else "0"+str(num)
+  return prefix + name[0:ind] + "_" + suffix
+
+
+# def Composition_lens_test():
+#   fok = 100
+#   beam1 = Beam(3, 0.02)
+#   p1 = Propagation(d=1.5*fok)
+#   l1 = Lens(f=fok)
+#   p2 = Propagation(d=3*fok)
+
+#   vergAbb = Composition_old(name="VergrAbb")
+#   vergAbb._lightsource = beam1
+#   vergAbb.add(p1)
+#   vergAbb.add(l1)
+#   vergAbb.add(p2)
+# #   vergAbb.add(p2) # kann eingeschaltet werden um Warnung zu triggern
+# #   beams = vergAbb.compute_beams()
+#   return vergAbb
+
+# def Teleskop_test():
+#   fok = 120
+#   # beam1 = Beam(1, 0.05)
+#   beam1 = Beam(2.0, 0.0)
+#   p1 = Propagation(d=fok)
+#   l1 = Lens(f=fok)
+#   p2 = Propagation(d=2*fok)
+#   l2 = Lens(f=fok)
+#   p3 = Propagation(d=fok)
+
+#   teles = Composition_old(name="Teleskop")
+#   teles._lightsource = beam1
+#   teles.add(p1)
+#   teles.add(l1)
+#   teles.add(p2)
+#   teles.add(l2)
+#   teles.add(p3)
+# #   teles.add(p2) # kann eingeschaltet werden um Warnung zu triggern
+# #   beams = teles.compute_beams()
+#   return teles
+
+
+# def Composition_mirror_test():
+#   a = Composition_old(name="4FlipTrip")
+#   r = Beam(radius=4, angle=0)
+# #   r = Beam(radius=4, angle=0, pos = (0, 0, 85))
+#   a._lightsource = r
+#   m = Mirror(phi=90)
+#   p = Propagation(d=300)
+#   m2 = Mirror(phi=90)
+#   p2 = Propagation(d=300)
+#   m3 = Mirror(phi=90)
+#   p3 = Propagation(d=300)
+#   p4 = Propagation(d=300)
+#   a.add(p)
+#   a.add(m)
+#   a.add(p2)
+#   a.add(m2)
+#   a.add(p3)
+#   a.add(m3)
+#   a.add(p4)
+
+# #   a.draw()
+# #   a.compute_beams()
+#   #a.draw_mounts()
+#   return a
+
+# def Mirror_Teleskop_test():
+#   c = Composition_old(name="MirrorTelescope")
+#   ls = Beam(angle=0)
+#   p1 = Propagation(d=100)
+#   cm1 = Curved_Mirror(radius=100, phi=180-10)
+#   p2 = Propagation(d=100)
+#   cm2 = Curved_Mirror(radius=100, phi=10-180)
+#   p3 = Propagation(d=100)
+
+#   c._lightsource = ls
+#   c.add(p1)
+#   c.add(cm1)
+#   c.add(p2)
+#   c.add(cm2)
+#   c.add(p3)
+#   return c
+
+# def add_only_elem_test():
+#   comp = Composition_old()
+#   lens1 = Lens(f=200, pos=(100, 0, 80))
+#   lens2 = Lens(f=200, pos=(500, 0, 80))
+#   comp.add_only_elm(lens1)
+#   comp.add_only_elm(lens2)
+#   return comp
+
+
+
+
+
+
