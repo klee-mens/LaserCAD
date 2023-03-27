@@ -18,9 +18,10 @@ from .ray import Ray
 from .beam import Beam
 from .optical_element import Opt_Element
 from .lens import Lens
+from .propagation import Propagation
 from .mirror import Mirror, Curved_Mirror
 from .composition import Composition
-from .moduls import Make_Telescope,Make_Periscope, Make_White_Cell, Make_Amplifier_Typ_I, Make_Amplifier_Typ_II_simple, Make_Stretcher
+from .moduls import Make_Telescope,Make_Periscope, Make_White_Cell,Make_Amplifier_Typ_I_simpler, Make_Amplifier_Typ_I_simple, Make_Amplifier_Typ_II_simple, Make_Stretcher, Make_Amplifier_Typ_II_simpler
 from .constants import inch
 from .grating import Grating
 
