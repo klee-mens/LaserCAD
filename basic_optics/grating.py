@@ -11,6 +11,7 @@ from copy import deepcopy
 from .optical_element import Opt_Element
 from .ray import Ray
 from .freecad_models import model_grating
+from .freecad_models import grating_mount
 
 class Grating(Opt_Element):
   """
@@ -55,7 +56,11 @@ class Grating(Opt_Element):
     dims = (self.width, self.height, self.thickness)
     return model_grating(name=self.name, dimensions=dims, geom=self.get_geom())
   
-  
+  def draw_mount_fc(self):
+    # self.draw_dict["mount_type"] = "POLARIS-K1-Step"
+    # self.draw_dict["Radius"] = 0
+    obj = grating_mount(name=self.name,height=self.height,thickness=self.thickness, geom=self.get_geom())
+    return obj
   
   
   
