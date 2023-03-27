@@ -6,6 +6,7 @@ Created on Tue Aug 30 17:03:16 2022
 """
 from .lens import Lens
 from .mirror import Mirror, Curved_Mirror, mirror_mount
+from .diaphragms import Diaphragms
 # from .propagation import Propagation
 # from .composition import Composition_old
 from .composition import Composition
@@ -70,7 +71,19 @@ def Make_Telescope(name="Teleskop", f1=100.0, f2=100.0, d0=100.0, lens1_aperture
 
   return teles
 
-
+def diaphragms_test(name="diaphragms_test"):
+  dia = Diaphragms(dia=50)
+  # dia.pos = (150,0,0)
+  ls = Beam(angle=0)
+  # dia.spot_diagram(ls)
+  dia1 = Composition(name=name)
+  # dia1.pos = (0,0,0)
+  # dia1.normal = (1,0,0)
+  dia1.set_light_source(ls)
+  dia1.propagate(150)
+  # dia1.add_fixed_elm(dia)
+  dia1.add_on_axis(dia)
+  return dia1
 
 
 
@@ -406,7 +419,6 @@ def Make_Amplifier_Typ_II_simpler(name="AmpTyp2sr", focal_length=600, magnificat
   # print("p1:", lens1.pos - (0, beam_sep, 0))
   plane_mir.set_normal_with_2_points(point0, point1)
   plane_mir.aperture = aperture_small
-  print("plane_mir.normal=",plane_mir.normal)
 
   ls = Beam(angle=0) # kollimierter Anfangsbeam
   # ls.pos = beam_pos
@@ -417,9 +429,6 @@ def Make_Amplifier_Typ_II_simpler(name="AmpTyp2sr", focal_length=600, magnificat
   AmpTyp2.pos = beam_pos
   AmpTyp2.normal = plane_mir.pos - beam_pos
   
-  print("plane_mir.pos=",plane_mir.pos)
-  print("beam_pos=",beam_pos)
-  print("amp.normal=",AmpTyp2.normal)
   # AmpTyp2.normal=np.array((AmpTyp2.normal[0],-AmpTyp2.normal[1],AmpTyp2.normal[2]))
   AmpTyp2.set_light_source(ls)
   AmpTyp2.add_fixed_elm(plane_mir)

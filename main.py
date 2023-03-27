@@ -13,9 +13,13 @@ pfad = __file__
 pfad = pfad[0:-7] #nur wenn das Skript auch wirklich main.py heißt
 sys.path.append(pfad)
 
+# import basic_optics.freecad_models as fcm
+# from importlib import reload
+# reload(fcm)
+
 from basic_optics.freecad_models import clear_doc, setview, freecad_da, freecad_model_lens
-from basic_optics import Beam, Mirror, Opt_Element, Geom_Object, Curved_Mirror, Lens, Ray, Composition, inch, Grating
-# from basic_optics.composition import Teleskop_test, Composition_mirror_test, Mirror_Teleskop_test, add_only_elem_test
+from basic_optics import Beam, Mirror, Opt_Element, Geom_Object, Curved_Mirror, Lens,Iris,Diaphragms, Ray, Composition, inch, Grating, Propagation
+#from basic_optics.composition import Teleskop_test, Composition_mirror_test, Mirror_Teleskop_test, add_only_elem_test
 from basic_optics.mirror import curved_mirror_test
 
 if freecad_da:
@@ -23,30 +27,69 @@ if freecad_da:
 
 
 
+# from basic_optics.freecad_models.freecad_model_mirror import model_stripe_mirror,model_round_mirror
 
 
 
-from basic_optics.tests import Telescope_4beam, Lens_4beam_Fokus, Parallel_ray_bundle_tilted_lens, grating_ray_bundle_test
+
+# from basic_optics.tests import Telescope_4beam, Lens_4beam_Fokus, Parallel_ray_bundle_tilted_lens, grating_ray_bundle_test
 
 # Telescope_4beam()
 # Lens_4beam_Fokus()
 # Parallel_ray_bundle_tilted_lens()
 # grating_ray_bundle_test()
 
-from basic_optics.tests import all_moduls_test
+# from basic_optics.tests import all_moduls_test
 
-peris, teles, amp, stretch, wcell = all_moduls_test()
+# peris, teles, amp, stretch, wcell = all_moduls_test()
 
-from basic_optics.moduls import Make_Amplifier_Typ_II_simple
 
-# amp = Make_Amplifier_Typ_II_simple()
-# amp.pos = (0,0,100)
-# m0 = amp._elements[0]
-# rgs = amp.compute_ray_groups()
-# r0 = rgs[0][0]
-# amp.draw()
-print("Hello world")
+
+from basic_optics.moduls import Make_Amplifier_Typ_I_simpler,Make_Stretcher,Make_Amplifier_Typ_II_simpler,Make_Amplifier_Typ_II_simple,Make_Amplifier_Typ_I_simple
+from basic_optics.moduls import diaphragms_test
+# peris = Make_Telescope()
+# peris.draw()
+# teles = Make_Periscope()
+# teles.draw_elements()
+# teles.draw_mounts()
+# amplifier0 = Make_Amplifier_Typ_I_simple(beam_sep=15,roundtrips2=2)
+# amplifier0.pos = (0, 0, 100)
+# amplifier0.draw_elements()
+# # amplifier0.draw_rays()
+# amplifier0.draw_mount()
+# amplifier0.draw_beams()
+
+# amplifier1 = Make_Amplifier_Typ_I_simpler(beam_sep=20,roundtrips2=2)
+# amplifier1.pos = (0, 200, 100)
+# amplifier1.draw_elements()
+# # amplifier1.draw_rays()
+# amplifier1.draw_mounts()
+# amplifier1.draw_beams()
+
+# amplifier2 = Make_Amplifier_Typ_II_simple(beam_sep=15,roundtrips2=2)
+# amplifier2.pos = (0, 400, 100)
+# amplifier2.draw_elements()
+# # amplifier2.draw_rays()
+# amplifier2.draw_mount()
+# amplifier2.draw_beams()
+
+# amplifier3 = Make_Amplifier_Typ_II_simpler(beam_sep=20,roundtrips2=2)
+# amplifier3.pos = (0, 600, 100)
+# amplifier3.draw_elements()
+# # amplifier3.draw_rays()
+
+# amplifier3.draw_mounts()
+# amplifier3.draw_beams()
+
+dia = diaphragms_test()
+dia.pos = (0,0,100)
+dia.draw_elements()
+dia.draw_rays()
+#dia.draw_beams()
+dia.draw_mounts()
 
 if freecad_da:
+  #model_stripe_mirror(dia=152.4,Radius1=-1000)
+  #model_round_mirror(dia=152.4, thickness=30,Radius=500)
   setview()
 
