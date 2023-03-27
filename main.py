@@ -30,6 +30,9 @@ from basic_optics.tests import Telescope_4beam, Lens_4beam_Fokus, Parallel_ray_b
 
 # Telescope_4beam()
 Lens_4beam_Fokus()
+
+print("AHHHHHHHHHHHHHHHHHHHHHHHHHHHHH!")
+
 # Parallel_ray_bundle_tilted_lens()
 # grating_ray_bundle_test()
 
