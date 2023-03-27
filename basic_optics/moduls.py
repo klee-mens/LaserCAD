@@ -5,7 +5,7 @@ Created on Tue Aug 30 17:03:16 2022
 @author: mens
 """
 from .lens import Lens
-from .mirror import Mirror, Curved_Mirror
+from .mirror import Mirror, Curved_Mirror, mirror_mount
 # from .propagation import Propagation
 # from .composition import Composition_old
 from .composition import Composition
@@ -13,6 +13,7 @@ from .beam import Beam
 from .constants import inch
 from .grating import Grating
 from .ray import Ray
+from .optical_element import Opt_Element
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -194,11 +195,118 @@ def Make_White_Cell(name="White Cell", Radius=300, roundtrips4=1, aperture_small
 
 
 
-def Make_Amplifier_Typ_I(name, length, som_values):
-  return -1
+def Make_Amplifier_Typ_I_simple(name = "AmpTyp1s", focal_length=600,
+                                dist3=600,roundtrips2=1,
+                                aperture_small=1*inch, aperture_big=2*inch, beam_sep=15):
+  # Radius2 = magnification*focal_length
+  dist1 =2*focal_length-dist3
+  dist2 = focal_length*2
+  theta = np.arctan(beam_sep/dist1) # Seperationswinkel auf Planspiegel
+  beam_pos = (dist2+dist1, -dist1 * np.tan(theta* roundtrips2), 0)
+  
+  plane_mir2 = Mirror()
+  plane_mir2.pos = (0,0,0) # der Ausgangspunkt
+  plane_mir2.normal = (-1,0,0) # umgekehrte Ausrichtung des Aufbaus
+  plane_mir2.aperture = aperture_small
+  
+  lens1 = Lens(f=focal_length)
+  lens1.normal = (1,0,0) #eigentlich egal, kann auch +1,0,0 sein
+  lens1.pos = (dist1,0,0) #d2 = b vom cm2 entfernt
+  lens1.aperture = aperture_big
+  
+  lens2 = Lens(f=focal_length)
+  lens2.normal = (1,0,0) #eigentlich egal, kann auch +1,0,0 sein
+  lens2.pos = (dist1+dist2,0,0) #d2 = b vom cm2 entfernt
+  lens2.aperture = aperture_big
+  
+  plane_mir1 = Mirror()
+  plane_mir1.pos = (dist1*2+dist2, 0, 0)
+  point1 = lens2.pos
+  point0 = lens2.pos - (0, beam_sep, 0)
+  # print("p1:", lens1.pos - (0, beam_sep, 0))
+  plane_mir1.set_normal_with_2_points(point0, point1)
+  plane_mir1.aperture = aperture_small
+  
+  ls = Beam(angle=0) # kollimierter Anfangsbeam
+  # ls.pos = beam_pos
+  # ls.normal = plane_mir.pos - beam_pos #soll direkt auch den Planspiegel zeigen
 
+  AmpTyp1 = Composition(name=name)
+  # print("geom0:", beam_pos, plane_mir.pos - beam_pos)
+  AmpTyp1.pos = beam_pos
+  AmpTyp1.normal = plane_mir1.pos - beam_pos
+  AmpTyp1.set_light_source(ls)
+  AmpTyp1.add_fixed_elm(plane_mir1)
+  AmpTyp1.add_fixed_elm(lens2)
+  AmpTyp1.add_fixed_elm(lens1)
+  AmpTyp1.add_fixed_elm(plane_mir2)
 
+  AmpTyp1.roundtrips = roundtrips2*2 #wird als neue Variable und nur zur Info eingefügt
+  seq = [0]
+  roundtrip_sequence = [1,2,3,2,1,0]
+  seq.extend(roundtrip_sequence)
+  for n in range(roundtrips2-1):
+    seq.extend(roundtrip_sequence)
+  AmpTyp1.set_sequence(seq)
+  AmpTyp1.propagate(120)
+  return AmpTyp1
 
+def Make_Amplifier_Typ_I_simpler(name = "AmpTyp1sr", focal_length=600,
+                                magnification=1,roundtrips2=1,
+                                aperture_small=0.5*inch, aperture_big=2*inch, beam_sep=15):
+  # Radius2 = magnification*focal_length
+  dist1 = (magnification+1) / (magnification**2+1) * focal_length
+  dist2 = magnification * dist1 * 2
+  Radius1=focal_length*2
+  theta = np.arctan(beam_sep/dist1) # Seperationswinkel auf Planspiegel
+  beam_pos = (dist2, -dist1 * np.tan(theta* roundtrips2), 0)
+  
+  plane_mir2 = Mirror()
+  plane_mir2.pos = (dist1*np.cos(theta*2),dist1*np.sin(theta*2),0) # der Ausgangspunkt
+  plane_mir2.normal = plane_mir2.pos # umgekehrte Ausrichtung des Aufbaus
+  plane_mir2.aperture = aperture_small
+  
+  cm2 = Curved_Mirror(radius=Radius1)
+  cm2.normal = (-np.cos(theta),-np.sin(theta),0) #eigentlich egal, kann auch +1,0,0 sein
+  cm2.pos = (0,0,0) #d2 = b vom cm2 entfernt
+  cm2.aperture = aperture_big
+  
+  cm1 = Curved_Mirror(radius=Radius1)
+  cm1.normal = (np.cos(theta),np.sin(theta),0) #eigentlich egal, kann auch +1,0,0 sein
+  cm1.pos = (dist2,0,0) #d2 = b vom cm2 entfernt
+  cm1.aperture = aperture_big
+  
+  plane_mir1 = Mirror()
+  plane_mir1.pos = (dist2-dist1*np.cos(theta*2), -dist1*np.sin(theta*2), 0)
+  point1 = cm1.pos
+  point0 = cm1.pos - (0, beam_sep, 0)
+  # print("p1:", lens1.pos - (0, beam_sep, 0))
+  plane_mir1.set_normal_with_2_points(point0, point1)
+  plane_mir1.aperture = aperture_small
+  
+  ls = Beam(angle=0) # kollimierter Anfangsbeam
+  # ls.pos = beam_pos
+  # ls.normal = plane_mir.pos - beam_pos #soll direkt auch den Planspiegel zeigen
+
+  AmpTyp1 = Composition(name=name)
+  # print("geom0:", beam_pos, plane_mir.pos - beam_pos)
+  AmpTyp1.pos = beam_pos
+  AmpTyp1.normal = plane_mir1.pos - beam_pos
+  AmpTyp1.set_light_source(ls)
+  AmpTyp1.add_fixed_elm(plane_mir1)
+  AmpTyp1.add_fixed_elm(cm1)
+  AmpTyp1.add_fixed_elm(cm2)
+  AmpTyp1.add_fixed_elm(plane_mir2)
+
+  AmpTyp1.roundtrips = roundtrips2*2 #wird als neue Variable und nur zur Info eingefügt
+  seq = [0]
+  roundtrip_sequence = [1,2,3,2,1,0]
+  seq.extend(roundtrip_sequence)
+  for n in range(roundtrips2-1):
+    seq.extend(roundtrip_sequence)
+  AmpTyp1.set_sequence(seq)
+  AmpTyp1.propagate(120)
+  return AmpTyp1
 
 def Make_Amplifier_Typ_II_simple(name="AmpTyp2s", focal_length=600, magnification=1,
                               roundtrips2=1,
@@ -267,6 +375,176 @@ def Make_Amplifier_Typ_II_simple(name="AmpTyp2s", focal_length=600, magnificatio
     AmpTyp2.set_sequence(seq)
     AmpTyp2.propagate(120)
     return AmpTyp2
+
+def Make_Amplifier_Typ_II_simpler(name="AmpTyp2sr", focal_length=600, magnification=1,
+                              roundtrips2=1,
+                              aperture_small=0.5*inch, aperture_big=2*inch, beam_sep=15):
+  
+  Radius2 = magnification*focal_length
+  dist1 = (magnification+1) / magnification * focal_length
+  dist2 = magnification * dist1
+  Radius1 = focal_length*2
+  theta = np.arctan(beam_sep/dist1) # Seperationswinkel auf Planspiegel
+  beam_pos = (dist2, -dist1 * np.tan(theta* roundtrips2), 0)
+  # print("Bemapos,", beam_pos)
+  # Position der Lichtquelle = n*Ablenkwinkel unter dem waagerechtem Strahl
+
+  cm2 = Curved_Mirror(radius= Radius2)
+  cm2.pos = (0,0,0) # der Ausgangspunkt
+  cm2.normal = (-1,0,0) # umgekehrte Ausrichtung des Aufbaus
+  cm2.aperture = aperture_small
+
+  cm1 = Curved_Mirror(radius= Radius1)
+  cm1.pos = (dist2,0,0)
+  cm1.normal = (np.cos(theta),np.sin(theta),0)
+  cm1.aperture = aperture_big
+
+  plane_mir = Mirror()
+  plane_mir.pos = (dist2-dist1*np.cos(theta*2), -dist1*np.sin(theta*2), 0)
+  point1 = cm1.pos
+  point0 = cm1.pos - (0, beam_sep, 0)
+  # print("p1:", lens1.pos - (0, beam_sep, 0))
+  plane_mir.set_normal_with_2_points(point0, point1)
+  plane_mir.aperture = aperture_small
+  print("plane_mir.normal=",plane_mir.normal)
+
+  ls = Beam(angle=0) # kollimierter Anfangsbeam
+  # ls.pos = beam_pos
+  # ls.normal = plane_mir.pos - beam_pos #soll direkt auch den Planspiegel zeigen
+
+  AmpTyp2 = Composition(name=name)
+  # print("geom0:", beam_pos, plane_mir.pos - beam_pos)
+  AmpTyp2.pos = beam_pos
+  AmpTyp2.normal = plane_mir.pos - beam_pos
+  
+  print("plane_mir.pos=",plane_mir.pos)
+  print("beam_pos=",beam_pos)
+  print("amp.normal=",AmpTyp2.normal)
+  # AmpTyp2.normal=np.array((AmpTyp2.normal[0],-AmpTyp2.normal[1],AmpTyp2.normal[2]))
+  AmpTyp2.set_light_source(ls)
+  AmpTyp2.add_fixed_elm(plane_mir)
+  AmpTyp2.add_fixed_elm(cm1)
+  AmpTyp2.add_fixed_elm(cm2)
+  
+  
+  
+  
+
+  AmpTyp2.roundtrips = roundtrips2*2 #wird als neue Variable und nur zur Info eingefügt
+  seq = [0]
+  roundtrip_sequence = [1,2,1,0]
+  seq.extend(roundtrip_sequence)
+  for n in range(roundtrips2-1):
+    seq.extend(roundtrip_sequence)
+  AmpTyp2.set_sequence(seq)
+  AmpTyp2.propagate(120)
+  return AmpTyp2
+
+def Make_Stretcher_old():
+  """
+  tja, versuchen wir mal einen Offner Strecker...
+
+  Returns
+  -------
+  TYPE Composition
+    den gesamten, geraytracten Strecker...
+
+  """
+  # definierende Parameter
+  Radius = 1000 #Radius des großen Konkavspiegels
+  Aperture_concav = 6 * inch
+  h_StripeM = 10 #Höhe des Streifenspiegels
+  gamma = 21 /180 *np.pi # Seperationswinkel zwischen einfallenden und Mittelpunktsstrahl; Alpha = Gamma + Beta
+  grat_const = 1/450 # Gitterkonstante in 1/mm
+  seperation = 100 # Differenz zwischen Gratingposition und Radius
+  lam_mid = 2400e-9 * 1e3 # Zentralwellenlänge in mm
+  delta_lamda = 250e-9*1e3 # Bandbreite in mm
+  number_of_rays = 20
+  safety_to_StripeM = 5 #Abstand der eingehenden Strahlen zum Concav Spiegel in mm
+  periscope_distance = 8
+  
+  # abgeleitete Parameter
+  v = lam_mid/grat_const
+  s = np.sin(gamma)
+  c = np.cos(gamma)
+  a = v/2
+  b = np.sqrt(a**2 - (v**2 - s**2)/(2*(1+c)))
+  sinB = a - b
+  
+  Concav = Curved_Mirror(radius=Radius, name="Concav_Mirror")
+  Concav.pos = (0,0,0)
+  Concav.aperture = Aperture_concav
+  Concav.normal = (-1,0,0)
+  
+  StripeM = Curved_Mirror(radius= -Radius/2, name="Stripe_Mirror")
+  StripeM.pos = (Radius/2, 0, 0)
+  #Cosmetics
+  StripeM.aperture=75
+  StripeM.draw_dict["height"]=10
+  StripeM.draw_dict["thickness"]=25
+  StripeM.draw_dict["model_type"]="Stripe"
+  
+  Grat = Grating(grat_const=grat_const, name="Gitter")
+  Grat.pos = (Radius-seperation, 0, 0)
+  Grat.normal = (np.sqrt(1-sinB**2), -sinB, 0)
+  
+  ray0 = Ray()
+  p_grat = np.array((Radius-seperation, 0, h_StripeM/2 + safety_to_StripeM))
+  vec = np.array((c, s, 0))
+  pos0 = p_grat - 250 * vec
+  ray0.normal = vec
+  ray0.pos = pos0
+  ray0.wavelength = lam_mid
+  
+  lightsource = Beam(radius=0, angle=0)
+  wavels = np.linspace(lam_mid-delta_lamda/2, lam_mid+delta_lamda/2, number_of_rays)
+  rays = []
+  cmap = plt.cm.gist_rainbow
+  for wavel in wavels:
+    rn = Ray()
+    # rn.normal = vec
+    # rn.pos = pos0
+    rn.wavelength = wavel
+    x = (wavel - lam_mid + delta_lamda/2) / delta_lamda
+    rn.draw_dict["color"] = cmap( x )
+    rays.append(rn)
+  lightsource.override_rays(rays)
+  
+  nfm1 = - ray0.normal
+  pfm1 = Grat.pos + 200 * nfm1 + (0,0,-h_StripeM/2 - safety_to_StripeM)
+  # subperis = Periscope(length=8, theta=-90, dist1=0, dist2=0)
+  # subperis.pos = pfm1
+  # subperis.normal = nfm1
+  flip_mirror1 = Mirror()
+  flip_mirror1.pos = pfm1
+  flip_mirror1.normal = nfm1 - np.array((0,0,-1))
+  
+  
+  flip_mirror2 = Mirror()
+  flip_mirror2.pos = pfm1 - np.array((0,0,periscope_distance))
+  flip_mirror2.normal = nfm1 - np.array((0,0,1))
+
+  
+  Stretcher = Composition(name="Strecker", pos=pos0, normal=vec)
+  
+  Stretcher.set_light_source(lightsource)
+  Stretcher.add_fixed_elm(Grat)
+  Stretcher.add_fixed_elm(Concav)
+  Stretcher.add_fixed_elm(StripeM)
+  Stretcher.add_fixed_elm(flip_mirror1)
+  Stretcher.add_fixed_elm(flip_mirror2)
+  
+  # for item in subperis._elements:
+  #   Stretcher.add_fixed_elm(item)
+  
+  
+  # seq = [0,1,2,1,0]
+  # seq = [0,1,2,1,0, 3]
+  # seq = [0,1,2,1,0, 3,4]
+  seq = [0,1,2,1,0, 3,4, 0, 1, 2, 1, 0]
+  Stretcher.set_sequence(seq)
+  Stretcher.propagate(300)
+  return Stretcher
 
 
 def Make_Stretcher():
@@ -347,11 +625,24 @@ def Make_Stretcher():
   flip_mirror1 = Mirror()
   flip_mirror1.pos = pfm1
   flip_mirror1.normal = nfm1 - np.array((0,0,-1))
+  def useless():
+    return None
+  flip_mirror1.draw = useless
+  flip_mirror1.draw_dict["mount_type"] = "dont_draw"
   
   flip_mirror2 = Mirror()
   flip_mirror2.pos = pfm1 - np.array((0,0,periscope_distance))
   flip_mirror2.normal = nfm1 - np.array((0,0,1))
+  flip_mirror2.draw = useless
+  flip_mirror2.draw_dict["mount_type"] = "dont_draw"
   
+  pure_cosmetic = Mirror(name="RoofTop_Mirror")
+  pure_cosmetic.draw_dict["mount_type"] = "rooftop_mirror"
+  pure_cosmetic.pos = (flip_mirror1.pos + flip_mirror2.pos ) / 2
+  pure_cosmetic.normal = (flip_mirror1.normal + flip_mirror2.normal ) / 2
+  pure_cosmetic.aperture = periscope_distance
+
+  pure_cosmetic.draw = useless
   
   Stretcher = Composition(name="Strecker", pos=pos0, normal=vec)
   
@@ -361,6 +652,7 @@ def Make_Stretcher():
   Stretcher.add_fixed_elm(StripeM)
   Stretcher.add_fixed_elm(flip_mirror1)
   Stretcher.add_fixed_elm(flip_mirror2)
+  Stretcher.add_fixed_elm(pure_cosmetic)
   
   # for item in subperis._elements:
   #   Stretcher.add_fixed_elm(item)
@@ -373,9 +665,6 @@ def Make_Stretcher():
   Stretcher.set_sequence(seq)
   Stretcher.propagate(300)
   return Stretcher
-
-
-
 
 
 
