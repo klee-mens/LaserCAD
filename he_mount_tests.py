@@ -1,0 +1,35 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Thu Mar  9 11:11:57 2023
+
+@author: mens
+"""
+
+import sys
+
+pfad = __file__
+pfad = pfad.replace("\\", "/") #just in case
+ind = pfad.rfind("/")
+pfad = pfad[0:ind+1]
+sys.path.append(pfad)
+
+from basic_optics import Mirror,Lens,Diaphragms
+from basic_optics.freecad_models import clear_doc, setview, freecad_da
+from basic_optics.freecad_models.freecad_model_mirror import mirror_mount
+
+
+
+if freecad_da:
+  clear_doc()
+
+
+m = Diaphragms(name="Standard_Mirror", pos=(0,0,100))
+# m.draw_dict["mount_type"] = "POLARIS-K21"
+m.aperture = 25.4
+m.draw()
+m.draw_mount()
+
+
+
+if freecad_da:
+  setview()

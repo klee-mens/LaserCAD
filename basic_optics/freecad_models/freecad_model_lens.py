@@ -10,10 +10,10 @@ sys.path.append(u'/home/mens/Nextcloud/FreeCAD/opticslib2/basic_objects/freecad_
 sys.path.append(u"C:/Users/mens/Nextcloud/FreeCAD/opticslib2/basic_objects/freecad_models")
 
 # from .utils import freecad_da, update_geom_info
-from .utils import freecad_da, update_geom_info, get_DOC, thisfolder, inch
+from .utils import freecad_da, update_geom_info, get_DOC, thisfolder#, inch
 from .freecad_model_composition import initialize_composition_old, add_to_composition
 import numpy as np
-import math
+#import math
 
 DEFALUT_MAX_ANGULAR_OFFSET = 10
 
@@ -151,8 +151,9 @@ def lens_mount(mount_name="lens_mount", mount_type="MLH05_M",
                  geom=None, only_info=False, drawing_post=True,
                  dia=25.4, **kwargs):
   mesh = True
-  mount_fix = False
-  flag_new = False
+  mount_adjusted = False
+  mount_in_database = False
+  DOC = get_DOC()
   if abs(geom[1][2])<DEFALUT_MAX_ANGULAR_OFFSET/180*pi:
     geom[1][2]=0
   else:
@@ -176,7 +177,7 @@ def lens_mount(mount_name="lens_mount", mount_type="MLH05_M",
   
   for mount_loop in buf:
     if mount_loop["name"] == mount_type:
-      flag_new = True
+      mount_in_database = True
       aperture = float(mount_loop["aperture"])
       height = float(mount_loop["height"])
       price = float(mount_loop["price"])
@@ -187,48 +188,37 @@ def lens_mount(mount_name="lens_mount", mount_type="MLH05_M",
       rotation = Rotation(float(mount_loop["rot_angleZ"]),
                           float(mount_loop["rot_angleY"]),
                           float(mount_loop["rot_angleX"]))
-      if not mount_fix:
+      if not mount_adjusted:
         place = Placement(offset, rotation, Vector(0,0,0))
-  if not flag_new:
+  if not mount_in_database:
     if mount_type != "default":
       print("This mount type is not in the database. Going back to construct a new mount.")
     height = dia/2+10
     xshift = 0
     if  drawing_post:
-      if (geom[0][2]-height<39) or (geom[0][2]-height>101):
-        print("Warning, there is no suitable post holder and slotted base at this height")
-      if height < geom[0][2]-59:
-        post = draw_post2(name="TR50_M", height=-50-height,xshift=xshift, 
-                          geom=geom)
-        post1 = draw_post2(name="BA1L", height=0,xshift=xshift, geom=geom)
-        post2 = draw_post2(name="PH50_M", height=0,xshift=xshift, geom=geom)
-      else:
-        post = draw_post2(name="TR30_M", height=-30-height,xshift=xshift, 
-                          geom=geom)
-        post1 = draw_post2(name="BA2_M", height=0,xshift=xshift, geom=geom)
-        post2 = draw_post2(name="PH20E_M", height=0,xshift=xshift, geom=geom)
+      post_part=draw_post_part(name="post_part", height=height,xshift=xshift, geom=geom)
     else:
-      DOC = get_DOC()
+      
       DOC.recompute()
       return building_mount(Radius1=dia/2,height=height,geom=geom)
     new_mount = building_mount(Radius1=dia/2,height=height,geom=geom)
 
     part = initialize_composition_old(name="mount, post and base")
-    container = post,post1,post2,new_mount
+    container = post_part,new_mount
     add_to_composition(part, container)
-
+    DOC.recompute()
     return part
 
   if only_info:
     data = {"aperture":aperture, "height":height, "price":price}
     return data
     
-  if mount_fix:
+  if mount_adjusted:
     datei = thisfolder + "mount_meshes\\adjusted lens mount\\" + mount_type
   else:
     datei = thisfolder + "mount_meshes\\lens\\" + mount_type
   if mesh:
-    DOC = get_DOC()
+    
     obj = DOC.addObject("Mesh::Feature", mount_name)
     datei += ".stl"
     obj.Mesh = Mesh.Mesh(datei)
@@ -236,71 +226,205 @@ def lens_mount(mount_name="lens_mount", mount_type="MLH05_M",
     datei += ".step"
     obj = ImportGui.insert(datei, "labor_116")
 
-  if not mount_fix:
+  if not mount_adjusted:
     obj.Placement = place
   update_geom_info(obj, geom, off0=offset)
   obj.Label = mount_name
-
   if  drawing_post:
-    if (geom[0][2]-height<39) or (geom[0][2]-height>101):
-      print("Warning, there is no suitable post holder and slotted base at this height")
-    if height < geom[0][2]-59:
-      post = draw_post2(name="TR50_M", height=-50-height,xshift=xshift, 
-                        geom=geom)
-      post1 = draw_post2(name="BA1L", height=0,xshift=xshift, geom=geom)
-      post2 = draw_post2(name="PH50_M", height=0,xshift=xshift, geom=geom)
-    else:
-      post = draw_post2(name="TR30_M", height=-30-height,xshift=xshift, 
-                        geom=geom)
-      post1 = draw_post2(name="BA2_M", height=0,xshift=xshift, geom=geom)
-      post2 = draw_post2(name="PH20E_M", height=0,xshift=xshift, geom=geom)
+    post_part=draw_post_part(name="post_part", height=xshift,xshift=xshift, geom=geom)
   else:
-    DOC = get_DOC()
     DOC.recompute()
     return obj
-
-  DOC = get_DOC()
-    
   part = initialize_composition_old(name="mount, post and base")
-  container = post,post1,post2,obj
+  container = post_part,obj
   add_to_composition(part, container)
-
   DOC.recompute()
   return part
 
-def draw_post2(name="TR50_M", height=12,xshift=0, geom=None):
+def draw_post_part(name="post_part", height=12,xshift=0, geom=None):
+  """
+  Draw the post part, including post, post holder and base
+
+  Parameters
+  ----------
+  name : TYPE, optional
+    DESCRIPTION. The default is "post_part".
+  height : TYPE, optional
+    distance from the center of the lens to the bottom of the mount.
+    The default is 12.
+  xshift : TYPE, optional
+    distance from the center of the lens to the cavity at the bottom of the 
+    mount. The default is 0.
+  geom : TYPE, optional
+    mount geom. The default is None.
+
+  Returns
+  -------
+  part : TYPE
+    DESCRIPTION.
+
+  """
+  if (geom[0][2]-height<34) or (geom[0][2]-height>190):
+    print("Warning, there is no suitable post holder and slotted base at this height")
+  post_length=50
+  if geom[0][2]-height>110:
+    post_length=100
+  elif geom[0][2]-height>85:
+    post_length=75
+  elif geom[0][2]-height>60:
+    post_length=50
+  elif geom[0][2]-height>50:
+    post_length=40
+  elif geom[0][2]-height>40:
+    post_length=30
+  else:
+    post_length=20
+    post2 = draw_post_holder(name="PH20E_M", height=0,xshift=xshift, geom=geom)
+  post = draw_post(name="TR"+str(post_length)+"_M", height=height,
+                   xshift=xshift,geom=geom)
+  if post_length>90 or post_length<31:
+    post1 = draw_post_base(name="BA2_M", height=0,xshift=xshift, geom=geom)
+  else:
+    post1 = draw_post_base(name="BA1L", height=0,xshift=xshift, geom=geom)
+  if post_length>20:
+    post2 = draw_post_holder(name="PH"+str(post_length)+"_M", height=0,
+                             xshift=xshift, geom=geom)
+  part = initialize_composition_old(name=name)
+  container = post,post1,post2
+  add_to_composition(part, container)
+  return part
+
+def draw_post(name="TR50_M", height=12,xshift=0, geom=None):
+  """
+  draw a post
+
+  Parameters
+  ----------
+  name : TYPE, optional
+    DESCRIPTION. The default is "TR50_M".
+  height : TYPE, optional
+    distance from the center of the lens to the bottom of the mount.
+    The default is 12.
+  xshift : TYPE, optional
+    distance from the center of the lens to the cavity at the bottom of the 
+    mount. The default is 0.
+  geom : TYPE, optional
+    mount geom. The default is None.
+
+  Returns
+  -------
+  obj : TYPE
+    DESCRIPTION.
+
+  """
   datei1 = thisfolder + "post\\" + name
-  
   DOC = get_DOC()
   obj = DOC.addObject("Mesh::Feature", name)
   datei1 += ".stl"
   obj.Mesh = Mesh.Mesh(datei1)
-  
+  obj.Label = name
+  post_length= int("".join(list(filter(str.isdigit,name))))
+  height=-post_length-height
+  offset=Vector(xshift,0,height)
+  obj.Placement = Placement(offset, Rotation(90,0,90), Vector(0,0,0))
+  update_geom_info(obj, geom, off0=offset)
+  return obj
+
+def draw_post_holder (name="PH50_M", height=12,xshift=0, geom=None):
+  """
+  draw the post holder
+
+  Parameters
+  ----------
+  name : TYPE, optional
+    The type of the post holder. The default is "PH50_M".
+  height : TYPE, optional
+    The height of the table for placing optical elements. The default is 0.
+  xshift : TYPE, optional
+    distance from the center of the lens to the cavity at the bottom of the 
+    mount. The default is 0.
+  geom : TYPE, optional
+    mount geom. The default is None.
+
+  Returns
+  -------
+  obj : TYPE
+    DESCRIPTION.
+
+  """
+  datei1 = thisfolder + "post\\post_holder\\" + name
+  DOC = get_DOC()
+  obj = DOC.addObject("Mesh::Feature", name)
+  datei1 += ".stl"
+  obj.Mesh = Mesh.Mesh(datei1)
   obj.Label = name
   Geom_ground = (np.array((geom[0][0],geom[0][1],0)), np.array((geom[1])))
-  if name == "BA1L":
-    offset=Vector(xshift,0,height)
+  if name =="PH100_M":
+    offset=Vector(xshift+4.3,-1.5,height+54)
+    obj.Placement = Placement(offset, Rotation(90,0,90), Vector(0,0,0))
+    update_geom_info(obj, Geom_ground, off0=offset)
+  elif name =="PH75_M":
+    offset=Vector(xshift+4.75,-1.35,height+41.5)
     obj.Placement = Placement(offset, Rotation(90,0,90), Vector(0,0,0))
     update_geom_info(obj, Geom_ground, off0=offset)
   elif name =="PH50_M":
     offset=Vector(xshift+5.25,0.25,height+28.5)
     obj.Placement = Placement(offset, Rotation(90,0,90), Vector(0,0,0))
     update_geom_info(obj, Geom_ground, off0=offset)
-  elif name =="TR50_M":
-    offset=Vector(xshift,0,height)
+  elif name =="PH40_M":
+    offset=Vector(xshift+4.75,-1.45,height+24)
     obj.Placement = Placement(offset, Rotation(90,0,90), Vector(0,0,0))
-    update_geom_info(obj, geom, off0=offset)
-  elif name =="TR30_M":
-    offset=Vector(xshift,0,height)
+    update_geom_info(obj, Geom_ground, off0=offset)
+  elif name =="PH30_M":
+    offset=Vector(xshift+4.75,-1.45,height+19.85)
     obj.Placement = Placement(offset, Rotation(90,0,90), Vector(0,0,0))
-    update_geom_info(obj, geom, off0=offset)
+    update_geom_info(obj, Geom_ground, off0=offset)
   elif name =="PH20E_M":
     offset = Vector(xshift-11.75,16.8,height+29)
+    obj.Placement = Placement(offset, Rotation(90,0,90), Vector(0,0,0))
+    update_geom_info(obj, Geom_ground, off0=offset)
+  return obj
+
+def draw_post_base(name="BA1L", height=12,xshift=0, geom=None):
+  """
+  draw the base of the post
+
+  Parameters
+  ----------
+  name : TYPE, optional
+    base type. The default is "BA1L".
+  height : TYPE, optional
+    The height of the table for placing optical elements. The default is 0.
+  xshift : TYPE, optional
+    distance from the center of the lens to the cavity at the bottom of the 
+    mount. The default is 0.
+  geom : TYPE, optional
+    mount geom. The default is None.
+
+  Returns
+  -------
+  obj : TYPE
+    DESCRIPTION.
+
+  """
+  datei1 = thisfolder + "post\\base\\" + name
+  DOC = get_DOC()
+  obj = DOC.addObject("Mesh::Feature", name)
+  datei1 += ".stl"
+  obj.Mesh = Mesh.Mesh(datei1)
+  obj.Label = name
+  Geom_ground = (np.array((geom[0][0],geom[0][1],0)), np.array((geom[1])))
+  if name == "BA1L":
+    offset=Vector(xshift,0,height)
     obj.Placement = Placement(offset, Rotation(90,0,90), Vector(0,0,0))
     update_geom_info(obj, Geom_ground, off0=offset)
   elif name =="BA2_M":
     offset=Vector(xshift,0,height+5.6)
     obj.Placement = Placement(offset, Rotation(0,0,90), Vector(0,0,0))
+    update_geom_info(obj, Geom_ground, off0=offset)
+  elif name == "BA3_M":
+    offset=Vector(xshift,0,height+4.5)
+    obj.Placement = Placement(offset, Rotation(90,0,90), Vector(0,0,0))
     update_geom_info(obj, Geom_ground, off0=offset)
   # obj.ViewObject.ShapeColor = (0.86,0.08,0.24)
   # obj.ViewObject.Transparency = 50
