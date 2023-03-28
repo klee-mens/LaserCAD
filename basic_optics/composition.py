@@ -92,9 +92,11 @@ class Composition(Opt_Element):
     # item.name = self.new_catalogue_entry(item)
     item.set_geom(self.last_geom())
     self.__add_raw(item)
-    newoA = item.next_ray(self.__optical_axis[-1])
-    newoA.length = 0
-    self.__optical_axis.append(newoA)
+    newoA_try = item.next_ray(self.__optical_axis[-1])
+    if newoA_try:
+      newoA = item.next_ray(self.__optical_axis[-1])
+      newoA.length = 0
+      self.__optical_axis.append(newoA)
 
   def add_fixed_elm(self, item):
     """

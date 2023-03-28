@@ -149,7 +149,7 @@ class Ray(Geom_Object):
   def h_alpha_theta_to(self, element):
     """
     ermittelt die Parameter (h, alpha) der geometrischen Optik, wenn Ray()
-    auf ein Element trifft, sowie den Winkel <theta> unter dem die ray.pos zur
+    auf ein Element trifft, sowie den Winkel <theta> unter dem die ray.normal zur
     z-Achse des elements steht (verwendet intersection)
     """
     h, alpha = self.h_alpha_to(element)
@@ -180,7 +180,7 @@ class Ray(Geom_Object):
     """
     self.set_geom(element.get_geom())
     pos, norm = element.get_geom()
-    xa, ya, za = element.get_axes()
+    xa, ya, za = element.get_coordinate_system()
     vec_in_eb = za*np.cos(theta) - ya*np.sin(theta)
     self.pos += vec_in_eb*h
     rotation_vec = np.cross(vec_in_eb, xa)

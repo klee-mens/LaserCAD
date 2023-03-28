@@ -74,8 +74,11 @@ def model_diaphragms(name="diaphragms", Radius=25,Hole_Radius=2, thickness=5,hei
   Pocket.Length = 10
   Pocket.ReferenceAxis = (sketch001,['N_Axis'])
   sketch001.Visibility = False
-
-  obj.ViewObject.ShapeColor = (204/255, 204/255, 204/255)
+  if "color" in kwargs.keys():
+    obj.ViewObject.ShapeColor = kwargs["color"]
+  else:
+    # obj.ViewObject.ShapeColor = (204/255, 204/255, 204/255)
+    obj.ViewObject.ShapeColor = (220/255, 220/255, 220/255)
   if "transparency" in kwargs.keys():
     obj.ViewObject.Transparency = kwargs["transparency"]
   else:

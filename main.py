@@ -18,7 +18,7 @@ sys.path.append(pfad)
 # reload(fcm)
 
 from basic_optics.freecad_models import clear_doc, setview, freecad_da, freecad_model_lens
-from basic_optics import Beam, Mirror, Opt_Element, Geom_Object, Curved_Mirror, Lens,Iris,Diaphragms, Ray, Composition, inch, Grating, Propagation
+from basic_optics import Beam, Mirror,RayGroup, Opt_Element, Geom_Object, Curved_Mirror, Lens,Iris,Diaphragms,Intersection_plane, Ray, Composition, inch, Grating, Propagation
 #from basic_optics.composition import Teleskop_test, Composition_mirror_test, Mirror_Teleskop_test, add_only_elem_test
 from basic_optics.mirror import curved_mirror_test
 
@@ -45,7 +45,7 @@ if freecad_da:
 
 
 
-from basic_optics.moduls import Make_Amplifier_Typ_I_simpler,Make_Stretcher,Make_Amplifier_Typ_II_simpler,Make_Amplifier_Typ_II_simple,Make_Amplifier_Typ_I_simple
+from basic_optics.moduls import Make_Telescope,Make_Amplifier_Typ_I_simpler,Make_Stretcher,Make_Amplifier_Typ_II_simpler,Make_Amplifier_Typ_II_simple,Make_Amplifier_Typ_I_simple
 from basic_optics.moduls import diaphragms_test
 # peris = Make_Telescope()
 # peris.draw()
@@ -81,12 +81,32 @@ from basic_optics.moduls import diaphragms_test
 # amplifier3.draw_mounts()
 # amplifier3.draw_beams()
 
-dia = diaphragms_test()
-dia.pos = (0,0,100)
-dia.draw_elements()
-dia.draw_rays()
-#dia.draw_beams()
-dia.draw_mounts()
+# dia = diaphragms_test()
+# dia.pos = (0,0,100)
+# dia.draw_elements()
+# dia.draw_rays()
+# #dia.draw_beams()
+# dia.draw_mounts()
+
+rg=RayGroup(waist=2.5,pos=(0,0,100))
+rg.make_square_distribution(10)
+dia1 = Composition(name="RayGroup test")
+dia1.set_light_source(rg)
+dia1.propagate(100)
+l1=Lens(f=150)
+dia1.add_on_axis(l1)
+dia1.propagate(150)
+ip=Intersection_plane()
+dia1.add_on_axis(ip)
+dia1.propagate(150)
+ip.spot_diagram(dia1.compute_beams().pop())
+
+
+
+dia1.draw_elements()
+dia1.draw_rays()
+dia1.draw_mounts()
+
 
 if freecad_da:
   #model_stripe_mirror(dia=152.4,Radius1=-1000)

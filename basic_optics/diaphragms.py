@@ -7,7 +7,7 @@ Created on Mon Mar 27 14:00:59 2023
 
 from .freecad_models import model_diaphragms,iris_post
 from .optical_element import Opt_Element
-import matplotlib.pyplot as plt
+
 from copy import deepcopy
 
 class Diaphragms(Opt_Element):

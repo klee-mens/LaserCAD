@@ -231,7 +231,7 @@ def lens_mount(mount_name="lens_mount", mount_type="MLH05_M",
   update_geom_info(obj, geom, off0=offset)
   obj.Label = mount_name
   if  drawing_post:
-    post_part=draw_post_part(name="post_part", height=xshift,xshift=xshift, geom=geom)
+    post_part=draw_post_part(name="post_part", height=height,xshift=xshift, geom=geom)
   else:
     DOC.recompute()
     return obj
