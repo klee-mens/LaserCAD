@@ -27,7 +27,38 @@ if freecad_da:
   import Sketcher
   from math import pi
   
-def model_diaphragms(name="diaphragms", Radius=25,Hole_Radius=2, thickness=5,height=20, geom=None, **kwargs):
+def model_intersection_plane(name="diaphragms", Radius=25, thickness=2, geom=None, **kwargs):
+  DOC = get_DOC()
+  obj = DOC.addObject('PartDesign::Body', name)
+  sketch = obj.newObject('Sketcher::SketchObject', name+'_sketch')
+  sketch.MapMode = 'FlatFace'
+  sketch.addGeometry(Part.Circle(Vector(0.0,0.0,0),Vector(0,0,1),Radius*2),False)
+  sketch.addConstraint(Sketcher.Constraint('Coincident',0,3,-1,1)) 
+  sketch.addConstraint(Sketcher.Constraint('Diameter',0,Radius*2)) 
+    
+  pad = obj.newObject('PartDesign::Pad','Pad')
+  pad.Profile = sketch
+  pad.Length = 0.1
+  pad.ReferenceAxis = (sketch,['N_Axis'])
+  pad.Midplane = 1
+  sketch.Visibility = False
+  
+  if "color" in kwargs.keys():
+    obj.ViewObject.ShapeColor = kwargs["color"]
+  else:
+    # obj.ViewObject.ShapeColor = (204/255, 204/255, 204/255)
+    obj.ViewObject.ShapeColor = (240/255, 240/255, 240/255)
+  if "transparency" in kwargs.keys():
+    obj.ViewObject.Transparency = kwargs["transparency"]
+  else:
+    obj.ViewObject.Transparency = 80
+  obj.Placement=Placement(Vector(0,0,0), Rotation(90,0,90), Vector(0,0,0))
+  update_geom_info(obj, geom)
+  
+  DOC.recompute()
+  return obj
+  
+def model_diaphragms(name="diaphragms", Radius=25,Hole_Radius=2, thickness=3,height=20, geom=None, **kwargs):
   DOC = get_DOC()
   obj = DOC.addObject('PartDesign::Body', name)
   sketch = obj.newObject('Sketcher::SketchObject', name+'_sketch')

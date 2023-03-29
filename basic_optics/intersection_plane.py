@@ -11,7 +11,7 @@ from copy import deepcopy
 from .ray import Ray
 from .beam import Beam
 import matplotlib.pyplot as plt
-from .freecad_models import model_diaphragms,iris_post
+from .freecad_models import model_intersection_plane,iris_post
 
 
 class Intersection_plane(Opt_Element):
@@ -28,7 +28,7 @@ class Intersection_plane(Opt_Element):
   
   def draw_fc(self):
     self.update_draw_dict()
-    return model_diaphragms(**self.draw_dict)
+    return model_intersection_plane(**self.draw_dict)
   
   
   def spot_diagram(self, beam):
@@ -46,6 +46,9 @@ class Intersection_plane(Opt_Element):
       point_y.append(pos_diff[2])
     plt.figure()
     plt.scatter(point_x,point_y)
+    plt.xlabel("x-axis, or y-axis if you follow the 3D coordinate (mm)")
+    plt.ylabel("y-axis, or z-axis if you follow the 3D coordinate (mm)")
+    plt.title("The spot diagram at " + self.name)
     plt.show()
   
   def __repr__(self):
