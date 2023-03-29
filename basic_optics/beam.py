@@ -34,7 +34,7 @@ class RayGroup(Geom_Object):
     The width of square equals 2*waist of ray group
     Parameters
     ----------
-    ray_in_line : int
+    ray_in_line : int(>0)
       rays in a line.That is going to determine the density of ray.
 
     Returns
@@ -103,6 +103,8 @@ class RayGroup(Geom_Object):
   def override_rays(self, rays):
     """
     setzt die rays neu, muss man eventuell aufpassen, mal sehen
+    
+    resets the rays, you may have to watch out, let's see
 
     Parameters
     ----------
@@ -184,6 +186,9 @@ class RayGroup(Geom_Object):
     """
     wird aufgerufen, wen die Position von <self> verändert wird
     ändert die Position aller __rays mit
+    
+    is called when the position of <self> is changed
+    changes the position of all __rays with
     """
     # print("Beam oldpos, newpos:", old_pos, new_pos)
     super()._pos_changed(old_pos, new_pos)
@@ -205,6 +210,11 @@ class RayGroup(Geom_Object):
     dreht die KooSys aller __rays mit
 
     dreht außerdem das eigene Koordiantensystem
+    
+    is called when the KooSys <_axes> is changed from <self>.
+    rotates the KooSys of all __rays as well
+
+    also rotates the own coordiante system
     """
     super()._axes_changed(old_axes, new_axes)
     self._rearange_subobjects_axes(old_axes, new_axes, self._rays)
@@ -224,6 +234,19 @@ class Beam(RayGroup):
   ermöglicht zudem die Erzeugung von Standard-Beams (r, alpha)
   Astigmatischen Beams ?
   Gauß-Beams?
+  
+  Class for "extended" rays
+  consists of at least 2 rays:
+  middle_ray, represents the optical axis = symmetry axis of the ray
+  outer_rays[], contains in case of a zlindersymmetric ray only one
+  ray, which is located in the lateral surface, but can contain up to 4 rays
+  (astigmatism)
+
+  has additionally wavelength, power
+
+  also allows the generation of standard beams (r, alpha)
+  astigmatic beams ?
+  Gaussian beams ?
   """
   def __init__(self, radius=1, angle=-0.05, ray_count=2, name="NewBeam", **kwargs):
     super().__init__(name=name, **kwargs)
@@ -257,6 +280,8 @@ class Beam(RayGroup):
   def override_rays(self, rays):
     """
     setzt die rays neu, muss man eventuell aufpassen, mal sehen
+    
+    resets the rays, you may have to watch out, let's see
 
     Parameters
     ----------
@@ -288,6 +313,10 @@ class Beam(RayGroup):
     berechnet aus 2 Strahlen inn und outer den zugehörigen beam Kegel mit
     radius r und öffnungswinkel alpha und zwar von hinten durch die Brust
     ins Auge
+    
+    calculates from 2 rays inn and outer the corresponding beam cone with 
+    radius r and aperture angle alpha and from behind through the breast into 
+    the eye
     """
     inner = self._rays[0]
     outer = self._rays[1]
@@ -311,6 +340,8 @@ class Beam(RayGroup):
   def is_valid(self):
     """
     prüft ob alle rays valide sind
+    
+    checks if all rays are valid
     """
     valid = True
     for ray in self._rays:
@@ -341,6 +372,9 @@ class Beam(RayGroup):
     """
     wird aufgerufen, wen die Position von <self> verändert wird
     ändert die Position aller __rays mit
+    
+    is called when the position of <self> is changed
+    changes the position of all __rays with
     """
     # print("Beam oldpos, newpos:", old_pos, new_pos)
     super()._pos_changed(old_pos, new_pos)
@@ -362,6 +396,11 @@ class Beam(RayGroup):
     dreht die KooSys aller __rays mit
 
     dreht außerdem das eigene Koordiantensystem
+    
+    is called when the KooSys <_axes> is changed from <self>.
+    rotates the KooSys of all __rays as well
+
+    also rotates its own coordiante system
     """
     super()._axes_changed(old_axes, new_axes)
     self._rearange_subobjects_axes(old_axes, new_axes, self._rays)

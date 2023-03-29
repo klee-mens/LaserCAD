@@ -83,6 +83,15 @@ class Geom_Object(object):
   ein, kann beliebig erweitert werden, wird an die draw_fc Routinen weiter
   gegeben
   
+  stores the elementary information about position <pos>, alignment 
+  <normal> and name <name>, 
+  defines the defaults for all subsequent objects, automatically adjusts the 
+  <normal> automatically adjusts the inner coordinate system <_axes>, and then 
+  calls the auxiliary functions <_pos_changed> and <_axes_changed>.
+
+  introduces the <draw_dict> with all important keyword arguments for the 
+  display can be extended arbitrarily, is passed to the draw_fc routines given
+  
   siehe tests()
   """
   def __init__(self, name=NAME0, pos=POS0, normal=NORM0):
@@ -100,6 +109,11 @@ class Geom_Object(object):
     beschreibt die Position des GeomObject als 3D-numpy-float-array
     stellt über Setter und Getter sicher, dass nur Kopien übergeben werden und
     das _pos_changed aufgrufen wird
+    
+    describes the position of the GeomObject as 3D-numpy-float-array
+    uses setters and getters to make sure that only copies are passed and that
+    the _pos_changed is called
+    
     """
     return np.array(self._pos) * 1.0
   @pos.setter
@@ -115,6 +129,12 @@ class Geom_Object(object):
     float-array mit Betrag 1
     stellt über Setter und Getter sicher, dass nur Kopien übergeben werden, der 
     Vektor stehts normiert wird und das die _axes aktualisiert wird
+    
+    Describes the orientation (= internal x-axis) of the GeomObject as a 3D-
+    numpy-float-array with amount 1
+    ensures via setter and getter that only copies are passed, that the vector 
+    is vector is always normalized and the _axes is updated.
+    
     """
     return np.array(self._axes[:,0])
   @normal.setter
@@ -128,6 +148,9 @@ class Geom_Object(object):
     """
     gibt das eigene Kooridnatensystem _axes als 3x3 Matrix zurück
     indem die x,y,z-Vektoren als Spaltenvektoren stehen
+    
+    returns the own coordinate system _axes as 3x3 matrix
+    where the x,y,z-vectors are column vectors
     """
     return np.array(self._axes)
   
@@ -135,6 +158,9 @@ class Geom_Object(object):
     """
     gibt normal (x), senkrecht1 (y) und senkrecht2 (z) als 3 Vektoren zurück
     (transponiert zu self.get_axes)
+    
+    returns normal (x), perpendicular1 (y) and perpendicular2 (z) as 3 vectors
+    (transposed to self.get_axes)
     """
     mat = np.array(self._axes)
     return mat[:,0], mat[:,1], mat[:,2]
@@ -145,6 +171,11 @@ class Geom_Object(object):
     _axes_changed auf
 
     new_axes : reelle, orthogonale 3x3 numpy float Matrix mit Determinante +1
+    
+    sets the own coordinate system to <new_axes> and calls 
+    _axes_changed
+
+    new_axes: real, orthogonal 3x3 numpy float matrix with determinant +1
     """
     old_axes = self.get_axes()
     self._axes = np.array(new_axes)
@@ -156,6 +187,10 @@ class Geom_Object(object):
     old_normal : 3D-array
     berechnet das neue Koordinatensystem durch Drehmatrix zwischen
     (neu-) normal und old_normal (setzt es aber nicht)
+    
+    old_normal : 3D-array
+    calculates the new coordinate system by rotation matrix between
+    (new-) normal and old_normal (but does not set it)
     """
     rotvec = np.cross(new_normal, old_normal) # Drehvektor
     v_abs = np.linalg.norm(rotvec)
@@ -177,8 +212,11 @@ class Geom_Object(object):
 
 
   def angle_to(self, obj):
-    """computes the angle to the normal of an other GeomObj <obj> with
-    correct sign"""
+    """
+    computes the angle to the normal of an other GeomObj <obj> with
+    correct sign
+    
+    """
     vec = obj.normal
     c = np.cross(self.normal, vec)
     sign = 1 if np.sum(c * self._axes[:,1]) >= 0 else -1
@@ -195,6 +233,17 @@ class Geom_Object(object):
 
     Bsp: element.rotate((0,1,0), 0.7854)
     entspricht Drehung um y-Achse um 45°
+    
+    rotates the object with respect to vec by the angle phi
+    Parameters
+    ----------
+    vec : 3D vector
+      Space direction around which is rotated, must not be normalized
+    phi : angle in radians
+
+    Ex: element.rotate((0,1,0), 0.7854)
+    corresponds to rotation around y-axis by 45°.
+    
     """
     rot_mat = rotation_matrix(vec, -phi)
     new_ax = np.matmul(rot_mat, self._axes)
@@ -217,6 +266,9 @@ class Geom_Object(object):
     """
     gibt das so genannte geom zurück, einfach nur ein Tupel aus <pos> und 
     <normal>, wichtig zur geometrischen Definition der meisten Objekte
+    
+    returns the so-called geom, simply a tuple of <pos> and 
+    <normal>, important for the geometric definition of most objects
     """
     return (self.pos, self.normal)
 
@@ -229,6 +281,10 @@ class Geom_Object(object):
     wird meist for den draw_routinen aufgerufen und kann die wichtigesten 
     key word arguments des <draw_dict> aktualisieren, falls sie genändert 
     wurden (z.B. self.radius von Curved_Mirror)
+    
+    is usually called for the draw_routines and can update the most important 
+    key word arguments of <draw_dict> if they have been changed (e.g. 
+    self.radius of have been changed (e.g. self.radius of Curved_Mirror).
     """
     self.draw_dict["name"]=self.name
     self.draw_dict["geom"]=self.get_geom() 
@@ -238,6 +294,10 @@ class Geom_Object(object):
     Funktion zur Darstellung des Objekts
     prüft nach, ob freecad als Backend verfügbar ist und ruft dann die 
     entsprechende draw-Funktion auf
+    
+    function to display the object
+    checks whether freecad is available as backend and then calls the 
+    corresponding draw function
     """
     if freecad_da:
       return self.draw_fc()
@@ -251,6 +311,10 @@ class Geom_Object(object):
     ruft falls FreeCAD vorhanden ist die entsprechende Zeichenfunktion aus
     freecad_models auf, gibt im Normalfall eine Referenz auf das entsprechende
     FreeCAD-Objekt zurück
+    
+    if FreeCAD is present, calls the corresponding drawing function from
+    freecad_models, normally returns a reference to the corresponding
+    FreeCAD object
     """
     #ToDo: fürs Debugging hier einfach einen Zylinder mit norm uns k zeichnen
     return None
@@ -260,6 +324,10 @@ class Geom_Object(object):
     falls FreeCAD nicht zur Verfügung steht, wird das Objekt in die Konsole 
     "gezeichnet", d.h. alle relevanten Parameter aus dem <draw_dict> werden
     per Text ausgegeben, gibt den Text als str zurück
+    
+    if FreeCAD is not available, the object will be "drawn" into the console. 
+    "drawn", i.e. all relevant parameters from the <draw_dict> will be
+    by text, returns the text as str
     """
 #     txt = "Das geometrische Objekt <" + self.name + "> wird an die Position "
     txt = "Das Objekt <" + self.class_name() + ":" +self.name
@@ -272,6 +340,9 @@ class Geom_Object(object):
     """
     wird aufgerufen, wen die Position von <self> verändert wird, kann nützlich
     sein für abgeleitete, zusammengesetzte Objekte wie beam oder composition
+    
+    is called when the position of <self> is changed, can be useful for derived
+    for derived, composite objects like beam or composition
     """
     pass
     
@@ -281,6 +352,10 @@ class Geom_Object(object):
     wird aufgerufen, wen das Koordinatensystem >_axes> von <self> verändert 
     wird,kann nützlich sein für abgeleitete, zusammengesetzte Objekte wie beam 
     oder composition
+    
+    is called when the coordinate system >_axes> of <self> is changed. 
+    can be useful for derived composite objects like beam 
+    or composition
     """
     pass
     
@@ -292,6 +367,12 @@ class Geom_Object(object):
     aller Subobjekte entsprechend geändert werden, d.h. relative Ausrichtung
     und Drehung soll beibehalten werden
     ...LinAlg Kram halt
+    
+    important for beam and composition
+    if custom <old_axes> is changed to <new_axes>, the _axes
+    of all subobjects should be changed accordingly, i.e. relative orientation
+    and rotation should be kept
+    ...LinAlg stuff halt
     """
     RotM = np.matmul(new_axes, np.linalg.inv(old_axes) )
     p0 = self.pos
@@ -309,6 +390,12 @@ class Geom_Object(object):
     Subobjekte entsprechend geändert werden, d.h. relative Ausrichtung und
     Drehung soll beibehalten werden
     ...LinAlg Kram halt
+    
+    important for beam and composition
+    if custom <old_pos> is changed to <new_pos>, the pos of all
+    subobjects should be changed accordingly, i.e. relative orientation and
+    rotation should be kept
+    ...LinAlg stuff halt
     """
     delta_pos = new_pos - old_pos
     for obj in objs:

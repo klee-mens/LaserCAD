@@ -28,6 +28,35 @@ if freecad_da:
 
 
 def model_lens(name="lens", dia=25, Radius1=300, Radius2=0, thickness=3, geom=None, **kwargs):
+  """
+    Build a lens.
+
+    Parameters
+    ----------
+    name : String, optional
+        The name of the lens. The default is "lens".
+    dia : float/int, optional
+        The diameter of the lens. The default is 25.
+    Radius1 : float/int, optional
+        The curvature of the first serface. The default is 300.
+    Radius2 : float/int, optional
+        The curvature of the second serface. The default is 0.
+    Radius = 0 means the flat serface.
+    thickness : float/int, optional
+        The thickness of the lens. The default is 3.
+    geom : TYPE, optional
+        geom info. The default is None.
+    **kwargs : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    obj : TYPE
+        DESCRIPTION.
+    example:
+        lens64 = model_lens("Lens64", dia=25.4, Radius1=250, Radius2=500, thickness=3, geom=None)
+
+    """
   DOC = get_DOC()
   """Beispiel
   #lens_1 = model_lens("lens01", 25, 50, 0, 10)
@@ -47,27 +76,35 @@ def model_lens(name="lens", dia=25, Radius1=300, Radius2=0, thickness=3, geom=No
   #sketch.Support = (DOC.getObject('XY_Plane'),[''])
   sketch.MapMode = 'FlatFace'
 
-  sketch.addGeometry(Part.LineSegment(Vector(0,0,0),Vector(thickness,0,0)),False)
+  sketch.addGeometry(Part.LineSegment(Vector(0,0,0),Vector(thickness,0,0)),
+                     False)
   sketch.addConstraint(Sketcher.Constraint('Coincident',0,1,-1,1))
   sketch.addConstraint(Sketcher.Constraint('PointOnObject',0,2,-1))
   sketch.addConstraint(Sketcher.Constraint('DistanceX',0,1,0,2,thickness))
 
   if Radius1 == 0:
-    sketch.addGeometry(Part.LineSegment(Vector(0.0,0.0,0),Vector(0,10,0)),False)
+    sketch.addGeometry(Part.LineSegment(Vector(0.0,0.0,0),Vector(0,10,0)),
+                       False)
     sketch.addConstraint(Sketcher.Constraint('Coincident',1,1,0,1))
     sketch.addConstraint(Sketcher.Constraint('PointOnObject',1,2,-2))
   else:
-    sketch.addGeometry(Part.ArcOfCircle(Part.Circle(Vector(Radius1,0,0),Vector(0,0,1),abs(Radius1)),0.9*a*pi,0.9*a*pi+0.1*pi),False)
+    sketch.addGeometry(Part.ArcOfCircle(Part.Circle(Vector(Radius1,0,0),
+                                        Vector(0,0,1),abs(Radius1)),0.9*a*pi,
+                                        0.9*a*pi+0.1*pi),False)
     sketch.addConstraint(Sketcher.Constraint('PointOnObject',1,3,-1))
     sketch.addConstraint(Sketcher.Constraint('Coincident',1,1+a,0,1))
     sketch.addConstraint(Sketcher.Constraint('Radius',1,abs(Radius1)))
 
   if Radius2 == 0:
-    sketch.addGeometry(Part.LineSegment(Vector(5.0,0.0,0),Vector(5,10,0)),False)
+    sketch.addGeometry(Part.LineSegment(Vector(5.0,0.0,0),Vector(5,10,0)),
+                       False)
     sketch.addConstraint(Sketcher.Constraint('Coincident',2,1,0,2))
     sketch.addConstraint(Sketcher.Constraint('Vertical',2))
   else:
-    sketch.addGeometry(Part.ArcOfCircle(Part.Circle(Vector(thickness-Radius2,0,0),Vector(0,0,1),abs(Radius2)),0.9*pi-0.9*b*pi,pi-0.9*b*pi),False)
+    sketch.addGeometry(Part.ArcOfCircle(Part.Circle(
+                                        Vector(thickness-Radius2,0,0),
+                                        Vector(0,0,1),abs(Radius2)),
+                                        0.9*pi-0.9*b*pi,pi-0.9*b*pi),False)
     sketch.addConstraint(Sketcher.Constraint('PointOnObject',2,3,-1))
     sketch.addConstraint(Sketcher.Constraint('Coincident',2,2-b,0,2))
     sketch.addConstraint(Sketcher.Constraint('Radius',2,abs(Radius2)))
@@ -141,15 +178,53 @@ def lens_mount(mount_name="mirror_mount", dia=inch,  geom=None,
 
 """
 
-
-# =============================================================================
-# Begin Working area of He Zhuang
-# =============================================================================
-
-
 def lens_mount(mount_name="lens_mount", mount_type="MLH05_M",  
                  geom=None, only_info=False, drawing_post=True,
                  dia=25.4, **kwargs):
+  """
+    Build the lens mount, post, post holder and slotted bases of the lens
+
+    Parameters
+    ----------
+    mount_name : String, optional
+        The name of the mount. The default is "lens_mount".
+    mount_type : String, optional
+        The type of the mount.You can check 'lensmounts.csv' to find mount in
+        the database.
+        If you want to select the appropriate mount automatically, please keep 
+        it as 'default'.
+        If you don't want to draw the mount, please set the mount_type 
+        as 'dont_draw'
+         The default is "MLH05_M".
+    geom : TYPE, optional
+        The geometrical parameter of the lens. The default is None.
+    only_info : Boolean, optional
+        Set it as True if you only the the information. The default is False.
+    drawing_post : Boolean, optional
+        Determine if you want to draw the post.
+        Set it as True if you want to draw the post. The default is True.
+    dia : float/int, optional
+        The diameter of the lens. Please input it correctly if you want to 
+        select the appropriate mount automatically.
+        The default is 25.4.
+    thickness : float/int, optional
+        The thickness of lens. The default is 30.
+    **kwargs : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    Part
+        A part which includes the mount, the post, the post holder and the 
+        slotted bases.
+    examples:
+        mount64 = lens_mount(mount_name="mount64", mount_type="default",  
+                         geom=None, only_info=False, drawing_post=True,
+                         dia=25.4*1.5)
+
+  """
+  if mount_type == "dont_draw":
+    return None
   mesh = True
   mount_adjusted = False
   mount_in_database = False
@@ -244,16 +319,17 @@ def lens_mount(mount_name="lens_mount", mount_type="MLH05_M",
 def draw_post_part(name="post_part", height=12,xshift=0, geom=None):
   """
   Draw the post part, including post, post holder and base
+  Assuming that all optics are placed in the plane of z = 0.
 
   Parameters
   ----------
-  name : TYPE, optional
-    DESCRIPTION. The default is "post_part".
-  height : TYPE, optional
-    distance from the center of the lens to the bottom of the mount.
+  name : String, optional
+    The name of the part. The default is "post_part".
+  height : float/int, optional
+    distance from the center of the mirror to the bottom of the mount.
     The default is 12.
-  xshift : TYPE, optional
-    distance from the center of the lens to the cavity at the bottom of the 
+  xshift : float/int, optional
+    distance from the center of the mirror to the cavity at the bottom of the 
     mount. The default is 0.
   geom : TYPE, optional
     mount geom. The default is None.
@@ -261,7 +337,7 @@ def draw_post_part(name="post_part", height=12,xshift=0, geom=None):
   Returns
   -------
   part : TYPE
-    DESCRIPTION.
+    A part which includes the post, the post holder and the slotted bases.
 
   """
   if (geom[0][2]-height<34) or (geom[0][2]-height>190):
@@ -297,16 +373,17 @@ def draw_post_part(name="post_part", height=12,xshift=0, geom=None):
 def draw_post(name="TR50_M", height=12,xshift=0, geom=None):
   """
   draw a post
+  Normally, this function is not called separately.
 
   Parameters
   ----------
-  name : TYPE, optional
-    DESCRIPTION. The default is "TR50_M".
-  height : TYPE, optional
-    distance from the center of the lens to the bottom of the mount.
+  name : String, optional
+    THe type of the post. The default is "TR50_M".
+  height : float/int, optional
+    distance from the center of the mirror to the bottom of the mount.
     The default is 12.
-  xshift : TYPE, optional
-    distance from the center of the lens to the cavity at the bottom of the 
+  xshift : float/int, optional
+    distance from the center of the mirror to the cavity at the bottom of the 
     mount. The default is 0.
   geom : TYPE, optional
     mount geom. The default is None.
@@ -314,7 +391,7 @@ def draw_post(name="TR50_M", height=12,xshift=0, geom=None):
   Returns
   -------
   obj : TYPE
-    DESCRIPTION.
+    post object.
 
   """
   datei1 = thisfolder + "post\\" + name
@@ -333,15 +410,16 @@ def draw_post(name="TR50_M", height=12,xshift=0, geom=None):
 def draw_post_holder (name="PH50_M", height=12,xshift=0, geom=None):
   """
   draw the post holder
+  Normally, this function is not called separately.
 
   Parameters
   ----------
-  name : TYPE, optional
+  name : String, optional
     The type of the post holder. The default is "PH50_M".
-  height : TYPE, optional
+  height : float/int, optional
     The height of the table for placing optical elements. The default is 0.
-  xshift : TYPE, optional
-    distance from the center of the lens to the cavity at the bottom of the 
+  xshift : float/int, optional
+    distance from the center of the mirror to the cavity at the bottom of the 
     mount. The default is 0.
   geom : TYPE, optional
     mount geom. The default is None.
@@ -388,15 +466,16 @@ def draw_post_holder (name="PH50_M", height=12,xshift=0, geom=None):
 def draw_post_base(name="BA1L", height=12,xshift=0, geom=None):
   """
   draw the base of the post
+  Normally, this function is not called separately.
 
   Parameters
   ----------
-  name : TYPE, optional
+  name : String, optional
     base type. The default is "BA1L".
-  height : TYPE, optional
+  height : float/int, optional
     The height of the table for placing optical elements. The default is 0.
-  xshift : TYPE, optional
-    distance from the center of the lens to the cavity at the bottom of the 
+  xshift : float/int, optional
+    distance from the center of the mirror to the cavity at the bottom of the 
     mount. The default is 0.
   geom : TYPE, optional
     mount geom. The default is None.
@@ -407,6 +486,7 @@ def draw_post_base(name="BA1L", height=12,xshift=0, geom=None):
     DESCRIPTION.
 
   """
+
   datei1 = thisfolder + "post\\base\\" + name
   DOC = get_DOC()
   obj = DOC.addObject("Mesh::Feature", name)
@@ -434,21 +514,23 @@ def draw_post_base(name="BA1L", height=12,xshift=0, geom=None):
 def building_mount(name="mount",  Radius1=13, Hole_Radius=2, thickness=10, 
                         height=20, geom=None, **kwargs):
   """
+  make a custom mount
+  Normally, this function is not called separately.
   Parameters
   ----------
-  name : TYPE, optional
+  name : String, optional
     DESCRIPTION. The default is "mount".
-  Radius1 : TYPE, optional
+  Radius1 : float/int, optional
     aperture of the mount. The default is 13.
-  Hole_Radius : TYPE, optional
+  Hole_Radius : float/int, optional
     radious of the fixed hole at the button of the mount. The default is 1.5.
-  thickness : TYPE, optional
+  thickness : float/int, optional
     DESCRIPTION. The default is 10.
-  height : TYPE, optional
+  height : float/int, optional
     the distance between the button of the mount and the center of the mirror.
     The default is 20.
   geom : TYPE, optional
-    DESCRIPTION. The default is None.
+    mirror geom. The default is None.
   **kwargs : TYPE
     DESCRIPTION.
   """
@@ -517,9 +599,6 @@ def building_mount(name="mount",  Radius1=13, Hole_Radius=2, thickness=10,
   DOC.recompute()
   return obj
 
-# =============================================================================
-# End Working area of He Zhuang
-# =============================================================================
 
 
 

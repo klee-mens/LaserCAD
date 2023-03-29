@@ -11,10 +11,15 @@ from copy import deepcopy
 from .ray import Ray
 from .beam import Beam
 import matplotlib.pyplot as plt
-from .freecad_models import model_intersection_plane,iris_post
+from .freecad_models import model_intersection_plane
 
 
 class Intersection_plane(Opt_Element):
+  """
+  The class of the intersection plane.
+  special functions: spot_diagram. Draw the Spot diagram at the intersection 
+  plane
+  """
   def __init__(self, dia=100, name="NewPlane", **kwargs):
     super().__init__(name=name, **kwargs)
     self.draw_dict["Radius"] = dia/2
@@ -32,6 +37,19 @@ class Intersection_plane(Opt_Element):
   
   
   def spot_diagram(self, beam):
+    """
+      Draw the Spot diagram at the intersection plane
+
+      Parameters
+      ----------
+      beam : Beam
+          Input beam.
+
+      Returns
+      -------
+      None.
+
+      """
     point_x = []
     point_y = []
     rays = beam.get_all_rays()
