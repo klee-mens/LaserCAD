@@ -297,14 +297,14 @@ class Composition(Opt_Element):
 
   def new_catalogue_entry(self, item):
     #gibt jedem neuen Element einen Namen entsprechend seiner Klasse
-    key = item.Klassenname()
+    key = item.class_name()
     if key in self._catalogue:
          anz, names = self._catalogue[key]
          anz += 1
          itname = next_name(names[-1])
          names.append(itname)
     else:
-         itname = self.name + "_" + item.Klassenname() + "_01"
+         itname = self.name + "_" + item.class_name() + "_01"
          anz = 1
     self._catalogue[key] = [anz, [itname]]
     return itname
