@@ -24,14 +24,25 @@ from basic_optics.tests import all_moduls_test
 
 if freecad_da:
   clear_doc()
-
-
-# peris, teles, amp, stretch, wcell = all_moduls_test()
-
-
+  
+peris, teles, amp, stretch, wcell = all_moduls_test()
 
 from basic_optics.moduls import Make_Amplifier_Typ_I_simpler,Make_Stretcher,Make_Amplifier_Typ_II_simpler,Make_Amplifier_Typ_II_simple,Make_Amplifier_Typ_I_simple
 from basic_optics.moduls import diaphragms_test
+
+
+
+
+# b = Beam(angle=0, radius=2)
+# m = Mirror(phi=90)
+
+# c = Composition(name="alfred")
+# c.set_light_source(b)
+# c.propagate(150)
+# c.add_on_axis(m)
+# c.propagate(150)
+
+# c.draw()
 
 # stretch = Make_Stretcher()
 # stretch.pos += (0,0,100)
@@ -39,9 +50,13 @@ from basic_optics.moduls import diaphragms_test
 # stretch.draw_rays()
 # stretch.draw_mounts()
 
-amp = Make_Amplifier_Typ_II_simpler()
-amp.pos = (0,0,200)
-amp.draw()
+# amp = Make_Amplifier_Typ_II_simpler()
+# amp.pos = (0,0,200)
+# amp.draw()
+
+
+
+
 
 if freecad_da:
 

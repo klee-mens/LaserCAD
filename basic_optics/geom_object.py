@@ -215,12 +215,21 @@ class Geom_Object(object):
 
   def get_geom(self):
     """
-    gibt das so genannte geom zurück, einfach nur ein Tupel aus <pos> und 
-    <normal>, wichtig zur geometrischen Definition der meisten Objekte
+    gibt das so genannte geom = (pos, normal) zurück, einfach nur ein Tupel aus 
+    <pos> und <normal>, wichtig zur geometrischen Definition der meisten Objekte
     """
     return (self.pos, self.normal)
 
   def set_geom(self, geom):
+    """
+    setzt (pos, normal) auf geom indem es die entsprechenden setter Funktionen
+    aufruft
+
+    Parameters
+    ----------
+    geom : 2-dim Tupel aus 3-D float arrays
+      (pos, normal)
+    """
     self.pos = np.array(geom[0])
     self.normal = np.array(geom[1])
     

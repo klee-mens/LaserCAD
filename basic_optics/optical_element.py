@@ -102,6 +102,20 @@ class Opt_Element(Geom_Object):
 
 
   def reflection(self, ray):
+    """
+    erzeugt den nächsten Strahl aus <Ray> mit Hilfe des Reflexionsgesetzes
+    (man beachte die umgedrehte <normal> im Gegensatz zur Konvention in z.B.
+    Springer Handbook of Optics and Lasers S. 68)
+
+    Parameters
+    ----------
+    ray : Ray()
+      incident ray
+
+    Returns
+    -------
+    reflected ray
+    """
     ray2 = deepcopy(ray)
     ray2.pos = ray.intersect_with(self) #dadruch wird ray.length verändert(!)
     k = ray2.normal
