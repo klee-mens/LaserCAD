@@ -50,7 +50,7 @@ def Make_Telescope(name="Teleskop", f1=100.0, f2=100.0, d0=100.0, lens1_aperture
 
 
   """
-  # p1 = Propagation(d=d0)
+  ls = Beam(radius=1.5, angle=0)
   l1 = Lens(f=f1)
   l1.aperture = lens1_aperture
   # p2 = Propagation(f1+f2)
@@ -61,6 +61,7 @@ def Make_Telescope(name="Teleskop", f1=100.0, f2=100.0, d0=100.0, lens1_aperture
   # p3 = Propagation(d3)
 
   teles = Composition(name=name)
+  teles.set_light_source(ls)
   teles.propagate(d0)
   teles.add_on_axis(l1)
   teles.propagate(f1+f2)

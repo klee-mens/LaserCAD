@@ -25,11 +25,13 @@ class Intersection_plane(Opt_Element):
     self.draw_dict["Radius"] = dia/2
     self.draw_dict["dia"]=dia
     self.aperture=dia
+    # self.interacts_with_rays = False
     
   def next_ray(self, ray):
     ray2=deepcopy(ray)
     ray2.pos = ray.intersect_with(self)
-    return ray2
+    # return ray2
+    return None
   
   def draw_fc(self):
     self.update_draw_dict()

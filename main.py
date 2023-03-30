@@ -38,6 +38,9 @@ if freecad_da:
 from basic_optics.moduls import Make_Telescope,Make_Amplifier_Typ_I_simpler,Make_Stretcher,Make_Amplifier_Typ_II_simpler,Make_Amplifier_Typ_II_simple,Make_Amplifier_Typ_I_simple
 from basic_optics.moduls import diaphragms_test
 
+# teles = Make_Telescope()
+# teles.draw()
+
 # stretch = Make_Stretcher()
 # stretch.pos += (0,0,100)
 # stretch.draw_elements()
@@ -59,8 +62,9 @@ from basic_optics.moduls import diaphragms_test
 # amplifier3.draw_mounts()
 # amplifier3.draw_beams()
 
-rg=RayGroup(waist=2.5,pos=(0,0,100))
-rg.make_square_distribution(10)
+# rg=RayGroup(waist=2.5,pos=(0,0,100))
+rg=Beam(radius=2.5,angle=0)
+# rg.make_square_distribution(10)
 dia1 = Composition(name="RayGroup test")
 dia1.set_light_source(rg)
 opt_element_count = 0
@@ -78,12 +82,14 @@ l1=Lens(f=150)
 dia1.add_on_axis(l1)
 opt_element_count += 1
 dia1.propagate(150)
+
 ip1=Intersection_plane()
 dia1.add_on_axis(ip1)
 opt_element_count += 1
 ip1_seq = opt_element_count
 # ip1.spot_diagram(dia1.compute_beams().pop())
 dia1.propagate(150)
+
 l2=Lens(f=150)
 dia1.add_on_axis(l2)
 opt_element_count += 1
@@ -92,25 +98,27 @@ dia1.propagate(150)
 iris = Iris(dia=4)
 dia1.add_on_axis(iris)
 opt_element_count += 1
-
 dia1.propagate(150)
+
 l3=Lens(f=150)
 dia1.add_on_axis(l3)
 opt_element_count += 1
 dia1.propagate(150)
+
 ip2=Intersection_plane()
 dia1.add_on_axis(ip2)
 opt_element_count += 1
 ip2_seq = opt_element_count
-dia1.propagate(150)
-
+dia1.propagate(1500)
+# ip2.spot_diagram(dia1.compute_beams().pop())
 
 dia1.draw_elements()
 dia1.draw_rays()
 dia1.draw_mounts()
+dia1.draw_beams()
 
 ip1.spot_diagram(dia1._ray_groups[ip1_seq])
-ip2.spot_diagram(dia1._ray_groups[ip2_seq])
+ip2.spot_diagram(dia1._ray_groups[-1])
 
 
 

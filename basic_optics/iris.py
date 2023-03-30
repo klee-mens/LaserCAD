@@ -24,12 +24,15 @@ class Iris(Opt_Element):
     ray2=deepcopy(ray)
     ray2.pos = ray.intersect_with(self)
     ray_pos = ray2.pos
-    
+    """
     if (ray_pos[1]-self.pos[1])**2+(ray_pos[2]-self.pos[2])**2>self.draw_dict["Radius1"]**2:
       return None
     else:
       return ray2
-  
+    """
+    # return ray2
+    return None
+    
   def draw_fc(self):
     self.update_draw_dict()
     return model_iris_diaphragms(**self.draw_dict)

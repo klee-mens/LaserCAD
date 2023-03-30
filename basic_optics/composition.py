@@ -169,6 +169,8 @@ class Composition(Opt_Element):
     self._ray_groups = [self._lightsource.get_all_rays()] #erst mal nullen
     for n in self._sequence:
       elm = self._elements[n]
+      if not elm.interacts_with_rays:
+        continue
       newgroup = []
       newgroup_name = self.name + "__ray_group" + str(n)
       raycounter = 1
@@ -192,13 +194,15 @@ class Composition(Opt_Element):
     self._beams = [self._lightsource]
     for n in self._sequence:
       elm = self._elements[n]
+      if not elm.interacts_with_rays:
+        continue
       beam = elm.next_beam(self._beams[-1])
       if beam.is_valid():
         # manche Elemente wie Prop geben keine validen beams zurück
         beamcount += 1
         beam.name = self.name + "_beam_" + str(beamcount)
         self._beams.append(beam)
-    beam.set_length(self._last_prop)
+        beam.set_length(self._last_prop)
     return self._beams
 
 
