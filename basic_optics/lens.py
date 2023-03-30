@@ -42,7 +42,7 @@ class Lens(Opt_Element):
     return lens_mount(**self.draw_dict)
 
   def __repr__(self):
-    n = len(self.Klassenname())
+    n = len(self.class_name())
     txt = 'Lens(f=' + repr(self.focal_length)
     txt += ', ' + super().__repr__()[n+1::]
     return txt

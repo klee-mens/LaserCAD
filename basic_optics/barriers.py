@@ -10,7 +10,7 @@ from .optical_element import Opt_Element
 
 from copy import deepcopy
 
-class Diaphragms(Opt_Element):
+class Barriers(Opt_Element):
   """
     The class of diaphragms.
     Just a block. Nothing special.

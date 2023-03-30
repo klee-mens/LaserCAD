@@ -42,6 +42,7 @@ class Opt_Element(Geom_Object):
     self.draw_dict.update({"dia":self.aperture, "thickness":5, 
                            "model_type":"DEFAULT", "mount_type": "default", 
                            "mount_name": self.name+"_mount"})
+    self.interacts_with_rays = True
 
   def matrix(self):
     return np.array(self._matrix)
@@ -93,10 +94,12 @@ class Opt_Element(Geom_Object):
     """
     newb = deepcopy(beam)
     newb.name = "next_" + beam.name
-    rays = beam.get_all_rays()
+    rays = beam._rays
     newrays = []
     for ray in rays:
-      newrays.append(self.next_ray(ray))
+      nr = self.next_ray(ray)
+      newrays.append(nr)
+      print("--->LENGTH:", ray.length)
     newb.override_rays(newrays)
     return newb
 

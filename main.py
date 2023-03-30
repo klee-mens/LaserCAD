@@ -19,18 +19,17 @@ sys.path.append(pfad)
 
 from basic_optics.freecad_models import clear_doc, setview, freecad_da, freecad_model_lens
 
-from basic_optics import Beam, Mirror,RayGroup, Opt_Element, Geom_Object, Curved_Mirror, Lens,Iris,Diaphragms,Intersection_plane, Ray, Composition, inch, Grating, Propagation
+from basic_optics import Beam, Mirror,RayGroup, Opt_Element, Geom_Object, Curved_Mirror
+from basic_optics import Lens,Iris,Barriers,Intersection_plane, Ray, Composition, inch, Grating, Propagation
 #from basic_optics.composition import Teleskop_test, Composition_mirror_test, Mirror_Teleskop_test, add_only_elem_test
 
-from basic_optics import Beam, Mirror, Opt_Element, Geom_Object, Curved_Mirror, Lens,Iris,Diaphragms, Ray, Composition, inch, Grating, Propagation
-
-from basic_optics.mirror import curved_mirror_test
-from basic_optics.tests import all_moduls_test
+# from basic_optics.mirror import curved_mirror_test
+# from basic_optics.tests import all_moduls_test
 
 if freecad_da:
   clear_doc()
-  
-peris, teles, amp, stretch, wcell = all_moduls_test()
+
+# peris, teles, amp, stretch, wcell = all_moduls_test()
 
 from basic_optics.moduls import Make_Telescope,Make_Amplifier_Typ_I_simpler,Make_Stretcher,Make_Amplifier_Typ_II_simpler,Make_Amplifier_Typ_II_simple,Make_Amplifier_Typ_I_simple
 from basic_optics.moduls import diaphragms_test
@@ -68,16 +67,10 @@ ip2=Intersection_plane()
 dia1.add_on_axis(ip2)
 dia1.propagate(150)
 ip2.spot_diagram(dia1.compute_beams().pop())
+# teles = Make_Telescope()
+# teles.draw()
 
 
-
-dia1.draw_elements()
-dia1.draw_rays()
-dia1.draw_mounts()
-
-# amp = Make_Amplifier_Typ_II_simpler()
-# amp.pos = (0,0,200)
-# amp.draw()
 
 
 if freecad_da:
