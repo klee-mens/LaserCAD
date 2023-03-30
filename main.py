@@ -34,39 +34,17 @@ if freecad_da:
 from basic_optics.moduls import Make_Telescope,Make_Amplifier_Typ_I_simpler,Make_Stretcher,Make_Amplifier_Typ_II_simpler,Make_Amplifier_Typ_II_simple,Make_Amplifier_Typ_I_simple
 from basic_optics.moduls import diaphragms_test
 
+teles = Make_Telescope()
+rg = RayGroup()
+teles.set_light_source(rg)
+teles.draw()
 
+from basic_optics.tests import Intersection_plane_spot_diagram_test
 
-
-
-rg=RayGroup(waist=2.5,pos=(0,0,100))
-rg.make_square_distribution(10)
-dia1 = Composition(name="RayGroup test")
-dia1.set_light_source(rg)
-dia1.normal=(-1,0,0)
-dia1.propagate(100)
-m1=Mirror(phi=-90)
-dia1.add_on_axis(m1)
-dia1.propagate(150)
-m2=Mirror(phi=-90)
-dia1.add_on_axis(m2)
-dia1.propagate(150)
-l1=Lens(f=150)
-dia1.add_on_axis(l1)
-dia1.propagate(150)
-ip1=Intersection_plane()
-dia1.add_on_axis(ip1)
-ip1.spot_diagram(dia1.compute_beams().pop())
-dia1.propagate(150)
-l2=Lens(f=150)
-dia1.add_on_axis(l2)
-dia1.propagate(300)
-l3=Lens(f=150)
-dia1.add_on_axis(l3)
-dia1.propagate(150)
-ip2=Intersection_plane()
-dia1.add_on_axis(ip2)
-dia1.propagate(150)
-ip2.spot_diagram(dia1.compute_beams().pop())
+# dia = Intersection_plane_spot_diagram_test()
+# dia.draw_elements()
+# dia.draw_mounts()
+# dia.draw_rays()
 # teles = Make_Telescope()
 # teles.draw()
 

@@ -39,8 +39,8 @@ class Opt_Element(Geom_Object):
     self.length = 0 #Länge in mm, die meisten opt Elemente sind 2D, also 0
     self.group = [] # falls das Element in eine Baugruppe eingesetzt wird
     #Parameter zum zeichnen
-    self.draw_dict.update({"dia":self.aperture, "thickness":5, 
-                           "model_type":"DEFAULT", "mount_type": "default", 
+    self.draw_dict.update({"dia":self.aperture, "thickness":5,
+                           "model_type":"DEFAULT", "mount_type": "default",
                            "mount_name": self.name+"_mount"})
     self.interacts_with_rays = True
 
@@ -63,22 +63,8 @@ class Opt_Element(Geom_Object):
     ray2.name = "next_" + ray.name
     return ray2
 
-  # def next_geom(self, geom):
-  #   """
-  #   beschreibt wie das Element den Verlauf der optischen Achse beeinflusst
-
-  #   Parameters
-  #   ----------
-  #   geom : (pos, normal)
-  #     Eingangs-Geom
-
-  #   Returns
-  #   -------
-  #   (pos, normal) : geom
-  #     Ausgangs-Geom
-
-  #   """
-  #   return geom
+  def transient(self, ray):
+    return -1
 
   def next_beam(self, beam):
     """
@@ -94,12 +80,12 @@ class Opt_Element(Geom_Object):
     """
     newb = deepcopy(beam)
     newb.name = "next_" + beam.name
-    rays = beam._rays
+    rays = beam.get_all_rays(by_reference=True)
     newrays = []
     for ray in rays:
       nr = self.next_ray(ray)
       newrays.append(nr)
-      print("--->LENGTH:", ray.length)
+      # print("--->LENGTH:", ray.length)
     newb.override_rays(newrays)
     return newb
 
@@ -156,10 +142,10 @@ class Opt_Element(Geom_Object):
   #     return ray2
 
   def refraction(self, ray):
-    
+
     ray2 = deepcopy(ray)
     ray2.pos = ray.intersect_with(self) #dadruch wird ray.length verändert(!)
-    radial_vec = ray2.pos - self.pos 
+    radial_vec = ray2.pos - self.pos
     norm = ray2.normal
     radius = np.linalg.norm(radial_vec) #Radius im sinne der parax Optik
     ea = self.normal #Einheitsvec in Richtung der optischen Achse oA
@@ -182,7 +168,7 @@ class Opt_Element(Geom_Object):
       ray2.pos = pos2
       ray2.normal = norm2
       return ray2
-    
+
     #else: Mittelpunktsstrahl
     ca = np.sum(ea * norm)
     em = norm - ca * ea #meridionaler Einheitsvektor
@@ -212,7 +198,7 @@ class Opt_Element(Geom_Object):
   def draw_mount_fc(self):
     #ToDo: fürs Debugging hier einfach einen Zylinder mit norm uns k zeichnen
     return None
-  
+
   def draw_mount_text(self):
     txt = "Kein Mount für <" +self.name + "> gefunden."
     return txt
@@ -221,12 +207,12 @@ class Opt_Element(Geom_Object):
   #   # wird eigentlich nirgednwo gebraucht
   #   dc = {"class":self.Klassenname()}
   #   dc.update(self.__dict__)
-    
-  #   # dc = {"class":self.Klassenname(), "name":self.name, "pos":self.pos, 
+
+  #   # dc = {"class":self.Klassenname(), "name":self.name, "pos":self.pos,
   #   #       "normal":self.normal, "axes":self._axes, "matrix":self._matrix,
   #   #       "aperture":self.aperture, "group":self.group}
   #   return dc
-  
+
   # def from_dict(dc):
   #   oe = Opt_Element()
   #   oe.name = dc["name"]
@@ -237,7 +223,7 @@ class Opt_Element(Geom_Object):
   #   oe.aperture = dc["aperture"]
   #   oe.group = dc["group"]
   #   return oe
-  
+
 
 def refraction_tests():
   oe = Opt_Element(pos = (100, 0, 0))

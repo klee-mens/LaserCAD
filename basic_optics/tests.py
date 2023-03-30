@@ -14,8 +14,8 @@ from .ray import Ray
 from .composition import Composition
 from .grating import Grating
 import numpy as np
-from iris import Iris
-from intersection_plane import Intersection_plane 
+# from iris import Iris
+# from intersection_plane import Intersection_plane
 
 
 
@@ -31,7 +31,7 @@ def Telescope_4beam():
       beam = bs[-1]
       bs.append(elm.next_beam(beam))
       beam.draw()
-    
+
   be = bs[-1]
   be.draw()
   return (bs, teles)
@@ -143,7 +143,7 @@ def Lens_4beam_Fokus_with_tild():
   einem Punkt gebündelt werden
   um die Brennebene zu veranschaulichen wird ein Spiegel an die Position gezeichnet
   }
-  aber mit 5° Winkel im letzten Speigel und kompletter Back prop, sollte wieder 
+  aber mit 5° Winkel im letzten Speigel und kompletter Back prop, sollte wieder
   4 kollimierte Strahlen in andere Richtung ergeben
 
   Returns
@@ -173,7 +173,7 @@ def Lens_4beam_Fokus_with_tild():
   foc_lens = Lens(name="focusing lens", f=focus, pos=(lens_pos, 0,0))
   foc_lens.draw()
   print()
-  
+
   nbs = []
   for i in range(4):
     nbs.append(foc_lens.next_beam(bs[i]))
@@ -181,7 +181,7 @@ def Lens_4beam_Fokus_with_tild():
     bs[i].draw()
     nbs[i].draw() #4 fokussierte Strahlen nach der Linse
     print("Beamfokus:", nbs[i].focal_length())
-    
+
   print()
   plane_mirror = Mirror(name="plane", pos = (lens_pos+focus, 0, 0), theta=5)
   plane_mirror.aperture = 50
@@ -191,12 +191,12 @@ def Lens_4beam_Fokus_with_tild():
   # end_mirror = Mirror(name="end_mirror", pos=(0,0,0))
   for i in range(4):
     #4 zurück nach oben refl Strahlen unter leichtem Winkel
-    nnbs.append(plane_mirror.next_beam(nbs[i])) 
+    nnbs.append(plane_mirror.next_beam(nbs[i]))
     #4 zurück wieder kollimerte Strahlen unter leichtem Winkel
     nnnbs.append(foc_lens.next_beam(nnbs[i]))
     nnbs[i].draw()
     nnnbs[i].draw()
-    # end_mirror.next_beam(nnnbs[i]) #nur um den letzten Strahl wieder auf die richtige 
+    # end_mirror.next_beam(nnnbs[i]) #nur um den letzten Strahl wieder auf die richtige
   return (bs, nbs, nnbs, nnnbs, foc_lens, plane_mirror)
 
 
@@ -221,14 +221,14 @@ def Parallel_ray_bundle_tilted_lens():
       r = Ray()
       r.pos = pos0 + np.array( (0, m*dist, n*dist) )
       rays.append(r)
-      
+
   bundel = Beam()
   Ray0 = Ray()
   rm = rays[line_count**2//2]
   Ray0.set_geom(rm.get_geom())
   rays.insert(0, Ray0)
   bundel.override_rays(rays)
-  
+
   comp = Composition(name="Parallel_ray_bundle_tilted_lens_test")
   comp.set_light_source(bundel)
   comp.pos = 2*bundel.pos #geht bsetimmt auch schöner
@@ -242,18 +242,18 @@ def Parallel_ray_bundle_tilted_lens():
   # comp.add(p2)
   le.normal = (1,0.1,0.1)
   le.normal *= -1 #sollte keine Rolle spielen -> Test für den Raytracer
-  
+
   comp.draw_elements()
   comp.draw_rays()
 
-  return comp  
+  return comp
 
 def Parallel_ray_bundle_tilted_mirror_ray_trace(focal_length = 200):
   """
   schießt eine Matrix aus line_count x line_count parallelen rays auf einen
   sphärischen Spiegel unter einem bestimmten Winkel und berechnet die neuen
   Strahlen mittels analytischem Raytracing
-  ...Sollten alle in einem Punkt fokussiert werden, +- Astigmatismus 
+  ...Sollten alle in einem Punkt fokussiert werden, +- Astigmatismus
 
   Returns
   -------
@@ -269,10 +269,10 @@ def Parallel_ray_bundle_tilted_mirror_ray_trace(focal_length = 200):
       r = Ray()
       r.pos = pos0 + np.array( (0, m*dist, n*dist) )
       rays.append(r)
-      
+
   bundel = Beam()
   bundel.override_rays(rays)
-  
+
   comp = Composition(name="Parallel_ray_bundle_tilted_lens_test")
   comp.set_light_source(bundel)
   comp.pos = 2*bundel.pos #geht bsetimmt auch schöner
@@ -284,15 +284,15 @@ def Parallel_ray_bundle_tilted_mirror_ray_trace(focal_length = 200):
   comp.add(le)
   comp.add(p2)
   le.normal = (1,0.1,0.1)
-  
+
   comp.draw()
   comp.draw_rays()
 
-  return comp  
+  return comp
 
 def grating_ray_bundle_test(draw=False):
   """
-  erzeugt ein 1D ray-Bündel und schickt es auf ein Grating, von dem dann ein 
+  erzeugt ein 1D ray-Bündel und schickt es auf ein Grating, von dem dann ein
   entsprechendes aufgefächertes Bündel ausgehen sollte
 
   Returns
@@ -301,10 +301,10 @@ def grating_ray_bundle_test(draw=False):
     DESCRIPTION.
 
   """
-  grat = Grating()    
+  grat = Grating()
   grat.pos += (100, 0, 0)
   grat.normal = (1, -0.2, 0)
-  
+
   wavelength_range = np.linspace(800e-6, 1000e-6, 20) #alle Wellenlängen in mm
   rays0 = []
   for wavelen in wavelength_range:
@@ -312,14 +312,14 @@ def grating_ray_bundle_test(draw=False):
     r.wavelength = wavelen
     rays0.append(r)
 
-  
+
   rays1 = [grat.next_ray(x) for x in rays0]
-  
+
   plane = Mirror()
   plane.normal *= -1
   for ray in rays1:
     ray.intersect_with(plane)
-    
+
   if draw:
     for ray in rays0:
       ray.draw()
@@ -331,28 +331,28 @@ def grating_ray_bundle_test(draw=False):
 
 def all_moduls_test():
   from .moduls import Make_Periscope, Make_Telescope, Make_Amplifier_Typ_II_simple, Make_Stretcher, Make_White_Cell
-  
+
   peris = Make_Periscope()
   peris.pos = (0,0,100)
   peris.draw()
-  
+
   teles = Make_Telescope()
   teles.pos = (0, 500,100)
   teles.draw()
-  
+
   amp = Make_Amplifier_Typ_II_simple(roundtrips2=3)
   amp.pos = (0, 1000, 100)
   amp.draw()
-  
+
   stretch = Make_Stretcher()
   stretch.pos = (0, 1500, 100)
   stretch.draw_elements()
   stretch.draw_rays()
-  
+
   wcell = Make_White_Cell(roundtrips4=2)
   wcell.pos = (0, 2000, 100)
   wcell.draw()
-  
+
   return peris, teles, amp, stretch, wcell
 
 def iris_test():
@@ -413,4 +413,40 @@ def iris_test():
 
   ip1.spot_diagram(dia1._ray_groups[ip1_seq])
   ip2.spot_diagram(dia1._ray_groups[-1])
-  return 1
+  return dia1
+
+
+def Intersection_plane_spot_diagram_test():
+  # from .iris import Iris
+  from .beam import RayGroup
+  from .intersection_plane import Intersection_plane
+  rg=RayGroup(waist=2.5,pos=(0,0,100))
+  rg.make_square_distribution(10)
+  dia1 = Composition(name="RayGroup test")
+  dia1.set_light_source(rg)
+  dia1.normal=(-1,0,0)
+  dia1.propagate(100)
+  m1=Mirror(phi=-90)
+  dia1.add_on_axis(m1)
+  dia1.propagate(150)
+  m2=Mirror(phi=-90)
+  dia1.add_on_axis(m2)
+  dia1.propagate(150)
+  l1=Lens(f=150)
+  dia1.add_on_axis(l1)
+  dia1.propagate(150)
+  ip1=Intersection_plane()
+  dia1.add_on_axis(ip1)
+  ip1.spot_diagram(dia1.compute_beams().pop())
+  dia1.propagate(150)
+  l2=Lens(f=150)
+  dia1.add_on_axis(l2)
+  dia1.propagate(300)
+  l3=Lens(f=150)
+  dia1.add_on_axis(l3)
+  dia1.propagate(150)
+  ip2=Intersection_plane()
+  dia1.add_on_axis(ip2)
+  dia1.propagate(150)
+  ip2.spot_diagram(dia1.compute_beams().pop())
+  return dia1
