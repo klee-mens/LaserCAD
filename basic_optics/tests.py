@@ -14,8 +14,8 @@ from .ray import Ray
 from .composition import Composition
 from .grating import Grating
 import numpy as np
-from iris import Iris
-from intersection_plane import Intersection_plane 
+from .iris import Iris
+from .intersection_plane import Intersection_plane 
 
 
 

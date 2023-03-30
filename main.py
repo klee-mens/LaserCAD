@@ -37,47 +37,51 @@ if freecad_da:
 from basic_optics.moduls import Make_Telescope,Make_Amplifier_Typ_I_simpler,Make_Stretcher,Make_Amplifier_Typ_II_simpler,Make_Amplifier_Typ_II_simple,Make_Amplifier_Typ_I_simple
 from basic_optics.moduls import diaphragms_test
 
+from basic_optics.tests import iris_test
+
 # teles = Make_Telescope()
 # teles.draw()
 
-rg=Beam(radius=0.05,angle=-0.05)
-cavset=Composition(name="Cavity Setting")
-cavset.set_light_source(rg)
-cavset.normal=(0,-1,0)
-cavset.pos=(0,20,100)
+# rg=Beam(radius=0.05,angle=-0.05)
+# cavset=Composition(name="Cavity Setting")
+# cavset.set_light_source(rg)
+# cavset.normal=(0,-1,0)
+# cavset.pos=(0,20,100)
 
-m1 = Mirror()
-m1.pos = (0,-15,100)
-point0 = (0,20,100)
-point1 = (-153.1560972,0,100)
-m1.set_normal_with_2_points(point0, point1)
+# m1 = Mirror()
+# m1.pos = (0,-15,100)
+# point0 = (0,20,100)
+# point1 = (-153.1560972,0,100)
+# m1.set_normal_with_2_points(point0, point1)
 
 
-cm1 = Curved_Mirror(radius= 200,phi=180-2.796834341)
-cm1.pos = (-153.1560972,0,100) 
-cm1.aperture = 25.4*2
+# cm1 = Curved_Mirror(radius= 200,phi=180-2.796834341)
+# cm1.pos = (-153.1560972,0,100) 
+# cm1.aperture = 25.4*2
 
-cm2 = Curved_Mirror(radius= 200,theta=-2.796834341)
-cm2.pos = cm1.pos+(425,0,0)
-cm2.aperture = 25.4*2
+# cm2 = Curved_Mirror(radius= 200,theta=-2.796834341)
+# cm2.pos = cm1.pos+(425,0,0)
+# cm2.aperture = 25.4*2
 
-m2 = Mirror()
-m2.pos = cm2.pos -(173.06080608,0,4695/277)
-point0 = cm2.pos
-point1 = m2.pos - (0,15,0)
-m2.set_normal_with_2_points(point0, point1)
+# m2 = Mirror()
+# m2.pos = cm2.pos -(173.06080608,0,4695/277)
+# point0 = cm2.pos
+# point1 = m2.pos - (0,15,0)
+# m2.set_normal_with_2_points(point0, point1)
 
-ip = Intersection_plane()
-ip.pos = m2.pos - (0,15,0)
-ip.normal = (0,-1,0)
+# ip = Intersection_plane()
+# ip.pos = m2.pos - (0,15,0)
+# ip.normal = (0,-1,0)
 
-cavset.add_fixed_elm(m1)
-cavset.add_fixed_elm(cm1)
-cavset.add_fixed_elm(cm2)
-cavset.add_fixed_elm(m2)
-cavset.add_fixed_elm(ip)
+# cavset.add_fixed_elm(m1)
+# cavset.add_fixed_elm(cm1)
+# cavset.add_fixed_elm(cm2)
+# cavset.add_fixed_elm(m2)
+# cavset.add_fixed_elm(ip)
 
-cavset.draw()
+# cavset.draw()
+
+iris_test()
 
 if freecad_da:
 
