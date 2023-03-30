@@ -19,13 +19,12 @@ sys.path.append(pfad)
 
 from basic_optics.freecad_models import clear_doc, setview, freecad_da, freecad_model_lens
 
-from basic_optics import Beam, Mirror,RayGroup, Opt_Element, Geom_Object, Curved_Mirror, Lens,Iris,Barriers,Intersection_plane, Ray, Composition, inch, Grating, Propagation
+from basic_optics import Beam, Mirror,RayGroup, Opt_Element, Geom_Object, Curved_Mirror
+from basic_optics import Lens,Iris,Barriers,Intersection_plane, Ray, Composition, inch, Grating, Propagation
 #from basic_optics.composition import Teleskop_test, Composition_mirror_test, Mirror_Teleskop_test, add_only_elem_test
 
-from basic_optics import Beam, Mirror, Opt_Element, Geom_Object, Curved_Mirror, Lens,Iris,Barriers, Ray, Composition, inch, Grating, Propagation
-
-from basic_optics.mirror import curved_mirror_test
-from basic_optics.tests import all_moduls_test
+# from basic_optics.mirror import curved_mirror_test
+# from basic_optics.tests import all_moduls_test
 
 if freecad_da:
   clear_doc()
@@ -41,86 +40,44 @@ from basic_optics.moduls import diaphragms_test
 # teles = Make_Telescope()
 # teles.draw()
 
-# stretch = Make_Stretcher()
-# stretch.pos += (0,0,100)
-# stretch.draw_elements()
-# stretch.draw_rays()
-# stretch.draw_mounts()
+rg=Beam(radius=0.05,angle=-0.05)
+cavset=Composition(name="Cavity Setting")
+cavset.set_light_source(rg)
+cavset.normal=(0,-1,0)
+cavset.pos=(0,20,100)
 
-# amplifier2 = Make_Amplifier_Typ_II_simple(beam_sep=15,roundtrips2=2)
-# amplifier2.pos = (0, 400, 100)
-# amplifier2.draw_elements()
-# # amplifier2.draw_rays()
-# amplifier2.draw_mount()
-# amplifier2.draw_beams()
-
-# amplifier3 = Make_Amplifier_Typ_II_simpler(beam_sep=20,roundtrips2=2)
-# amplifier3.pos = (0, 600, 100)
-# amplifier3.draw_elements()
-# # amplifier3.draw_rays()
-
-# amplifier3.draw_mounts()
-# amplifier3.draw_beams()
-
-# rg=RayGroup(waist=2.5,pos=(0,0,100))
-rg=Beam(radius=2.5,angle=0)
-# rg.make_square_distribution(10)
-dia1 = Composition(name="RayGroup test")
-dia1.set_light_source(rg)
-opt_element_count = 0
-dia1.normal=(-1,0,0)
-dia1.propagate(100)
-m1=Mirror(phi=-90)
-dia1.add_on_axis(m1)
-opt_element_count += 1
-dia1.propagate(150)
-m2=Mirror(phi=-90)
-dia1.add_on_axis(m2)
-opt_element_count += 1
-dia1.propagate(150)
-l1=Lens(f=150)
-dia1.add_on_axis(l1)
-opt_element_count += 1
-dia1.propagate(150)
-
-ip1=Intersection_plane()
-dia1.add_on_axis(ip1)
-opt_element_count += 1
-ip1_seq = opt_element_count
-# ip1.spot_diagram(dia1.compute_beams().pop())
-dia1.propagate(150)
-
-l2=Lens(f=150)
-dia1.add_on_axis(l2)
-opt_element_count += 1
-dia1.propagate(150)
-
-iris = Iris(dia=4)
-dia1.add_on_axis(iris)
-opt_element_count += 1
-dia1.propagate(150)
-
-l3=Lens(f=150)
-dia1.add_on_axis(l3)
-opt_element_count += 1
-dia1.propagate(150)
-
-ip2=Intersection_plane()
-dia1.add_on_axis(ip2)
-opt_element_count += 1
-ip2_seq = opt_element_count
-dia1.propagate(1500)
-# ip2.spot_diagram(dia1.compute_beams().pop())
-
-dia1.draw_elements()
-dia1.draw_rays()
-dia1.draw_mounts()
-dia1.draw_beams()
-
-ip1.spot_diagram(dia1._ray_groups[ip1_seq])
-ip2.spot_diagram(dia1._ray_groups[-1])
+m1 = Mirror()
+m1.pos = (0,-15,100)
+point0 = (0,20,100)
+point1 = (-153.1560972,0,100)
+m1.set_normal_with_2_points(point0, point1)
 
 
+cm1 = Curved_Mirror(radius= 200,phi=180-2.796834341)
+cm1.pos = (-153.1560972,0,100) 
+cm1.aperture = 25.4*2
+
+cm2 = Curved_Mirror(radius= 200,theta=-2.796834341)
+cm2.pos = cm1.pos+(425,0,0)
+cm2.aperture = 25.4*2
+
+m2 = Mirror()
+m2.pos = cm2.pos -(173.06080608,0,4695/277)
+point0 = cm2.pos
+point1 = m2.pos - (0,15,0)
+m2.set_normal_with_2_points(point0, point1)
+
+ip = Intersection_plane()
+ip.pos = m2.pos - (0,15,0)
+ip.normal = (0,-1,0)
+
+cavset.add_fixed_elm(m1)
+cavset.add_fixed_elm(cm1)
+cavset.add_fixed_elm(cm2)
+cavset.add_fixed_elm(m2)
+cavset.add_fixed_elm(ip)
+
+cavset.draw()
 
 if freecad_da:
 

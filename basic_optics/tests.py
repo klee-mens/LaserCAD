@@ -413,3 +413,4 @@ def iris_test():
 
   ip1.spot_diagram(dia1._ray_groups[ip1_seq])
   ip2.spot_diagram(dia1._ray_groups[-1])
+  return 1
