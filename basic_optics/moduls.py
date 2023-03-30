@@ -559,6 +559,9 @@ def Make_Stretcher_old():
 def Make_Stretcher():
   """
   tja, versuchen wir mal einen Offner Strecker...
+  Note: When drawing a rooftop mirror, we will draw apure_cosmetic mirror to 
+  confirm the position of the mount. The mirror's geom is the average of two 
+  flip mirror. And its aperture is the periscope_distance.
 
   Returns
   -------

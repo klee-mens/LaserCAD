@@ -15,7 +15,7 @@ Erstellen der 3D Obejkte in FreeCAD
 
 from .geom_object import Geom_Object, TOLERANCE
 from .ray import Ray
-from .beam import Beam
+from .beam import Beam,RayGroup
 from .optical_element import Opt_Element
 from .lens import Lens
 from .propagation import Propagation
@@ -26,6 +26,7 @@ from .constants import inch
 from .grating import Grating
 from .diaphragms import Diaphragms
 from .iris import Iris
+from .intersection_plane import Intersection_plane
 
 pfad = __file__[0:-9]
 

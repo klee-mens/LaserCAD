@@ -3,6 +3,7 @@
 Created on Mon Mar 27 12:12:58 2023
 
 @author: He
+Ignore this part. Itsd not finished yet.
 """
 
 from .freecad_models import model_iris_diaphragms,iris_post
