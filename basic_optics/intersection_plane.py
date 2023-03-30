@@ -9,7 +9,7 @@ from .optical_element import Opt_Element
 import numpy as np
 from copy import deepcopy
 from .ray import Ray
-from .beam import Beam
+from .beam import Beam,RayGroup
 import matplotlib.pyplot as plt
 from .freecad_models import model_intersection_plane
 
@@ -52,8 +52,10 @@ class Intersection_plane(Opt_Element):
       """
     point_x = []
     point_y = []
-    rays = beam.get_all_rays()
-
+    if isinstance(beam, RayGroup) or isinstance(beam, Beam):
+      rays = beam.get_all_rays()
+    else:
+      rays = beam
     for point_i in rays:
       intersection_point = point_i.intersection(self)
       pos_diff = intersection_point - self.pos

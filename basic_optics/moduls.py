@@ -6,7 +6,7 @@ Created on Tue Aug 30 17:03:16 2022
 """
 from .lens import Lens
 from .mirror import Mirror, Curved_Mirror, mirror_mount
-from .diaphragms import Diaphragms
+from .barriers import Barriers
 # from .propagation import Propagation
 # from .composition import Composition_old
 from .composition import Composition
@@ -72,7 +72,7 @@ def Make_Telescope(name="Teleskop", f1=100.0, f2=100.0, d0=100.0, lens1_aperture
   return teles
 
 def diaphragms_test(name="diaphragms_test"):
-  dia = Diaphragms(dia=50)
+  dia = Barriers(dia=50)
   # dia.pos = (150,0,0)
   ls = Beam(angle=0)
   # dia.spot_diagram(ls)

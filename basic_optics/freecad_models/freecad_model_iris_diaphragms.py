@@ -78,7 +78,7 @@ def model_intersection_plane(name="intersection_plane", Radius=25, geom=None, **
   DOC.recompute()
   return obj
   
-def model_diaphragms(name="diaphragms", Radius=25,Hole_Radius=2, thickness=3,height=20, geom=None, **kwargs):
+def model_diaphragms(name="diaphragms", Radius=25,Hole_Radius=2, thickness=5,height=20, geom=None, **kwargs):
   """
     Draw a diaphragms
 
@@ -167,7 +167,7 @@ def model_diaphragms(name="diaphragms", Radius=25,Hole_Radius=2, thickness=3,hei
   DOC.recompute()
   return obj
 
-def model_iris_diaphragms(name="iris", Radius1=10, Radius2=25,Hole_Radius=2, thickness=3,height=20, geom=None, **kwargs):
+def model_iris_diaphragms(name="iris", Radius1=10, Radius2=25,Hole_Radius=2, thickness=5,height=20, geom=None, **kwargs):
   """
     Draw a iris diaphragms (dosn't work for now')
 
@@ -262,7 +262,7 @@ def model_iris_diaphragms(name="iris", Radius1=10, Radius2=25,Hole_Radius=2, thi
   DOC.recompute()
   return obj
 
-def iris_post( geom = None, **kwargs):
+def iris_post(height=20,geom = None, **kwargs):
   """
     draw the post
 
@@ -279,6 +279,5 @@ def iris_post( geom = None, **kwargs):
         DESCRIPTION.
 
     """
-  height = 20
   xshift = 0
   return draw_post_part(name="post_part", height=height,xshift=xshift, geom=geom)

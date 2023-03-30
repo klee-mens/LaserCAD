@@ -19,10 +19,10 @@ sys.path.append(pfad)
 
 from basic_optics.freecad_models import clear_doc, setview, freecad_da, freecad_model_lens
 
-from basic_optics import Beam, Mirror,RayGroup, Opt_Element, Geom_Object, Curved_Mirror, Lens,Iris,Diaphragms,Intersection_plane, Ray, Composition, inch, Grating, Propagation
+from basic_optics import Beam, Mirror,RayGroup, Opt_Element, Geom_Object, Curved_Mirror, Lens,Iris,Barriers,Intersection_plane, Ray, Composition, inch, Grating, Propagation
 #from basic_optics.composition import Teleskop_test, Composition_mirror_test, Mirror_Teleskop_test, add_only_elem_test
 
-from basic_optics import Beam, Mirror, Opt_Element, Geom_Object, Curved_Mirror, Lens,Iris,Diaphragms, Ray, Composition, inch, Grating, Propagation
+from basic_optics import Beam, Mirror, Opt_Element, Geom_Object, Curved_Mirror, Lens,Iris,Barriers, Ray, Composition, inch, Grating, Propagation
 
 from basic_optics.mirror import curved_mirror_test
 from basic_optics.tests import all_moduls_test
@@ -63,41 +63,56 @@ rg=RayGroup(waist=2.5,pos=(0,0,100))
 rg.make_square_distribution(10)
 dia1 = Composition(name="RayGroup test")
 dia1.set_light_source(rg)
+opt_element_count = 0
 dia1.normal=(-1,0,0)
 dia1.propagate(100)
 m1=Mirror(phi=-90)
 dia1.add_on_axis(m1)
+opt_element_count += 1
 dia1.propagate(150)
 m2=Mirror(phi=-90)
 dia1.add_on_axis(m2)
+opt_element_count += 1
 dia1.propagate(150)
 l1=Lens(f=150)
 dia1.add_on_axis(l1)
+opt_element_count += 1
 dia1.propagate(150)
 ip1=Intersection_plane()
 dia1.add_on_axis(ip1)
-ip1.spot_diagram(dia1.compute_beams().pop())
+opt_element_count += 1
+ip1_seq = opt_element_count
+# ip1.spot_diagram(dia1.compute_beams().pop())
 dia1.propagate(150)
 l2=Lens(f=150)
 dia1.add_on_axis(l2)
-dia1.propagate(300)
+opt_element_count += 1
+dia1.propagate(150)
+
+iris = Iris(dia=4)
+dia1.add_on_axis(iris)
+opt_element_count += 1
+
+dia1.propagate(150)
 l3=Lens(f=150)
 dia1.add_on_axis(l3)
+opt_element_count += 1
 dia1.propagate(150)
 ip2=Intersection_plane()
 dia1.add_on_axis(ip2)
+opt_element_count += 1
+ip2_seq = opt_element_count
 dia1.propagate(150)
-ip2.spot_diagram(dia1.compute_beams().pop())
-
 
 
 dia1.draw_elements()
 dia1.draw_rays()
 dia1.draw_mounts()
 
-# amp = Make_Amplifier_Typ_II_simpler()
-# amp.pos = (0,0,200)
-# amp.draw()
+ip1.spot_diagram(dia1._ray_groups[ip1_seq])
+ip2.spot_diagram(dia1._ray_groups[ip2_seq])
+
+
 
 if freecad_da:
 
