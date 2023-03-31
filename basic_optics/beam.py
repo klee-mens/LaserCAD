@@ -128,10 +128,12 @@ class RayGroup(Geom_Object):
     return txt
     
   def draw_fc(self):
-    part = initialize_composition_old(name="ray group")
+    part = initialize_composition_old(name="ray_group")
     container = []
     for nn in range(self.__ray_count):
       our=self._rays[nn]
+      our.update_draw_dict()
+      our.draw_dict["length"] = our.length
       obj=model_ray_1D(**our.draw_dict)
       container.append(obj)
     add_to_composition(part, container)

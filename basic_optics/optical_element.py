@@ -99,7 +99,6 @@ class Opt_Element(Geom_Object):
     for ray in rays:
       nr = self.next_ray(ray)
       newrays.append(nr)
-      print("--->LENGTH:", ray.length)
     newb.override_rays(newrays)
     return newb
 
