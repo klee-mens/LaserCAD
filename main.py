@@ -13,38 +13,31 @@ pfad = __file__
 pfad = pfad[0:-7] #nur wenn das Skript auch wirklich main.py heißt
 sys.path.append(pfad)
 
-# import basic_optics.freecad_models as fcm
-# from importlib import reload
-# reload(fcm)
 
 from basic_optics.freecad_models import clear_doc, setview, freecad_da, freecad_model_lens,model_table
 
-from basic_optics import Beam, Mirror,RayGroup, Opt_Element, Geom_Object, Curved_Mirror
+from basic_optics import Beam, Mirror, Opt_Element, Geom_Object, Curved_Mirror
 from basic_optics import Lens,Iris,Barriers,Intersection_plane, Ray, Composition, inch, Grating, Propagation
-#from basic_optics.composition import Teleskop_test, Composition_mirror_test, Mirror_Teleskop_test, add_only_elem_test
 import numpy as np
+
 # from basic_optics.mirror import curved_mirror_test
-# from basic_optics.tests import all_moduls_test
+from basic_optics.tests import all_moduls_test
 
 if freecad_da:
   clear_doc()
 
-
-# peris, teles, amp, stretch, wcell = all_moduls_test()
-
-
+peris, teles, amp, stretch, wcell = all_moduls_test()
 
 from basic_optics.moduls import Make_Telescope,Make_Amplifier_Typ_I_simpler,Make_Stretcher,Make_Amplifier_Typ_II_simpler,Make_Amplifier_Typ_II_simple,Make_Amplifier_Typ_I_simple
 from basic_optics.moduls import diaphragms_test
 
 
-rg=RayGroup(waist=2.5,pos=(0,0,100))
-# rg=Beam(radius=2.5,angle=0)
-rg.make_square_distribution(15)
-rg.draw()
+# # rg=Beam(radius=2.5,angle=0)
+# rg.make_square_distribution(15)
+# rg.draw()
 
-# teles = Make_Telescope()
-# teles.draw()
+# rg=Beam(radius=2.5,pos=(0,0,100))
+
 # cm_radius = 200
 # cavity_length = 425
 # angle_shift = 2.796834341
@@ -98,6 +91,18 @@ rg.draw()
 # cavset.draw()
 
 # table= model_table()
+
+# ls = Beam(radius= 2, angle=0)
+# ls.make_square_distribution()
+# teles = Make_Telescope()
+# teles.set_light_source(ls)
+# teles.draw()
+
+
+from basic_optics.tests import Intersection_plane_spot_diagram_test
+
+
+
 
 
 
