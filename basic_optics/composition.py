@@ -235,22 +235,6 @@ class Composition(Opt_Element):
       obj = elm.draw_mount()
       container.append(obj)
     return self.__container_to_part(self._mounts_part, container)
-
-  # def draw_rays(self):
-  #   self.__init_parts()
-  #   self.compute_ray_groups()
-  #   container = []
-  #   for raygroup in self._ray_groups:
-  #     subgr = []
-  #     for ray in raygroup:
-  #       obj = ray.draw()
-  #       subgr.append(obj)
-  #     container.append(subgr)
-  #   if freecad_da:
-  #     return make_to_ray_part(self.name, self._rays_part, container)
-  #   self._rays_part = container
-  #   self._drawing_part[2] = self._rays_part
-  #   return container
   
   def draw_rays(self):
     return self.draw_beams(style="ray_group")

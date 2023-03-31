@@ -60,12 +60,7 @@ class Opt_Element(Geom_Object):
       Ausgangsstrahl
     """
     return -1
-    # ray2 = deepcopy(ray)
-    # ray2.name = "next_" + ray.name
-    # return ray2
 
-  # def transient(self, ray):
-  #   return -1
 
   def next_beam(self, beam):
     """
@@ -118,31 +113,7 @@ class Opt_Element(Geom_Object):
     # print("REFL", k, km, scpr, newk, ray2.normal)
     return ray2
 
-  # def refraction_old(self, ray):
-  #   ray2 = deepcopy(ray)
-  #   ray2.pos = ray.intersect_with(self) #dadruch wird ray.length verändert(!)
-  #   ovec = ray2.pos - self.pos
-  #   novec = np.linalg.norm(ovec)
-  #   if novec < TOLERANCE:
-  #     # Mittelpunktstrahl, keine Brechung
-  #     return ray2
-  #   else:
-  #     ovec *= 1/novec #radial
-  #     snorm = self.normal #normal
-  #     rnorm = ray2.normal
-  #     vec_t = np.cross(ovec, snorm) #tangential
-  #     vn = np.sum(snorm * rnorm)
-  #     vr = np.sum(ovec * rnorm)
-  #     vt = np.sum(vec_t * rnorm)
-  #     ve = np.sqrt(vr**2 + vn**2) #in Ebene
-  #     al = vr/vn
-  #     h2, al2 = np.matmul(self._matrix, np.array((novec, al)))
-  #     vr2 = al2
-  #     ven = (1+ vr2**2)
-  #     vr2 = vr2 * ve / ven
-  #     vn2 = vn * ve / ven
-  #     ray2.normal = vr2 * ovec + vn2 * snorm + vt * vec_t
-  #     return ray2
+
 
   def refraction(self, ray):
 
@@ -205,27 +176,6 @@ class Opt_Element(Geom_Object):
   def draw_mount_text(self):
     txt = "Kein Mount für <" +self.name + "> gefunden."
     return txt
-
-  # def to_dict(self):
-  #   # wird eigentlich nirgednwo gebraucht
-  #   dc = {"class":self.Klassenname()}
-  #   dc.update(self.__dict__)
-
-  #   # dc = {"class":self.Klassenname(), "name":self.name, "pos":self.pos,
-  #   #       "normal":self.normal, "axes":self._axes, "matrix":self._matrix,
-  #   #       "aperture":self.aperture, "group":self.group}
-  #   return dc
-
-  # def from_dict(dc):
-  #   oe = Opt_Element()
-  #   oe.name = dc["name"]
-  #   oe.pos = dc["pos"]
-  #   oe.normal = dc["normal"]
-  #   oe._axes = dc["axes"]
-  #   oe._matrix = dc["matrix"]
-  #   oe.aperture = dc["aperture"]
-  #   oe.group = dc["group"]
-  #   return oe
 
 
 def refraction_tests():
