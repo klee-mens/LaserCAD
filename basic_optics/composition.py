@@ -244,7 +244,7 @@ class Composition(Opt_Element):
     self.draw_elements()
     self.draw_beams()
     self.draw_mounts()
-    self.draw_rays()
+    # self.draw_rays()
 
   def __container_to_part(self, part, container):
     if freecad_da:

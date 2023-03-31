@@ -210,7 +210,7 @@ def Make_White_Cell(name="White Cell", Radius=300, roundtrips4=1, aperture_small
 
 
 def Make_Amplifier_Typ_I_simple(name = "AmpTyp1s", focal_length=600,
-                                dist3=600,roundtrips2=1,
+                                dist3=600,roundtrips2=2,
                                 aperture_small=1*inch, aperture_big=2*inch, beam_sep=15):
   # Radius2 = magnification*focal_length
   dist1 =2*focal_length-dist3
@@ -266,7 +266,7 @@ def Make_Amplifier_Typ_I_simple(name = "AmpTyp1s", focal_length=600,
   return AmpTyp1
 
 def Make_Amplifier_Typ_I_simpler(name = "AmpTyp1sr", focal_length=600,
-                                magnification=1,roundtrips2=1,
+                                magnification=1,roundtrips2=2,
                                 aperture_small=0.5*inch, aperture_big=2*inch, beam_sep=15):
   # Radius2 = magnification*focal_length
   dist1 = (magnification+1) / (magnification**2+1) * focal_length
@@ -323,7 +323,7 @@ def Make_Amplifier_Typ_I_simpler(name = "AmpTyp1sr", focal_length=600,
   return AmpTyp1
 
 def Make_Amplifier_Typ_II_simple(name="AmpTyp2s", focal_length=600, magnification=1,
-                              roundtrips2=1,
+                              roundtrips2=2,
                               aperture_small=1*inch, aperture_big=2*inch, beam_sep=15):
     """
     generiert die Strahlführung eines einfachen Typ II Verstärkers mit einer Linse
@@ -391,7 +391,7 @@ def Make_Amplifier_Typ_II_simple(name="AmpTyp2s", focal_length=600, magnificatio
     return AmpTyp2
 
 def Make_Amplifier_Typ_II_simpler(name="AmpTyp2sr", focal_length=600, magnification=1,
-                              roundtrips2=1,
+                              roundtrips2=2,
                               aperture_small=0.5*inch, aperture_big=2*inch, beam_sep=15):
   
   Radius2 = magnification*focal_length
