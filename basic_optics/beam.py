@@ -23,10 +23,9 @@ class Beam(Geom_Object):
   average_divegence = ?
 
   """
-  def __init__(self, radius=1, angle=0, name="NewBeam", ray_count=2,
-               distribution="cone", **kwargs):
+  def __init__(self, radius=1, angle=0, name="NewBeam", distribution="cone", **kwargs):
     super().__init__(name=name, **kwargs)
-    self._ray_count = ray_count
+    self._ray_count = 2
     self._rays = [Ray() for n in range(self._ray_count)]
     self._angle = angle
     self._radius = radius
@@ -47,9 +46,10 @@ class Beam(Geom_Object):
       self = -1
       return -1
     
-  def make_cone_distribution(self, ray_count=None):
-    if ray_count:
-      self._ray_count = ray_count
+  def make_cone_distribution(self, ray_count=2):
+    self._ray_count = ray_count
+    self._distribution = "cone"
+    self.draw_dict["model"] = "cone"
     mr = self._rays[0]
     mr.set_geom(self.get_geom())
     mr.name = self.name + "_inner_Ray"
@@ -86,6 +86,8 @@ class Beam(Geom_Object):
         ray_counting+=1
     # print(ray_counting) # ray_counting is the number of the rays.
     self._ray_count = ray_counting
+    self._distribution = "square"
+    self.draw_dict["model"] = "ray_group"
 
   def make_circular_distribution(self, ring_number=2):
     """
@@ -121,6 +123,8 @@ class Beam(Geom_Object):
         ray_counting+=1
     # print(ray_counting) # ray_counting is the number of the rays.
     self._ray_count = ray_counting
+    self._distribution = "circular"
+    self.draw_dict["model"] = "ray_group"
 
   def override_rays(self, rays):
     """
@@ -256,7 +260,7 @@ if __name__ == "__main__":
 
   print()
 
-  b = Beam(ray_count=5, pos=(1,2,3))
+  b = Beam(pos=(1,2,3))
   print(b.outer_rays())
   print("Radius, Winkel von b:", b.radius_angle())
 

@@ -83,7 +83,6 @@ class Opt_Element(Geom_Object):
       if not nr:
         return -1 #Für Elemente die nicht mit Strahlen interagieren wird -1 als beam zurück gegeben
       newrays.append(nr)
-      # print("--->LENGTH:", ray.length)
     newb.override_rays(newrays)
     return newb
 
