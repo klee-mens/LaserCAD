@@ -163,6 +163,8 @@ class Mirror(Opt_Element):
     """
     inc = self.pos - p0
     refl = p1 - self.pos
+    inc *= 1/np.linalg.norm(inc)
+    refl *= 1/np.linalg.norm(refl)
     # print("nextnormal", (inc - refl)/np.linalg.norm(inc - refl))
     self.normal = inc - refl
     self.__phi, self.__theta =  self.recompute_angles()

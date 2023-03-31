@@ -15,7 +15,7 @@ Erstellen der 3D Obejkte in FreeCAD
 
 from .geom_object import Geom_Object, TOLERANCE
 from .ray import Ray
-from .beam import Beam,RayGroup
+from .beam import Beam #,RayGroup
 from .optical_element import Opt_Element
 from .lens import Lens
 from .propagation import Propagation

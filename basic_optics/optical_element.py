@@ -42,7 +42,7 @@ class Opt_Element(Geom_Object):
     self.draw_dict.update({"dia":self.aperture, "thickness":5,
                            "model_type":"DEFAULT", "mount_type": "default",
                            "mount_name": self.name+"_mount"})
-    self.interacts_with_rays = True
+    # self.interacts_with_rays = True
 
   def matrix(self):
     return np.array(self._matrix)
@@ -59,12 +59,13 @@ class Opt_Element(Geom_Object):
     ray2 : Ray
       Ausgangsstrahl
     """
-    ray2 = deepcopy(ray)
-    ray2.name = "next_" + ray.name
-    return ray2
-
-  def transient(self, ray):
     return -1
+    # ray2 = deepcopy(ray)
+    # ray2.name = "next_" + ray.name
+    # return ray2
+
+  # def transient(self, ray):
+  #   return -1
 
   def next_beam(self, beam):
     """
@@ -84,6 +85,8 @@ class Opt_Element(Geom_Object):
     newrays = []
     for ray in rays:
       nr = self.next_ray(ray)
+      if not nr:
+        return -1 #Für Elemente die nicht mit Strahlen interagieren wird -1 als beam zurück gegeben
       newrays.append(nr)
       # print("--->LENGTH:", ray.length)
     newb.override_rays(newrays)

@@ -157,47 +157,49 @@ class Composition(Opt_Element):
     self.recompute_optical_axis()
 
 
-  def compute_ray_groups(self):
-    """
-    berechnet von einer ray_groups[0] aus alle folgenden Strahlen, default ist
-    die Gruppe der Lightsource
+  # def compute_ray_groups(self):
+  #   """
+  #   berechnet von einer ray_groups[0] aus alle folgenden Strahlen, default ist
+  #   die Gruppe der Lightsource
 
-    Returns
-    -------
-    array of computed ray_groups
-    """
-    self._ray_groups = [self._lightsource.get_all_rays()] #erst mal nullen
-    for n in self._sequence:
-      elm = self._elements[n]
-      if not elm.interacts_with_rays:
-        continue
-      newgroup = []
-      newgroup_name = self.name + "__ray_group" + str(n)
-      raycounter = 1
-      for oldray in self._ray_groups[-1]:
-        ray = elm.next_ray(oldray)
-        if not ray == None:
-          # manche Elemente geben keien validen rays zurück (?)
-          ray.name = newgroup_name + "_ray" + str(raycounter)
-          raycounter += 1
-          newgroup.append(ray)
-          # self._rays.append(ray)
-      if len(newgroup) > 0:
-        self._ray_groups.append(newgroup)
-    for ray in self._ray_groups[-1]:
-      ray.length = self._last_prop
-      # ray.length = 200
-    return deepcopy(self._ray_groups)
+  #   Returns
+  #   -------
+  #   array of computed ray_groups
+  #   """
+  #   self._ray_groups = [self._lightsource.get_all_rays()] #erst mal nullen
+  #   for n in self._sequence:
+  #     elm = self._elements[n]
+  #     # if not elm.interacts_with_rays:
+  #     #   continue
+  #     newgroup = []
+  #     newgroup_name = self.name + "__ray_group" + str(n)
+  #     raycounter = 1
+  #     for oldray in self._ray_groups[-1]:
+  #       ray = elm.next_ray(oldray)
+  #       # if not ray == None:
+  #       #   # manche Elemente geben keien validen rays zurück (?)
+  #       if not ray:
+  #         break
+  #       ray.name = newgroup_name + "_ray" + str(raycounter)
+  #       raycounter += 1
+  #       newgroup.append(ray)
+  #     # if len(newgroup) > 0:
+  #     self._ray_groups.append(newgroup)
+  #   for ray in self._ray_groups[-1]:
+  #     ray.length = self._last_prop
+  #     # ray.length = 200
+  #   return deepcopy(self._ray_groups)
 
   def compute_beams(self):
     beamcount = 0
     self._beams = [self._lightsource]
     for n in self._sequence:
       elm = self._elements[n]
-      if not elm.interacts_with_rays:
-        continue
+      # if not elm.interacts_with_rays:
+      #   continue
       beam = elm.next_beam(self._beams[-1])
-      if beam.is_valid():
+      # if beam.is_valid():
+      if beam:
         # manche Elemente wie Prop geben keine validen beams zurück
         beamcount += 1
         beam.name = self.name + "_beam_" + str(beamcount)
@@ -214,7 +216,10 @@ class Composition(Opt_Element):
       container.append(obj)
     return self.__container_to_part(self._elements_part, container)
 
-  def draw_beams(self):
+  def draw_beams(self, style="cone"):
+    liso = self._lightsource
+    if liso._distribution == "cone":
+      liso.draw_dict["model"] = style
     self.__init_parts()
     self.compute_beams()
     container = []
@@ -231,21 +236,25 @@ class Composition(Opt_Element):
       container.append(obj)
     return self.__container_to_part(self._mounts_part, container)
 
+  # def draw_rays(self):
+  #   self.__init_parts()
+  #   self.compute_ray_groups()
+  #   container = []
+  #   for raygroup in self._ray_groups:
+  #     subgr = []
+  #     for ray in raygroup:
+  #       obj = ray.draw()
+  #       subgr.append(obj)
+  #     container.append(subgr)
+  #   if freecad_da:
+  #     return make_to_ray_part(self.name, self._rays_part, container)
+  #   self._rays_part = container
+  #   self._drawing_part[2] = self._rays_part
+  #   return container
+  
   def draw_rays(self):
-    self.__init_parts()
-    self.compute_ray_groups()
-    container = []
-    for raygroup in self._ray_groups:
-      subgr = []
-      for ray in raygroup:
-        obj = ray.draw()
-        subgr.append(obj)
-      container.append(subgr)
-    if freecad_da:
-      return make_to_ray_part(self.name, self._rays_part, container)
-    self._rays_part = container
-    self._drawing_part[2] = self._rays_part
-    return container
+    return self.draw_beams(style="ray_group")
+  
 
   def draw(self):
     self.draw_elements()
@@ -315,7 +324,8 @@ class Composition(Opt_Element):
 
   def __no_double_integration_check(self, item):
     #checken ob Elm schon mal eingefügt
-    if self in item.group:
+    # if self in item.group:
+    if item in self._elements:
       warning("Das Element -" + str(item) + "- wurde bereits in <" +
             self.name + "> eingefügt.")
     item.group.append(self)
@@ -333,21 +343,6 @@ class Composition(Opt_Element):
     self._rearange_subobjects_pos(old_pos, new_pos, [r for rg in self._ray_groups[1::] for r in rg])
     self._rearange_subobjects_pos(old_pos, new_pos, self.__optical_axis)
 
-
-  # def _normal_changed(self, old_normal, new_normal):
-  #   """
-  #   wird aufgerufen, wen die Normale von <self> verändert wird
-  #   dreht die Normale aller __rays mit
-
-  #   dreht außerdem das eigene Koordiantensystem
-  #   """
-  #   super()._normal_changed(old_normal, new_normal)
-  #   self._rearange_subobjects_normal(old_normal, new_normal, [self._lightsource]) #sonst wird ls doppelt geshifted
-  #   self._rearange_subobjects_normal(old_normal, new_normal, self._elements)
-  #   self._rearange_subobjects_normal(old_normal, new_normal, self._beams[1::])
-  #   self._rearange_subobjects_normal(old_normal, new_normal, [r for rg in self._ray_groups[1::] for r in rg])
-  #   self._rearange_subobjects_normal(old_normal, new_normal, self.__optical_axis)
-    
   def _axes_changed(self, old_axes, new_axes):
     """
     wird aufgerufen, wen die axese von <self> verändert wird
