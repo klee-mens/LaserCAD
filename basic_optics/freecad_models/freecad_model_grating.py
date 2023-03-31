@@ -24,6 +24,7 @@ def model_grating(name="grating", dimensions=DEFUALT_DIM, geom=GEOM0,
                   color=DEFUALT_COLOR):
   """
   kreiert das Model eines Gitters durch simples Erzeugen eines Quaders
+  creates the model of a grid by simply creating a box
 
   Parameters
   ----------
@@ -56,6 +57,28 @@ def model_grating(name="grating", dimensions=DEFUALT_DIM, geom=GEOM0,
   return obj
 
 def grating_mount(name="grating_mount",height=50,thickness=8,geom=None, **kwargs):
+  """
+    Build the mount of the grating.
+
+    Parameters
+    ----------
+    name : String, optional
+        The name of the mount. The default is "grating_mount".
+    height : float/int, optional
+        The height of the grating. The default is 50.
+    thickness : float/int, optional
+        The thickness of the grating. The default is 8.
+    geom : TYPE, optional
+        geom info. The default is None.
+    **kwargs : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    part : TYPE
+        DESCRIPTION.
+
+    """
   if height<=20:
     grating_mount_name="KGM20"
   elif height<=40:
@@ -94,6 +117,28 @@ def grating_mount(name="grating_mount",height=50,thickness=8,geom=None, **kwargs
   return part
 
 def draw_mount(name="KGM60_base",height=50,thickness=8,geom=None):
+  """
+    Draw the part of the mount.
+    Since the grating mount is divided into three parts, this function will 
+    draw one part of the mount. 
+
+    Parameters
+    ----------
+    name : TYPE, optional
+        Part name. The default is "KGM60_base".
+    height : float/int, optional
+        The height of the grating. The default is 50.
+    thickness : float/int, optional
+        The thickness of the grating. The default is 8.
+    geom : TYPE, optional
+        geom info. The default is None.
+
+    Returns
+    -------
+    obj : TYPE
+        DESCRIPTION.
+
+    """
   mesh = True
   xshift = thickness-8
   if "60" in name:
@@ -129,9 +174,9 @@ def rotate_vector(shiftvec=np.array((1.0,0,0)),vec=np.array((1.0,0,0)),angle=0):
 
   Parameters
   ----------
-  shiftvec : TYPE, optional
+  shiftvec : np.array(), optional
     The vector needs to be rotated. The default is np.array((1,0,0)).
-  vec : TYPE, optional
+  vec : np.array(), optional
     The rotating axis. The default is np.array((1,0,0)).
   angle : TYPE, optional
     The angle. The default is 0.

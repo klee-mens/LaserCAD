@@ -29,8 +29,23 @@ DEFALUT_MAX_ANGULAR_OFFSET = 10
 
 def model_mirror(model_type="DEFAULT", **kwargs):
   """
-  Example:
-  mirror47 = mirror("mirror_47", dia=25, d=5, R=200)
+    bulid a mirror model
+
+    Parameters
+    ----------
+    model_type : String, optional
+        The type of the mirror.
+        There are two options, Round mirror(DEFAULT) and Stripe mirror.
+        The default is "DEFAULT".
+    **kwargs : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    obj : TYPE
+        object of mirror.
+    Example:
+    mirror47 = mirror("mirror_47", dia=25, d=5, R=200)
   """
     
   if model_type == "DEFAULT" or model_type == "Round":
@@ -43,10 +58,31 @@ def model_mirror(model_type="DEFAULT", **kwargs):
 
 def model_round_mirror(name="mirror", dia=25, thickness=5, Radius=0, geom=None, **kwargs):
   """
-  Example:
-  mirror47 = mirror("mirror_47", dia=25, d=5, R=200)
-  """
+    Build a round mirror model with a certain diameter, thickness and radius
 
+    Parameters
+    ----------
+    name : String, optional
+        The name of the mirror. The default is "mirror".
+    dia : float/int, optional
+        The diameter of the mirror. The default is 25.
+    thickness : float/int, optional
+        The thickness of the mirror. The default is 5.
+    Radius : float/int, optional
+        The curvature of the mirror. 0 means plane mirror. The default is 0.
+    geom : TYPE, optional
+        The geometrical parameter of the mirror. The default is None.
+    **kwargs : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    obj : TYPE
+    object of mirror.
+
+    Example:
+    mirror47 = mirror("mirror_47", dia=25, d=5, R=200)
+  """
   DOC = get_DOC()
   obj = model_lens(name, dia, Radius1=-Radius, Radius2=0, thickness=thickness)
 
@@ -68,6 +104,35 @@ def model_round_mirror(name="mirror", dia=25, thickness=5, Radius=0, geom=None, 
 
 def model_stripe_mirror(name="Stripe_Mirror", dia=75, Radius1=250, thickness=25, 
                         height=10, geom=None, **kwargs):
+  """
+    
+
+    Parameters
+    ----------
+    name : String, optional
+        The name of the mirror. The default is "Stripe_Mirror".
+    dia : TYPE, optional
+        The width of the mirror. The default is 75.
+    Radius1 : TYPE, optional
+        The curvature of the mirror. The default is 250.
+    thickness : TYPE, optional
+        The thickness of the mirror. The default is 25.
+    height : TYPE, optional
+        The height of the mirror. The default is 10.
+    geom : TYPE, optional
+        The geometrical parameter of the mirror. The default is None.
+    **kwargs : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    obj : TYPE
+        object of mirror.
+   example:
+       stripe_mirror=model_stripe_mirror(name="Stripe_Mirror", dia=60, 
+                                         Radius1=300, thickness=30, height=15, 
+                                         geom=None,)
+   """
   DOC = get_DOC()
   """Beispiel
   s.o.
@@ -130,14 +195,62 @@ def model_stripe_mirror(name="Stripe_Mirror", dia=75, Radius1=250, thickness=25,
 
 
 
-# =============================================================================
-# Begin Working area of He Zhuang
-# =============================================================================
 
 
 def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
                  mount_type="default", geom=None, only_info=False, 
                  drawing_post=True, dia=25.4,thickness=30, **kwargs):
+  """
+    Build the mirror mount, post, post holder and slotted bases of the mirror
+
+    Parameters
+    ----------
+    mount_name : String, optional
+        The name of the mount. The default is "mirror_mount".
+    model_type : String, optional
+        The tpye fo the mirror. There are some special mount for stripe mirror
+        and rooftop mirror.
+        Set the model_type as 'rooftop_mirror' if you want to draw rooftop 
+        mirror mount.
+        Set the model_type as 'Stripe' if you want to draw stripe mirror mount.
+        The default is "DEFAULT".
+    mount_type : String, optional
+        The type of the mount.You can check 'mirrormounts.csv' to find mount in
+        the database.
+        If you want to select the appropriate mount automatically, please keep 
+        it as 'default'.
+        If you don't want to draw the mount, please set the mount_type 
+        as 'dont_draw'
+        DESCRIPTION. The default is "default".
+    geom : TYPE, optional
+        The geometrical parameter of the mirror. The default is None.
+    only_info : Boolean, optional
+        Set it as True if you only the the information. The default is False.
+    drawing_post : Boolean, optional
+        Determine if you want to draw the post.
+        Set it as True if you want to draw the post. The default is True.
+    dia : float/int, optional
+        The diameter of the mirror. Please input it correctly if you want to 
+        select the appropriate mount automatically.
+        In case of rooftop mirror, dia mean the periscope distance between rays.
+        Please check the Make_Stretcher() function in modults to get an example 
+        of how to use.
+        The default is 25.4.
+    thickness : float/int, optional
+        The thickness of mirror. The default is 30.
+    **kwargs : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    Part
+        A part which includes the mount, the post, the post holder and the 
+        slotted bases.
+  example:
+      mount64=mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
+                       mount_type="POLARIS-K1", geom=None, only_info=False, 
+                       drawing_post=True, dia=25.4*2,thickness=30)
+  """
   if mount_type == "dont_draw":
     return None
   mesh = True
@@ -160,8 +273,10 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
     additional_mount = draw_stripe_mount(thickness=thickness,geom=geom)
     xshift = thickness-7
     yshift = 104.3
-    geom = (np.array((geom[0][0]+xshift*geom[1][0]-yshift*geom[1][1],geom[0][1]+yshift*geom[1][0]+xshift*geom[1][1],geom[0][2])),
-            np.array((-geom[1][0],-geom[1][1],geom[1][2])))
+    geom = (np.array((geom[0][0]+xshift*geom[1][0]-yshift*geom[1][1],
+                      geom[0][1]+yshift*geom[1][0]+xshift*geom[1][1],
+                      geom[0][2])),np.array((-geom[1][0],-geom[1][1],
+                      geom[1][2])))
     mount_type = "POLARIS-K2"
     dia =25.4*2
   if mount_type =="rooftop_mirror":
@@ -302,15 +417,16 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
 def draw_post_part(name="post_part", height=12,xshift=0, geom=None):
   """
   Draw the post part, including post, post holder and base
+  Assuming that all optics are placed in the plane of z = 0.
 
   Parameters
   ----------
-  name : TYPE, optional
-    DESCRIPTION. The default is "post_part".
-  height : TYPE, optional
+  name : String, optional
+    The name of the part. The default is "post_part".
+  height : float/int, optional
     distance from the center of the mirror to the bottom of the mount.
     The default is 12.
-  xshift : TYPE, optional
+  xshift : float/int, optional
     distance from the center of the mirror to the cavity at the bottom of the 
     mount. The default is 0.
   geom : TYPE, optional
@@ -319,7 +435,7 @@ def draw_post_part(name="post_part", height=12,xshift=0, geom=None):
   Returns
   -------
   part : TYPE
-    DESCRIPTION.
+    A part which includes the post, the post holder and the slotted bases.
 
   """
   if (geom[0][2]-height<34) or (geom[0][2]-height>190):
@@ -327,11 +443,11 @@ def draw_post_part(name="post_part", height=12,xshift=0, geom=None):
   post_length=50
   if geom[0][2]-height>110:
     post_length=100
-  elif geom[0][2]-height>85:
+  elif geom[0][2]-height>90:
     post_length=75
-  elif geom[0][2]-height>60:
+  elif geom[0][2]-height>65:
     post_length=50
-  elif geom[0][2]-height>50:
+  elif geom[0][2]-height>55:
     post_length=40
   elif geom[0][2]-height>40:
     post_length=30
@@ -355,15 +471,16 @@ def draw_post_part(name="post_part", height=12,xshift=0, geom=None):
 def draw_post(name="TR50_M", height=12,xshift=0, geom=None):
   """
   draw a post
+  Normally, this function is not called separately.
 
   Parameters
   ----------
-  name : TYPE, optional
-    DESCRIPTION. The default is "TR50_M".
-  height : TYPE, optional
+  name : String, optional
+    THe type of the post. The default is "TR50_M".
+  height : float/int, optional
     distance from the center of the mirror to the bottom of the mount.
     The default is 12.
-  xshift : TYPE, optional
+  xshift : float/int, optional
     distance from the center of the mirror to the cavity at the bottom of the 
     mount. The default is 0.
   geom : TYPE, optional
@@ -392,14 +509,15 @@ def draw_post(name="TR50_M", height=12,xshift=0, geom=None):
 def draw_post_holder (name="PH50_M", height=0,xshift=0, geom=None):
   """
   draw the post holder
+  Normally, this function is not called separately.
 
   Parameters
   ----------
-  name : TYPE, optional
+  name : String, optional
     The type of the post holder. The default is "PH50_M".
-  height : TYPE, optional
+  height : float/int, optional
     The height of the table for placing optical elements. The default is 0.
-  xshift : TYPE, optional
+  xshift : float/int, optional
     distance from the center of the mirror to the cavity at the bottom of the 
     mount. The default is 0.
   geom : TYPE, optional
@@ -448,14 +566,15 @@ def draw_post_holder (name="PH50_M", height=0,xshift=0, geom=None):
 def draw_post_base(name="BA1L", height=0,xshift=0, geom=None):
   """
   draw the base of the post
+  Normally, this function is not called separately.
 
   Parameters
   ----------
-  name : TYPE, optional
+  name : String, optional
     base type. The default is "BA1L".
-  height : TYPE, optional
+  height : float/int, optional
     The height of the table for placing optical elements. The default is 0.
-  xshift : TYPE, optional
+  xshift : float/int, optional
     distance from the center of the mirror to the cavity at the bottom of the 
     mount. The default is 0.
   geom : TYPE, optional
@@ -495,17 +614,20 @@ def draw_post_base(name="BA1L", height=0,xshift=0, geom=None):
 def draw_post_special(name="TR50_M", height=12,xshift=0, geom=None):
   """
   draw the special post only for periscope
+  Normally, this function is not called separately.
 
   Parameters
   ----------
-  name : TYPE, optional
-    DESCRIPTION. The default is "TR50_M".
-  height : TYPE, optional
-    DESCRIPTION. The default is 12.
-  xshift : TYPE, optional
-    DESCRIPTION. The default is 0.
+  name : String, optional
+    The type of the elements that needs to be drawed. The default is "TR50_M".
+  height : float/int, optional
+    distance from the center of the mirror to the bottom of the mount.
+    The default is 12.
+  xshift : float/int, optional
+    distance from the center of the mirror to the cavity at the bottom of the 
+    mount. The default is 0.
   geom : TYPE, optional
-    DESCRIPTION. The default is None.
+    mirror geom. The default is None.
 
   Returns
   -------
@@ -516,17 +638,6 @@ def draw_post_special(name="TR50_M", height=12,xshift=0, geom=None):
   DOC = get_DOC()
   ground = np.array((geom[1][0],geom[1][1],0))
   ground = ground/(pow(geom[1][0]**2+geom[1][1]**2,0.5))
-#  pos = geom[0]+ground*xshift
-  # Geom_ground = (np.array((geom[0]))-ground*xshift, ground)
-  # if name =="new":
-  #   offset=Vector(xshift-56,100,-50)
-  #   obj = DOC.addObject("Part::Box","Box")
-  #   obj.Label = "Mount_base"
-  #   obj.Length = '100.00 mm'
-  #   obj.Height = '100.00 mm'
-  #   obj.Placement=Placement(Vector(offset), Rotation(0,0,0), Vector(0,0,0))
-  #   update_geom_info(obj, Geom_ground, off0=offset)
-  #   return obj
   obj = DOC.addObject("Mesh::Feature", name)
   datei1 += ".stl"
   obj.Mesh = Mesh.Mesh(datei1)
@@ -551,21 +662,22 @@ def building_mount(name="mount",  Radius1=13, Hole_Radius=2, thickness=10,
                         height=20, geom=None, **kwargs):
   """
   make a custom mount
+  Normally, this function is not called separately.
   Parameters
   ----------
-  name : TYPE, optional
+  name : String, optional
     DESCRIPTION. The default is "mount".
-  Radius1 : TYPE, optional
+  Radius1 : float/int, optional
     aperture of the mount. The default is 13.
-  Hole_Radius : TYPE, optional
+  Hole_Radius : float/int, optional
     radious of the fixed hole at the button of the mount. The default is 1.5.
-  thickness : TYPE, optional
+  thickness : float/int, optional
     DESCRIPTION. The default is 10.
-  height : TYPE, optional
+  height : float/int, optional
     the distance between the button of the mount and the center of the mirror.
     The default is 20.
   geom : TYPE, optional
-    DESCRIPTION. The default is None.
+    mirror geom. The default is None.
   **kwargs : TYPE
     DESCRIPTION.
   """
@@ -638,13 +750,14 @@ def building_mount(name="mount",  Radius1=13, Hole_Radius=2, thickness=10,
 def draw_large_mount(thickness=30,geom=None):
   """
   draw a large mount
+  Normally, this function is not called separately.
 
   Parameters
   ----------
-  thickness : TYPE, optional
+  thickness : float/int, optional
     the thickness of the large mirror. The default is 30.
   geom : TYPE, optional
-    DESCRIPTION. The default is None.
+    mirror geom. The default is None.
 
   Returns
   -------
@@ -687,13 +800,14 @@ def draw_large_mount(thickness=30,geom=None):
 def draw_stripe_mount(thickness=25,geom=None):
   """
   draw a stripe mount
+  Normally, this function is not called separately.
 
   Parameters
   ----------
-  thickness : TYPE, optional
+  thickness : float/int, optional
     the thickness of the stripe mirror. The default is 25.
   geom : TYPE, optional
-    DESCRIPTION. The default is None.
+    mirror geom. The default is None.
 
   Returns
   -------
@@ -755,11 +869,11 @@ def rotate_vector(shiftvec=np.array((1.0,0,0)),vec=np.array((1.0,0,0)),angle=0):
 
   Parameters
   ----------
-  shiftvec : TYPE, optional
+  shiftvec : np.array(), optional
     The vector needs to be rotated. The default is np.array((1,0,0)).
-  vec : TYPE, optional
+  vec : np.array(), optional
     The rotating axis. The default is np.array((1,0,0)).
-  angle : TYPE, optional
+  angle : float/int, optional
     The angle. The default is 0.
 
   Returns
@@ -771,11 +885,17 @@ def rotate_vector(shiftvec=np.array((1.0,0,0)),vec=np.array((1.0,0,0)),angle=0):
   shiftvec = Vector(shiftvec)
   vec = Vector(vec)
   return shiftvec*math.cos(angle)+vec.cross(shiftvec)*math.sin(angle)+vec*(vec*shiftvec)*(1-math.cos(angle))
-# =============================================================================
-# End Working area of He Zhuang
-# =============================================================================
 
-
+def model_table():
+  datei1 = thisfolder + "post\\optical breadboard.stl" 
+  DOC = get_DOC()
+  obj = DOC.addObject("Mesh::Feature", "optical breadboard")
+  obj.Mesh = Mesh.Mesh(datei1)
+  obj.Label = "optical breadboard"
+  obj.Placement =Placement(Vector(-750,-400,0),Rotation(0,0,0), Vector(0,0,0))
+  
+  DOC.recompute()
+  return obj
 
 
 

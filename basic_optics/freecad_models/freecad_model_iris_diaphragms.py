@@ -27,7 +27,28 @@ if freecad_da:
   import Sketcher
   from math import pi
   
-def model_intersection_plane(name="diaphragms", Radius=25, thickness=2, geom=None, **kwargs):
+
+def model_intersection_plane(name="intersection_plane", Radius=25, geom=None, **kwargs):
+  """
+    Build a model to mark the intersection plane
+
+    Parameters
+    ----------
+    name : String, optional
+        The name of the model. The default is "intersection_plane".
+    Radius : float/int, optional
+        Radius of the plane. The default is 25.
+    geom : TYPE, optional
+        geom info of the intersection plane. The default is None.
+    **kwargs : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    obj : TYPE
+        DESCRIPTION.
+
+    """
   DOC = get_DOC()
   obj = DOC.addObject('PartDesign::Body', name)
   sketch = obj.newObject('Sketcher::SketchObject', name+'_sketch')
@@ -58,7 +79,34 @@ def model_intersection_plane(name="diaphragms", Radius=25, thickness=2, geom=Non
   DOC.recompute()
   return obj
   
-def model_diaphragms(name="diaphragms", Radius=25,Hole_Radius=2, thickness=3,height=20, geom=None, **kwargs):
+def model_diaphragms(name="diaphragms", Radius=25,Hole_Radius=2, thickness=5,height=20, geom=None, **kwargs):
+  """
+    Draw a diaphragms
+
+    Parameters
+    ----------
+    name : TYPE, optional
+        diaphragms name. The default is "diaphragms".
+    Radius : TYPE, optional
+        The radius of the diaphragm. The default is 25.
+    Hole_Radius : TYPE, optional
+        radious of the fixed hole at the button of the diaphragm. 
+        The default is 2.
+    thickness : TYPE, optional
+        The thickness of the diaphragm. The default is 3.
+    height : TYPE, optional
+        The height from the center to the button of the diaphragm. The default is 20.
+    geom : TYPE, optional
+        geom info. The default is None.
+    **kwargs : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    obj : TYPE
+        DESCRIPTION.
+
+    """
   DOC = get_DOC()
   obj = DOC.addObject('PartDesign::Body', name)
   sketch = obj.newObject('Sketcher::SketchObject', name+'_sketch')
@@ -120,7 +168,35 @@ def model_diaphragms(name="diaphragms", Radius=25,Hole_Radius=2, thickness=3,hei
   DOC.recompute()
   return obj
 
-def model_iris_diaphragms(name="iris", Radius1=10, Radius2=25,Hole_Radius=2, thickness=3,height=20, geom=None, **kwargs):
+def model_iris_diaphragms(name="iris", Radius1=10, Radius2=25,Hole_Radius=2, thickness=5,height=20, geom=None, **kwargs):
+  """
+    Draw a iris diaphragms (dosn't work for now')
+
+    Parameters
+    ----------
+    name : TYPE, optional
+        DESCRIPTION. The default is "iris".
+    Radius1 : TYPE, optional
+        DESCRIPTION. The default is 10.
+    Radius2 : TYPE, optional
+        DESCRIPTION. The default is 25.
+    Hole_Radius : TYPE, optional
+        DESCRIPTION. The default is 2.
+    thickness : TYPE, optional
+        DESCRIPTION. The default is 3.
+    height : TYPE, optional
+        DESCRIPTION. The default is 20.
+    geom : TYPE, optional
+        DESCRIPTION. The default is None.
+    **kwargs : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    obj : TYPE
+        DESCRIPTION.
+
+    """
   DOC = get_DOC()
   obj = DOC.addObject('PartDesign::Body', name)
   sketch = obj.newObject('Sketcher::SketchObject', name+'_sketch')
@@ -187,7 +263,22 @@ def model_iris_diaphragms(name="iris", Radius1=10, Radius2=25,Hole_Radius=2, thi
   DOC.recompute()
   return obj
 
-def iris_post(dia = 20, geom = None, **kwargs):
-  height = 20
+def iris_post(height=20,geom = None, **kwargs):
+  """
+    draw the post
+
+    Parameters
+    ----------
+    geom : TYPE, optional
+        DESCRIPTION. The default is None.
+    **kwargs : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    TYPE
+        DESCRIPTION.
+
+    """
   xshift = 0
   return draw_post_part(name="post_part", height=height,xshift=xshift, geom=geom)

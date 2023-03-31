@@ -39,9 +39,10 @@ class Opt_Element(Geom_Object):
     self.length = 0 #Länge in mm, die meisten opt Elemente sind 2D, also 0
     self.group = [] # falls das Element in eine Baugruppe eingesetzt wird
     #Parameter zum zeichnen
-    self.draw_dict.update({"dia":self.aperture, "thickness":5, 
-                           "model_type":"DEFAULT", "mount_type": "default", 
+    self.draw_dict.update({"dia":self.aperture, "thickness":5,
+                           "model_type":"DEFAULT", "mount_type": "default",
                            "mount_name": self.name+"_mount"})
+    # self.interacts_with_rays = True
 
   def matrix(self):
     return np.array(self._matrix)
@@ -58,26 +59,8 @@ class Opt_Element(Geom_Object):
     ray2 : Ray
       Ausgangsstrahl
     """
-    ray2 = deepcopy(ray)
-    ray2.name = "next_" + ray.name
-    return ray2
+    return -1
 
-  # def next_geom(self, geom):
-  #   """
-  #   beschreibt wie das Element den Verlauf der optischen Achse beeinflusst
-
-  #   Parameters
-  #   ----------
-  #   geom : (pos, normal)
-  #     Eingangs-Geom
-
-  #   Returns
-  #   -------
-  #   (pos, normal) : geom
-  #     Ausgangs-Geom
-
-  #   """
-  #   return geom
 
   def next_beam(self, beam):
     """
@@ -93,15 +76,32 @@ class Opt_Element(Geom_Object):
     """
     newb = deepcopy(beam)
     newb.name = "next_" + beam.name
-    rays = beam.get_all_rays()
+    rays = beam.get_all_rays(by_reference=True)
     newrays = []
     for ray in rays:
-      newrays.append(self.next_ray(ray))
+      nr = self.next_ray(ray)
+      if not nr:
+        return -1 #Für Elemente die nicht mit Strahlen interagieren wird -1 als beam zurück gegeben
+      newrays.append(nr)
     newb.override_rays(newrays)
     return newb
 
 
   def reflection(self, ray):
+    """
+    erzeugt den nächsten Strahl aus <Ray> mit Hilfe des Reflexionsgesetzes
+    (man beachte die umgedrehte <normal> im Gegensatz zur Konvention in z.B.
+    Springer Handbook of Optics and Lasers S. 68)
+
+    Parameters
+    ----------
+    ray : Ray()
+      incident ray
+
+    Returns
+    -------
+    reflected ray
+    """
     ray2 = deepcopy(ray)
     ray2.pos = ray.intersect_with(self) #dadruch wird ray.length verändert(!)
     k = ray2.normal
@@ -112,37 +112,13 @@ class Opt_Element(Geom_Object):
     # print("REFL", k, km, scpr, newk, ray2.normal)
     return ray2
 
-  # def refraction_old(self, ray):
-  #   ray2 = deepcopy(ray)
-  #   ray2.pos = ray.intersect_with(self) #dadruch wird ray.length verändert(!)
-  #   ovec = ray2.pos - self.pos
-  #   novec = np.linalg.norm(ovec)
-  #   if novec < TOLERANCE:
-  #     # Mittelpunktstrahl, keine Brechung
-  #     return ray2
-  #   else:
-  #     ovec *= 1/novec #radial
-  #     snorm = self.normal #normal
-  #     rnorm = ray2.normal
-  #     vec_t = np.cross(ovec, snorm) #tangential
-  #     vn = np.sum(snorm * rnorm)
-  #     vr = np.sum(ovec * rnorm)
-  #     vt = np.sum(vec_t * rnorm)
-  #     ve = np.sqrt(vr**2 + vn**2) #in Ebene
-  #     al = vr/vn
-  #     h2, al2 = np.matmul(self._matrix, np.array((novec, al)))
-  #     vr2 = al2
-  #     ven = (1+ vr2**2)
-  #     vr2 = vr2 * ve / ven
-  #     vn2 = vn * ve / ven
-  #     ray2.normal = vr2 * ovec + vn2 * snorm + vt * vec_t
-  #     return ray2
+
 
   def refraction(self, ray):
-    
+
     ray2 = deepcopy(ray)
     ray2.pos = ray.intersect_with(self) #dadruch wird ray.length verändert(!)
-    radial_vec = ray2.pos - self.pos 
+    radial_vec = ray2.pos - self.pos
     norm = ray2.normal
     radius = np.linalg.norm(radial_vec) #Radius im sinne der parax Optik
     ea = self.normal #Einheitsvec in Richtung der optischen Achse oA
@@ -165,7 +141,7 @@ class Opt_Element(Geom_Object):
       ray2.pos = pos2
       ray2.normal = norm2
       return ray2
-    
+
     #else: Mittelpunktsstrahl
     ca = np.sum(ea * norm)
     em = norm - ca * ea #meridionaler Einheitsvektor
@@ -195,32 +171,11 @@ class Opt_Element(Geom_Object):
   def draw_mount_fc(self):
     #ToDo: fürs Debugging hier einfach einen Zylinder mit norm uns k zeichnen
     return None
-  
+
   def draw_mount_text(self):
     txt = "Kein Mount für <" +self.name + "> gefunden."
     return txt
 
-  # def to_dict(self):
-  #   # wird eigentlich nirgednwo gebraucht
-  #   dc = {"class":self.Klassenname()}
-  #   dc.update(self.__dict__)
-    
-  #   # dc = {"class":self.Klassenname(), "name":self.name, "pos":self.pos, 
-  #   #       "normal":self.normal, "axes":self._axes, "matrix":self._matrix,
-  #   #       "aperture":self.aperture, "group":self.group}
-  #   return dc
-  
-  # def from_dict(dc):
-  #   oe = Opt_Element()
-  #   oe.name = dc["name"]
-  #   oe.pos = dc["pos"]
-  #   oe.normal = dc["normal"]
-  #   oe._axes = dc["axes"]
-  #   oe._matrix = dc["matrix"]
-  #   oe.aperture = dc["aperture"]
-  #   oe.group = dc["group"]
-  #   return oe
-  
 
 def refraction_tests():
   oe = Opt_Element(pos = (100, 0, 0))

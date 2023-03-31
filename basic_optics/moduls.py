@@ -6,7 +6,7 @@ Created on Tue Aug 30 17:03:16 2022
 """
 from .lens import Lens
 from .mirror import Mirror, Curved_Mirror, mirror_mount
-from .diaphragms import Diaphragms
+from .barriers import Barriers
 # from .propagation import Propagation
 # from .composition import Composition_old
 from .composition import Composition
@@ -50,7 +50,7 @@ def Make_Telescope(name="Teleskop", f1=100.0, f2=100.0, d0=100.0, lens1_aperture
 
 
   """
-  # p1 = Propagation(d=d0)
+  ls = Beam(radius=1.5, angle=0)
   l1 = Lens(f=f1)
   l1.aperture = lens1_aperture
   # p2 = Propagation(f1+f2)
@@ -61,6 +61,7 @@ def Make_Telescope(name="Teleskop", f1=100.0, f2=100.0, d0=100.0, lens1_aperture
   # p3 = Propagation(d3)
 
   teles = Composition(name=name)
+  teles.set_light_source(ls)
   teles.propagate(d0)
   teles.add_on_axis(l1)
   teles.propagate(f1+f2)
@@ -72,7 +73,7 @@ def Make_Telescope(name="Teleskop", f1=100.0, f2=100.0, d0=100.0, lens1_aperture
   return teles
 
 def diaphragms_test(name="diaphragms_test"):
-  dia = Diaphragms(dia=50)
+  dia = Barriers(dia=50)
   # dia.pos = (150,0,0)
   ls = Beam(angle=0)
   # dia.spot_diagram(ls)
@@ -209,7 +210,7 @@ def Make_White_Cell(name="White Cell", Radius=300, roundtrips4=1, aperture_small
 
 
 def Make_Amplifier_Typ_I_simple(name = "AmpTyp1s", focal_length=600,
-                                dist3=600,roundtrips2=1,
+                                dist3=600,roundtrips2=2,
                                 aperture_small=1*inch, aperture_big=2*inch, beam_sep=15):
   # Radius2 = magnification*focal_length
   dist1 =2*focal_length-dist3
@@ -265,7 +266,7 @@ def Make_Amplifier_Typ_I_simple(name = "AmpTyp1s", focal_length=600,
   return AmpTyp1
 
 def Make_Amplifier_Typ_I_simpler(name = "AmpTyp1sr", focal_length=600,
-                                magnification=1,roundtrips2=1,
+                                magnification=1,roundtrips2=2,
                                 aperture_small=0.5*inch, aperture_big=2*inch, beam_sep=15):
   # Radius2 = magnification*focal_length
   dist1 = (magnification+1) / (magnification**2+1) * focal_length
@@ -322,7 +323,7 @@ def Make_Amplifier_Typ_I_simpler(name = "AmpTyp1sr", focal_length=600,
   return AmpTyp1
 
 def Make_Amplifier_Typ_II_simple(name="AmpTyp2s", focal_length=600, magnification=1,
-                              roundtrips2=1,
+                              roundtrips2=2,
                               aperture_small=1*inch, aperture_big=2*inch, beam_sep=15):
     """
     generiert die Strahlführung eines einfachen Typ II Verstärkers mit einer Linse
@@ -390,7 +391,7 @@ def Make_Amplifier_Typ_II_simple(name="AmpTyp2s", focal_length=600, magnificatio
     return AmpTyp2
 
 def Make_Amplifier_Typ_II_simpler(name="AmpTyp2sr", focal_length=600, magnification=1,
-                              roundtrips2=1,
+                              roundtrips2=2,
                               aperture_small=0.5*inch, aperture_big=2*inch, beam_sep=15):
   
   Radius2 = magnification*focal_length
@@ -559,6 +560,9 @@ def Make_Stretcher_old():
 def Make_Stretcher():
   """
   tja, versuchen wir mal einen Offner Strecker...
+  Note: When drawing a rooftop mirror, we will draw apure_cosmetic mirror to 
+  confirm the position of the mount. The mirror's geom is the average of two 
+  flip mirror. And its aperture is the periscope_distance.
 
   Returns
   -------

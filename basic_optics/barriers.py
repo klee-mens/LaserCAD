@@ -2,7 +2,7 @@
 """
 Created on Mon Mar 27 14:00:59 2023
 
-@author: 12816
+@author: He
 """
 
 from .freecad_models import model_diaphragms,iris_post
@@ -10,7 +10,11 @@ from .optical_element import Opt_Element
 
 from copy import deepcopy
 
-class Diaphragms(Opt_Element):
+class Barriers(Opt_Element):
+  """
+    The class of diaphragms.
+    Just a block. Nothing special.
+  """
   def __init__(self, dia = 50, name = "New_diaphragms",**kwargs):
     super().__init__(name=name, **kwargs)
     self.aperture = dia

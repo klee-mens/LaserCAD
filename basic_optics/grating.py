@@ -57,8 +57,6 @@ class Grating(Opt_Element):
     return model_grating(name=self.name, dimensions=dims, geom=self.get_geom())
   
   def draw_mount_fc(self):
-    # self.draw_dict["mount_type"] = "POLARIS-K1-Step"
-    # self.draw_dict["Radius"] = 0
     obj = grating_mount(name=self.name,height=self.height,thickness=self.thickness, geom=self.get_geom())
     return obj
   
