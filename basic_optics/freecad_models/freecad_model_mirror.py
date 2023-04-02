@@ -443,11 +443,11 @@ def draw_post_part(name="post_part", height=12,xshift=0, geom=None):
   post_length=50
   if geom[0][2]-height>110:
     post_length=100
-  elif geom[0][2]-height>85:
+  elif geom[0][2]-height>90:
     post_length=75
-  elif geom[0][2]-height>60:
+  elif geom[0][2]-height>65:
     post_length=50
-  elif geom[0][2]-height>50:
+  elif geom[0][2]-height>55:
     post_length=40
   elif geom[0][2]-height>40:
     post_length=30
@@ -886,7 +886,16 @@ def rotate_vector(shiftvec=np.array((1.0,0,0)),vec=np.array((1.0,0,0)),angle=0):
   vec = Vector(vec)
   return shiftvec*math.cos(angle)+vec.cross(shiftvec)*math.sin(angle)+vec*(vec*shiftvec)*(1-math.cos(angle))
 
-
+def model_table():
+  datei1 = thisfolder + "post\\optical breadboard.stl" 
+  DOC = get_DOC()
+  obj = DOC.addObject("Mesh::Feature", "optical breadboard")
+  obj.Mesh = Mesh.Mesh(datei1)
+  obj.Label = "optical breadboard"
+  obj.Placement =Placement(Vector(-750,-400,0),Rotation(0,0,0), Vector(0,0,0))
+  
+  DOC.recompute()
+  return obj
 
 
 

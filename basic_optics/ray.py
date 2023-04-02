@@ -186,11 +186,16 @@ class Ray(Geom_Object):
     rotation_vec = np.cross(vec_in_eb, xa)
     self.rotate(rotation_vec, -alpha)
 
+  def update_draw_dict(self):
+    super().update_draw_dict()
+    self.draw_dict["length"] = self.length
+
   def draw_fc(self):
     self.update_draw_dict()
-    self.draw_dict["length"] = self.length
     obj = model_ray_1D(**self.draw_dict)
     return obj
+
+
 
   # def draw(self):
   #   if freecad_da:

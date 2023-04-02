@@ -17,8 +17,11 @@ if freecad_da:
   from FreeCAD import Vector
   import Part
 
+DEFAULT_COLOR_CRIMSON = (0.86,0.08,0.24) #crimson
 
-def model_beam(name="beam", dia=10, prop=200,  f=130, clr="crimson", geom_info=None):
+
+def model_beam(name="beam", dia=10, prop=200,  f=130, color=DEFAULT_COLOR_CRIMSON, 
+               geom_info=None):
   """creates a red beam with length <prop>, diameter <dia>,
   fokus <f> and name ~
   example :  beam1 = model_beam("laser1", 10, 200, 100)
@@ -57,7 +60,7 @@ def model_beam(name="beam", dia=10, prop=200,  f=130, clr="crimson", geom_info=N
     DOC.recompute()
 
   obj.Placement = FreeCAD.Placement(Vector(0,0,0), FreeCAD.Rotation(Vector(0,1,0),90), Vector(0,0,0))
-  obj.ViewObject.ShapeColor = (0.86,0.08,0.24)
+  obj.ViewObject.ShapeColor = color
   obj.ViewObject.Transparency = 50
   obj.Label = name
   update_geom_info(obj, geom_info)

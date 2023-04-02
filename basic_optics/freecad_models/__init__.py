@@ -17,7 +17,7 @@ from .freecad_model_lens import model_lens, lens_mount
 from .freecad_model_ray import model_ray_1D
 from .freecad_model_beam import model_beam
 from .freecad_model_composition import initialize_composition, add_to_composition, make_to_ray_part
-from .freecad_model_mirror import model_mirror, mirror_mount, model_stripe_mirror
+from .freecad_model_mirror import model_mirror, mirror_mount, model_stripe_mirror,model_table
 from .freecad_model_grating import model_grating,grating_mount
 from .freecad_model_iris_diaphragms import model_iris_diaphragms,iris_post,model_diaphragms,model_intersection_plane
 pfad = __file__[0:-9]
