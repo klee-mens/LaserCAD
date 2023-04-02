@@ -199,7 +199,7 @@ def model_stripe_mirror(name="Stripe_Mirror", dia=75, Radius1=250, thickness=25,
 
 def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
                  mount_type="default", geom=None, only_info=False, 
-                 drawing_post=True, dia=25.4,thickness=30, **kwargs):
+                 drawing_post=True,base_exists=False, dia=25.4,thickness=30, **kwargs):
   """
     Build the mirror mount, post, post holder and slotted bases of the mirror
 
@@ -349,7 +349,8 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
     xshift=0
     new_mount = building_mount(Radius1=dia/2,height=height,geom=geom)
     if  drawing_post:
-      post_part=draw_post_part(name="post_part", height=height,xshift=xshift, geom=geom)
+      post_part=draw_post_part(name="post_part",base_exists=base_exists,
+                               height=height,xshift=xshift, geom=geom)
     else:
       DOC.recompute()
       return new_mount
@@ -404,7 +405,8 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
   obj.Label = mount_name
   
   if  drawing_post:
-    post_part=draw_post_part(name="post_part", height=height,xshift=xshift, geom=geom)
+    post_part=draw_post_part(name="post_part",base_exists=base_exists,
+                             height=height,xshift=xshift, geom=geom)
   else:
     DOC.recompute()
     return obj
@@ -414,7 +416,7 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
   DOC.recompute()
   return part
 
-def draw_post_part(name="post_part", height=12,xshift=0, geom=None):
+def draw_post_part(name="post_part", base_exists=False, height=12,xshift=0, geom=None):
   """
   Draw the post part, including post, post holder and base
   Assuming that all optics are placed in the plane of z = 0.
@@ -441,28 +443,52 @@ def draw_post_part(name="post_part", height=12,xshift=0, geom=None):
   if (geom[0][2]-height<34) or (geom[0][2]-height>190):
     print("Warning, there is no suitable post holder and slotted base at this height")
   post_length=50
-  if geom[0][2]-height>110:
-    post_length=100
-  elif geom[0][2]-height>90:
-    post_length=75
-  elif geom[0][2]-height>65:
-    post_length=50
-  elif geom[0][2]-height>55:
-    post_length=40
-  elif geom[0][2]-height>40:
-    post_length=30
+  if base_exists:
+      if geom[0][2]-height>110:
+        post_length=100
+      elif geom[0][2]-height>90:
+        post_length=75
+      elif geom[0][2]-height>65:
+        post_length=50
+      elif geom[0][2]-height>55:
+        post_length=40
+      elif geom[0][2]-height>40:
+        post_length=30
+      else:
+        post_length=20
+        post2 = draw_post_holder(name="PH20E_M", height=0,xshift=xshift, geom=geom)
+      post = draw_post(name="TR"+str(post_length)+"_M", height=height,
+                       xshift=xshift,geom=geom)
+      if post_length>20:
+        post2 = draw_post_holder(name="PH"+str(post_length)+"_M", height=0,
+                                 xshift=xshift, geom=geom)
   else:
-    post_length=20
-    post2 = draw_post_holder(name="PH20E_M", height=0,xshift=xshift, geom=geom)
-  post = draw_post(name="TR"+str(post_length)+"_M", height=height,
-                   xshift=xshift,geom=geom)
-  if post_length>90 or post_length<31:
-    post1 = draw_post_base(name="BA2_M", height=0,xshift=xshift, geom=geom)
+      if geom[0][2]-height>105:
+        post_length=100
+      elif geom[0][2]-height>85:
+        post_length=75
+      elif geom[0][2]-height>60:
+        post_length=50
+      elif geom[0][2]-height>50:
+        post_length=40
+      elif geom[0][2]-height>35:
+        post_length=30
+      else:
+        post_length=20
+        post2 = draw_post_holder(name="PH"+str(post_length)+"_M", height=0,
+                                 xshift=xshift, geom=geom)
+      post = draw_post(name="TR"+str(post_length)+"_M", height=height,
+                       xshift=xshift,geom=geom)
+      post2 = draw_post_holder(name="PH"+str(post_length)+"E_M", height=0,
+                               xshift=xshift, geom=geom)
+  if base_exists:
+    if post_length>90 or post_length<31:
+        post1 = draw_post_base(name="BA2_M", height=0,xshift=xshift, geom=geom)
+    else:
+        post1 = draw_post_base(name="BA1L", height=0,xshift=xshift, geom=geom)
   else:
-    post1 = draw_post_base(name="BA1L", height=0,xshift=xshift, geom=geom)
-  if post_length>20:
-    post2 = draw_post_holder(name="PH"+str(post_length)+"_M", height=0,
-                             xshift=xshift, geom=geom)
+    post1 = None
+  
   part = initialize_composition_old(name=name)
   container = post,post1,post2
   add_to_composition(part, container)
@@ -561,6 +587,28 @@ def draw_post_holder (name="PH50_M", height=0,xshift=0, geom=None):
     offset = Vector(xshift-11.75,16.8,height+29)
     obj.Placement = Placement(offset, Rotation(90,0,90), Vector(0,0,0))
     update_geom_info(obj, Geom_ground, off0=offset)
+#----------------------------------------------------------------------------
+  elif name =="PH100E_M":
+    offset=Vector(xshift+6.25,6.75,height+40.4)
+    obj.Placement = Placement(offset, Rotation(90,0,90), Vector(0,0,0))
+    update_geom_info(obj, Geom_ground, off0=offset)
+  elif name =="PH75E_M":
+    offset=Vector(xshift-8,10.5,height+46.5)
+    obj.Placement = Placement(offset, Rotation(90,0,90), Vector(0,0,0))
+    update_geom_info(obj, Geom_ground, off0=offset)
+  elif name =="PH50E_M":
+    offset=Vector(xshift-4.5,18,height+22.6)
+    obj.Placement = Placement(offset, Rotation(90,0,90), Vector(0,0,0))
+    update_geom_info(obj, Geom_ground, off0=offset)
+  elif name =="PH40E_M":
+    offset=Vector(xshift-2,2.7,height+25.7)
+    obj.Placement = Placement(offset, Rotation(90,0,90), Vector(0,0,0))
+    update_geom_info(obj, Geom_ground, off0=offset)
+  elif name =="PH30E_M":
+    offset=Vector(xshift-4.5,-5.5,height+31.25)
+    obj.Placement = Placement(offset, Rotation(90,0,90), Vector(0,0,0))
+    update_geom_info(obj, Geom_ground, off0=offset)
+
   return obj
 
 def draw_post_base(name="BA1L", height=0,xshift=0, geom=None):
