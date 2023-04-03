@@ -14,27 +14,31 @@ from .ray import Ray
 from .composition import Composition
 from .grating import Grating
 import numpy as np
+
+from .iris import Iris
+from .intersection_plane import Intersection_plane 
+
 # from iris import Iris
 # from intersection_plane import Intersection_plane
 
 
 
-def Telescope_4beam():
-  teles = Make_Telescope(name="teles", lens1_aperture=50, lens2_aperture=50)
-  teles.draw()
-  dist = 8
-  b0 = Beam(name="b1", angle=0)
-  b0.pos += (0, dist, dist)
-  bs = [b0]
-  for elm in teles._elements:
-    if not type(elm) == type(Propagation()):
-      beam = bs[-1]
-      bs.append(elm.next_beam(beam))
-      beam.draw()
+# def Telescope_4beam():
+#   teles = Make_Telescope(name="teles", lens1_aperture=50, lens2_aperture=50)
+#   teles.draw()
+#   dist = 8
+#   b0 = Beam(name="b1", angle=0)
+#   b0.pos += (0, dist, dist)
+#   bs = [b0]
+#   for elm in teles._elements:
+#     if not type(elm) == type(Propagation()):
+#       beam = bs[-1]
+#       bs.append(elm.next_beam(beam))
+#       beam.draw()
 
-  be = bs[-1]
-  be.draw()
-  return (bs, teles)
+#   be = bs[-1]
+#   be.draw()
+#   return (bs, teles)
 
 
 def Lens_4beam_Fokus():
@@ -248,47 +252,47 @@ def Parallel_ray_bundle_tilted_lens():
 
   return comp
 
-def Parallel_ray_bundle_tilted_mirror_ray_trace(focal_length = 200):
-  """
-  schießt eine Matrix aus line_count x line_count parallelen rays auf einen
-  sphärischen Spiegel unter einem bestimmten Winkel und berechnet die neuen
-  Strahlen mittels analytischem Raytracing
-  ...Sollten alle in einem Punkt fokussiert werden, +- Astigmatismus
+# def Parallel_ray_bundle_tilted_mirror_ray_trace(focal_length = 200):
+#   """
+#   schießt eine Matrix aus line_count x line_count parallelen rays auf einen
+#   sphärischen Spiegel unter einem bestimmten Winkel und berechnet die neuen
+#   Strahlen mittels analytischem Raytracing
+#   ...Sollten alle in einem Punkt fokussiert werden, +- Astigmatismus
 
-  Returns
-  -------
-  die komplette Komposition
+#   Returns
+#   -------
+#   die komplette Komposition
 
-  """
-  dist = 3
-  line_count = 5
-  rays = []
-  pos0 = np.array( ( 0, -dist*(line_count//2), -dist*(line_count//2) ) )
-  for m in range(line_count):
-    for n in range(line_count):
-      r = Ray()
-      r.pos = pos0 + np.array( (0, m*dist, n*dist) )
-      rays.append(r)
+#   """
+#   dist = 3
+#   line_count = 5
+#   rays = []
+#   pos0 = np.array( ( 0, -dist*(line_count//2), -dist*(line_count//2) ) )
+#   for m in range(line_count):
+#     for n in range(line_count):
+#       r = Ray()
+#       r.pos = pos0 + np.array( (0, m*dist, n*dist) )
+#       rays.append(r)
 
-  bundel = Beam()
-  bundel.override_rays(rays)
+#   bundel = Beam()
+#   bundel.override_rays(rays)
 
-  comp = Composition(name="Parallel_ray_bundle_tilted_lens_test")
-  comp.set_light_source(bundel)
-  comp.pos = 2*bundel.pos #geht bsetimmt auch schöner
-  p1 = Propagation(d=100)
-  # le = Lens(f=focal_length)
-  le = Curved_Mirror(radius=2*focal_length)
-  p2 = Propagation(d=200)
-  comp.add(p1)
-  comp.add(le)
-  comp.add(p2)
-  le.normal = (1,0.1,0.1)
+#   comp = Composition(name="Parallel_ray_bundle_tilted_lens_test")
+#   comp.set_light_source(bundel)
+#   comp.pos = 2*bundel.pos #geht bsetimmt auch schöner
+#   p1 = Propagation(d=100)
+#   # le = Lens(f=focal_length)
+#   le = Curved_Mirror(radius=2*focal_length)
+#   p2 = Propagation(d=200)
+#   comp.add(p1)
+#   comp.add(le)
+#   comp.add(p2)
+#   le.normal = (1,0.1,0.1)
 
-  comp.draw()
-  comp.draw_rays()
+#   comp.draw()
+#   comp.draw_rays()
 
-  return comp
+#   return comp
 
 def grating_ray_bundle_test(draw=False):
   """

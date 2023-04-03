@@ -76,7 +76,7 @@ class Intersection_plane(Opt_Element):
     plt.show()
   
   def __repr__(self):
-    n = len(self.Klassenname())
+    n = len(self.class_name())
     txt = 'Intersection_plane(dia=' + repr(self.aperture)
     txt += ', ' + super().__repr__()[n+1::]
     return txt

@@ -13,7 +13,7 @@ ind = pfad.rfind("/")
 pfad = pfad[0:ind+1]
 sys.path.append(pfad)
 
-from basic_optics import Mirror,Lens,Diaphragms
+from basic_optics import Mirror,Lens
 from basic_optics.freecad_models import clear_doc, setview, freecad_da
 from basic_optics.freecad_models.freecad_model_mirror import mirror_mount
 
@@ -23,8 +23,8 @@ if freecad_da:
   clear_doc()
 
 
-m = Diaphragms(name="Standard_Mirror", pos=(0,0,100))
-# m.draw_dict["mount_type"] = "POLARIS-K21"
+m = Mirror(name="Standard_Mirror", pos=(0,0,140))
+m.draw_dict["mount_type"] = "POLARIS-K21"
 m.aperture = 25.4
 m.draw()
 m.draw_mount()

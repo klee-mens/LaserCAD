@@ -59,7 +59,7 @@ class Opt_Element(Geom_Object):
     ray2 : Ray
       Ausgangsstrahl
     """
-    return -1
+    return False
 
 
   def next_beam(self, beam):
@@ -81,7 +81,7 @@ class Opt_Element(Geom_Object):
     for ray in rays:
       nr = self.next_ray(ray)
       if not nr:
-        return -1 #Für Elemente die nicht mit Strahlen interagieren wird -1 als beam zurück gegeben
+        return False #Für Elemente die nicht mit Strahlen interagieren wird -1 als beam zurück gegeben
       newrays.append(nr)
     newb.override_rays(newrays)
     return newb
