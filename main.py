@@ -104,7 +104,7 @@ cavset.draw()
 # iris_test()
 
 
-from basic_optics.tests import Intersection_plane_spot_diagram_test
+# from basic_optics.tests import Intersection_plane_spot_diagram_test
 
 
 
