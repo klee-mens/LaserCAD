@@ -115,23 +115,10 @@ class Opt_Element(Geom_Object):
 
 
   def refraction(self, ray,r_ref_index = 0.667):
-    # print("ray.pos =",ray.pos)
-    # ray2 = deepcopy(ray)
-    # ray2.pos = ray.intersect_with(self) #dadruch wird ray.length verändert(!)
-    # print("ray2.pos =",ray2.pos)
-    # radial_vec = ray2.pos - self.pos
-    ray2 = ray
+    ray2 = deepcopy(ray)
+    ray2.pos = ray.intersect_with(self) #dadruch wird ray.length verändert(!)
     norm = ray2.normal
-    ea = self.normal
-    ref = 1/r_ref_index
-    muti = norm[0]*ea[0]+norm[1]*ea[1]+norm[2]*ea[2]
-    norm2 = ref * norm - ref*(muti)*ea + pow(1-ref**2*(1-muti**2),0.5)*ea
-    muti2 = norm2[0]*ea[0]+norm2[1]*ea[1]+norm2[2]*ea[2]
-    if muti2 < 0 :
-        norm2 = ref * norm - ref*(muti)*ea - pow(1-ref**2*(1-muti**2),0.5)*ea
-    ray2.normal = norm2
-    return ray2
-    """
+    radial_vec = ray2.pos - self.pos
     radius = np.linalg.norm(radial_vec) #Radius im sinne der parax Optik
     ea = self.normal #Einheitsvec in Richtung der optischen Achse oA
     if np.sum(ea * norm) < 0:
@@ -152,8 +139,6 @@ class Opt_Element(Geom_Object):
       norm2 = vm*np.cos(alpha2)*ea + vm*np.sin(alpha2)*er + cs*es # neue normale
       ray2.pos = pos2
       ray2.normal = norm2
-      print("norm=",norm)
-      print("norm2=",norm2)
       return ray2
 
     #else: Mittelpunktsstrahl
@@ -173,7 +158,7 @@ class Opt_Element(Geom_Object):
     ray2.normal = norm2
     
     return ray2
-    """
+    
 
   def draw_mount(self):
     if freecad_da:

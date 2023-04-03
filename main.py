@@ -43,17 +43,19 @@ re_test = Composition(name = "refractive test")
 
 re_test.set_light_source(rg)
 re_test.pos=(0,0,100)
-re_test.normal = (1,0.5,0)
+re_test.normal = (1,0,0)
 # re_test.propagate(20)
 
-re_plane = Refractive_plane(r_ref_index=1.5,pos=(20,0,100))
+lens1 = Lens(f=20,pos=(10,0,100))
+re_test.add_fixed_elm(lens1)
+re_plane = Refractive_plane(r_ref_index=10,pos=(200,0,100))
 re_test.add_fixed_elm(re_plane)
-re_plane2 = Refractive_plane(r_ref_index=2/3,pos=(40,0,100))
+re_plane2 = Refractive_plane(r_ref_index=0.1,pos=(240,0,100))
 re_test.add_fixed_elm(re_plane2)
 re_test.propagate(50)
 re_test.draw_elements()
 re_test.draw_beams()
-re_test.draw_rays()
+
 
 # anor=2.796834341
 # cm_radius = 200
