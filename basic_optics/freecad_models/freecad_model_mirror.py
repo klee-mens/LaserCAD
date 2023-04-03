@@ -475,7 +475,7 @@ def draw_post_part(name="post_part", base_exists=False, height=12,xshift=0, geom
         post_length=30
       else:
         post_length=20
-        post2 = draw_post_holder(name="PH"+str(post_length)+"_M", height=0,
+        post2 = draw_post_holder(name="PH"+str(post_length)+"E_M", height=0,
                                  xshift=xshift, geom=geom)
       post = draw_post(name="TR"+str(post_length)+"_M", height=height,
                        xshift=xshift,geom=geom)

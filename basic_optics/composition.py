@@ -201,7 +201,6 @@ class Composition(Opt_Element):
       # if beam.is_valid():
       if beam:
         # manche Elemente wie Prop geben keine validen beams zurück
-        print("interacting element:", elm)
         beamcount += 1
         beam.name = self.name + "_beam_" + str(beamcount)
         self._beams.append(beam)

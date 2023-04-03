@@ -189,7 +189,7 @@ class Beam(Geom_Object):
     if alph == 0:
       return 0
     else:
-      return - r/alph
+       return - r/np.tan(alph)
 
   def length(self):
     return self.inner_ray().length

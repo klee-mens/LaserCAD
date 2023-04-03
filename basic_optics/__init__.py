@@ -27,6 +27,7 @@ from .grating import Grating
 from .barriers import Barriers
 from .iris import Iris
 from .intersection_plane import Intersection_plane
+from .refractive_plane import Refractive_plane
 
 pfad = __file__[0:-9]
 

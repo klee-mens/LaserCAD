@@ -23,8 +23,9 @@ if freecad_da:
   clear_doc()
 
 
-m = Mirror(name="Standard_Mirror", pos=(0,0,140))
-m.draw_dict["mount_type"] = "POLARIS-K21"
+m = Mirror(name="Standard_Mirror", pos=(0,0,60))
+m.normal = (1,1,0)
+m.draw_dict["mount_type"] = "POLARIS-K1"
 m.aperture = 25.4
 m.draw()
 m.draw_mount()
