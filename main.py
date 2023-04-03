@@ -25,7 +25,13 @@ from basic_optics.tests import all_moduls_test
 if freecad_da:
   clear_doc()
 
+from basic_optics.moduls import Make_Amplifier_Typ_II_simpler, Make_Amplifier_Typ_II_UpDown
 
+# amp2 = Make_Amplifier_Typ_II_simpler()
+amp2 = Make_Amplifier_Typ_II_UpDown(roundtrips2=2)
+amp2.pos = (0,0,120)
+amp2.draw()
+# amp2.draw_elements()
 
 
 # results = all_moduls_test()
