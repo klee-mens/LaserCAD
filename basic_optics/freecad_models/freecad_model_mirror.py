@@ -263,12 +263,13 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
     geom[1][2]=0
   else:
     print("this post should't be placed on the XY plane")
+    if mount_type!="rooftop_mirror":
+      mount_rotation=True
   if abs(geom[1][1])<DEFALUT_MAX_ANGULAR_OFFSET/180*np.pi:
     geom[1][1]=0
   if abs(geom[1][0])<DEFALUT_MAX_ANGULAR_OFFSET/180*np.pi:
     geom[1][0]=0
-    if mount_type!="rooftop_mirror":
-      mount_rotation=True
+    
   if model_type=="Stripe":
     additional_mount = draw_stripe_mount(thickness=thickness,geom=geom)
     xshift = thickness-7

@@ -12,10 +12,12 @@ sys.path.append(u"C:/Users/mens/Nextcloud/FreeCAD/opticslib2/basic_objects/freec
 
 # from .utils import freecad_da, update_geom_info
 from .utils import freecad_da, update_geom_info, get_DOC
+import numpy as np
 if freecad_da:
   import FreeCAD
   from FreeCAD import Vector
   import Part
+  import Sketcher
 
 DEFAULT_COLOR_CRIMSON = (0.86,0.08,0.24) #crimson
 
@@ -68,6 +70,85 @@ def model_beam(name="beam", dia=10, prop=200,  f=130, color=DEFAULT_COLOR_CRIMSO
   DOC.recompute()
   return obj
 
+def moedel_Gaussian_beam (name="Gaussian_beam",q=-100+200j,prop=200,wavelength=650E-9,
+                          color=DEFAULT_COLOR_CRIMSON, geom_info=None):
+    """
+    creates a Gaussian beam.
+    Parameters
+    ----------
+    name : TYPE, optional
+        beam name. The default is "Gaussian_beam".
+    q : TYPE, optional
+        q-parameter. The default is -100+200j.
+    prop : TYPE, optional
+        propgation length. The default is 200.
+    wavelength : TYPE, optional
+        wavelength. The default is 650E-9.
+    color : TYPE, optional
+        beam color. The default is DEFAULT_COLOR_CRIMSON.
+    geom_info : TYPE, optional
+        DESCRIPTION. The default is None.
+
+    Returns
+    -------
+    obj : TYPE
+        DESCRIPTION.
+    example: beam1 = model_beam("laser1", -100+200j, 200, 650E-6)
+    """
+    DOC = get_DOC()
+    obj = DOC.addObject('PartDesign::Body', name)
+    sketch = obj.newObject('Sketcher::SketchObject', name+'_sketch')
+    sketch.Support = (DOC.getObject('XY_Plane'),[''])
+    sketch.MapMode = 'FlatFace'
+    z0 = np.imag(q)
+    z_start=np.real(q)
+    z_end = z_start+prop
+    w0 = pow(wavelength*z0/np.pi,0.5)
+    w_start = w0 * pow(1+(z_start/z0)**2,0.5)
+    w_end = w0 * pow(1+(z_end/z0)**2,0.5)
+    
+    print("z_start:",z_start)
+    print("w0:",w0)
+    print("w_start:",w_start)
+    print("w_end:",w_end)
+    sketch.addGeometry(Part.ArcOfHyperbola(Part.Hyperbola(Vector(-z_start,w0,0),Vector(-z_start-w0/2,0,0),Vector(-z_start,0,0)),-1,1),False)
+    sketch.exposeInternalGeometry(0)
+    
+    sketch.addConstraint(Sketcher.Constraint('PointOnObject',0,3,-1))
+    
+    sketch.addConstraint(Sketcher.Constraint('DistanceX',-1,1,0,3,-z_start))
+    sketch.addConstraint(Sketcher.Constraint('DistanceX',-1,1,0,2,0))
+    sketch.addConstraint(Sketcher.Constraint('DistanceX',-1,1,0,1,prop)) 
+    sketch.addConstraint(Sketcher.Constraint('DistanceY',-1,1,0,2,w_start))
+    sketch.addConstraint(Sketcher.Constraint('DistanceY',-1,1,0,1,w_end)) 
+    # sketch.addConstraint(Sketcher.Constraint('Distance',2,1,1,1,z0))
+    
+    sketch.addGeometry(Part.LineSegment(Vector(0,w_start,0),Vector(0,0,0)),False)
+    sketch.addConstraint(Sketcher.Constraint('Coincident',4,1,0,2))
+    # sketch.addConstraint(Sketcher.Constraint('Coincident',4,2,-1,1))
+    sketch.addConstraint(Sketcher.Constraint('Vertical',4))
+    
+    sketch.addGeometry(Part.LineSegment(Vector(prop,w_end,0),Vector(prop,0,0)),False)
+    sketch.addConstraint(Sketcher.Constraint('Coincident',5,1,0,1))
+    sketch.addConstraint(Sketcher.Constraint('PointOnObject',5,2,-1)) 
+    sketch.addConstraint(Sketcher.Constraint('Vertical',5))
+    sketch.addGeometry(Part.LineSegment(Vector(0,0,0),Vector(prop,0,0)),False)
+    sketch.addConstraint(Sketcher.Constraint('Coincident',6,1,4,2))
+    sketch.addConstraint(Sketcher.Constraint('Coincident',6,2,5,2))
+    sketch.addConstraint(Sketcher.Constraint('Horizontal',6))
+    
+    rev = obj.newObject('PartDesign::Revolution',name+'_Revolution')
+    rev.Profile = sketch
+    rev.Angle = 360
+    rev.ReferenceAxis = (obj.getObject('X_Axis'), [''])
+    rev.Midplane = 0
+    sketch.Visibility = False
+    
+    obj.ViewObject.ShapeColor = color
+    obj.ViewObject.Transparency = 50
+    obj.Label = name
+    update_geom_info(obj, geom_info)
+    return obj
 
 # Test
 if __name__ == "__main__":

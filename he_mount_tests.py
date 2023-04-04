@@ -16,20 +16,20 @@ sys.path.append(pfad)
 from basic_optics import Mirror,Lens
 from basic_optics.freecad_models import clear_doc, setview, freecad_da
 from basic_optics.freecad_models.freecad_model_mirror import mirror_mount
-
-
+from basic_optics.freecad_models.freecad_model_beam import moedel_Gaussian_beam
 
 if freecad_da:
   clear_doc()
 
 
-m = Mirror(name="Standard_Mirror", pos=(0,0,60))
-m.normal = (1,1,0)
-m.draw_dict["mount_type"] = "POLARIS-K1"
-m.aperture = 25.4
-m.draw()
-m.draw_mount()
+# m = Mirror(name="Standard_Mirror", pos=(0,0,60))
+# m.normal = (1,1,0)
+# m.draw_dict["mount_type"] = "POLARIS-K1"
+# m.aperture = 25.4
+# m.draw()
+# m.draw_mount()
 
+b=moedel_Gaussian_beam("laser1", -1000+1000j, 2000, 1030E-6)
 
 
 if freecad_da:

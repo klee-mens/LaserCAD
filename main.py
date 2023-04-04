@@ -33,7 +33,7 @@ if freecad_da:
 # peris, teles, amp, stretch, wcell = all_moduls_test()
 
 from basic_optics.moduls import Make_Telescope,Make_Amplifier_Typ_I_simpler,Make_Stretcher,Make_Amplifier_Typ_II_simpler,Make_Amplifier_Typ_II_simple,Make_Amplifier_Typ_I_simple
-from basic_optics.moduls import diaphragms_test
+# from basic_optics.moduls import diaphragms_test
 
 from basic_optics.tests import iris_test
 

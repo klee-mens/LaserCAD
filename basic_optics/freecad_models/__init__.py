@@ -15,7 +15,7 @@ Created on Thu Aug 18 12:29:31 2022
 from .utils import freecad_da, start_DOC, get_DOC, warning, clear_doc, setview
 from .freecad_model_lens import model_lens, lens_mount
 from .freecad_model_ray import model_ray_1D
-from .freecad_model_beam import model_beam
+from .freecad_model_beam import model_beam, moedel_Gaussian_beam
 from .freecad_model_composition import initialize_composition, add_to_composition, make_to_ray_part
 from .freecad_model_mirror import model_mirror, mirror_mount, model_stripe_mirror,model_table
 from .freecad_model_grating import model_grating,grating_mount
