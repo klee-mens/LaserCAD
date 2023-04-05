@@ -6,7 +6,7 @@ Created on Mon Aug 22 12:34:44 2022
 """
 
 from basic_optics import Ray, Geom_Object, TOLERANCE
-from basic_optics.freecad_models import model_beam,model_ray_1D
+from basic_optics.freecad_models import model_beam,model_ray_1D,model_Gaussian_beam
 from basic_optics.freecad_models.freecad_model_composition import initialize_composition_old, add_to_composition
 # from .optical_element import Opt_Element
 
@@ -38,13 +38,16 @@ class Beam(Geom_Object):
       self.draw_dict["model"] = "ray_group"      
     elif distribution == "circular":
       self.make_circular_distribution()
-      self.draw_dict["model"] = "ray_group"      
+      self.draw_dict["model"] = "ray_group" 
+    elif distribution == "Gaussian":
+      self.make_Gaussian_distribution()
+      self.draw_dict["model"] = "Gaussian"
     else:
       # Abortion
       print("Distribution tpye not know. Beam not valid.")
       print("Allowed distribution types are: 'cone', 'square', 'circular'")
       self = -1
-      return -1
+      return None
     
   def make_cone_distribution(self, ray_count=2):
     self._ray_count = ray_count
@@ -58,7 +61,20 @@ class Beam(Geom_Object):
       our = self._rays[n+1]
       our.from_h_alpha_theta(self._radius, self._angle, thetas[n], self)
       our.name = self.name + "_outer_Ray" + str(n)
-
+  
+  def make_Gaussian_distribution(self, ray_count=2):
+    self._ray_count = ray_count
+    self._distribution = "Gaussian"
+    self.draw_dict["model"] = "Gaussian"
+    mr = self._rays[0]
+    mr.set_geom(self.get_geom())
+    mr.name = self.name + "_inner_Ray"
+    thetas = np.linspace(0, 2*np.pi, self._ray_count)
+    for n in range(self._ray_count-1):
+      our = self._rays[n+1]
+      our.from_h_alpha_theta(self._radius, self._angle, thetas[n], self)
+      our.name = self.name + "_outer_Ray" + str(n)
+  
   def make_square_distribution(self, ray_in_line=3):
     """
     Let the group of rays follow the square distribution
@@ -232,6 +248,8 @@ class Beam(Geom_Object):
       radius, _ = self.radius_angle()
       return model_beam(name=self.name, dia=2*radius, prop=self.length(),
            f=self.focal_length(), geom_info=self.get_geom())
+      # return model_Gaussian_beam(name=self.name, dia=2*radius, prop=self.length(),
+      #      f=self.focal_length(), geom_info=self.get_geom())
     else:
       part = initialize_composition_old(name="ray group")
       container = []
@@ -246,8 +264,24 @@ class Beam(Geom_Object):
 
 
 
+class Gaussian_Beam(Ray):
+# class Gaussian_beam(Geom_Object):
+  def __init__(self, q_para=-100+100j, wavelength=1030E-6, name="NewGassian",  **kwargs):
+    super().__init__(name=name, **kwargs)
+    self.wavelength = wavelength
+    self.q_para = q_para
+    
+    
+  def __repr__(self):
+    # radius, angle = self.radius_angle()
+    n = len(self.class_name())
+    txt = 'Gaussian_Beam(q_para=' + repr(self.q_para)
+    txt += ', ' + super().__repr__()[n+1::]
+    return txt
 
-
+  def draw_fc(self):
+    return model_Gaussian_beam(name=self.name, q_para=self.q_para,
+                               wavelength=self.wavelength, geom_info=self.get_geom())
 
 
 

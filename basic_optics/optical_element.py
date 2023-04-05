@@ -77,6 +77,8 @@ class Opt_Element(Geom_Object):
     newb = deepcopy(beam)
     newb.name = "next_" + beam.name
     rays = beam.get_all_rays(by_reference=True)
+    # if beam._distribution == "Gaussian":
+      
     newrays = []
     for ray in rays:
       nr = self.next_ray(ray)
@@ -86,6 +88,17 @@ class Opt_Element(Geom_Object):
     newb.override_rays(newrays)
     return newb
 
+  def next_gauss(self,gaussian):
+      next_gaussian=deepcopy(gaussian)
+      next_middle = self.next_ray(gaussian) #change the length of Gaussian
+      next_gaussian.set_geom(next_middle.get_geom())
+      [[A,B],[C,D]] = self._matrix
+      # print([[A,B],[C,D]])
+      q_parameter = deepcopy(gaussian.q_para)
+      q_parameter += gaussian.length
+      next_gaussian.q_para = (A*q_parameter+B)/(C*q_parameter+D)
+      # print(next_gaussian.q_para)
+      return next_gaussian
 
   def reflection(self, ray):
     """

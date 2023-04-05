@@ -13,10 +13,10 @@ ind = pfad.rfind("/")
 pfad = pfad[0:ind+1]
 sys.path.append(pfad)
 
-from basic_optics import Mirror,Lens
+from basic_optics import Mirror,Lens,Gaussian_Beam
 from basic_optics.freecad_models import clear_doc, setview, freecad_da
 from basic_optics.freecad_models.freecad_model_mirror import mirror_mount
-from basic_optics.freecad_models.freecad_model_beam import moedel_Gaussian_beam
+from basic_optics.freecad_models.freecad_model_beam import model_Gaussian_beam
 
 if freecad_da:
   clear_doc()
@@ -29,8 +29,17 @@ if freecad_da:
 # m.draw()
 # m.draw_mount()
 
-b=moedel_Gaussian_beam("laser1", -1000+1000j, 2000, 1030E-6)
+# b=model_Gaussian_beam("laser1", -100+100j, 200, 1030E-3)
+# m=Mirror(pos=(0,0,100))
+# m.draw()
+# m.draw_mount()
+gb1 = Gaussian_Beam(q_para=-100+10e5j ,pos=(0,0,100))
+le = Lens(f=100,pos = (200,0,100))
 
+gb2 = le.next_gauss(gb1)
+gb1.draw()
+le.draw()
+gb2.draw()
 
 if freecad_da:
   setview()
