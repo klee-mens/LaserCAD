@@ -89,7 +89,7 @@ class Opt_Element(Geom_Object):
     return newb
 
   def next_gauss(self,gaussian):
-      next_gaussian=deepcopy(gaussian)
+      next_gaussian = deepcopy(gaussian)
       next_middle = self.next_ray(gaussian) #change the length of Gaussian
       next_gaussian.set_geom(next_middle.get_geom())
       [[A,B],[C,D]] = self._matrix

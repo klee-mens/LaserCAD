@@ -33,13 +33,18 @@ if freecad_da:
 # m=Mirror(pos=(0,0,100))
 # m.draw()
 # m.draw_mount()
-gb1 = Gaussian_Beam(q_para=-100+10e5j ,pos=(0,0,100))
-le = Lens(f=100,pos = (200,0,100))
-
+gb1 = Gaussian_Beam(wavelength=1030E-6,pos=(0,0,100))
+# gb1.q_para = 10E5j
+le = Lens(f=100,pos = (100,0,100))
+mr = Mirror(phi=90, pos = (295,0,100))
+mr.aperture = 100
 gb2 = le.next_gauss(gb1)
+gb3 = mr.next_gauss(gb2)
 gb1.draw()
 le.draw()
+mr.draw()
 gb2.draw()
+gb3.draw()
 
 if freecad_da:
   setview()

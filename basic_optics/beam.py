@@ -23,7 +23,7 @@ class Beam(Geom_Object):
   average_divegence = ?
 
   """
-  def __init__(self, radius=1, angle=0, name="NewBeam", distribution="cone", **kwargs):
+  def __init__(self, radius=1, angle=0, name="NewBeam",wavelength=1030E-6, distribution="cone", **kwargs):
     super().__init__(name=name, **kwargs)
     self._ray_count = 2
     self._rays = [Ray() for n in range(self._ray_count)]
@@ -40,6 +40,16 @@ class Beam(Geom_Object):
       self.make_circular_distribution()
       self.draw_dict["model"] = "ray_group" 
     elif distribution == "Gaussian":
+      z0 = wavelength/(np.pi*np.tan(angle)*np.tan(angle))
+      w0 = wavelength/(np.pi*np.tan(angle))
+      if w0>radius:
+        print("Woring: Wrong Radius!")
+      z = z0*pow((radius*radius)/(w0*w0)-1,0.5)
+      if angle<0:
+        z = -z
+      q_para = complex(z,z0)
+      self.wavelength = wavelength
+      self.q_para = q_para
       self.make_Gaussian_distribution()
       self.draw_dict["model"] = "Gaussian"
     else:
@@ -244,7 +254,11 @@ class Beam(Geom_Object):
 
 
   def draw_fc(self):
-    if self.draw_dict["model"] == "cone":
+    if self.draw_dict["model"] == "Gaussian":
+      return model_Gaussian_beam(name=self.name, q_para=self.q_para,
+                                 wavelength=self.wavelength,prop=self.length,
+                                 geom_info=self.get_geom())
+    elif self.draw_dict["model"] == "cone":
       radius, _ = self.radius_angle()
       return model_beam(name=self.name, dia=2*radius, prop=self.length(),
            f=self.focal_length(), geom_info=self.get_geom())
@@ -266,11 +280,18 @@ class Beam(Geom_Object):
 
 class Gaussian_Beam(Ray):
 # class Gaussian_beam(Geom_Object):
-  def __init__(self, q_para=-100+100j, wavelength=1030E-6, name="NewGassian",  **kwargs):
+  def __init__(self, radius=10, angle=0.05, wavelength=1030E-6, name="NewGassian",  **kwargs):
     super().__init__(name=name, **kwargs)
+    z0 = wavelength/(np.pi*np.tan(angle)*np.tan(angle))
+    w0 = wavelength/(np.pi*np.tan(angle))
+    if w0>radius:
+      print("Woring: Wrong Radius!")
+    z = z0*pow((radius*radius)/(w0*w0)-1,0.5)
+    if angle<0:
+      z = -z
+    q_para = complex(z,z0)
     self.wavelength = wavelength
     self.q_para = q_para
-    
     
   def __repr__(self):
     # radius, angle = self.radius_angle()
@@ -281,7 +302,8 @@ class Gaussian_Beam(Ray):
 
   def draw_fc(self):
     return model_Gaussian_beam(name=self.name, q_para=self.q_para,
-                               wavelength=self.wavelength, geom_info=self.get_geom())
+                               wavelength=self.wavelength,prop=self.length,
+                               geom_info=self.get_geom())
 
 
 
