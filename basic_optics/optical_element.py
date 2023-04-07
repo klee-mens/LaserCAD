@@ -86,6 +86,12 @@ class Opt_Element(Geom_Object):
         return False #Für Elemente die nicht mit Strahlen interagieren wird -1 als beam zurück gegeben
       newrays.append(nr)
     newb.override_rays(newrays)
+    if beam._distribution == "Gaussian":
+      [[A,B],[C,D]] = self._matrix
+      # print([[A,B],[C,D]])
+      q_parameter = deepcopy(beam.q_para)
+      q_parameter += beam.get_all_rays()[0].length
+      newb.q_para = (A*q_parameter+B)/(C*q_parameter+D)
     return newb
 
   def next_gauss(self,gaussian):

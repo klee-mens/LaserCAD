@@ -123,7 +123,7 @@ def model_Gaussian_beam (name="Gaussian_beam",q_para=-100+200j,prop=200,waveleng
     sketch.addConstraint(Sketcher.Constraint('Coincident',2,1,1,2)) 
     sketch.addConstraint(Sketcher.Constraint('Vertical',2)) 
     ii = 0
-    for ii in range(int(prop//5)):
+    for ii in range(int(prop)):
       new_pos = ii*10
       new_w = w0 * pow(1+((z_start+new_pos)/z0)**2,0.5)
       next_w = w0 * pow(1+((z_start+new_pos+10)/z0)**2,0.5)

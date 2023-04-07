@@ -30,6 +30,7 @@ class Beam(Geom_Object):
     self._angle = angle
     self._radius = radius
     self._distribution = distribution
+    self._wavelength = wavelength
     if distribution == "cone":
       self.make_cone_distribution()
       self.draw_dict["model"] = "cone"      
@@ -73,17 +74,26 @@ class Beam(Geom_Object):
       our.name = self.name + "_outer_Ray" + str(n)
   
   def make_Gaussian_distribution(self, ray_count=2):
-    self._ray_count = ray_count
+    self._ray_count = 1
+    radius = self._radius
+    wavelength = self._wavelength
+    angle = self._angle
     self._distribution = "Gaussian"
     self.draw_dict["model"] = "Gaussian"
+    
+    z0 = wavelength/(np.pi*np.tan(angle)*np.tan(angle))
+    w0 = wavelength/(np.pi*np.tan(angle))
+    if w0>radius:
+      print("Woring: Wrong Radius!")
+    z = z0*pow((radius*radius)/(w0*w0)-1,0.5)
+    if angle<0:
+      z = -z
+    q_para = complex(z,z0)
+    self.q_para = q_para
     mr = self._rays[0]
     mr.set_geom(self.get_geom())
     mr.name = self.name + "_inner_Ray"
-    thetas = np.linspace(0, 2*np.pi, self._ray_count)
-    for n in range(self._ray_count-1):
-      our = self._rays[n+1]
-      our.from_h_alpha_theta(self._radius, self._angle, thetas[n], self)
-      our.name = self.name + "_outer_Ray" + str(n)
+
   
   def make_square_distribution(self, ray_in_line=3):
     """
@@ -256,7 +266,8 @@ class Beam(Geom_Object):
   def draw_fc(self):
     if self.draw_dict["model"] == "Gaussian":
       return model_Gaussian_beam(name=self.name, q_para=self.q_para,
-                                 wavelength=self.wavelength,prop=self.length,
+                                 wavelength=self.wavelength,
+                                 prop=self.get_all_rays()[0].length,
                                  geom_info=self.get_geom())
     elif self.draw_dict["model"] == "cone":
       radius, _ = self.radius_angle()
