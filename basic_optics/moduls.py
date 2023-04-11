@@ -563,12 +563,10 @@ def Make_Stretcher():
   Note: When drawing a rooftop mirror, we will draw apure_cosmetic mirror to 
   confirm the position of the mount. The mirror's geom is the average of two 
   flip mirror. And its aperture is the periscope_distance.
-
   Returns
   -------
   TYPE Composition
     den gesamten, geraytracten Strecker...
-
   """
   # definierende Parameter
   Radius = 1000 #Radius des großen Konkavspiegels
@@ -631,7 +629,7 @@ def Make_Stretcher():
   lightsource.override_rays(rays)
   
   nfm1 = - ray0.normal
-  pfm1 = Grat.pos + 200 * nfm1 + (0,0,-h_StripeM/2 - safety_to_StripeM)
+  pfm1 = Grat.pos + 400 * nfm1 + (0,0,-h_StripeM/2 - safety_to_StripeM)
   # subperis = Periscope(length=8, theta=-90, dist1=0, dist2=0)
   # subperis.pos = pfm1
   # subperis.normal = nfm1
@@ -678,6 +676,7 @@ def Make_Stretcher():
   Stretcher.set_sequence(seq)
   Stretcher.propagate(300)
   return Stretcher
+
 
 
 

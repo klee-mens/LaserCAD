@@ -352,6 +352,7 @@ def all_moduls_test():
   stretch.pos = (0, 1500, 100)
   stretch.draw_elements()
   stretch.draw_rays()
+  stretch.draw_mounts()
 
   wcell = Make_White_Cell(roundtrips4=2)
   wcell.pos = (0, 2000, 100)

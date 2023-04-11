@@ -262,9 +262,9 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
   if abs(geom[1][2])<DEFALUT_MAX_ANGULAR_OFFSET/180*np.pi:
     geom[1][2]=0
   else:
-    print("this post should't be placed on the XY plane")
     if mount_type!="rooftop_mirror":
       mount_rotation=True
+      print("this post should't be placed on the XY plane")
   if abs(geom[1][1])<DEFALUT_MAX_ANGULAR_OFFSET/180*np.pi:
     geom[1][1]=0
   if abs(geom[1][0])<DEFALUT_MAX_ANGULAR_OFFSET/180*np.pi:
@@ -377,7 +377,6 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
     
   if mount_rotation:
     #obj.Placement = Placement(Vector(0,0,0), Rotation(0,0,90), Vector(0,0,0))
-    
     if  drawing_post:
       post = draw_post_special(name="TR50_M", height=50+height,xshift=xshift,
                         geom=geom)

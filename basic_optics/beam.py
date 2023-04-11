@@ -30,7 +30,7 @@ class Beam(Geom_Object):
     self._angle = angle
     self._radius = radius
     self._distribution = distribution
-    self._wavelength = wavelength
+    self._Bwavelength = wavelength
     if distribution == "cone":
       self.make_cone_distribution()
       self.draw_dict["model"] = "cone"      
@@ -76,7 +76,7 @@ class Beam(Geom_Object):
   def make_Gaussian_distribution(self, ray_count=2):
     self._ray_count = 1
     radius = self._radius
-    wavelength = self._wavelength
+    wavelength = self._Bwavelength
     angle = self._angle
     self._distribution = "Gaussian"
     self.draw_dict["model"] = "Gaussian"
