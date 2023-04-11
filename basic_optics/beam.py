@@ -183,6 +183,8 @@ class Beam(Geom_Object):
     txt = 'Beam(radius=' + repr(radius)
     txt += ', anlge=' + repr(angle)
     txt += ', distribution=' + repr(self._distribution)
+    if self._distribution == "Gaussian":
+       txt = 'Gaussian_Beam(q_para=' + repr(self.q_para)
     txt += ', ' + super().__repr__()[6::]
     return txt
 
