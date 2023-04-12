@@ -88,7 +88,6 @@ class Opt_Element(Geom_Object):
     newb.override_rays(newrays)
     if beam._distribution == "Gaussian":
       [[A,B],[C,D]] = self._matrix
-      # print([[A,B],[C,D]])
       q_parameter = deepcopy(beam.q_para)
       q_parameter += beam.get_all_rays()[0].length
       newb.q_para = (A*q_parameter+B)/(C*q_parameter+D)
@@ -133,7 +132,7 @@ class Opt_Element(Geom_Object):
 
 
 
-  def refraction(self, ray,r_ref_index = 0.667):
+  def refraction(self, ray):
     ray2 = deepcopy(ray)
     ray2.pos = ray.intersect_with(self) #dadruch wird ray.length verändert(!)
     norm = ray2.normal
