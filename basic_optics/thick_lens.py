@@ -24,12 +24,12 @@ class Thick_Lens(Opt_Element):
         self.focal_length = 0
         print("infinite focal length")
       else:
-        self.focal_length = 1 / ((n-1)(1/radius2))
+        self.focal_length = float(1 / ((n-1)*(1/radius2)))
     else:
       if abs(radius2) < TOLERANCE:
-        self.focal_length = 1 / ((n-1)(1/radius1))
+        self.focal_length = float(1 / ((n-1)*(1/radius1)))
       else:
-        self.focal_length = 1 / ((n-1)(1/radius1+1/radius2)-(n-1)**2*thickness/(n*radius1*radius2))
+        self.focal_length = float(1 / ((n-1)*(1/radius1+1/radius2)-(n-1)*(n-1)*thickness/(n*radius1*radius2)))
   @property
   def focal_length(self):
     return self.__f

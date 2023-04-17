@@ -16,7 +16,7 @@ sys.path.append(pfad)
 
 from basic_optics.freecad_models import clear_doc, setview, freecad_da, freecad_model_lens, model_table
 
-from basic_optics import Beam, Mirror, Opt_Element, Geom_Object, Curved_Mirror
+from basic_optics import Beam, Mirror, Opt_Element, Geom_Object, Curved_Mirror,Thick_Lens
 from basic_optics import Lens, Ray, Composition, Grating, Propagation, Intersection_plane
 from basic_optics import Refractive_plane
 
