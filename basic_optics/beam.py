@@ -75,21 +75,8 @@ class Beam(Geom_Object):
   
   def make_Gaussian_distribution(self, ray_count=2):
     self._ray_count = 1
-    radius = self._radius
-    wavelength = self._Bwavelength
-    angle = self._angle
     self._distribution = "Gaussian"
     self.draw_dict["model"] = "Gaussian"
-    
-    z0 = wavelength/(np.pi*np.tan(angle)*np.tan(angle))
-    w0 = wavelength/(np.pi*np.tan(angle))
-    if w0>radius:
-      print("Woring: Wrong Radius!")
-    z = z0*pow((radius*radius)/(w0*w0)-1,0.5)
-    if angle<0:
-      z = -z
-    q_para = complex(z,z0)
-    self.q_para = q_para
     mr = self._rays[0]
     mr.set_geom(self.get_geom())
     mr.name = self.name + "_inner_Ray"
