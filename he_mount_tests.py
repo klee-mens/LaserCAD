@@ -22,29 +22,31 @@ if freecad_da:
   clear_doc()
 
 
-# m = Mirror(name="Standard_Mirror", pos=(0,0,60))
-# m.normal = (1,1,0)
-# m.draw_dict["mount_type"] = "POLARIS-K1"
+m = Mirror(name="Standard_Mirror", pos=(0,0,80))
+m.normal = (1,1,0)
+m.draw_dict["model_type"]="Rooftop"
+#m.normal = (1,0,0)
+m.draw_dict["mount_type"] = "rooftop_mirror"
 # m.aperture = 25.4
-# m.draw()
-# m.draw_mount()
+m.draw()
+m.draw_mount()
 
 # b=model_Gaussian_beam("laser1", -100+100j, 200, 1030E-3)
 # m=Mirror(pos=(0,0,100))
 # m.draw()
 # m.draw_mount()
-gb1 = Beam(radius=10, angle=0.05,wavelength=1030E-6,pos=(0,0,100),distribution="Gaussian")
-# gb1.q_para = 10E5j
-le = Lens(f=100,pos = (100,0,100))
-mr = Mirror(phi=90, pos = (295,0,100))
-mr.aperture = 100
-gb2 = le.next_beam(gb1)
-gb3 = mr.next_beam(gb2)
-gb1.draw()
-le.draw()
-mr.draw()
-gb2.draw()
-gb3.draw()
+# gb1 = Beam(radius=10, angle=0.05,wavelength=1030E-6,pos=(0,0,100),distribution="Gaussian")
+# # gb1.q_para = 10E5j
+# le = Lens(f=100,pos = (100,0,100))
+# mr = Mirror(phi=90, pos = (295,0,100))
+# mr.aperture = 100
+# gb2 = le.next_beam(gb1)
+# gb3 = mr.next_beam(gb2)
+# gb1.draw()
+# le.draw()
+# mr.draw()
+# gb2.draw()
+# gb3.draw()
 
 if freecad_da:
   setview()

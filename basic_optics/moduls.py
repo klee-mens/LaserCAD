@@ -648,12 +648,13 @@ def Make_Stretcher():
   flip_mirror2.draw_dict["mount_type"] = "dont_draw"
   
   pure_cosmetic = Mirror(name="RoofTop_Mirror")
+  pure_cosmetic.draw_dict["model_type"]="Rooftop"
   pure_cosmetic.draw_dict["mount_type"] = "rooftop_mirror"
   pure_cosmetic.pos = (flip_mirror1.pos + flip_mirror2.pos ) / 2
   pure_cosmetic.normal = (flip_mirror1.normal + flip_mirror2.normal ) / 2
   pure_cosmetic.aperture = periscope_distance
 
-  pure_cosmetic.draw = useless
+  # pure_cosmetic.draw = useless
   
   Stretcher = Composition(name="Strecker", pos=pos0, normal=vec)
   

@@ -117,7 +117,7 @@ from basic_optics.tests import iris_test
 # cavset.add_fixed_elm(m2)
 # cavset.add_fixed_elm(ip)
 # cavset.propagate(25)
-# # ip.spot_diagram(cavset._ray_groups[-1])
+# # ip.spot_diagram(cavset._beams[-1])
 # cavset.draw()
 
 # table= model_table()
