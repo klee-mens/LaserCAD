@@ -141,27 +141,33 @@ def model_stripe_mirror(name="Stripe_Mirror", dia=75, Radius1=250, thickness=25,
   """
   
   Radius1 *= -1
-  a = 1 if Radius1>0 else 0
+  a = 1 if Radius1>0 else -1
 
   obj = DOC.addObject('PartDesign::Body', name)
   sketch = obj.newObject('Sketcher::SketchObject', name+'_sketch')
   #sketch.Support = (DOC.getObject('XY_Plane'),[''])
   sketch.MapMode = 'FlatFace'
-
-  sketch.addGeometry(Part.ArcOfCircle(Part.Circle(Vector(Radius1,0,0),Vector(0,0,1),abs(Radius1)),0.9*a*pi,0.9*a*pi+0.2*pi),False)
-  sketch.addConstraint(Sketcher.Constraint('PointOnObject',-1,1,0)) 
-  sketch.addConstraint(Sketcher.Constraint('Symmetric',0,1,0,2,-1)) 
-  sketch.addConstraint(Sketcher.Constraint('Radius',0,Radius1)) 
-  sketch.addConstraint(Sketcher.Constraint('DistanceY',0,2,0,1,dia)) 
-
-
-  sketch.addGeometry(Part.LineSegment(Vector(1.0,dia/2,0.0),Vector(thickness,dia/2,0.0)),False)
+  if a == 1:
+    sketch.addGeometry(Part.ArcOfCircle(Part.Circle(Vector(Radius1,0,0),Vector(0,0,1),abs(Radius1)),0.9*a*pi,0.9*a*pi+0.2*pi),False)
+    sketch.addConstraint(Sketcher.Constraint('PointOnObject',-1,1,0)) 
+    sketch.addConstraint(Sketcher.Constraint('Symmetric',0,1,0,2,-1)) 
+    sketch.addConstraint(Sketcher.Constraint('Radius',0,Radius1)) 
+    sketch.addConstraint(Sketcher.Constraint('DistanceY',0,2,0,1,dia)) 
+  else:
+    sketch.addGeometry(Part.ArcOfCircle(Part.Circle(Vector(Radius1,0,0),Vector(0,0,1),abs(Radius1)),np.arcsin(dia/(2*-Radius1)),-np.arcsin(dia/(2*-Radius1))),False)
+    sketch.addConstraint(Sketcher.Constraint('DistanceX',0,3,-1,1,-Radius1)) 
+    sketch.addConstraint(Sketcher.Constraint('PointOnObject',0,3,-1)) 
+    sketch.addConstraint(Sketcher.Constraint('DistanceY',-1,1,0,2,dia/2)) 
+    sketch.addConstraint(Sketcher.Constraint('DistanceY',0,1,-1,1,dia/2)) 
+    sketch.addConstraint(Sketcher.Constraint('Radius',0,-Radius1)) 
+  xx = Radius1-pow(Radius1**2-(dia/2)**2,0.5)
+  sketch.addGeometry(Part.LineSegment(Vector(a*xx,dia/2,0.0),Vector(thickness,dia/2,0.0)),False)
   sketch.addConstraint(Sketcher.Constraint('Coincident',1,1,0,1)) 
   sketch.addConstraint(Sketcher.Constraint('Horizontal',1)) 
   sketch.addGeometry(Part.LineSegment(Vector(thickness,dia/2,0.0),Vector(thickness,-dia/2,0.0)),False)
   sketch.addConstraint(Sketcher.Constraint('Coincident',2,1,1,2)) 
   sketch.addConstraint(Sketcher.Constraint('Vertical',2)) 
-  sketch.addGeometry(Part.LineSegment(Vector(thickness,-dia/2,0),Vector(1,-dia/2,0)),False)
+  sketch.addGeometry(Part.LineSegment(Vector(thickness,-dia/2,0),Vector(a*xx,-dia/2,0)),False)
   sketch.addConstraint(Sketcher.Constraint('Coincident',3,1,2,2)) 
   sketch.addConstraint(Sketcher.Constraint('Coincident',3,2,0,2)) 
   sketch.addConstraint(Sketcher.Constraint('Horizontal',3)) 

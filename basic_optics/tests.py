@@ -6,7 +6,7 @@ Created on Tue Jan 24 19:46:37 2023
 """
 
 from .lens import Lens
-from .mirror import Mirror, Curved_Mirror
+from .mirror import Mirror, Curved_Mirror,Cylindrical_Mirror
 from .beam import Beam
 from .moduls import Make_Telescope
 # from .propagation import Propagation
@@ -576,3 +576,28 @@ def Reflective_plane_test(Beam_radius = 2.5, Beam_angle = 0.1):
   re_test.propagate(50)
   re_test.draw_elements()
   re_test.draw_beams()
+  
+def Cylindrical_Mirror_test():
+  """
+  a simple Cylindrical_Mirror_test
+
+  Returns
+  -------
+  None.
+
+  """
+  rg=Beam(radius=2.5,angle=0.1,pos=(-100,0,100))
+  rg.normal = (1,0,0)
+  rg.make_square_distribution(10)
+  m = Cylindrical_Mirror(name="Standard_Mirror",radius=200, pos=(100,0,100))
+  # m.normal = (1,1,0)
+  # m.draw_dict["model_type"]="Rooftop"
+  #m.normal = (1,0,0)
+  # m.draw_dict["mount_type"] = "rooftop_mirror"
+  m.aperture = 25.4*4
+  m.draw()
+  m.draw_mount()
+  rg1 = m.next_beam(rg)
+  # rg1.length = 2000
+  rg.draw()
+  rg1.draw()

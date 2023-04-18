@@ -13,7 +13,7 @@ ind = pfad.rfind("/")
 pfad = pfad[0:ind+1]
 sys.path.append(pfad)
 
-from basic_optics import Mirror,Lens,Gaussian_Beam,Beam
+from basic_optics import Mirror,Lens,Gaussian_Beam,Beam,Cylindrical_Mirror
 from basic_optics.freecad_models import clear_doc, setview, freecad_da
 from basic_optics.freecad_models.freecad_model_mirror import mirror_mount
 from basic_optics.freecad_models.freecad_model_beam import model_Gaussian_beam
@@ -21,15 +21,21 @@ from basic_optics.freecad_models.freecad_model_beam import model_Gaussian_beam
 if freecad_da:
   clear_doc()
 
-
-m = Mirror(name="Standard_Mirror", pos=(0,0,80))
-m.normal = (1,1,0)
-m.draw_dict["model_type"]="Rooftop"
+rg=Beam(radius=2.5,angle=0.1,pos=(-100,0,100))
+rg.normal = (1,0,0)
+rg.make_square_distribution(10)
+m = Cylindrical_Mirror(name="Standard_Mirror",radius=200, pos=(100,0,100))
+# m.normal = (1,1,0)
+# m.draw_dict["model_type"]="Rooftop"
 #m.normal = (1,0,0)
-m.draw_dict["mount_type"] = "rooftop_mirror"
-# m.aperture = 25.4
+# m.draw_dict["mount_type"] = "rooftop_mirror"
+m.aperture = 25.4*4
 m.draw()
 m.draw_mount()
+rg1 = m.next_beam(rg)
+# rg1.length = 2000
+rg.draw()
+rg1.draw()
 
 # b=model_Gaussian_beam("laser1", -100+100j, 200, 1030E-3)
 # m=Mirror(pos=(0,0,100))

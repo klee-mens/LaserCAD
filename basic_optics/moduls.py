@@ -593,6 +593,9 @@ def Make_Stretcher():
   Concav.pos = (0,0,0)
   Concav.aperture = Aperture_concav
   Concav.normal = (-1,0,0)
+  Concav.draw_dict["height"]=40
+  Concav.draw_dict["thickness"]=25
+  Concav.draw_dict["model_type"]="Stripe"
   
   StripeM = Curved_Mirror(radius= -Radius/2, name="Stripe_Mirror")
   StripeM.pos = (Radius/2, 0, 0)
