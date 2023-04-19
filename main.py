@@ -16,7 +16,7 @@ sys.path.append(pfad)
 
 from basic_optics.freecad_models import clear_doc, setview, freecad_da, freecad_model_lens, model_table
 
-from basic_optics import Beam, Mirror, Opt_Element, Geom_Object, Curved_Mirror,Thick_Lens
+from basic_optics import Beam, Mirror, Opt_Element, Geom_Object, Curved_Mirror,Thick_Lens, Cylindrical_Mirror
 from basic_optics import Lens, Ray, Composition, Grating, Propagation, Intersection_plane
 from basic_optics import Refractive_plane
 
@@ -139,7 +139,7 @@ lam_mid = 2400e-9 * 1e3 # Zentralwellenlänge in mm
 delta_lamda = 250e-9*1e3 # Bandbreite in mm
 number_of_rays = 20
 safety_to_StripeM = 5 #Abstand der eingehenden Strahlen zum Concav Spiegel in mm
-periscope_distance = 8
+periscope_distance = 12
 
 # abgeleitete Parameter
 v = lam_mid/grat_const
@@ -149,15 +149,16 @@ a = v/2
 b = np.sqrt(a**2 - (v**2 - s**2)/(2*(1+c)))
 sinB = a - b
 
-Concav = Curved_Mirror(radius=Radius, name="Concav_Mirror")
+Concav = Cylindrical_Mirror(radius=Radius, name="Concav_Mirror")
 Concav.pos = (0,0,0)
 Concav.aperture = Aperture_concav
 Concav.normal = (-1,0,0)
+Concav._axes = np.array([[-1,0,0],[0,0,1],[0,1,0]])
 Concav.draw_dict["height"]=40
 Concav.draw_dict["thickness"]=25
 Concav.draw_dict["model_type"]="Stripe"
 
-StripeM = Curved_Mirror(radius= -Radius/2, name="Stripe_Mirror")
+StripeM = Cylindrical_Mirror(radius= -Radius/2, name="Stripe_Mirror")
 StripeM.pos = (Radius/2, 0, 0)
 #Cosmetics
 StripeM.aperture=75
@@ -170,7 +171,7 @@ Grat.pos = (Radius-seperation, 0, 0)
 Grat.normal = (np.sqrt(1-sinB**2), -sinB, 0)
 
 ray0 = Ray()
-p_grat = np.array((Radius-seperation, 0, h_StripeM/2 + safety_to_StripeM))
+p_grat = np.array((Radius-seperation, 0, -h_StripeM/2 - safety_to_StripeM))
 vec = np.array((c, s, 0))
 pos0 = p_grat - 250 * vec
 ray0.normal = vec
@@ -192,7 +193,7 @@ for wavel in wavels:
 lightsource.override_rays(rays)
 
 nfm1 = - ray0.normal
-pfm1 = Grat.pos + 800 * nfm1 + (0,0,-h_StripeM/2 - safety_to_StripeM)
+pfm1 = Grat.pos + 400 * nfm1 + (0,0,h_StripeM/2 + safety_to_StripeM + periscope_distance)
 # subperis = Periscope(length=8, theta=-90, dist1=0, dist2=0)
 # subperis.pos = pfm1
 # subperis.normal = nfm1
@@ -217,20 +218,41 @@ pure_cosmetic.pos = (flip_mirror1.pos + flip_mirror2.pos ) / 2
 pure_cosmetic.normal = (flip_mirror1.normal + flip_mirror2.normal ) / 2
 pure_cosmetic.aperture = periscope_distance
 
-# pure_cosmetic.draw = useless
-
 M1 = Mirror()
-M1.pos = pos0 + np.array((0,0,periscope_distance)) + nfm1*200
-point0 = pos0 + np.array((0,0,periscope_distance))
-point1 = M1.pos + (0,0,100)
+M1.aperture = 25.4/2
+M1.pos = pos0 - (0,0,periscope_distance)
+point0 = p_grat - (0,0,periscope_distance)
+point1 = M1.pos + (100,0,0)
 M1.set_normal_with_2_points(point0, point1)
 
-M2 = Mirror()
-M2.pos = point1
-point0 = M1.pos
-point1 = M2.pos + (200,0,0)
-M2.set_normal_with_2_points(point0, point1)
+M3 = Mirror()
+M3.aperture = 25.4/2
+M3.pos = p_grat - 300 * vec
+point0 = p_grat - (0,0,periscope_distance)
+M3.normal = -vec
 
+M2 = Mirror()
+M2.aperture = 25.4/2
+M2.pos = M1.pos + (750,0,0)
+point0 = M1.pos
+point1 = p_grat - (-100,0,periscope_distance)
+M2.set_normal_with_2_points([point0], point1)
+
+Concav1 = Curved_Mirror(radius=500, name="Concav_Mirror")
+Concav1.pos = point1
+Concav1.aperture = 25.4*2
+# Concav1.normal = (-1,0,0)
+point0 = M2.pos
+point1 = Concav1.pos + (100,0,0)
+Concav1.set_normal_with_2_points(point0, point1)
+
+Concav2 = Curved_Mirror(radius=500, name="Concav_Mirror")
+Concav2.pos = Concav1.pos + (500,0,0)
+Concav2.aperture = 25.4*2
+Concav2.normal = (1,0,0)
+
+
+# pure_cosmetic.draw = useless
 
 Stretcher = Composition(name="Strecker", pos=pos0, normal=vec)
 
@@ -238,28 +260,34 @@ Stretcher.set_light_source(lightsource)
 Stretcher.add_fixed_elm(Grat)
 Stretcher.add_fixed_elm(Concav)
 Stretcher.add_fixed_elm(StripeM)
-Stretcher.add_fixed_elm(flip_mirror1)
-Stretcher.add_fixed_elm(flip_mirror2)
-Stretcher.add_fixed_elm(M1)
-Stretcher.add_fixed_elm(M2)
+# Stretcher.add_fixed_elm(flip_mirror2)
+# Stretcher.add_fixed_elm(flip_mirror1)
+# Stretcher.add_fixed_elm(M1)
+# Stretcher.add_fixed_elm(M2)
+# Stretcher.add_fixed_elm(Concav1)
+# Stretcher.add_fixed_elm(Concav2)
+# Stretcher.add_fixed_elm(M3)
+
+# Stretcher.add_fixed_elm(pure_cosmetic)
 
 # for item in subperis._elements:
 #   Stretcher.add_fixed_elm(item)
-Stretcher.add_fixed_elm(pure_cosmetic)
 
-# seq = [0,1,2,1,0,3,4]
+
+# seq = [0,1,2,1,0]
 # seq = [0,1,2,1,0, 3]
 # seq = [0,1,2,1,0, 3,4]
-seq = [0,1,2,1,0, 3,4, 0, 1, 2, 1, 0,5,6]
-Stretcher.set_sequence(seq)
-Stretcher.propagate(300)
+# seq = [0,1,2,1,0, 3,4, 0, 1, 2, 1, 0]
+# roundtrip_sequence = seq
+roundtrip=1
+# for n in range(roundtrip-1):
+  # seq.extend(roundtrip_sequence)
+# Stretcher.set_sequence(seq)
+Stretcher.propagate(1000)
 Stretcher.pos = (0,0,100)
 Stretcher.draw_elements()
 Stretcher.draw_mounts()
 Stretcher.draw_rays()
-# ws = Make_White_Cell(roundtrips4 = 3)
-# ws.pos = (0,0,100)
-# ws.draw()
 
 
 # results = all_moduls_test()

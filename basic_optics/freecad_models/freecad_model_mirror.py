@@ -105,7 +105,7 @@ def model_round_mirror(name="mirror", dia=25, thickness=5, Radius=0, geom=None, 
 
 
 def model_stripe_mirror(name="Stripe_Mirror", dia=75, Radius1=250, thickness=25, 
-                        height=10, geom=None, **kwargs):
+                        height=10, geom=None, pos=0, axes = "somthing", **kwargs):
   """
     
 
@@ -258,7 +258,7 @@ def model_rooftop_mirror(name="rooftop_mirror",dia=0, geom=None, **kwargs):
     obj.ViewObject.Transparency = kwargs["transparency"]
   else:
     obj.ViewObject.Transparency = DEFAULT_TRANSPARENCY+20
-  offset=Vector(12.6-dia,0,0)
+  offset=Vector(dia/2,0,0)
   obj.Placement = Placement(offset, Rotation(0,-180,90), Vector(0,0,0))
   update_geom_info(obj, geom, off0=offset)
   # DOC = get_DOC()

@@ -5,7 +5,7 @@ Created on Tue Aug 30 17:03:16 2022
 @author: mens
 """
 from .lens import Lens
-from .mirror import Mirror, Curved_Mirror, mirror_mount
+from .mirror import Mirror, Curved_Mirror, mirror_mount,Cylindrical_Mirror
 from .barriers import Barriers
 # from .propagation import Propagation
 # from .composition import Composition_old
@@ -579,7 +579,7 @@ def Make_Stretcher():
   delta_lamda = 250e-9*1e3 # Bandbreite in mm
   number_of_rays = 20
   safety_to_StripeM = 5 #Abstand der eingehenden Strahlen zum Concav Spiegel in mm
-  periscope_distance = 8
+  periscope_distance = 16
   
   # abgeleitete Parameter
   v = lam_mid/grat_const
@@ -593,11 +593,12 @@ def Make_Stretcher():
   Concav.pos = (0,0,0)
   Concav.aperture = Aperture_concav
   Concav.normal = (-1,0,0)
-  Concav.draw_dict["height"]=40
-  Concav.draw_dict["thickness"]=25
-  Concav.draw_dict["model_type"]="Stripe"
+  # Concav._axes = np.array([[-1,0,0],[0,0,1],[0,1,0]])
+  # Concav.draw_dict["height"]=40
+  # Concav.draw_dict["thickness"]=25
+  # Concav.draw_dict["model_type"]="Stripe"
   
-  StripeM = Curved_Mirror(radius= -Radius/2, name="Stripe_Mirror")
+  StripeM = Cylindrical_Mirror(radius= -Radius/2, name="Stripe_Mirror")
   StripeM.pos = (Radius/2, 0, 0)
   #Cosmetics
   StripeM.aperture=75
@@ -610,7 +611,7 @@ def Make_Stretcher():
   Grat.normal = (np.sqrt(1-sinB**2), -sinB, 0)
   
   ray0 = Ray()
-  p_grat = np.array((Radius-seperation, 0, h_StripeM/2 + safety_to_StripeM))
+  p_grat = np.array((Radius-seperation, 0, -h_StripeM/2 - safety_to_StripeM))
   vec = np.array((c, s, 0))
   pos0 = p_grat - 250 * vec
   ray0.normal = vec
@@ -632,7 +633,7 @@ def Make_Stretcher():
   lightsource.override_rays(rays)
   
   nfm1 = - ray0.normal
-  pfm1 = Grat.pos + 400 * nfm1 + (0,0,-h_StripeM/2 - safety_to_StripeM)
+  pfm1 = Grat.pos + 400 * nfm1 + (0,0,h_StripeM/2 + safety_to_StripeM + periscope_distance)
   # subperis = Periscope(length=8, theta=-90, dist1=0, dist2=0)
   # subperis.pos = pfm1
   # subperis.normal = nfm1
@@ -665,8 +666,8 @@ def Make_Stretcher():
   Stretcher.add_fixed_elm(Grat)
   Stretcher.add_fixed_elm(Concav)
   Stretcher.add_fixed_elm(StripeM)
-  Stretcher.add_fixed_elm(flip_mirror1)
   Stretcher.add_fixed_elm(flip_mirror2)
+  Stretcher.add_fixed_elm(flip_mirror1)
   Stretcher.add_fixed_elm(pure_cosmetic)
   
   # for item in subperis._elements:

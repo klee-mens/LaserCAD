@@ -361,8 +361,8 @@ class Cylindrical_Mirror(Mirror):
     t2 = (-b - np.sqrt(discriminant)) / (2 * a)
 
     # Check if intersection is within ray segment
-    if t1 < 0 and t2 < 0:
-        return None
+    # if t1 < 0 and t2 < 0:
+    #     return None
 
     # Select smallest positive t
     t = min(t1, t2) if t1 >= 0 and t2 >= 0 else max(t1, t2)
@@ -380,6 +380,55 @@ class Cylindrical_Mirror(Mirror):
     ray.length=np.sqrt(dist[0]**2+dist[1]**2+dist[2]**2)
     return ray2
   
+def intersect_ray_cylinder(ray_origin, ray_direction, cylinder_center, cylinder_axis, cylinder_radius):
+    """
+    Calculates the intersection point of a ray with a cylindrical surface.
+
+    Args:
+        ray_origin (numpy array): The origin of the ray, as a 3D vector.
+        ray_direction (numpy array): The direction of the ray, as a 3D vector.
+        cylinder_center (numpy array): The center of the cylinder, as a 3D vector.
+        cylinder_axis (numpy array): The axis of the cylinder, as a 3D vector.
+        cylinder_radius (float): The radius of the cylinder.
+
+    Returns:
+        numpy array or None: The intersection point, as a 3D vector, or None if no intersection.
+    """
+
+    # Convert inputs to numpy arrays for vector operations
+    ray_origin = np.array(ray_origin)
+    ray_direction = np.array(ray_direction)
+    cylinder_center = np.array(cylinder_center)
+    cylinder_axis = np.array(cylinder_axis)
+
+    # Compute auxiliary vectors
+    oc = ray_origin - cylinder_center
+    a = np.dot(ray_direction, ray_direction) - np.dot(ray_direction, cylinder_axis)**2
+    b = 2 * (np.dot(ray_direction, oc) - np.dot(ray_direction, cylinder_axis) * np.dot(oc, cylinder_axis))
+    c = np.dot(oc, oc) - np.dot(oc, cylinder_axis)**2 - cylinder_radius**2
+
+    # Compute discriminant
+    discriminant = b**2 - 4 * a * c
+
+    # If discriminant is negative, no intersection
+    if discriminant < 0:
+        return None
+
+    # Compute t parameter (parameter along the ray direction)
+    t1 = (-b + np.sqrt(discriminant)) / (2 * a)
+    t2 = (-b - np.sqrt(discriminant)) / (2 * a)
+
+    # Check if intersection is within ray segment
+    if t1 < 0 and t2 < 0:
+        return None
+
+    # Select smallest positive t
+    t = min(t1, t2) if t1 >= 0 and t2 >= 0 else max(t1, t2)
+
+    # Compute intersection point
+    intersection_point = ray_origin + t * ray_direction
+
+    return intersection_point
 
 def tests():
   m = Mirror(phi=90, theta=0) # einfacher Flip Mirror
