@@ -760,194 +760,265 @@ def Make_Stretcher():
 
 
 
-# def Teleskop_old(name="Teleskop", f1=100.0, f2=100.0, d0=100.0, lens1_aperture=25,
-#              lens2_aperture=inch):
-#   """
-#   erstellt ein Teleskop mit dem Kram da oben
+def Make_Amplifier_Typ_II_plane():
+  name="AmpTyp2s" 
+  focal_length=600 
+  magnification=1
+  roundtrips2=2
+  aperture_small=1*inch 
+  beam_sep=15
+  aperture_big = beam_sep * (roundtrips2+1)
+  
+  Radius2 = magnification*focal_length
+  dist1 = (magnification+1) / magnification * focal_length
+  dist2 = magnification * dist1
+  theta = np.arctan(beam_sep/dist1) # Seperationswinkel auf Planspiegel
+  PHI0 = 180 - 180/np.pi*theta
+  # beam_pos = (dist2, -dist1 * np.tan(theta* roundtrips2), 0)
+  
+  curved = Curved_Mirror(radius= Radius2)
+  curved.aperture = aperture_small
+  
+  lens1 = Curved_Mirror(radius=focal_length*2, phi=180-3)
+  lens1.aperture = aperture_big
+  
+  plane_mir = Mirror(phi=PHI0)
+  plane_mir.aperture = aperture_small
+  
+  ls = Beam(angle=0) # kollimierter Anfangsbeam
+  
+  #bauen wir den Amp von hinten auf
+  helper = Composition()
+  helper.add_on_axis(curved)
+  helper.propagate(dist2)
+  helper.add_on_axis(lens1)
+  helper.propagate(dist1)
+  helper.add_on_axis(plane_mir)
+  
+  helper_seq = [0,1,2]
+  helper_roundtrip_sequence = [1,0,1,2]
+  for n in range(roundtrips2-1):
+    helper_seq.extend(helper_roundtrip_sequence)
+  helper.set_sequence(helper_seq)
 
-#   Parameters
-#   ----------
-#   name : TYPE, optional
-#     DESCRIPTION. The default is "Teleskop".
-#   f1 : TYPE, optional
-#     Brennweite der ersten Linse. The default is 100.
-#   f2 : TYPE, optional
-#     Brennweite der zweiten Linse, Das Verhältnis f2/f1 gitb die Vergrößerung
-#     <amplification> des Teleskops an. The default is 100. -> amp=1.0
-#   d0 : TYPE, optional
-#     gibt den Abstand pos0 von Teleskop und erster Linse an. The default is 100.
+  helper.propagate(2.2*focal_length)
+  ls = Beam(radius=1.5, angle=0)
+  helper.set_light_source(ls)
+  bs = helper.compute_beams()
+  last = bs[-1]
+  lastray = last.inner_ray()
+  ps = lastray.endpoint()
+  ps += (0,0,-5)
+  # ns = lastray.normal
+  ns = plane_mir.pos - ps
+  
+  # helper.draw_elements()
+  
+  AmpTyp2 = Composition(name=name, pos=ps, normal=ns)
+  ls = Beam(angle=0) # kollimierter Anfangsbeam
+  AmpTyp2.set_light_source(ls)
+  AmpTyp2.add_fixed_elm(plane_mir)
+  AmpTyp2.add_fixed_elm(lens1)
+  AmpTyp2.add_fixed_elm(curved)
+  
+  AmpTyp2.roundtrips = roundtrips2*2 #wird als neue Variable und nur zur Info eingefügt
+  seq = [0]
+  roundtrip_sequence = [1,2,1,0]
+  seq.extend(roundtrip_sequence)
+  for n in range(roundtrips2-1):
+    seq.extend(roundtrip_sequence)
+    seq.extend(roundtrip_sequence)
+  AmpTyp2.set_sequence(seq)
+  AmpTyp2.propagate(3*focal_length)
 
-#   Returns
-#   -------focal_length = 200
-#   teles : Composition_old
-#   """
-#   p1 = Propagation(d=d0)
-#   l1 = Lens(f=f1)
-#   l1.aperture = lens1_aperture
-#   p2 = Propagation(f1+f2)
-#   l2 = Lens(f=f2)
-#   l2.aperture = lens2_aperture
-#   amp = f2/f1
-#   d3 = f1*(1+amp)*amp - d0*amp*amp
-#   p3 = Propagation(d3)
-
-#   teles = Composition_old(name=name)
-#   teles.add(p1)
-#   teles.add(l1)
-#   teles.add(p2)
-#   teles.add(l2)
-#   teles.add(p3)
-#   teles.amplification = amp
-#   return teles
-
-
-# def Amplifier_Typ_II_simple_old(name="AmpTyp2s", focal_length=600, magnification=1,
-#                             roundtrips2=1,
-#                             aperture_small=1*inch, aperture_big=2*inch, beam_sep=15):
-#   """
-#   generiert die Strahlführung eines einfachen Typ II Verstärkers mit einer Linse
-#   und einem gekrümmten Spiegel
-
-#   V = magnification
-#   f = focal_length
-#   a = (V+1)/V * f
-#   b = a*V
-#   f2 = V/2 * f
-
-#   Returns
-#   -------
-#   Composition_old: Amplifier_TypII_simple
-
-
-#   """
-#   Radius2 = magnification*focal_length
-#   dist1 = (magnification+1) / magnification * focal_length
-#   dist2 = magnification * dist1
-#   theta = np.arctan(beam_sep/dist1) # Seperationswinkel auf Planspiegel
-#   beam_pos = (dist2, -dist1 * np.tan(theta* roundtrips2), 0)
-#   # Position der Lichtquelle = n*Ablenkwinkel unter dem waagerechtem Strahl
-
-#   cm2 = Curved_Mirror(radius= Radius2)
-#   cm2.pos = (0,0,0) # der Ausgangspunkt
-#   cm2.normal = (-1,0,0) # umgekehrte Ausrichtung des Aufbaus
-#   cm2.aperture = aperture_small
-
-#   lens1 = Lens(f=focal_length)
-#   lens1.normal = (1,0,0) #eigentlich egal, kann auch +1,0,0 sein
-#   lens1.pos = (dist2,0,0) #d2 = b vom cm2 entfernt
-#   lens1.aperture = aperture_big
-
-#   plane_mir = Mirror()
-#   plane_mir.pos = (dist1+dist2, 0, 0)
-#   point1 = lens1.pos
-#   point0 = lens1.pos - (0, beam_sep, 0)
-#   plane_mir.set_normal_with_2_points(point0, point1)
-#   plane_mir.aperture = aperture_small
-
-#   ls = Beam(angle=0) # kollimierter Anfangsbeam
-#   ls.pos = beam_pos
-#   ls.normal = plane_mir.pos - beam_pos #soll direkt auch den Planspiegel zeigen
+  AmpTyp2.pos = (0,0,120)
+  return AmpTyp2
 
 
-#   AmpTyp2 = Composition_old(name=name)
-#   AmpTyp2.set_light_source(ls)
-#   AmpTyp2.add_only_elm(plane_mir)
-#   AmpTyp2.add_only_elm(lens1)
-#   AmpTyp2.add_only_elm(cm2)
 
-#   # lastprop
-#   # lastprop = Propagation(d = 300)
-#   # lastprop.pos = plane_mir.pos
-#   # lastprop.normal = ls.pos - plane_mir.pos
-#   # AmpTyp2.add_only_elm(lastprop)
+def Make_Amplifier_Typ_II_with_theta():
+  name="AmpTyp2s" 
+  focal_length=600 
+  magnification=1
+  roundtrips2=3
+  aperture_small=1*inch 
+  beam_sep=15
+  aperture_big = beam_sep * (roundtrips2*2-1)
+  
+  Radius2 = magnification*focal_length
+  dist1 = (magnification+1) / magnification * focal_length
+  dist2 = magnification * dist1
+  theta = np.arctan(beam_sep/dist1) # Seperationswinkel auf Planspiegel
+  PHI0 = 180 - 180/np.pi*theta
+  THETA0 = 5
+  normal_helper = np.array((np.cos(THETA0/180*np.pi), 0, np.sin(THETA0/180*np.pi)))
+  # beam_pos = (dist2, -dist1 * np.tan(theta* roundtrips2), 0)
+  
+  # curved = Curved_Mirror(radius= Radius2)
+  curved = Curved_Mirror(radius= Radius2, phi=0, theta=180)
+  curved.aperture = aperture_small
+  
+  # lens1 = Curved_Mirror(radius=focal_length*2, theta=-THETA0)
+  lens1 = Curved_Mirror(radius=focal_length*2, phi=0, theta=THETA0-180)
+  lens1.aperture = aperture_big
+  
+  # plane_mir = Mirror(phi=PHI0, theta=2*THETA0)
+  plane_mir = Mirror(phi=PHI0)
+  plane_mir.aperture = aperture_small
+  
+  ls = Beam(angle=0) # kollimierter Anfangsbeam
+  
+  #bauen wir den Amp von hinten auf
+  helper = Composition(normal=normal_helper)
+  helper.add_on_axis(curved)
+  helper.propagate(dist2)
+  helper.add_on_axis(lens1)
+  helper.propagate(dist1)
+  helper.add_on_axis(plane_mir)
+  
+  helper_seq = [0,1,2]
+  helper_roundtrip_sequence = [1,0,1,2]
+  for n in range(roundtrips2-1):
+    helper_seq.extend(helper_roundtrip_sequence)
+  helper.set_sequence(helper_seq)
 
-#   AmpTyp2.roundtrips = roundtrips2*2 #wird als neue Variable und nur zur Info eingefügt
-#   seq = [0, 1]
-#   roundtrip_sequence = [2,3,4,5,4,3,2,1]
-#   seq.extend(roundtrip_sequence)
-#   for n in range(roundtrips2-1):
-#     seq.extend(roundtrip_sequence)
-#   # seq.append(6)
-#   AmpTyp2.sequence = seq
-#   return AmpTyp2
+  helper.propagate(2.2*focal_length)
+  ls = Beam(radius=1.5, angle=0)
+  helper.set_light_source(ls)
+  bs = helper.compute_beams()
+  last = bs[-1]
+  lastray = last.inner_ray()
+  ps = lastray.endpoint()
+  ps += (0,0,-5)
+  # ns = lastray.normal
+  ns = plane_mir.pos - ps
+  
+  # helper.draw_elements()
+  # helper.draw_beams()
+  
+  AmpTyp2 = Composition(name=name, pos=ps, normal=ns)
+  ls = Beam(angle=0) # kollimierter Anfangsbeam
+  AmpTyp2.set_light_source(ls)
+  AmpTyp2.add_fixed_elm(plane_mir)
+  AmpTyp2.add_fixed_elm(lens1)
+  AmpTyp2.add_fixed_elm(curved)
+  
+  AmpTyp2.roundtrips = roundtrips2*2 #wird als neue Variable und nur zur Info eingefügt
+  seq = [0]
+  roundtrip_sequence = [1,2,1,0]
+  seq.extend(roundtrip_sequence)
+  for n in range(roundtrips2-1):
+    seq.extend(roundtrip_sequence)
+    seq.extend(roundtrip_sequence)
+  AmpTyp2.set_sequence(seq)
+  AmpTyp2.propagate(3*focal_length)
+
+  AmpTyp2.pos = (0,0,120)
+  AmpTyp2.normal = (1,0,0)
+  return AmpTyp2
 
 
-# def White_Cell_old(name="White Cell", Radius=300, roundtrips4=1, aperture_small=1*inch,
-#                aperture_big=2*inch, mirror_sep=10):
-#   """
-#   Versuch...
-#   generiert eine Whitcelle mit Doppelpass (=4*2 round trips)
-#   legt Anfangsstrahlposition in x,y Ebene bei (0,0,0)
-#   Spiegel stehen alle senkrecht, d.h. Normale entweder x oder -x
+def Make_Amplifier_Typ_II_Juergen():
+  name="AmpTyp2s" 
+  focal_length=600 
+  magnification=1
+  roundtrips2=4
+  aperture_small=1*inch 
+  beam_sep=10
+  aperture_big = beam_sep * (roundtrips2*2-1)
+  
+  Radius2 = magnification*focal_length
+  dist1 = (magnification+1) / magnification * focal_length
+  dist2 = magnification * dist1
+  theta = np.arctan(beam_sep/dist1) # Seperationswinkel auf Planspiegel
+  PHI0 = 180 - 180/np.pi*theta
+  THETA0 = 5
+  normal_helper = np.array((np.cos(THETA0/180*np.pi), 0, np.sin(THETA0/180*np.pi)))
+  a = dist1 * 0.65
+  b = 85
+  c = dist1 - a - b
+  # beam_pos = (dist2, -dist1 * np.tan(theta* roundtrips2), 0)
+  
+  # curved = Curved_Mirror(radius= Radius2)
+  curved = Curved_Mirror(radius= Radius2, phi=0, theta=180)
+  curved.aperture = aperture_small
+  
+  # lens1 = Curved_Mirror(radius=focal_length*2, theta=-THETA0)
+  lens1 = Curved_Mirror(radius=focal_length*2, phi=0, theta=THETA0-180)
+  lens1.aperture = aperture_big
+  
+  flip1 = Mirror(phi=90)
+  flip1.aperture=2*inch
+  flip2 = Mirror(phi=90)
+  flip2.aperture=2*inch
 
+  # plane_mir = Mirror(phi=PHI0, theta=2*THETA0)
+  plane_mir = Mirror(phi=-PHI0)
+  plane_mir.aperture = aperture_small
+  
+  ls = Beam(angle=0, radius=1.5) # kollimierter Anfangsbeam
+  
+  
+  
+    
+  
+  #bauen wir den Amp von hinten auf
+  helper = Composition(normal=normal_helper)
+  helper.add_on_axis(curved)
+  helper.propagate(dist2)
+  helper.add_on_axis(lens1)
+  helper.propagate(a)
+  helper.add_on_axis(flip1)
+  helper.propagate(b)
+  helper.add_on_axis(flip2)
+  helper.propagate(c)
 
-#   """
-#   pos0 = np.array((0,0,0))
-#   cm2_hits = roundtrips4*2 - 1
-#   seperation = aperture_big / cm2_hits
-#   pos_cm2 = pos0 + (0, seperation * roundtrips4, 0)
-#   h = (mirror_sep + aperture_small) / 2
-#   pos_cm1 = pos_cm2 + (np.sqrt(Radius**2 - h**2), -h, 0)
-#   pos_cm3 = pos_cm2 + (np.sqrt(Radius**2 - h**2), +h, 0)
-#   cm1_regarding_point = pos_cm2 - (0, seperation/2, 0)
-#   cm3_regarding_point = pos_cm2 + (0, seperation/2, 0)
+  helper.add_on_axis(plane_mir)
+  
+  helper_seq = [0,1,2,3,4]
+  helper_roundtrip_sequence = [3,2,1,0,1,2,3,4]
+  for n in range(roundtrips2-1):
+    helper_seq.extend(helper_roundtrip_sequence)
+  last_seq = [3,2]
+  helper_seq.extend(last_seq)
+  helper.set_sequence(helper_seq)  
+  
 
-#   whitecell = Composition_old(name=name)
+  helper.propagate(2.2*focal_length)
+  ls = Beam(radius=1.5, angle=0)
+  helper.set_light_source(ls)
+  bs = helper.compute_beams()
+  last = bs[-1]
+  lastray = last.inner_ray()
+  ps = lastray.endpoint()
+  ps += (0,0,-5)
+  # ns = lastray.normal
+  ns = lastray.pos - ps
+  
+  # helper.draw_elements()
+  # helper.draw_beams()
+  
+  AmpTyp2 = Composition(name=name, pos=ps, normal=ns)
+  ls = Beam(angle=0) # kollimierter Anfangsbeam
+  AmpTyp2.set_light_source(ls)
+  AmpTyp2.add_fixed_elm(flip1)
+  AmpTyp2.add_fixed_elm(flip2)
+  AmpTyp2.add_fixed_elm(plane_mir)
+  AmpTyp2.add_fixed_elm(lens1)
+  AmpTyp2.add_fixed_elm(curved)
 
-#   ls = Beam(angle=0, pos=pos0)
-#   ls.normal = pos_cm1 - pos0
-#   whitecell.set_light_source(ls)
+  #jetzt kommt eine weirde sequenZ...  
+  seq = [0,1,2]
+  roundtrip_sequence = [1,0,3,4,3,0,1,2]
+  seq.extend(roundtrip_sequence)
+  for n in range(roundtrips2-1):
+    seq.extend(roundtrip_sequence)
+    seq.extend(roundtrip_sequence)
+  last_seq = [1,0]
+  seq.extend(last_seq)
+  AmpTyp2.set_sequence(seq)
+  AmpTyp2.propagate(3*focal_length)
 
-#   cm1 = Curved_Mirror(radius=Radius)
-#   cm1.pos = pos_cm1
-#   cm1.aperture = aperture_small
-#   whitecell.add_only_elm(cm1)
-#   cm1.normal = pos_cm1 - cm1_regarding_point
-
-#   cm2 = Curved_Mirror(radius=Radius)
-#   cm2.aperture = aperture_big
-#   cm2.pos = pos_cm2
-#   whitecell.add_only_elm(cm2)
-#   cm2.normal = (-1,0,0)
-
-#   cm3 = Curved_Mirror(radius=Radius)
-#   cm3.pos = pos_cm3
-#   cm3.aperture = aperture_small
-#   whitecell.add_only_elm(cm3)
-#   cm3.normal = pos_cm3 - cm3_regarding_point
-
-
-#   prop4 = Propagation(d=Radius) #müsste auch mit beamberechnung gehen...
-#   prop4.pos = cm3.pos
-#   prop4.normal = pos0 + (0, roundtrips4*2*seperation, 0) - cm3.pos
-#   whitecell.add(prop4)
-
-#   whitecell.roundtrips = roundtrips4*4
-#   seq = [0, 1, 2, 3, 4, 5]
-#   roundtrip_sequence = [4, 3 ,2, 1, 2, 3, 4, 5]
-#   for n in range(roundtrips4-1):
-#     seq.extend(roundtrip_sequence)
-#   seq.append(6)
-#   whitecell.sequence = seq
-
-#   return whitecell
-
-
-# def Periskop_old(name="Periskop", length=150, theta = 90, phi = 0):
-#   # if direction == "x":
-#   #   vec = np.array((1,0,0))
-#   # elif direction == "y":
-#   #   vec = np.array((0,1,0))
-#   # elif direction == "z":
-#   #   vec = np.array((0,0,1))
-#   # else:
-#   #   vec = direction
-#   m1 = Mirror(phi = phi, theta=theta)
-#   p = Propagation(d=length)
-#   m2 = Mirror(phi = -phi, theta = -theta)
-#   peris = Composition_old(name=name)
-#   peris.add(m1)
-#   peris.add(p)
-#   peris.add(m2)
-
-#   return peris
+  AmpTyp2.pos = (0,0,120)
+  AmpTyp2.normal = (1,0,0)
+  return AmpTyp2

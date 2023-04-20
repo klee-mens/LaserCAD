@@ -190,22 +190,24 @@ class Composition(Opt_Element):
   #     # ray.length = 200
   #   return deepcopy(self._ray_groups)
 
-  def compute_beams(self):
+  def compute_beams(self, external_source=None):
     beamcount = 0
-    self._beams = [self._lightsource]
+    if external_source:
+      beamlist = [external_source]
+    else:
+      beamlist = [self._lightsource]
     for n in self._sequence:
       elm = self._elements[n]
-      # if not elm.interacts_with_rays:
-      #   continue
-      beam = elm.next_beam(self._beams[-1])
-      # if beam.is_valid():
+      beam = elm.next_beam(beamlist[-1])
       if beam:
         # manche Elemente wie Prop geben keine validen beams zurück
         beamcount += 1
         beam.name = self.name + "_beam_" + str(beamcount)
-        self._beams.append(beam)
-        beam.set_length(self._last_prop)
-    return self._beams
+        beamlist.append(beam)
+    beam.set_length(self._last_prop)
+    if not external_source:
+      self._beams = beamlist
+    return beamlist
 
 
   def draw_elements(self):
