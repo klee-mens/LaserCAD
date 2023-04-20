@@ -180,6 +180,8 @@ def model_stripe_mirror(name="Stripe_Mirror", dia=75, Radius1=250, thickness=25,
   pad.Midplane = 1
   sketch.Visibility = False
   
+  # obj.Placement = Placement(Vector(0,0,0), Rotation(0,0,90), Vector(0,0,0))
+  
   if "color" in kwargs.keys():
     obj.ViewObject.ShapeColor = kwargs["color"]
   else:

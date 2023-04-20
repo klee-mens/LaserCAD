@@ -14,7 +14,16 @@ from .optical_element import Opt_Element
 import numpy as np
 from copy import deepcopy
 
+try:
+  import FreeCAD
+  DOC = FreeCAD.activeDocument()
+  print(DOC)
+  from FreeCAD import Vector, Placement, Rotation
+except:
+  freecad_da = False
+  DOC = None
 
+from .freecad_models.utils import freecad_da, update_geom_info, get_DOC, rotate, thisfolder
 
 class Mirror(Opt_Element):
   """
@@ -310,6 +319,13 @@ class Cylindrical_Mirror(Mirror):
     # self.draw_dict["mount_type"] = "POLARIS-K1-Step"
     self.draw_dict["Radius1"] = self.radius
     obj = model_mirror(**self.draw_dict)
+    default = Vector(0,0,1)
+    xx,yy,zz = self.get_coordinate_system()
+    zz = Vector(zz)
+    angle = default.getAngle(zz)*180/np.pi
+    vec = default.cross(zz)
+    off0 = self.pos
+    rotate(obj, vec, angle, off0=0)
     return obj
   
   def next_ray_tracing(self, ray):

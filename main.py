@@ -154,7 +154,7 @@ Concav.pos = (0,0,0)
 Concav.aperture = Aperture_concav
 Concav.normal = (-1,0,0)
 Concav._axes = np.array([[-1,0,0],[0,0,1],[0,1,0]])
-Concav.draw_dict["height"]=40
+Concav.draw_dict["height"]=Aperture_concav
 Concav.draw_dict["thickness"]=25
 Concav.draw_dict["model_type"]="Stripe"
 
@@ -223,7 +223,7 @@ M1.aperture = 25.4/2
 M1.pos = pos0 - (0,0,periscope_distance)
 point0 = p_grat - (0,0,periscope_distance)
 point1 = M1.pos + (100,0,0)
-M1.set_normal_with_2_points(point0, point1)
+M1.set_normal_with_2_points([point0], point1)
 
 M3 = Mirror()
 M3.aperture = 25.4/2
@@ -274,21 +274,21 @@ Stretcher.add_fixed_elm(StripeM)
 #   Stretcher.add_fixed_elm(item)
 
 
-# seq = [0,1,2,1,0]
+seq = [0,1,2,1]
 # seq = [0,1,2,1,0, 3]
 # seq = [0,1,2,1,0, 3,4]
-# seq = [0,1,2,1,0, 3,4, 0, 1, 2, 1, 0]
+
+# seq = [0,1,2,1,0, 3,4, 0, 1, 2, 1, 0, 5, 6, 7, 8, 7, 6, 5, 0, 1, 2, 1, 0, 4,3,0,1,2,1,0,9]
 # roundtrip_sequence = seq
-roundtrip=1
+# roundtrip=1
 # for n in range(roundtrip-1):
-  # seq.extend(roundtrip_sequence)
-# Stretcher.set_sequence(seq)
+#   seq.extend(roundtrip_sequence)
+Stretcher.set_sequence(seq)
 Stretcher.propagate(1000)
 Stretcher.pos = (0,0,100)
 Stretcher.draw_elements()
 Stretcher.draw_mounts()
 Stretcher.draw_rays()
-
 
 # results = all_moduls_test()
 

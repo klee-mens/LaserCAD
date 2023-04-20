@@ -18,6 +18,7 @@ from basic_optics.freecad_models import clear_doc, setview, freecad_da
 from basic_optics.freecad_models.freecad_model_mirror import mirror_mount
 from basic_optics.freecad_models.freecad_model_beam import model_Gaussian_beam
 
+import numpy as np
 if freecad_da:
   clear_doc()
 
@@ -26,16 +27,16 @@ if freecad_da:
 # rg.make_square_distribution(10)
 # m = Cylindrical_Mirror(name="Standard_Mirror",radius=-200, pos=(100,0,100))
 
-m = Mirror(name="Standard_Mirror", pos=(100,0,100))
-# m.normal = (1,1,0)
-m.draw_dict["model_type"]="Rooftop"
-m.aperture = 0
-m.normal = (1,0,0)
-m.draw_dict["mount_type"] = "rooftop_mirror"
+# m = Mirror(name="Standard_Mirror", pos=(100,0,100))
+# # m.normal = (1,1,0)
+# m.draw_dict["model_type"]="Rooftop"
+# m.aperture = 0
+# m.normal = (1,0,0)
+# m.draw_dict["mount_type"] = "rooftop_mirror"
 
-# m.aperture = 25.4*4
-m.draw()
-m.draw_mount()
+# # m.aperture = 25.4*4
+# m.draw()
+# m.draw_mount()
 # rg1 = m.next_beam(rg)
 # rg.draw()
 # rg1.draw()
@@ -56,6 +57,26 @@ m.draw_mount()
 # mr.draw()
 # gb2.draw()
 # gb3.draw()
+
+rg=Beam(radius=2.5,angle=0.1,pos=(-100,0,100))
+rg.normal = (1,0,0)
+rg.make_square_distribution(10)
+m = Cylindrical_Mirror(name="Standard_Mirror",radius=200, pos=(100,0,100))
+m.normal = (1,1,0)
+# m.draw_dict["model_type"]="Rooftop"
+#m.normal = (1,0,0)
+# m.draw_dict["mount_type"] = "rooftop_mirror"
+m.aperture = 25.4*4
+# m._axes = np.array([[ 0.70710678, -0.70710678,  0.        ],
+#        [ 0.        ,  0.        ,  1.        ],
+#        [ 0.70710678, 0.70710678,  0.        ]])
+m.draw()
+m.draw_mount()
+rg1 = m.next_beam(rg)
+# print(m._axes)
+# rg1.length = 2000
+rg.draw()
+rg1.draw()
 
 if freecad_da:
   setview()
