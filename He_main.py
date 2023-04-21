@@ -156,10 +156,10 @@ Concav = Cylindrical_Mirror(radius=Radius, name="Concav_Mirror")
 Concav.pos = (0,0,0)
 Concav.aperture = Aperture_concav
 Concav.normal = (-1,0,0)
-Concav._axes = np.array([[-1,0,0],[0,0,1],[0,1,0]])
+# Concav._axes = np.array([[-1,0,0],[0,0,1],[0,1,0]])
 Concav.draw_dict["height"]=Aperture_concav
 Concav.draw_dict["thickness"]=25
-Concav.draw_dict["model_type"]="Stripe"
+
 
 StripeM = Cylindrical_Mirror(radius= -Radius/2, name="Stripe_Mirror")
 StripeM.pos = (Radius/2, 0, 0)

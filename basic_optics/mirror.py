@@ -357,13 +357,18 @@ class Cylindrical_Mirror(Mirror):
     ray_direction = np.array(ray_direction)
     cylinder_center = np.array(cylinder_center)
     cylinder_axis = np.array(cylinder_axis)
-
-    # Compute auxiliary vectors
-    oc = ray_origin - cylinder_center
-    a = np.dot(ray_direction, ray_direction) - np.dot(ray_direction, cylinder_axis)**2
-    b = 2 * (np.dot(ray_direction, oc) - np.dot(ray_direction, cylinder_axis) * np.dot(oc, cylinder_axis))
-    c = np.dot(oc, oc) - np.dot(oc, cylinder_axis)**2 - self.radius**2
-
+    
+    # oc = ray_origin - cylinder_center
+    # a = np.dot(ray_direction, ray_direction) - np.dot(ray_direction, cylinder_axis)**2
+    # b = 2 * (np.dot(ray_direction, oc) - np.dot(ray_direction, cylinder_axis) * np.dot(oc, cylinder_axis))
+    # c = np.dot(oc, oc) - np.dot(oc, cylinder_axis)**2 - self.radius**2
+    middle_vec = cylinder_center + cylinder_axis * (np.dot(ray_origin,cylinder_axis) - np.dot(cylinder_center,cylinder_axis))-ray_origin
+    middle_vec2 = cylinder_axis*(np.dot(ray_direction,cylinder_axis))-ray_direction
+    a = np.dot(middle_vec2 , middle_vec2)
+    b = 2 * np.dot(middle_vec2 , middle_vec)
+    c = np.dot(middle_vec , middle_vec) - self.radius **2
+    
+    
     # Compute discriminant
     discriminant = b**2 - 4 * a * c
 
@@ -381,14 +386,16 @@ class Cylindrical_Mirror(Mirror):
 
     # Select smallest positive t
     t = min(t1, t2) if t1 >= 0 and t2 >= 0 else max(t1, t2)
-
     # Compute intersection point
-    intersection_point = ray_origin + t * ray_direction
+    
+    intersection_point = ray_origin + ray_direction * t
     p0 = intersection_point
-    new_center = center + (p0-self.pos)*zz
+    new_center = cylinder_center + cylinder_axis * (p0*cylinder_axis-cylinder_center*cylinder_axis)
+    
     surface_norm = p0 - new_center #Normale auf Spiegeloberfläche in p0 
     surface_norm *= 1/np.linalg.norm(surface_norm) #normieren
     #Reflektionsgesetz
+    print(cylinder_center,new_center)
     ray2.normal = ray.normal - 2*np.sum(ray.normal*surface_norm)*surface_norm
     ray2.pos = p0
     dist = p0-ray.pos
@@ -421,7 +428,8 @@ def intersect_ray_cylinder(ray_origin, ray_direction, cylinder_center, cylinder_
     a = np.dot(ray_direction, ray_direction) - np.dot(ray_direction, cylinder_axis)**2
     b = 2 * (np.dot(ray_direction, oc) - np.dot(ray_direction, cylinder_axis) * np.dot(oc, cylinder_axis))
     c = np.dot(oc, oc) - np.dot(oc, cylinder_axis)**2 - cylinder_radius**2
-
+    
+    
     # Compute discriminant
     discriminant = b**2 - 4 * a * c
 

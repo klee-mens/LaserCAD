@@ -60,21 +60,25 @@ if freecad_da:
 
 rg=Beam(radius=2.5,angle=0.1,pos=(-100,0,100))
 rg.normal = (1,0,0)
-rg.make_square_distribution(10)
+rg.make_square_distribution(5)
 m = Cylindrical_Mirror(name="Standard_Mirror",radius=200, pos=(100,0,100))
 m.normal = (1,1,0)
 # m.draw_dict["model_type"]="Rooftop"
 #m.normal = (1,0,0)
 # m.draw_dict["mount_type"] = "rooftop_mirror"
 m.aperture = 25.4*4
-m.rotate((1,1,0), np.pi/2)
+# print(m.pos,m.normal,m.get_coordinate_system())
+m.rotate((1,1,0), -np.pi/2)
+# print(m.pos,m.normal,m.get_coordinate_system())
+# m._axes = np.array([[1,0,0],[0,0,1],[0,-1,0]])
 m.draw()
-m.draw_mount()
+# m.draw_mount()
 rg1 = m.next_beam(rg)
 # print(m._axes)
 # rg1.length = 2000
 rg.draw()
 rg1.draw()
+
 
 if freecad_da:
   setview()
