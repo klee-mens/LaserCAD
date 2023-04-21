@@ -105,10 +105,22 @@ def set_normal(obj, normal, off0=0):
   rotate(obj, vec, angle, off0)
   return obj.Placement
 
+def set_z_normal(obj, normal, off0=0):
+  default = Vector(0,0,1)
+  angle = default.getAngle(normal)*180/np.pi
+  vec = default.cross(normal)
+  rotate(obj, vec, angle, off0)
+  return obj.Placement
+
 def update_geom_info(obj, geom_info, off0=0):
   if geom_info != None:
     pos = Vector(geom_info[0])
     normal = Vector(geom_info[1])
+    # -----------------------------------
+    if len(geom_info)>2:
+      z_normal = Vector(geom_info[2])
+      set_z_normal(obj, z_normal, off0)
+    # -----------------------------------
     set_normal(obj, normal, off0)
     translate(obj, pos)
     
