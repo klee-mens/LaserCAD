@@ -67,9 +67,7 @@ m.normal = (1,1,0)
 #m.normal = (1,0,0)
 # m.draw_dict["mount_type"] = "rooftop_mirror"
 m.aperture = 25.4*4
-# m._axes = np.array([[ 0.70710678, -0.70710678,  0.        ],
-#        [ 0.        ,  0.        ,  1.        ],
-#        [ 0.70710678, 0.70710678,  0.        ]])
+m.rotate((1,1,0), np.pi/2)
 m.draw()
 m.draw_mount()
 rg1 = m.next_beam(rg)

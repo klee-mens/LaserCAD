@@ -324,7 +324,6 @@ class Cylindrical_Mirror(Mirror):
     zz = Vector(zz)
     angle = default.getAngle(zz)*180/np.pi
     vec = default.cross(zz)
-    off0 = self.pos
     rotate(obj, vec, angle, off0=0)
     return obj
   

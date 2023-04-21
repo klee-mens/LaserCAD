@@ -10,9 +10,12 @@ import sys
 import os
 
 pfad = __file__
-pfad = pfad[0:-7] #nur wenn das Skript auch wirklich main.py heißt
+pfad = pfad.replace("\\", "/") #just in case
+ind = pfad.rfind("/")
+pfad = pfad[0:ind+1]
 sys.path.append(pfad)
 
+from basic_optics import Mirror,Lens,Gaussian_Beam,Beam,Cylindrical_Mirror
 
 from basic_optics.freecad_models import clear_doc, setview, freecad_da, freecad_model_lens, model_table
 
@@ -274,7 +277,7 @@ Stretcher.add_fixed_elm(StripeM)
 #   Stretcher.add_fixed_elm(item)
 
 
-seq = [0,1,2,1]
+# seq = [0,1,2,1]
 # seq = [0,1,2,1,0, 3]
 # seq = [0,1,2,1,0, 3,4]
 
@@ -283,7 +286,7 @@ seq = [0,1,2,1]
 # roundtrip=1
 # for n in range(roundtrip-1):
 #   seq.extend(roundtrip_sequence)
-Stretcher.set_sequence(seq)
+# Stretcher.set_sequence(seq)
 Stretcher.propagate(1000)
 Stretcher.pos = (0,0,100)
 Stretcher.draw_elements()
