@@ -346,6 +346,7 @@ class Cylindrical_Mirror(Mirror):
     """
     ray2 = deepcopy(ray)
     ray2.name = "next_" + ray.name
+    self.normal *= 1/np.linalg.norm(self.normal)
     center = self.pos - self.radius * self.normal
     xx,yy,zz = self.get_coordinate_system()
     ray_origin = ray2.pos
@@ -385,22 +386,27 @@ class Cylindrical_Mirror(Mirror):
     #     return None
 
     # Select smallest positive t
-    t = min(t1, t2) if t1 >= 0 and t2 >= 0 else max(t1, t2)
+    # t = min(t1, t2) if t1 >= 0 and t2 >= 0 else max(t1, t2)
+    if self.radius>0:
+      t = max(t1, t2)
+    else:
+      t = min(t1, t2)
     # Compute intersection point
     
     intersection_point = ray_origin + ray_direction * t
     p0 = intersection_point
-    new_center = cylinder_center + cylinder_axis * (p0*cylinder_axis-cylinder_center*cylinder_axis)
-    
+    new_center = cylinder_center + cylinder_axis * (np.dot(p0,cylinder_axis)-np.dot(cylinder_center,cylinder_axis))
     surface_norm = p0 - new_center #Normale auf Spiegeloberfläche in p0 
     surface_norm *= 1/np.linalg.norm(surface_norm) #normieren
     #Reflektionsgesetz
-    print(cylinder_center,new_center)
+    # print(cylinder_center,new_center)
     ray2.normal = ray.normal - 2*np.sum(ray.normal*surface_norm)*surface_norm
     ray2.pos = p0
     dist = p0-ray.pos
     ray.length=np.sqrt(dist[0]**2+dist[1]**2+dist[2]**2)
     return ray2
+  
+  
   
 def intersect_ray_cylinder(ray_origin, ray_direction, cylinder_center, cylinder_axis, cylinder_radius):
     """
