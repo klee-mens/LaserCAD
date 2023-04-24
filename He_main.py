@@ -151,7 +151,7 @@ c = np.cos(gamma)
 a = v/2
 b = np.sqrt(a**2 - (v**2 - s**2)/(2*(1+c)))
 sinB = a - b
-print(np.arcsin(sinB)*180/np.pi)
+
 
 Concav1 = Cylindrical_Mirror(radius=Radius, name="Concav_Mirror")
 Concav1.pos = (0,0,-h_StripeM/2 - safety_to_StripeM)
