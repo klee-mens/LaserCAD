@@ -68,7 +68,7 @@ m.normal = (1,1,0)
 # m.draw_dict["mount_type"] = "rooftop_mirror"
 m.aperture = 25.4*4
 # print(m.pos,m.normal,m.get_coordinate_system())
-m.rotate((1,1,0), np.pi/4)
+m.rotate((1,1,0), np.pi/2)
 # print(m.pos,m.normal,m.get_coordinate_system())
 # m._axes = np.array([[1,0,0],[0,0,1],[0,-1,0]])
 m.draw()
