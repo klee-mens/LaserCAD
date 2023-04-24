@@ -135,11 +135,11 @@ from basic_optics.tests import iris_test
 Radius = 600 #Radius des großen Konkavspiegels
 Aperture_concav = 100
 h_StripeM = 10 #Höhe des Streifenspiegels
-gamma = 21 /180 *np.pi # Seperationswinkel zwischen einfallenden und Mittelpunktsstrahl; Alpha = Gamma + Beta
-grat_const = 1/450 # Gitterkonstante in 1/mm
+gamma = 33.4906043205826 /180 *np.pi # Seperationswinkel zwischen einfallenden und Mittelpunktsstrahl; Alpha = Gamma + Beta
+grat_const = 1/1480 # Gitterkonstante in 1/mm
 seperation = 120 # Differenz zwischen Gratingposition und Radius
-lam_mid = 2400e-9 * 1e3 # Zentralwellenlänge in mm
-delta_lamda = 250e-9*1e3 # Bandbreite in mm
+lam_mid = 1030e-9 * 1e3 # Zentralwellenlänge in mm
+delta_lamda = 50e-9*1e3 # Bandbreite in mm
 number_of_rays = 20
 safety_to_StripeM = 5 #Abstand der eingehenden Strahlen zum Concav Spiegel in mm
 periscope_distance = 10
@@ -151,6 +151,7 @@ c = np.cos(gamma)
 a = v/2
 b = np.sqrt(a**2 - (v**2 - s**2)/(2*(1+c)))
 sinB = a - b
+print(np.arcsin(sinB)*180/np.pi)
 
 Concav1 = Cylindrical_Mirror(radius=Radius, name="Concav_Mirror")
 Concav1.pos = (0,0,-h_StripeM/2 - safety_to_StripeM)
@@ -329,7 +330,7 @@ Stretcher.set_sequence(seq)
 Stretcher.propagate(1000)
 Stretcher.pos = (0,0,100)
 Stretcher.draw_elements()
-Stretcher.draw_mounts()
+# Stretcher.draw_mounts()
 Stretcher.draw_rays()
 
 
