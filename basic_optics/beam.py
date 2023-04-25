@@ -106,6 +106,7 @@ class Beam(Geom_Object):
         self._rays[ray_counting].set_geom(self.get_geom())
         self._rays[ray_counting].pos=self._rays[ray_counting].pos+(0,n,m)     #change the position of the ray
         self._rays[ray_counting].name=self.name+str(ray_counting)
+        self._rays[ray_counting].wavelength = self._Bwavelength
         ray_counting+=1
     # print(ray_counting) # ray_counting is the number of the rays.
     self._ray_count = ray_counting
@@ -132,14 +133,17 @@ class Beam(Geom_Object):
     ray_counting=0
     radius=self._radius
     for r in np.arange(0,radius+radius/ring_number/2,radius/ring_number):        #r repersents the height of the ray
-      if r!=0:                                                                #if the ray is not in the center
+      
+      if r!=0:                                                                 #if the ray is not in the center
         thetas = np.linspace(0, 2*np.pi, int(r*ring_number/radius)*6+1)        #thetas repersents the rotation angle of the ray
         for n in range(int(r*ring_number/radius)*6):
           our=self._rays[ray_counting]
+          self._rays[ray_counting].wavelength = self._Bwavelength
           our.from_h_alpha_theta(r, self._angle, thetas[n], self)            # rotate the ray which is not in the center
           our.name=self.name + "_outer_Ray" +str(ray_counting)
           ray_counting+=1
       else:
+        self._rays[ray_counting].wavelength = self._Bwavelength
         mr=self._rays[ray_counting]
         mr.set_geom(self.get_geom())
         mr.name = self.name + "_inner_Ray"

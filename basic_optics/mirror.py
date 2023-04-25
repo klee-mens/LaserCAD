@@ -262,13 +262,22 @@ class Curved_Mirror(Mirror):
 
     """
     ray2 = deepcopy(ray)
+    print(ray2.normal)
     ray2.name = "next_" + ray.name
     center = self.pos - self.radius * self.normal
     p0 = ray.intersect_with_sphere(center, self.radius) #Auftreffpunkt p0
     surface_norm = p0 - center #Normale auf Spiegeloberfläche in p0 
     surface_norm *= 1/np.linalg.norm(surface_norm) #normieren
     #Reflektionsgesetz
-    ray2.normal = ray.normal - 2*np.sum(ray.normal*surface_norm)*surface_norm
+    surface_norm = np.array(surface_norm)
+    raynormal =np.array(ray.normal)
+    print("surface_norm=",surface_norm)
+    print("ray.normal=",ray.normal)
+    ray2normal = raynormal - 2*np.sum(raynormal*surface_norm)*surface_norm
+    print("ray2normal=",ray2normal)
+    ray2.normal = deepcopy(ray2normal)
+    print("ray2.normal=",ray2.normal)
+    # ray2.normal = ray.normal - 2*np.sum(ray.normal*surface_norm)*surface_norm
     ray2.pos = p0
 
     return ray2

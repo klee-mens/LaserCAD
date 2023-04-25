@@ -15,7 +15,7 @@ ind = pfad.rfind("/")
 pfad = pfad[0:ind+1]
 sys.path.append(pfad)
 
-from basic_optics import Mirror,Lens,Gaussian_Beam,Beam,Cylindrical_Mirror
+from basic_optics import Mirror,Lens,Gaussian_Beam,Beam,Cylindrical_Mirror,Intersection_plane
 
 from basic_optics.freecad_models import clear_doc, setview, freecad_da, freecad_model_lens, model_table
 
@@ -136,6 +136,7 @@ Radius = 600 #Radius des großen Konkavspiegels
 Aperture_concav = 100
 h_StripeM = 10 #Höhe des Streifenspiegels
 gamma = 33.4906043205826 /180 *np.pi # Seperationswinkel zwischen einfallenden und Mittelpunktsstrahl; Alpha = Gamma + Beta
+# gamma = 36 /180 *np.pi
 grat_const = 1/1480 # Gitterkonstante in 1/mm
 seperation = 120 # Differenz zwischen Gratingposition und Radius
 lam_mid = 1030e-9 * 1e3 # Zentralwellenlänge in mm
@@ -231,8 +232,12 @@ for wavel in wavels:
   rays.append(rn)
 lightsource.override_rays(rays)
 
+newlightsource = Beam(radius=2, angle=0,wavelength=1030e-9 * 1e3)
+newlightsource.make_circular_distribution(ring_number=2)
+
+
 nfm1 = - ray0.normal
-pfm1 = Grat.pos + 400 * nfm1 + (0,0,h_StripeM/2 + safety_to_StripeM + periscope_distance)
+pfm1 = Grat.pos + 600 * nfm1 + (0,0,h_StripeM/2 + safety_to_StripeM + periscope_distance)
 # subperis = Periscope(length=8, theta=-90, dist1=0, dist2=0)
 # subperis.pos = pfm1
 # subperis.normal = nfm1
@@ -264,14 +269,22 @@ point0 = p_grat - (0,0,periscope_distance)
 point1 = M1.pos + (100,0,0)
 M1.set_normal_with_2_points([point0], point1)
 
-M3 = Mirror()
+M3 = Curved_Mirror(radius=2750, name="Concav_Mirror")
 M3.aperture = 25.4/2
-M3.pos = p_grat - 300 * vec
-point0 = p_grat - (0,0,periscope_distance)
+M3.pos = p_grat - 500 * vec
 M3.normal = -vec
 
-# M2 = Curved_Mirror(radius=1000, name="Concav_Mirror")
-M2 = Mirror()
+fixlens1 = Lens(f=100)
+fixlens1.aperture = 25.4/2
+fixlens1.pos = p_grat - 445 * vec
+fixlens1.normal = vec
+
+fixlens2 = Lens(f=25)
+fixlens2.aperture = 25.4/2
+fixlens2.pos = p_grat - 425 * vec
+fixlens2.normal = vec
+
+M2 = Curved_Mirror(radius=2750, name="Concav_Mirror")
 M2.aperture = 25.4*2
 M2.pos = M1.pos + (250,0,0)
 M2.normal = (1,0,0)
@@ -292,12 +305,15 @@ Cavity2.pos = Concav1.pos + (500,0,0)
 Cavity2.aperture = 25.4*2
 Cavity2.normal = (1,0,0)
 
+ip = Intersection_plane(dia=100)
+ip.pos = p_grat + vec*100
+ip.normal = vec
 
 # pure_cosmetic.draw = useless
 
 Stretcher = Composition(name="Strecker", pos=pos0, normal=vec)
 
-Stretcher.set_light_source(lightsource)
+Stretcher.set_light_source(newlightsource)
 Stretcher.add_fixed_elm(Grat)
 Stretcher.add_fixed_elm(Concav1)
 Stretcher.add_fixed_elm(StripeM)
@@ -311,6 +327,9 @@ Stretcher.add_fixed_elm(M2)
 # Stretcher.add_fixed_elm(Concav1)
 # Stretcher.add_fixed_elm(Concav2)
 Stretcher.add_fixed_elm(M3)
+Stretcher.add_fixed_elm(ip)
+# Stretcher.add_fixed_elm(fixlens1)
+# Stretcher.add_fixed_elm(fixlens2)
 
 Stretcher.add_fixed_elm(pure_cosmetic)
 
@@ -320,19 +339,22 @@ Stretcher.add_fixed_elm(pure_cosmetic)
 
 seq = [0,1,2,3,0,4,5,0,6,2,7,0,8,9,8,0,7,2,6,0,5,4,0,3,2,1,0,10]
 # seq = [0,1,2,1,0, 3]
+
 # seq = [0,1,2,3,0, 4, 5, 6, 2, 7, 0]
 
 roundtrip_sequence = seq
 roundtrip=1
 for n in range(roundtrip-1):
   seq.extend(roundtrip_sequence)
+seq.extend([11])
 Stretcher.set_sequence(seq)
-Stretcher.propagate(1000)
+Stretcher.propagate(500)
 Stretcher.pos = (0,0,100)
 Stretcher.draw_elements()
-# Stretcher.draw_mounts()
-Stretcher.draw_rays()
-
+Stretcher.draw_mounts()
+# Stretcher.draw_beams()
+Stretcher.draw_beams(style="ray_group")
+ip.spot_diagram(Stretcher._beams[-1])
 
 # results = all_moduls_test()
 

@@ -32,7 +32,7 @@ class Intersection_plane(Opt_Element):
     ray2=deepcopy(ray)
     ray2.pos = ray.intersect_with(self)
     # return ray2
-    return None
+    return ray2
   
   def draw_fc(self):
     self.update_draw_dict()
