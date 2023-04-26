@@ -29,6 +29,7 @@ from basic_optics.moduls import Make_White_Cell
 import matplotlib.pyplot as plt
 
 import numpy as np
+from copy import deepcopy
 
 if freecad_da:
   clear_doc()
@@ -135,8 +136,8 @@ from basic_optics.tests import iris_test
 Radius = 600 #Radius des großen Konkavspiegels
 Aperture_concav = 100
 h_StripeM = 10 #Höhe des Streifenspiegels
-gamma = 33.4906043205826 /180 *np.pi # Seperationswinkel zwischen einfallenden und Mittelpunktsstrahl; Alpha = Gamma + Beta
-# gamma = 36 /180 *np.pi
+# gamma = 33.4906043205826 /180 *np.pi # Seperationswinkel zwischen einfallenden und Mittelpunktsstrahl; Alpha = Gamma + Beta
+gamma = 36 /180 *np.pi
 grat_const = 1/1480 # Gitterkonstante in 1/mm
 seperation = 120 # Differenz zwischen Gratingposition und Radius
 lam_mid = 1030e-9 * 1e3 # Zentralwellenlänge in mm
@@ -228,13 +229,32 @@ for wavel in wavels:
   # rn.pos = pos0
   rn.wavelength = wavel
   x = (wavel - lam_mid + delta_lamda/2) / delta_lamda
+  
   rn.draw_dict["color"] = cmap( x )
   rays.append(rn)
 lightsource.override_rays(rays)
 
-newlightsource = Beam(radius=2, angle=0,wavelength=1030e-9 * 1e3)
-newlightsource.make_circular_distribution(ring_number=2)
-
+newlightsource0 = Beam(radius=1, angle=0,wavelength=lam_mid)
+newlightsource0.make_circular_distribution(ring_number=3)
+newlightsource1 = Beam(radius=1, angle=0,wavelength=lam_mid+delta_lamda/2)
+newlightsource1.make_circular_distribution(ring_number=3)
+newlightsource2 = Beam(radius=1, angle=0,wavelength=lam_mid-delta_lamda/2)
+newlightsource2.make_circular_distribution(ring_number=3)
+newlightsource = Beam(radius=0, angle=0)
+rays = []
+for wavel in range(0,newlightsource0._ray_count):
+  rn = newlightsource0.get_all_rays()[wavel]
+  rn.draw_dict["color"] = cmap( 0.4 )
+  rays.append(rn)
+for wavel in range(0,newlightsource1._ray_count):
+  rn = newlightsource1.get_all_rays()[wavel]
+  rn.draw_dict["color"] = cmap( 0.8 )
+  rays.append(rn)
+for wavel in range(0,newlightsource2._ray_count):
+  rn = newlightsource2.get_all_rays()[wavel]
+  rn.draw_dict["color"] = cmap( 0 )
+  rays.append(rn)
+newlightsource.override_rays(rays)
 
 nfm1 = - ray0.normal
 pfm1 = Grat.pos + 600 * nfm1 + (0,0,h_StripeM/2 + safety_to_StripeM + periscope_distance)
@@ -269,7 +289,8 @@ point0 = p_grat - (0,0,periscope_distance)
 point1 = M1.pos + (100,0,0)
 M1.set_normal_with_2_points([point0], point1)
 
-M3 = Curved_Mirror(radius=2750, name="Concav_Mirror")
+M3 = Curved_Mirror(radius=2500, name="Concav_Mirror")
+# M3 = Mirror()
 M3.aperture = 25.4/2
 M3.pos = p_grat - 500 * vec
 M3.normal = -vec
@@ -284,7 +305,7 @@ fixlens2.aperture = 25.4/2
 fixlens2.pos = p_grat - 425 * vec
 fixlens2.normal = vec
 
-M2 = Curved_Mirror(radius=2750, name="Concav_Mirror")
+M2 = Curved_Mirror(radius=2500, name="Concav_Mirror")
 M2.aperture = 25.4*2
 M2.pos = M1.pos + (250,0,0)
 M2.normal = (1,0,0)
@@ -306,14 +327,16 @@ Cavity2.aperture = 25.4*2
 Cavity2.normal = (1,0,0)
 
 ip = Intersection_plane(dia=100)
-ip.pos = p_grat + vec*100
+ip.pos = p_grat + vec*1000
 ip.normal = vec
 
 # pure_cosmetic.draw = useless
+M1.pos = M1.pos-(0,0,4)
+
 
 Stretcher = Composition(name="Strecker", pos=pos0, normal=vec)
 
-Stretcher.set_light_source(newlightsource)
+Stretcher.set_light_source(newlightsource0)
 Stretcher.add_fixed_elm(Grat)
 Stretcher.add_fixed_elm(Concav1)
 Stretcher.add_fixed_elm(StripeM)

@@ -79,21 +79,35 @@ if freecad_da:
 # rg.draw()
 # rg1.draw()
 # ==========================================================
-ray0 = Ray(pos=[208.49408, 137.95006, 100.     ],normal=[-0.83397755, -0.55179838,  0.        ])
-M3 = Curved_Mirror(radius=2750, name="Concav_Mirror")
-M3.aperture = 25.4/2
-gamma = 33.4906043205826 /180 *np.pi
-Radius = 600
-seperation = 120
-h_StripeM = 10 
-safety_to_StripeM = 5
-s = np.sin(gamma)
-c = np.cos(gamma)
-vec = np.array((c, s, 0))
-p_grat = np.array((Radius-seperation, 0, -h_StripeM/2 - safety_to_StripeM))
-M3.pos = [  63.01183973, -275.90011634,  -10.        ]
-M3.normal = [-0.83397632, -0.55180023,  0.        ]
-ray2 = M3.next_ray(ray0)
-ray2.draw()
+# ray0 = Ray(pos=[208.49408, 137.95006, 100.     ],normal=[-0.83397755, -0.55179838,  0.        ])
+# ray0 = Ray(pos=[0,0,0],normal=[1,1,0])
+gb1 = Beam(radius=10, angle=0.1,wavelength=1030E-3,pos=(0,0,0))
+gb1.normal = (-1,-1,0)
+gb1.make_circular_distribution(ring_number=2)
+M3 = Curved_Mirror( name="Concav_Mirror")
+M3.aperture = 25.4*2
+# gamma = 33.4906043205826 /180 *np.pi
+# Radius = 600
+# seperation = 120
+# h_StripeM = 10 
+# safety_to_StripeM = 5
+# s = np.sin(gamma)
+# c = np.cos(gamma)
+# vec = np.array((c, s, 0))
+# p_grat = np.array((Radius-seperation, 0, -h_StripeM/2 - safety_to_StripeM))
+M3.pos = (-100,-100,0)
+# M3.normal =(-1,-1,0)
+point0 = point1 = (0,0,0)
+M3.set_normal_with_2_points(point0, point1)
+gb2 = M3.next_beam(gb1)
+# gb1.draw()
+M3.draw()
+# gb2.draw()
+M3.normal *=-1
+M3.draw()
+# ray2 = M3.next_ray(ray0)
+# ray0.draw()
+
+# ray2.draw()
 if freecad_da:
   setview()

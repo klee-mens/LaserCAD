@@ -26,7 +26,7 @@ class Ray(Geom_Object):
   def __init__(self, **kwargs):
     super().__init__(**kwargs)
     self.length = DEFAULT_LENGTH #willkürlich, muss immer neu berechnet werden
-    self.wavelength = 660e-6 #Wellenlänge in mm; Default: 660nm
+    self.wavelength = 1030e-6 #Wellenlänge in mm; Default: 660nm
     self.draw_dict.update({"length":self.length})
 
   def endpoint(self):

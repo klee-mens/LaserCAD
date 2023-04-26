@@ -244,6 +244,8 @@ class Curved_Mirror(Mirror):
     obj = model_mirror(**self.draw_dict)
     return obj
   
+  
+  
   def next_ray_trace(self, ray):
     """
     erzeugt den nächsten Ray auf Basis der analytischen Berechung von Schnitt-
@@ -262,24 +264,23 @@ class Curved_Mirror(Mirror):
 
     """
     ray2 = deepcopy(ray)
-    print(ray2.normal)
     ray2.name = "next_" + ray.name
+    
     center = self.pos - self.radius * self.normal
     p0 = ray.intersect_with_sphere(center, self.radius) #Auftreffpunkt p0
     surface_norm = p0 - center #Normale auf Spiegeloberfläche in p0 
     surface_norm *= 1/np.linalg.norm(surface_norm) #normieren
     #Reflektionsgesetz
-    surface_norm = np.array(surface_norm)
-    raynormal =np.array(ray.normal)
-    print("surface_norm=",surface_norm)
-    print("ray.normal=",ray.normal)
-    ray2normal = raynormal - 2*np.sum(raynormal*surface_norm)*surface_norm
-    print("ray2normal=",ray2normal)
-    ray2.normal = deepcopy(ray2normal)
-    print("ray2.normal=",ray2.normal)
-    # ray2.normal = ray.normal - 2*np.sum(ray.normal*surface_norm)*surface_norm
+    if np.std(ray2.normal-self.normal)<TOLERANCE and np.std(p0-self.pos)<TOLERANCE:
+      ray2.pos = p0
+      a=ray2.normal
+      a=a*-1
+      ray3 = Ray(name = ray2.name)
+      ray3.pos = p0
+      ray3.normal = a
+      return ray3
+    ray2.normal = ray.normal - 2*np.sum(ray.normal*surface_norm)*surface_norm
     ray2.pos = p0
-
     return ray2
 
 class Cylindrical_Mirror(Mirror):

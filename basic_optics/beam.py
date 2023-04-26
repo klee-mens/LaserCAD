@@ -138,18 +138,21 @@ class Beam(Geom_Object):
         thetas = np.linspace(0, 2*np.pi, int(r*ring_number/radius)*6+1)        #thetas repersents the rotation angle of the ray
         for n in range(int(r*ring_number/radius)*6):
           our=self._rays[ray_counting]
-          self._rays[ray_counting].wavelength = self._Bwavelength
+          # self._rays[ray_counting].wavelength = self._Bwavelength
           our.from_h_alpha_theta(r, self._angle, thetas[n], self)            # rotate the ray which is not in the center
           our.name=self.name + "_outer_Ray" +str(ray_counting)
           ray_counting+=1
       else:
-        self._rays[ray_counting].wavelength = self._Bwavelength
+        # self._rays[ray_counting].wavelength = self._Bwavelength
         mr=self._rays[ray_counting]
         mr.set_geom(self.get_geom())
         mr.name = self.name + "_inner_Ray"
         ray_counting+=1
     # print(ray_counting) # ray_counting is the number of the rays.
     self._ray_count = ray_counting
+    print(ray_counting)
+    for r in range(0,self._ray_count):
+      self._rays[r].wavelength = self._Bwavelength
     self._distribution = "circular"
     self.draw_dict["model"] = "ray_group"
 
