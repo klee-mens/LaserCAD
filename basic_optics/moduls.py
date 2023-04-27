@@ -836,11 +836,11 @@ def Make_Amplifier_Typ_II_plane():
 
 
 
-def Make_Amplifier_Typ_II_with_theta():
+def Make_Amplifier_Typ_II_with_theta(roundtrips2=3):
   name="AmpTyp2s" 
   focal_length=600 
   magnification=1
-  roundtrips2=3
+  # roundtrips2=3
   aperture_small=1*inch 
   beam_sep=15
   aperture_big = beam_sep * (roundtrips2*2-1)

@@ -6,7 +6,10 @@ Created on Wed Aug 24 16:28:18 2022
 """
 
 
-from .utils import freecad_da, update_geom_info, get_DOC, rotate, thisfolder#,translate 
+from .utils import freecad_da, get_DOC, rotate, thisfolder
+# from .utils import update_geom_info as update_geom_info_NEW
+from .utils import update_geom_info
+# from .utils import update_pos_norm as update_geom_info ############ HACKY
 from .freecad_model_lens import model_lens
 from .freecad_model_composition import initialize_composition_old, add_to_composition
 import numpy as np
@@ -96,6 +99,7 @@ def model_round_mirror(name="mirror", dia=25, thickness=5, Radius=0, geom=None, 
   else:
     obj.ViewObject.Transparency = DEFAULT_TRANSPARENCY
   update_geom_info(obj, geom)
+  # update_geom_info_NEW(obj, geom) #################
 
   DOC = get_DOC()
   DOC.recompute()
@@ -182,6 +186,7 @@ def model_stripe_mirror(name="Stripe_Mirror", dia=75, Radius1=250, thickness=25,
   else:
     obj.ViewObject.Transparency = 0
   update_geom_info(obj, geom)
+  # update_geom_info_NEW(obj, geom) #################
 
   DOC = get_DOC()
   DOC.recompute()
@@ -259,24 +264,29 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
   mount_rotation = False
   additional_mount = None
   DOC = get_DOC()
-  if abs(geom[1][2])<DEFALUT_MAX_ANGULAR_OFFSET/180*np.pi:
-    geom[1][2]=0
+
+  POS = geom[0]
+  AXES = geom[1]
+  NORMAL = AXES[:,0]
+  
+  if abs(NORMAL[2])<DEFALUT_MAX_ANGULAR_OFFSET/180*np.pi:
+    NORMAL[2]=0
   else:
     print("this post should't be placed on the XY plane")
-  if abs(geom[1][1])<DEFALUT_MAX_ANGULAR_OFFSET/180*np.pi:
-    geom[1][1]=0
-  if abs(geom[1][0])<DEFALUT_MAX_ANGULAR_OFFSET/180*np.pi:
-    geom[1][0]=0
+  if abs(NORMAL[1])<DEFALUT_MAX_ANGULAR_OFFSET/180*np.pi:
+    NORMAL[1]=0
+  if abs(NORMAL[0])<DEFALUT_MAX_ANGULAR_OFFSET/180*np.pi:
+    NORMAL[0]=0
     if mount_type!="rooftop_mirror":
       mount_rotation=True
   if model_type=="Stripe":
     additional_mount = draw_stripe_mount(thickness=thickness,geom=geom)
     xshift = thickness-7
     yshift = 104.3
-    geom = (np.array((geom[0][0]+xshift*geom[1][0]-yshift*geom[1][1],
-                      geom[0][1]+yshift*geom[1][0]+xshift*geom[1][1],
-                      geom[0][2])),np.array((-geom[1][0],-geom[1][1],
-                      geom[1][2])))
+    geom = (np.array((POS[0]+xshift*NORMAL[0]-yshift*NORMAL[1],
+                      POS[1]+yshift*NORMAL[0]+xshift*NORMAL[1],
+                      POS[2])),np.array((-NORMAL[0],-NORMAL[1],
+                      NORMAL[2])))
     mount_type = "POLARIS-K2"
     dia =25.4*2
   if mount_type =="rooftop_mirror":
@@ -286,7 +296,7 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
     shiftvec=Vector(xshift,0,zshift)
     default=Vector(1,0,0)
     default_axis=Vector(0,1,0)
-    normal=Vector(geom[1])
+    normal=Vector(NORMAL)
     angle = default.getAngle(normal)
     if angle!=0:
       vec = default.cross(normal)
@@ -296,14 +306,14 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
       default_axis = default_axis/np.linalg.norm(default_axis)
     if angle==np.pi/180:
       shiftvec = -shiftvec
-    new_normal = Vector(geom[1])
+    new_normal = Vector(NORMAL)
     # new_normal = rotate_vector(shiftvec=new_normal,vec=default_axis,angle=45/180*np.pi)
-    new_pos = Vector(geom[0])+shiftvec
+    new_pos = Vector(POS)+shiftvec
     geom = (new_pos,new_normal)
     mount_type = "POLARIS-K2"
     dia =25.4*2
-    if abs(geom[1][2])<DEFALUT_MAX_ANGULAR_OFFSET/180*np.pi:
-      geom[1][2]=0
+    if abs(NORMAL[2])<DEFALUT_MAX_ANGULAR_OFFSET/180*np.pi:
+      NORMAL[2]=0
   if mount_type == "default":
     if dia<= 25.4/2:
       mount_type = "POLARIS-K05"
@@ -438,18 +448,23 @@ def draw_post_part(name="post_part", height=12,xshift=0, geom=None):
     A part which includes the post, the post holder and the slotted bases.
 
   """
-  if (geom[0][2]-height<34) or (geom[0][2]-height>190):
+  
+  POS = geom[0]
+  AXES = geom[1]
+  NORMAL = AXES[:,0]
+  
+  if (POS[2]-height<34) or (POS[2]-height>190):
     print("Warning, there is no suitable post holder and slotted base at this height")
   post_length=50
-  if geom[0][2]-height>110:
+  if POS[2]-height>110:
     post_length=100
-  elif geom[0][2]-height>90:
+  elif POS[2]-height>90:
     post_length=75
-  elif geom[0][2]-height>65:
+  elif POS[2]-height>65:
     post_length=50
-  elif geom[0][2]-height>55:
+  elif POS[2]-height>55:
     post_length=40
-  elif geom[0][2]-height>40:
+  elif POS[2]-height>40:
     post_length=30
   else:
     post_length=20
@@ -530,13 +545,18 @@ def draw_post_holder (name="PH50_M", height=0,xshift=0, geom=None):
 
   """
   
+  POS = geom[0]
+  AXES = geom[1]
+  NORMAL = AXES[:,0]
+  
   datei1 = thisfolder + "post\\post_holder\\" + name
   DOC = get_DOC()
   obj = DOC.addObject("Mesh::Feature", name)
   datei1 += ".stl"
   obj.Mesh = Mesh.Mesh(datei1)
   obj.Label = name
-  Geom_ground = (np.array((geom[0][0],geom[0][1],0)), np.array((geom[1])))
+  # Geom_ground = (np.array((POS[0],POS[1],0)), np.array((NORMAL)))
+  Geom_ground = (np.array((POS[0],POS[1],0)), np.eye(3))
   if name =="PH100_M":
     offset=Vector(xshift+4.3,-1.5,height+54)
     obj.Placement = Placement(offset, Rotation(90,0,90), Vector(0,0,0))
@@ -586,6 +606,10 @@ def draw_post_base(name="BA1L", height=0,xshift=0, geom=None):
     DESCRIPTION.
 
   """
+  
+  POS = geom[0]
+  AXES = geom[1]
+  NORMAL = AXES[:,0]
 
   datei1 = thisfolder + "post\\base\\" + name
   DOC = get_DOC()
@@ -593,7 +617,8 @@ def draw_post_base(name="BA1L", height=0,xshift=0, geom=None):
   datei1 += ".stl"
   obj.Mesh = Mesh.Mesh(datei1)
   obj.Label = name
-  Geom_ground = (np.array((geom[0][0],geom[0][1],0)), np.array((geom[1])))
+  # Geom_ground = (np.array((POS[0],POS[1],0)), np.array((NORMAL)))
+  Geom_ground = (np.array((POS[0],POS[1],0)), np.eye(3))
   if name == "BA1L":
     offset=Vector(xshift,0,height)
     obj.Placement = Placement(offset, Rotation(90,0,90), Vector(0,0,0))
@@ -634,10 +659,15 @@ def draw_post_special(name="TR50_M", height=12,xshift=0, geom=None):
   None.
 
   """
+  
+  POS = geom[0]
+  AXES = geom[1]
+  NORMAL = AXES[:,0]
+  
   datei1 = thisfolder + "post\\" + name
   DOC = get_DOC()
-  ground = np.array((geom[1][0],geom[1][1],0))
-  ground = ground/(pow(geom[1][0]**2+geom[1][1]**2,0.5))
+  ground = np.array((NORMAL[0],NORMAL[1],0))
+  ground = ground/(pow(NORMAL[0]**2+NORMAL[1]**2,0.5))
   obj = DOC.addObject("Mesh::Feature", name)
   datei1 += ".stl"
   obj.Mesh = Mesh.Mesh(datei1)
@@ -654,7 +684,7 @@ def draw_post_special(name="TR50_M", height=12,xshift=0, geom=None):
     offset=Vector(xshift,94.4,0)
     obj.Placement=Placement(Vector(offset), Rotation(0,-0,180), Vector(0,0,0))
     update_geom_info(obj, geom, off0=offset)
-    rotate(obj,Vector(0,1,0),180/pi*np.arctan(geom[1][2]/(pow(geom[1][0]**2+geom[1][1]**2,0.5))))
+    rotate(obj,Vector(0,1,0),180/pi*np.arctan(NORMAL[2]/(pow(NORMAL[0]**2+NORMAL[1]**2,0.5))))
   DOC.recompute()
   return obj
 
@@ -765,6 +795,11 @@ def draw_large_mount(thickness=30,geom=None):
     DESCRIPTION.
 
   """
+  
+  POS = geom[0]
+  AXES = geom[1]
+  NORMAL = AXES[:,0]
+  
   mesh = True
   datei = thisfolder + "mount_meshes\\special mount\\large mirror mount"
   if mesh:
@@ -778,12 +813,13 @@ def draw_large_mount(thickness=30,geom=None):
   offset=Vector(thickness-30,0,0)
   obj.Placement = Placement(offset, Rotation(0,0,0), Vector(0,0,0))
   update_geom_info(obj,geom,off0=offset)
-  if geom[0][2]>70:
-    Geom_ground = (np.array((geom[0][0],geom[0][1],0)), np.array((geom[1])))
+  if POS[2]>70:
+    # Geom_ground = (np.array((POS[0],POS[1],0)), np.array((NORMAL)))
+    Geom_ground = (np.array((POS[0],POS[1],0)), np.eye(3))
     obj1 = DOC.addObject("Part::Cylinder","Cylinder")
     obj1.Label = "Post"
     obj1.Radius = 38 #35.05
-    obj1.Height = geom[0][2]-70
+    obj1.Height = POS[2]-70
     offset1 = Vector(78.95+thickness-30,0,0)
     obj1.Placement = Placement(offset1, Rotation(0,0,0), Vector(0,0,0))
     update_geom_info(obj1, Geom_ground,off0=offset1)

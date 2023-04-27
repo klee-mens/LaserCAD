@@ -228,9 +228,14 @@ def lens_mount(mount_name="lens_mount", mount_type="MLH05_M",
   mesh = True
   mount_adjusted = False
   mount_in_database = False
+  
   DOC = get_DOC()
-  if abs(geom[1][2])<DEFALUT_MAX_ANGULAR_OFFSET/180*pi:
-    geom[1][2]=0
+  POS = geom[0]
+  AXES = geom[1]
+  NORMAL = AXES[:,0]
+  
+  if abs(NORMAL[2])<DEFALUT_MAX_ANGULAR_OFFSET/180*pi:
+    NORMAL[2]=0
   else:
     print("this post should't be placed on the XY plane")
   if mount_type == "default":
@@ -340,18 +345,23 @@ def draw_post_part(name="post_part", height=12,xshift=0, geom=None):
     A part which includes the post, the post holder and the slotted bases.
 
   """
-  if (geom[0][2]-height<34) or (geom[0][2]-height>190):
+  
+  POS = geom[0]
+  AXES = geom[1]
+  NORMAL = AXES[:,0]
+  
+  if (POS[2]-height<34) or (POS[2]-height>190):
     print("Warning, there is no suitable post holder and slotted base at this height")
   post_length=50
-  if geom[0][2]-height>110:
+  if POS[2]-height>110:
     post_length=100
-  elif geom[0][2]-height>85:
+  elif POS[2]-height>85:
     post_length=75
-  elif geom[0][2]-height>60:
+  elif POS[2]-height>60:
     post_length=50
-  elif geom[0][2]-height>50:
+  elif POS[2]-height>50:
     post_length=40
-  elif geom[0][2]-height>40:
+  elif POS[2]-height>40:
     post_length=30
   else:
     post_length=20
@@ -430,13 +440,18 @@ def draw_post_holder (name="PH50_M", height=12,xshift=0, geom=None):
     DESCRIPTION.
 
   """
+  POS = geom[0]
+  AXES = geom[1]
+  NORMAL = AXES[:,0]
+  
   datei1 = thisfolder + "post\\post_holder\\" + name
   DOC = get_DOC()
   obj = DOC.addObject("Mesh::Feature", name)
   datei1 += ".stl"
   obj.Mesh = Mesh.Mesh(datei1)
   obj.Label = name
-  Geom_ground = (np.array((geom[0][0],geom[0][1],0)), np.array((geom[1])))
+  # Geom_ground = (np.array((POS[0],POS[1],0)), np.array((NORMAL)))
+  Geom_ground = (np.array((POS[0],POS[1],0)), np.eye(3))
   if name =="PH100_M":
     offset=Vector(xshift+4.3,-1.5,height+54)
     obj.Placement = Placement(offset, Rotation(90,0,90), Vector(0,0,0))
@@ -493,7 +508,13 @@ def draw_post_base(name="BA1L", height=12,xshift=0, geom=None):
   datei1 += ".stl"
   obj.Mesh = Mesh.Mesh(datei1)
   obj.Label = name
-  Geom_ground = (np.array((geom[0][0],geom[0][1],0)), np.array((geom[1])))
+  
+  POS = geom[0]
+  AXES = geom[1]
+  NORMAL = AXES[:,0]
+  
+  # Geom_ground = (np.array((POS[0],POS[1],0)), np.array((NORMAL)))
+  Geom_ground = (np.array((POS[0],POS[1],0)), np.eye(3))
   if name == "BA1L":
     offset=Vector(xshift,0,height)
     obj.Placement = Placement(offset, Rotation(90,0,90), Vector(0,0,0))

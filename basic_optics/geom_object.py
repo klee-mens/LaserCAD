@@ -27,13 +27,13 @@ def rotation_matrix(vec, phi):
 	vec *= 1/v_abs
 	rot_mat = np.eye(3)
 	rot_mat[0,0] = vec[0]*vec[0]*(1-np.cos(phi)) + np.cos(phi)
-	rot_mat[0,1] = vec[1]*vec[0]*(1-np.cos(phi)) + vec[2]*np.sin(phi)
-	rot_mat[0,2] = vec[2]*vec[0]*(1-np.cos(phi)) - vec[1]*np.sin(phi)
-	rot_mat[1,0] = vec[0]*vec[1]*(1-np.cos(phi)) - vec[2]*np.sin(phi)
+	rot_mat[1,0] = vec[1]*vec[0]*(1-np.cos(phi)) + vec[2]*np.sin(phi)
+	rot_mat[2,0] = vec[2]*vec[0]*(1-np.cos(phi)) - vec[1]*np.sin(phi)
+	rot_mat[0,1] = vec[0]*vec[1]*(1-np.cos(phi)) - vec[2]*np.sin(phi)
 	rot_mat[1,1] = vec[1]*vec[1]*(1-np.cos(phi)) + np.cos(phi)
-	rot_mat[1,2] = vec[2]*vec[1]*(1-np.cos(phi)) + vec[0]*np.sin(phi)
-	rot_mat[2,0] = vec[0]*vec[2]*(1-np.cos(phi)) + vec[1]*np.sin(phi)
-	rot_mat[2,1] = vec[1]*vec[2]*(1-np.cos(phi)) - vec[0]*np.sin(phi)
+	rot_mat[2,1] = vec[2]*vec[1]*(1-np.cos(phi)) + vec[0]*np.sin(phi)
+	rot_mat[0,2] = vec[0]*vec[2]*(1-np.cos(phi)) + vec[1]*np.sin(phi)
+	rot_mat[1,2] = vec[1]*vec[2]*(1-np.cos(phi)) - vec[0]*np.sin(phi)
 	rot_mat[2,2] = vec[2]*vec[2]*(1-np.cos(phi)) + np.cos(phi)
 	return rot_mat
 
@@ -245,7 +245,7 @@ class Geom_Object(object):
     corresponds to rotation around y-axis by 45°.
     
     """
-    rot_mat = rotation_matrix(vec, -phi)
+    rot_mat = rotation_matrix(vec, phi)
     new_ax = np.matmul(rot_mat, self._axes)
     self.set_axes(new_ax) 
 
@@ -264,26 +264,26 @@ class Geom_Object(object):
 
   def get_geom(self):
     """
-    gibt das so genannte geom = (pos, normal) zurück, einfach nur ein Tupel aus 
-    <pos> und <normal>, wichtig zur geometrischen Definition der meisten Objekte
+    gibt das so genannte geom = (pos, axes) zurück, einfach nur ein Tupel aus 
+    <pos> und <axes>, wichtig zur geometrischen Definition der meisten Objekte
     
     returns the so-called geom, simply a tuple of <pos> and 
-    <normal>, important for the geometric definition of most objects
+    <axes>, important for the geometric definition of most objects
     """
-    return (self.pos, self.normal)
+    return (self.pos, self.get_axes())
 
   def set_geom(self, geom):
     """
-    setzt (pos, normal) auf geom indem es die entsprechenden setter Funktionen
+    setzt (pos, axes) auf geom indem es die entsprechenden setter Funktionen
     aufruft
 
     Parameters
     ----------
     geom : 2-dim Tupel aus 3-D float arrays
-      (pos, normal)
+      (pos, axes)
     """
     self.pos = np.array(geom[0])
-    self.normal = np.array(geom[1])
+    self.set_axes(geom[1])
     
   def update_draw_dict(self):
     """

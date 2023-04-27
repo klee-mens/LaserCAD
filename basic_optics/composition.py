@@ -66,7 +66,7 @@ class Composition(Opt_Element):
 
   def last_geom(self):
     end_of_axis = self.__optical_axis[-1]
-    return (end_of_axis.endpoint(), end_of_axis.normal)
+    return (end_of_axis.endpoint(), end_of_axis.get_axes())
 
   def __add_raw(self, item):
     # #checken ob Elm schon mal eingefügt

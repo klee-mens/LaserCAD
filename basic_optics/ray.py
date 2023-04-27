@@ -179,7 +179,9 @@ class Ray(Geom_Object):
     element : geom_object
     """
     self.set_geom(element.get_geom())
-    pos, norm = element.get_geom()
+    # pos, norm = element.get_geom()
+    # pos = element.pos
+    # norm = element.normal
     xa, ya, za = element.get_coordinate_system()
     vec_in_eb = za*np.cos(theta) - ya*np.sin(theta)
     self.pos += vec_in_eb*h

@@ -105,10 +105,65 @@ def set_normal(obj, normal, off0=0):
   rotate(obj, vec, angle, off0)
   return obj.Placement
 
+# def update_geom_info(obj, geom_info, off0=0):
+#   if geom_info != None:
+#     pos = Vector(geom_info[0])
+#     normal = Vector(geom_info[1])
+#     set_normal(obj, normal, off0)
+#     translate(obj, pos)
+
+def update_pos_norm(obj, pos_norm=None, off0=0):
+  if pos_norm != None:
+    pos = Vector(pos_norm[0])
+    normal = Vector(pos_norm[1])
+    set_normal(obj, normal, off0)
+    translate(obj, pos)
+
+
+def vec_phi_from_matrix(matrix):
+  """
+  Computes the rotation vector <vec> and angle <phi> from a given rotation 
+  matrix. See "https://en.wikipedia.org/wiki/Rotation_matrix"
+
+  Parameters
+  ----------
+  matrix : TYPE rotation matrix
+
+  Returns
+  -------
+  phi, vec
+  """
+  val, vecs = np.linalg.eig(matrix)
+  arg = ( np.trace(matrix)-1 ) / 2
+  if arg > 1:
+    # print("arg-gedöns:", arg)
+    arg = 1
+  elif arg < -1:
+    # print("arg-gedöns:", arg)
+    arg = -1
+  phi = np.arccos(arg)
+  for n in range(3):
+    vec = vecs[:,n]
+    if np.all(np.isreal(vec)):
+      vec = np.real(vec)
+      break
+  # determine sign of phi
+  a = vec[0]*vec[1]*(1-np.cos(phi)) - vec[2]*np.sin(phi)
+  b = matrix[0,1]
+  if np.isclose(a, b):
+    return vec, phi
+  else:
+    return vec, -phi
+  # print("something is strange with this rotation matrix")
+  # return None
+
+
 def update_geom_info(obj, geom_info, off0=0):
   if geom_info != None:
     pos = Vector(geom_info[0])
-    normal = Vector(geom_info[1])
-    set_normal(obj, normal, off0)
-    translate(obj, pos)
-    
+    axes = geom_info[1]
+    rotvec, phi = vec_phi_from_matrix(axes)
+    rotvec = Vector(rotvec)
+    phi *= 180/np.pi
+    place0 = obj.Placement
+    obj.Placement = Placement(pos, Rotation(rotvec,phi), Vector(0,0,0)).multiply(place0)
