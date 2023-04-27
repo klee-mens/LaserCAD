@@ -127,14 +127,14 @@ class Opt_Element(Geom_Object):
     scpr = np.sum(km*k)
     newk = k-2*scpr*km
     p0 = ray2.pos
-    if np.std(ray2.normal-self.normal)<TOLERANCE and np.std(p0-self.pos)<TOLERANCE:
-      ray2.pos = p0
-      a=ray2.normal
-      a=a*-1
-      ray3 = Ray(name = ray2.name)
-      ray3.pos = p0
-      ray3.normal = a
-      return ray3
+    # if np.std(ray2.normal-self.normal)<TOLERANCE and np.std(p0-self.pos)<TOLERANCE:
+    #   ray2.pos = p0
+    #   a=ray2.normal
+    #   a=a*-1
+    #   ray3 = Ray(name = ray2.name)
+    #   ray3.pos = p0
+    #   ray3.normal = a
+    #   return ray3
     ray2.normal = newk
     # print("REFL", k, km, scpr, newk, ray2.normal)
     return ray2

@@ -271,14 +271,14 @@ class Curved_Mirror(Mirror):
     surface_norm = p0 - center #Normale auf Spiegeloberfläche in p0 
     surface_norm *= 1/np.linalg.norm(surface_norm) #normieren
     #Reflektionsgesetz
-    if np.std(ray2.normal-self.normal)<TOLERANCE and np.std(p0-self.pos)<TOLERANCE:
-      ray2.pos = p0
-      a=ray2.normal
-      a=a*-1
-      ray3 = Ray(name = ray2.name)
-      ray3.pos = p0
-      ray3.normal = a
-      return ray3
+    # if np.std(ray2.normal-self.normal)<TOLERANCE and np.std(p0-self.pos)<TOLERANCE:
+    #   ray2.pos = p0
+    #   a=ray2.normal
+    #   a=a*-1
+    #   ray3 = Ray(name = ray2.name)
+    #   ray3.pos = p0
+    #   ray3.normal = a
+    #   return ray3
     ray2.normal = ray.normal - 2*np.sum(ray.normal*surface_norm)*surface_norm
     ray2.pos = p0
     return ray2
