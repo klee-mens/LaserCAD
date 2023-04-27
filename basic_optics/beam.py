@@ -56,7 +56,7 @@ class Beam(Geom_Object):
     else:
       # Abortion
       print("Distribution tpye not know. Beam not valid.")
-      print("Allowed distribution types are: 'cone', 'square', 'circular'")
+      print("Allowed distribution types are: 'cone', 'square', 'circular', 'Gaussian'")
       self = -1
       return None
     
@@ -150,7 +150,7 @@ class Beam(Geom_Object):
         ray_counting+=1
     # print(ray_counting) # ray_counting is the number of the rays.
     self._ray_count = ray_counting
-    print(ray_counting)
+    # print(ray_counting)
     for r in range(0,self._ray_count):
       self._rays[r].wavelength = self._Bwavelength
     self._distribution = "circular"

@@ -236,10 +236,13 @@ lightsource.override_rays(rays)
 
 newlightsource0 = Beam(radius=1, angle=0,wavelength=lam_mid)
 newlightsource0.make_circular_distribution(ring_number=3)
+
 newlightsource1 = Beam(radius=1, angle=0,wavelength=lam_mid+delta_lamda/2)
 newlightsource1.make_circular_distribution(ring_number=3)
+  
 newlightsource2 = Beam(radius=1, angle=0,wavelength=lam_mid-delta_lamda/2)
 newlightsource2.make_circular_distribution(ring_number=3)
+  
 newlightsource = Beam(radius=0, angle=0)
 rays = []
 for wavel in range(0,newlightsource0._ray_count):
@@ -289,11 +292,19 @@ point0 = p_grat - (0,0,periscope_distance)
 point1 = M1.pos + (100,0,0)
 M1.set_normal_with_2_points([point0], point1)
 
-M3 = Curved_Mirror(radius=2500, name="Concav_Mirror")
-# M3 = Mirror()
+# M3 = Curved_Mirror(radius=2500, name="Concav_Mirror")
+M3 = Mirror()
 M3.aperture = 25.4/2
-M3.pos = p_grat - 500 * vec
-M3.normal = -vec
+M3.pos = p_grat - 400 * vec
+# M3.normal = -vec
+point0 = p_grat
+point1 = M3.pos + (-100,0,0)
+M3.set_normal_with_2_points(point0, point1)
+
+Curved_Mirror2 = Curved_Mirror(radius=2500, name="Concav_Mirror")
+Curved_Mirror2.aperture = 25.4*2
+Curved_Mirror2.pos = M3.pos + (-100,0,0)
+Curved_Mirror2.normal = (-1,0,0)
 
 fixlens1 = Lens(f=100)
 fixlens1.aperture = 25.4/2
@@ -305,10 +316,10 @@ fixlens2.aperture = 25.4/2
 fixlens2.pos = p_grat - 425 * vec
 fixlens2.normal = vec
 
-M2 = Curved_Mirror(radius=2500, name="Concav_Mirror")
-M2.aperture = 25.4*2
-M2.pos = M1.pos + (250,0,0)
-M2.normal = (1,0,0)
+Curved_Mirror1 = Curved_Mirror(radius=2500, name="Concav_Mirror")
+Curved_Mirror1.aperture = 25.4*2
+Curved_Mirror1.pos = M1.pos + (250,0,0)
+Curved_Mirror1.normal = (1,0,0)
 # point0 = M1.pos
 # point1 = p_grat - (-100,0,periscope_distance)
 # M2.set_normal_with_2_points([point0], point1)
@@ -317,7 +328,7 @@ Cavity1 = Curved_Mirror(radius=500, name="Concav_Mirror")
 Cavity1.pos = point1
 Cavity1.aperture = 25.4*2
 # Concav1.normal = (-1,0,0)
-point0 = M2.pos
+point0 = Curved_Mirror1.pos
 point1 = Cavity1.pos + (100,0,0)
 Cavity1.set_normal_with_2_points(point0, point1)
 
@@ -327,7 +338,7 @@ Cavity2.aperture = 25.4*2
 Cavity2.normal = (1,0,0)
 
 ip = Intersection_plane(dia=100)
-ip.pos = p_grat + vec*1000
+ip.pos = p_grat + vec*500
 ip.normal = vec
 
 # pure_cosmetic.draw = useless
@@ -336,7 +347,7 @@ M1.pos = M1.pos-(0,0,4)
 
 Stretcher = Composition(name="Strecker", pos=pos0, normal=vec)
 
-Stretcher.set_light_source(newlightsource0)
+Stretcher.set_light_source(newlightsource)
 Stretcher.add_fixed_elm(Grat)
 Stretcher.add_fixed_elm(Concav1)
 Stretcher.add_fixed_elm(StripeM)
@@ -346,10 +357,11 @@ Stretcher.add_fixed_elm(flip_mirror1)
 Stretcher.add_fixed_elm(Concav3)
 Stretcher.add_fixed_elm(Concav4)
 Stretcher.add_fixed_elm(M1)
-Stretcher.add_fixed_elm(M2)
+Stretcher.add_fixed_elm(Curved_Mirror1)
 # Stretcher.add_fixed_elm(Concav1)
 # Stretcher.add_fixed_elm(Concav2)
 Stretcher.add_fixed_elm(M3)
+Stretcher.add_fixed_elm(Curved_Mirror2)
 Stretcher.add_fixed_elm(ip)
 # Stretcher.add_fixed_elm(fixlens1)
 # Stretcher.add_fixed_elm(fixlens2)
@@ -360,24 +372,59 @@ Stretcher.add_fixed_elm(pure_cosmetic)
 #   Stretcher.add_fixed_elm(item)
 
 
-seq = [0,1,2,3,0,4,5,0,6,2,7,0,8,9,8,0,7,2,6,0,5,4,0,3,2,1,0,10]
+seq = [0,1,2,3,0,4,5,0,6,2,7,0,8,9,8,0,7,2,6,0,5,4,0,3,2,1,0,10,11,10]
 # seq = [0,1,2,1,0, 3]
 
 # seq = [0,1,2,3,0, 4, 5, 6, 2, 7, 0]
 
 roundtrip_sequence = seq
-roundtrip=1
+
+roundtrip=7
 for n in range(roundtrip-1):
-  seq.extend(roundtrip_sequence)
-seq.extend([11])
+  seq.extend([0,1,2,3,0,4,5,0,6,2,7,0,8,9,8,0,7,2,6,0,5,4,0,3,2,1,0,10,11,10])
+# seq.extend([0,1,2,3,0,4,5,0,6,2,7,0,8,9,8,0,7,2,6,0,5,4,0,3])
+seq.extend([12])
 Stretcher.set_sequence(seq)
-Stretcher.propagate(500)
+Stretcher.propagate(100)
 Stretcher.pos = (0,0,100)
-Stretcher.draw_elements()
-Stretcher.draw_mounts()
+# Stretcher.draw_elements()
+# Stretcher.draw_mounts()
 # Stretcher.draw_beams()
-Stretcher.draw_beams(style="ray_group")
-ip.spot_diagram(Stretcher._beams[-1])
+# Stretcher.draw_beams(style="ray_group")
+# ip.spot_diagram(Stretcher._beams[-1])
+
+# newbeam = Stretcher._beams[-1]
+# newbeam1= Grat.next_beam(newbeam)
+# newbeam2= Concav1.next_beam(newbeam1)
+# newbeam3= StripeM.next_beam(newbeam2)
+# newbeam4= Concav2.next_beam(newbeam3)
+# newbeam5= Grat.next_beam(newbeam4)
+# newbeam6= flip_mirror2.next_beam(newbeam5)
+# newbeam7= flip_mirror1.next_beam(newbeam6)
+# newbeam8= Grat.next_beam(newbeam7)
+# newbeam9= Concav3.next_beam(newbeam8)
+# newbeam10=StripeM.next_beam(newbeam9)
+# newbeam11=Concav4.next_beam(newbeam10)
+# newbeam12=Grat.next_beam(newbeam11)
+
+# newbeam.draw()
+# Grat.draw()
+# StripeM.draw()
+# Concav1.draw()
+# Concav2.draw()
+# Concav3.draw()
+# newbeam1.draw()
+# newbeam2.draw()
+# newbeam3.draw()
+# newbeam4.draw()
+# newbeam5.draw()
+# newbeam6.draw()
+# newbeam7.draw()
+# newbeam8.draw()
+# newbeam9.draw()
+# newbeam10.draw()
+# newbeam11.draw()
+# newbeam12.draw()
 
 # results = all_moduls_test()
 

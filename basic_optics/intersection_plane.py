@@ -13,6 +13,7 @@ from .beam import Beam #,RayGroup
 import matplotlib.pyplot as plt
 # from .freecad_models import model_intersection_plane,iris_post
 from .freecad_models import model_intersection_plane
+from .freecad_models.freecad_model_ray import RAY_COLOR
 
 
 class Intersection_plane(Opt_Element):
@@ -55,13 +56,23 @@ class Intersection_plane(Opt_Element):
       """
     point_x = []
     point_y = []
+    point_c = []
     # if isinstance(beam, RayGroup) or isinstance(beam, Beam):
     if isinstance(beam, Beam):
       rays = beam.get_all_rays()
     else:
       rays = beam
+    cmap = plt.cm.gist_rainbow
     for point_i in rays:
       intersection_point = point_i.intersection(self)
+      lamuda = point_i.wavelength
+      if lamuda>=400e-6 and lamuda<=780e-6:
+        c = cmap((lamuda-400e-6)/380e-6)
+      elif 'color' in point_i.draw_dict:
+        c = point_i.draw_dict["color"]
+      else:
+        c=RAY_COLOR
+      point_c.append(c)
       pos_diff = intersection_point - self.pos
       if self.draw_dict["dia"]**2<pos_diff[1]**2+pos_diff[2]**2:
         self.draw_dict["dia"] = pow(pos_diff[1]**2+pos_diff[2]**2,0.5)
@@ -69,7 +80,9 @@ class Intersection_plane(Opt_Element):
       point_x.append(pos_diff[1])
       point_y.append(pos_diff[2])
     plt.figure()
-    plt.scatter(point_x,point_y)
+    area = (20 * np.random.rand(37))**2
+    c = np.sqrt(area)
+    plt.scatter(point_x,point_y,c=point_c)
     plt.xlabel("x-axis, or y-axis if you follow the 3D coordinate (mm)")
     plt.ylabel("y-axis, or z-axis if you follow the 3D coordinate (mm)")
     plt.title("The spot diagram at " + self.name)

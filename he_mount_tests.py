@@ -101,13 +101,23 @@ point0 = (100,0,0)
 point1 = (0,100,0)
 M3.set_normal_with_2_points(point0, point1)
 gb2 = M3.next_beam(gb1)
-# gb1.draw()
-print(M3.normal)
-# gb2.draw()
 M3.normal *=-1
-print(M3.normal)
-# ray2 = M3.next_ray(ray0)
-# ray0.draw()
+# gb1.draw()
+# print(M3.normal)
+# gb2.draw()
+ray1 = Ray(pos = [ -0.41797817  , 9.29026066 ,-19.40315812],normal=[ 0.87347155  ,0.48601921 ,-0.02885788])
+ray1.length=600
+Radius = 600
+StripeM = Cylindrical_Mirror(radius= -Radius/2, name="Stripe_Mirror")
+StripeM.pos = (Radius/2, 0, 0)
+#Cosmetics
+StripeM.aperture=100
+StripeM.draw_dict["height"]=9
+StripeM.draw_dict["thickness"]=50
+StripeM.draw_dict["model_type"]="Stripe"
+ray1.draw()
+StripeM.draw()
+# print(M3.normal)
 
 # ray2.draw()
 if freecad_da:
