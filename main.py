@@ -32,9 +32,12 @@ import numpy as np
 
 from basic_optics.moduls import Make_Amplifier_Typ_II_Juergen
 
-amp = Make_Amplifier_Typ_II_Juergen()
-amp.draw()
+# amp = Make_Amplifier_Typ_II_Juergen()
+# amp.draw()
 
+from basic_optics.resonator import Resonator
+
+res = Resonator()
 
 
 
