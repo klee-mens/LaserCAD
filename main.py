@@ -33,6 +33,15 @@ import numpy as np
 from basic_optics.moduls import Make_Amplifier_Typ_II_Juergen
 from basic_optics.tests import all_moduls_test
 
+
+# amp = Make_Amplifier_Typ_II_Juergen()
+# amp.draw()
+
+from basic_optics.beam import Gaussian_Beam
+
+gb = Gaussian_Beam()
+gb.draw()
+
 # all_moduls_test()
 
 # amp = Make_Amplifier_Typ_II_Juergen()

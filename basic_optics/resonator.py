@@ -21,6 +21,7 @@ class Resonator(Composition):
   def __init__(self, **kwargs):
     super().__init__(**kwargs)
     self._outputcoupler_index = 0
+    self.wavelength = 1030e-6 #Yb in mm
     
   def add_outputcoupler(self, item):
     if type(item) == type(Mirror()):
@@ -50,10 +51,10 @@ class Resonator(Composition):
     noe = len(self._elements)
     seq = [x for x in range(noe)]
     seq.extend([x for x in range(noe-2, 0, -1)])
+    prop = np.linalg.norm(self._elements[0].pos-self._elements[1].pos)
+    self._last_prop = prop
     self.set_sequence(seq)
-    self._last_prop = np.linalg.norm(self._elements[0].pos-self._elements[1].pos)
     matrix = self.matrix()
-    print("MATRIX:", matrix)
     A = matrix[0,0]
     B = matrix[0,1]
     C = matrix[1,0]
@@ -65,4 +66,5 @@ class Resonator(Composition):
       return -1
     else:
       z0 = np.sqrt(E)
-      return (z, z0)
+      q_para = (z +1j*z0)
+      return q_para

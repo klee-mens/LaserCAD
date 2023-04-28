@@ -52,6 +52,8 @@ def model_mirror(model_type="DEFAULT", **kwargs):
     obj = model_round_mirror(**kwargs)
   elif model_type == "Stripe":
     obj = model_stripe_mirror(**kwargs)
+  elif model_type == "Rooftop":
+    obj = model_rooftop_mirror(**kwargs)
      
   return obj
 
@@ -103,7 +105,7 @@ def model_round_mirror(name="mirror", dia=25, thickness=5, Radius=0, geom=None, 
 
 
 def model_stripe_mirror(name="Stripe_Mirror", dia=75, Radius1=250, thickness=25, 
-                        height=10, geom=None, **kwargs):
+                        height=10, geom=None, pos=0, axes = "somthing", **kwargs):
   """
     
 
@@ -139,27 +141,33 @@ def model_stripe_mirror(name="Stripe_Mirror", dia=75, Radius1=250, thickness=25,
   """
   
   Radius1 *= -1
-  a = 1 if Radius1>0 else 0
+  a = 1 if Radius1>0 else -1
 
   obj = DOC.addObject('PartDesign::Body', name)
   sketch = obj.newObject('Sketcher::SketchObject', name+'_sketch')
   #sketch.Support = (DOC.getObject('XY_Plane'),[''])
   sketch.MapMode = 'FlatFace'
-
-  sketch.addGeometry(Part.ArcOfCircle(Part.Circle(Vector(Radius1,0,0),Vector(0,0,1),abs(Radius1)),0.9*a*pi,0.9*a*pi+0.2*pi),False)
-  sketch.addConstraint(Sketcher.Constraint('PointOnObject',-1,1,0)) 
-  sketch.addConstraint(Sketcher.Constraint('Symmetric',0,1,0,2,-1)) 
-  sketch.addConstraint(Sketcher.Constraint('Radius',0,Radius1)) 
-  sketch.addConstraint(Sketcher.Constraint('DistanceY',0,2,0,1,dia)) 
-
-
-  sketch.addGeometry(Part.LineSegment(Vector(1.0,dia/2,0.0),Vector(thickness,dia/2,0.0)),False)
+  if a == 1:
+    sketch.addGeometry(Part.ArcOfCircle(Part.Circle(Vector(Radius1,0,0),Vector(0,0,1),abs(Radius1)),0.9*a*pi,0.9*a*pi+0.2*pi),False)
+    sketch.addConstraint(Sketcher.Constraint('PointOnObject',-1,1,0)) 
+    sketch.addConstraint(Sketcher.Constraint('Symmetric',0,1,0,2,-1)) 
+    sketch.addConstraint(Sketcher.Constraint('Radius',0,Radius1)) 
+    sketch.addConstraint(Sketcher.Constraint('DistanceY',0,2,0,1,dia)) 
+  else:
+    sketch.addGeometry(Part.ArcOfCircle(Part.Circle(Vector(Radius1,0,0),Vector(0,0,1),abs(Radius1)),np.arcsin(dia/(2*-Radius1)),-np.arcsin(dia/(2*-Radius1))),False)
+    sketch.addConstraint(Sketcher.Constraint('DistanceX',0,3,-1,1,-Radius1)) 
+    sketch.addConstraint(Sketcher.Constraint('PointOnObject',0,3,-1)) 
+    sketch.addConstraint(Sketcher.Constraint('DistanceY',-1,1,0,2,dia/2)) 
+    sketch.addConstraint(Sketcher.Constraint('DistanceY',0,1,-1,1,dia/2)) 
+    sketch.addConstraint(Sketcher.Constraint('Radius',0,-Radius1)) 
+  xx = Radius1-pow(Radius1**2-(dia/2)**2,0.5)
+  sketch.addGeometry(Part.LineSegment(Vector(a*xx,dia/2,0.0),Vector(thickness,dia/2,0.0)),False)
   sketch.addConstraint(Sketcher.Constraint('Coincident',1,1,0,1)) 
   sketch.addConstraint(Sketcher.Constraint('Horizontal',1)) 
   sketch.addGeometry(Part.LineSegment(Vector(thickness,dia/2,0.0),Vector(thickness,-dia/2,0.0)),False)
   sketch.addConstraint(Sketcher.Constraint('Coincident',2,1,1,2)) 
   sketch.addConstraint(Sketcher.Constraint('Vertical',2)) 
-  sketch.addGeometry(Part.LineSegment(Vector(thickness,-dia/2,0),Vector(1,-dia/2,0)),False)
+  sketch.addGeometry(Part.LineSegment(Vector(thickness,-dia/2,0),Vector(a*xx,-dia/2,0)),False)
   sketch.addConstraint(Sketcher.Constraint('Coincident',3,1,2,2)) 
   sketch.addConstraint(Sketcher.Constraint('Coincident',3,2,0,2)) 
   sketch.addConstraint(Sketcher.Constraint('Horizontal',3)) 
@@ -172,6 +180,8 @@ def model_stripe_mirror(name="Stripe_Mirror", dia=75, Radius1=250, thickness=25,
   pad.Midplane = 1
   sketch.Visibility = False
   
+  # obj.Placement = Placement(Vector(0,0,0), Rotation(0,0,90), Vector(0,0,0))
+  
   if "color" in kwargs.keys():
     obj.ViewObject.ShapeColor = kwargs["color"]
   else:
@@ -180,10 +190,80 @@ def model_stripe_mirror(name="Stripe_Mirror", dia=75, Radius1=250, thickness=25,
   if "transparency" in kwargs.keys():
     obj.ViewObject.Transparency = kwargs["transparency"]
   else:
-    obj.ViewObject.Transparency = 0
+    obj.ViewObject.Transparency = DEFAULT_TRANSPARENCY
   update_geom_info(obj, geom)
 
   DOC = get_DOC()
+  DOC.recompute()
+  
+  return obj
+
+
+def model_rooftop_mirror(name="rooftop_mirror",dia=0, geom=None, **kwargs):
+  """
+  draw a rooftop mirror
+
+  Parameters
+  ----------
+  name : TYPE, optional
+    mirror name. The default is "rooftop_mirror".
+  dia : TYPE, optional
+    the periscope distance, which will deside the pos of mirror.
+    The default is 0.
+  geom : TYPE, optional
+    DESCRIPTION. The default is None.
+  **kwargs : TYPE
+    DESCRIPTION.
+
+  Returns
+  -------
+  obj : TYPE
+    DESCRIPTION.
+    
+  example:
+      stripe_mirror= model_rooftop_mirror(name="rooftop_mirror",dia=0, 
+                                          geom=None, **kwargs)
+  """
+
+  DOC = get_DOC()
+  obj = DOC.addObject('PartDesign::Body', name)
+  sketch = obj.newObject('Sketcher::SketchObject', name+'_sketch')
+  # sketch.Support = (DOC.getObject('XY_Plane'),[''])
+  sketch.MapMode = 'FlatFace'
+
+  sketch.addGeometry(Part.LineSegment(Vector(0,0,0),Vector(24.748737,24.748737,0)),False)
+  sketch.addConstraint(Sketcher.Constraint('Coincident',-1,1,0,1)) 
+  sketch.addGeometry(Part.LineSegment(Vector(24.748737,24.748737,0),Vector(24.748737,-24.748737,0)),False)
+  sketch.addConstraint(Sketcher.Constraint('Coincident',0,2,1,1)) 
+  sketch.addConstraint(Sketcher.Constraint('Vertical',1)) 
+  sketch.addGeometry(Part.LineSegment(Vector(24.748737,-24.748737,0),Vector(0,0,0)),False)
+  sketch.addConstraint(Sketcher.Constraint('Coincident',1,2,2,1)) 
+  sketch.addConstraint(Sketcher.Constraint('Coincident',2,2,0,1)) 
+  sketch.addConstraint(Sketcher.Constraint('Angle',-1,1,0,1,45/180*np.pi)) 
+  sketch.addConstraint(Sketcher.Constraint('Angle',2,2,-1,1,45/180*np.pi)) 
+  sketch.addConstraint(Sketcher.Constraint('Distance',0,35)) 
+  
+
+  pad = obj.newObject('PartDesign::Pad','Pad')
+  pad.Profile = sketch
+  pad.Length = 90
+  pad.ReferenceAxis = (sketch,['N_Axis'])
+  pad.Midplane = 1
+  sketch.Visibility = False
+  
+  if "color" in kwargs.keys():
+    obj.ViewObject.ShapeColor = kwargs["color"]
+  else:
+    # obj.ViewObject.ShapeColor = (204/255, 204/255, 204/255)
+    obj.ViewObject.ShapeColor = DEFAULT_COLOR
+  if "transparency" in kwargs.keys():
+    obj.ViewObject.Transparency = kwargs["transparency"]
+  else:
+    obj.ViewObject.Transparency = DEFAULT_TRANSPARENCY+20
+  offset=Vector(dia/2,0,0)
+  obj.Placement = Placement(offset, Rotation(0,-180,90), Vector(0,0,0))
+  update_geom_info(obj, geom, off0=offset)
+  # DOC = get_DOC()
   DOC.recompute()
   
   return obj
@@ -194,12 +274,9 @@ def model_stripe_mirror(name="Stripe_Mirror", dia=75, Radius1=250, thickness=25,
 
 
 
-
-
-
 def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
                  mount_type="default", geom=None, only_info=False, 
-                 drawing_post=True, dia=25.4,thickness=30, **kwargs):
+                 drawing_post=True,base_exists=False, dia=25.4,thickness=30, **kwargs):
   """
     Build the mirror mount, post, post holder and slotted bases of the mirror
 
@@ -262,13 +339,14 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
   if abs(geom[1][2])<DEFALUT_MAX_ANGULAR_OFFSET/180*np.pi:
     geom[1][2]=0
   else:
-    print("this post should't be placed on the XY plane")
+    if mount_type!="rooftop_mirror":
+      mount_rotation=True
+      print("this post should't be placed on the XY plane")
   if abs(geom[1][1])<DEFALUT_MAX_ANGULAR_OFFSET/180*np.pi:
     geom[1][1]=0
   if abs(geom[1][0])<DEFALUT_MAX_ANGULAR_OFFSET/180*np.pi:
     geom[1][0]=0
-    if mount_type!="rooftop_mirror":
-      mount_rotation=True
+    
   if model_type=="Stripe":
     additional_mount = draw_stripe_mount(thickness=thickness,geom=geom)
     xshift = thickness-7
@@ -349,7 +427,8 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
     xshift=0
     new_mount = building_mount(Radius1=dia/2,height=height,geom=geom)
     if  drawing_post:
-      post_part=draw_post_part(name="post_part", height=height,xshift=xshift, geom=geom)
+      post_part=draw_post_part(name="post_part",base_exists=base_exists,
+                               height=height,xshift=xshift, geom=geom)
     else:
       DOC.recompute()
       return new_mount
@@ -375,7 +454,6 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
     
   if mount_rotation:
     #obj.Placement = Placement(Vector(0,0,0), Rotation(0,0,90), Vector(0,0,0))
-    
     if  drawing_post:
       post = draw_post_special(name="TR50_M", height=50+height,xshift=xshift,
                         geom=geom)
@@ -404,7 +482,8 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
   obj.Label = mount_name
   
   if  drawing_post:
-    post_part=draw_post_part(name="post_part", height=height,xshift=xshift, geom=geom)
+    post_part=draw_post_part(name="post_part",base_exists=base_exists,
+                             height=height,xshift=xshift, geom=geom)
   else:
     DOC.recompute()
     return obj
@@ -414,7 +493,7 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
   DOC.recompute()
   return part
 
-def draw_post_part(name="post_part", height=12,xshift=0, geom=None):
+def draw_post_part(name="post_part", base_exists=False, height=12,xshift=0, geom=None):
   """
   Draw the post part, including post, post holder and base
   Assuming that all optics are placed in the plane of z = 0.
@@ -441,28 +520,52 @@ def draw_post_part(name="post_part", height=12,xshift=0, geom=None):
   if (geom[0][2]-height<34) or (geom[0][2]-height>190):
     print("Warning, there is no suitable post holder and slotted base at this height")
   post_length=50
-  if geom[0][2]-height>110:
-    post_length=100
-  elif geom[0][2]-height>90:
-    post_length=75
-  elif geom[0][2]-height>65:
-    post_length=50
-  elif geom[0][2]-height>55:
-    post_length=40
-  elif geom[0][2]-height>40:
-    post_length=30
+  if base_exists:
+      if geom[0][2]-height>110:
+        post_length=100
+      elif geom[0][2]-height>90:
+        post_length=75
+      elif geom[0][2]-height>65:
+        post_length=50
+      elif geom[0][2]-height>55:
+        post_length=40
+      elif geom[0][2]-height>40:
+        post_length=30
+      else:
+        post_length=20
+        post2 = draw_post_holder(name="PH20E_M", height=0,xshift=xshift, geom=geom)
+      post = draw_post(name="TR"+str(post_length)+"_M", height=height,
+                       xshift=xshift,geom=geom)
+      if post_length>20:
+        post2 = draw_post_holder(name="PH"+str(post_length)+"_M", height=0,
+                                 xshift=xshift, geom=geom)
   else:
-    post_length=20
-    post2 = draw_post_holder(name="PH20E_M", height=0,xshift=xshift, geom=geom)
-  post = draw_post(name="TR"+str(post_length)+"_M", height=height,
-                   xshift=xshift,geom=geom)
-  if post_length>90 or post_length<31:
-    post1 = draw_post_base(name="BA2_M", height=0,xshift=xshift, geom=geom)
+      if geom[0][2]-height>105:
+        post_length=100
+      elif geom[0][2]-height>85:
+        post_length=75
+      elif geom[0][2]-height>60:
+        post_length=50
+      elif geom[0][2]-height>50:
+        post_length=40
+      elif geom[0][2]-height>35:
+        post_length=30
+      else:
+        post_length=20
+        post2 = draw_post_holder(name="PH"+str(post_length)+"E_M", height=0,
+                                 xshift=xshift, geom=geom)
+      post = draw_post(name="TR"+str(post_length)+"_M", height=height,
+                       xshift=xshift,geom=geom)
+      post2 = draw_post_holder(name="PH"+str(post_length)+"E_M", height=0,
+                               xshift=xshift, geom=geom)
+  if base_exists:
+    if post_length>90 or post_length<31:
+        post1 = draw_post_base(name="BA2_M", height=0,xshift=xshift, geom=geom)
+    else:
+        post1 = draw_post_base(name="BA1L", height=0,xshift=xshift, geom=geom)
   else:
-    post1 = draw_post_base(name="BA1L", height=0,xshift=xshift, geom=geom)
-  if post_length>20:
-    post2 = draw_post_holder(name="PH"+str(post_length)+"_M", height=0,
-                             xshift=xshift, geom=geom)
+    post1 = None
+  
   part = initialize_composition_old(name=name)
   container = post,post1,post2
   add_to_composition(part, container)
@@ -561,6 +664,28 @@ def draw_post_holder (name="PH50_M", height=0,xshift=0, geom=None):
     offset = Vector(xshift-11.75,16.8,height+29)
     obj.Placement = Placement(offset, Rotation(90,0,90), Vector(0,0,0))
     update_geom_info(obj, Geom_ground, off0=offset)
+#----------------------------------------------------------------------------
+  elif name =="PH100E_M":
+    offset=Vector(xshift+6.25,6.75,height+40.4)
+    obj.Placement = Placement(offset, Rotation(90,0,90), Vector(0,0,0))
+    update_geom_info(obj, Geom_ground, off0=offset)
+  elif name =="PH75E_M":
+    offset=Vector(xshift-8,10.5,height+46.5)
+    obj.Placement = Placement(offset, Rotation(90,0,90), Vector(0,0,0))
+    update_geom_info(obj, Geom_ground, off0=offset)
+  elif name =="PH50E_M":
+    offset=Vector(xshift-4.5,18,height+22.6)
+    obj.Placement = Placement(offset, Rotation(90,0,90), Vector(0,0,0))
+    update_geom_info(obj, Geom_ground, off0=offset)
+  elif name =="PH40E_M":
+    offset=Vector(xshift-2,2.7,height+25.7)
+    obj.Placement = Placement(offset, Rotation(90,0,90), Vector(0,0,0))
+    update_geom_info(obj, Geom_ground, off0=offset)
+  elif name =="PH30E_M":
+    offset=Vector(xshift-4.5,-5.5,height+31.25)
+    obj.Placement = Placement(offset, Rotation(90,0,90), Vector(0,0,0))
+    update_geom_info(obj, Geom_ground, off0=offset)
+
   return obj
 
 def draw_post_base(name="BA1L", height=0,xshift=0, geom=None):
