@@ -37,28 +37,15 @@ from basic_optics.tests import all_moduls_test
 # amp = Make_Amplifier_Typ_II_Juergen()
 # amp.draw()
 
-from basic_optics.beam import Gaussian_Beam
-
-gb = Gaussian_Beam()
-gb.draw()
-
 # all_moduls_test()
 
 # amp = Make_Amplifier_Typ_II_Juergen()
 # amp.draw()
 
 from basic_optics.resonator import Resonator
+from basic_optics.tests import simple_resonator_test
 
-res = Resonator()
-m0 = Mirror()
-le = Lens(f=250)
-m1 = Mirror()
-res = Resonator()
-res.add_on_axis(m0)
-res.propagate(500)
-res.add_on_axis(le)
-res.propagate(270)
-res.add_on_axis(m1)
+res = simple_resonator_test()
 
 
 if freecad_da:

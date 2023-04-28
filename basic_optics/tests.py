@@ -19,6 +19,8 @@ import matplotlib.pyplot as plt
 from .iris import Iris
 from .intersection_plane import Intersection_plane 
 
+from .resonator import Resonator
+
 # from iris import Iris
 # from intersection_plane import Intersection_plane
 
@@ -913,3 +915,17 @@ def Wrong_stretcher_with_two_Cylindrical_Mirror():
   Stretcher.draw_elements()
   Stretcher.draw_mounts()
   Stretcher.draw_rays()
+  
+def simple_resonator_test():
+  res = Resonator()
+  m0 = Mirror()
+  le = Lens(f=250)
+  m1 = Mirror()
+  res = Resonator()
+  res.add_on_axis(m0)
+  res.propagate(500)
+  res.add_on_axis(le)
+  res.propagate(270)
+  res.add_on_axis(m1)
+  res.draw()
+  return res

@@ -300,6 +300,9 @@ class Gaussian_Beam(Ray):
     self.wavelength = wavelength
     self.q_para = q_para
 
+  def set_length(self, length):
+    # needed for consitency in next_beam function
+    self.length = length
     
   def __repr__(self):
     # radius, angle = self.radius_angle()

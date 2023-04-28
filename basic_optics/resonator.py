@@ -8,6 +8,7 @@ Created on Thu Apr 27 00:51:06 2023
 
 from .composition import Composition
 from .mirror import Mirror
+from .beam import Gaussian_Beam
 import numpy as np
 
 class Resonator(Composition):
@@ -48,6 +49,7 @@ class Resonator(Composition):
       the q parameter
 
     """
+    #claculate the matrix with the correct sequence
     noe = len(self._elements)
     seq = [x for x in range(noe)]
     seq.extend([x for x in range(noe-2, 0, -1)])
@@ -64,7 +66,18 @@ class Resonator(Composition):
     if E < 0:
       print("Resonator is unstable")
       return -1
-    else:
-      z0 = np.sqrt(E)
-      q_para = (z +1j*z0)
-      return q_para
+    ### set Lightsource accordingly 
+    z0 = np.sqrt(E)
+    q_para = (z +1j*z0)
+    gb00 = Gaussian_Beam(wavelength=self.wavelength) #der -1 strahl
+    gb00.q_para = q_para
+    gb00.set_geom(self.get_geom())
+    lsgb = self._elements[0].next_beam(gb00)
+    self._lightsource = lsgb
+    # set sequence for compute beams
+    self.set_sequence([x for x in range(1, noe)])
+    return q_para
+  
+  def compute_beams(self, external_source=None):
+    self.compute_eigenmode()
+    super().compute_beams(external_source)
