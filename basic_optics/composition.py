@@ -138,7 +138,7 @@ class Composition(Opt_Element):
     newoA.length = self._last_prop
 
 
-  def get_matrix(self):
+  def matrix(self):
    self._matrix = np.eye(2)
    self.recompute_optical_axis()
    for ind in self._sequence:
