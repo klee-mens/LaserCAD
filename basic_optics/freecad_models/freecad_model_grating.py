@@ -96,7 +96,9 @@ def grating_mount(name="grating_mount",height=50,thickness=8,geom=None, **kwargs
   shiftvec=Vector(xshift,0,0)
   default=Vector(1,0,0)
   default_axis=Vector(0,1,0)
-  normal=Vector(geom[1])
+  # normal=Vector(geom[1])
+  axes = geom[1]
+  normal = Vector(axes[:,0])
   angle = default.getAngle(normal)
   if angle!=0:
     vec = default.cross(normal)
@@ -106,9 +108,12 @@ def grating_mount(name="grating_mount",height=50,thickness=8,geom=None, **kwargs
     default_axis = default_axis/np.linalg.norm(default_axis)
   if angle==np.pi/180:
     shiftvec = -shiftvec
-  new_normal = Vector(geom[1])
+  new_normal = Vector(normal)
   new_pos = Vector(geom[0])+shiftvec
-  geom = (new_pos,new_normal)
+  # geom = (new_pos,new_normal)
+  newaxs = np.array(axes)
+  newaxs[:,0] = new_normal
+  geom = (new_pos, newaxs)
   other_mount = mirror_mount(mount_name="mirror_mount",mount_type="default", geom=geom, dia=25.4)
   part = initialize_composition_old(name="Grating mount, post and base")
   container = mount1,mount2,mount3,other_mount

@@ -88,7 +88,9 @@ class Mirror(Opt_Element):
       (pos, normal)
     """
     self.pos = geom[0]
-    self.__incident_normal = geom[1]
+    # self.__incident_normal = geom[1]
+    axes = geom[1]
+    self.__incident_normal = axes[:,0]
     self.update_normal()
 
   @property
@@ -194,7 +196,13 @@ class Mirror(Opt_Element):
   def draw_mount_fc(self):
     self.update_draw_dict()
     self.draw_dict["dia"]=self.aperture
-    obj = mirror_mount(**self.draw_dict)
+    # obj = mirror_mount(**self.draw_dict)
+    # now we will use the old geom definition with (pos, norm) in a dirty, 
+    # hacky way, because I don't want to fix the 10.000 usages of geom in
+    # the mirror_mount function manually, no, I don't
+    helper_dict = dict(self.draw_dict)
+    # helper_dict["geom"] = (self.pos, self.normal)
+    obj = mirror_mount(**helper_dict)
     return obj
 
 
@@ -230,11 +238,11 @@ class Curved_Mirror(Mirror):
     txt += ', ' + super().__repr__()[7::]
     return txt
 
-  def next_geom(self, geom):
-    r0 = Ray()
-    r0.set_geom(geom)
-    r1 = self.next_ray(r0)
-    return r1.get_geom()
+  # def next_geom(self, geom):
+  #   r0 = Ray()
+  #   r0.set_geom(geom)
+  #   r1 = self.next_ray(r0)
+  #   return r1.get_geom()
 
   def draw_fc(self):
     self.update_draw_dict()

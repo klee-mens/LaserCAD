@@ -72,7 +72,8 @@ def model_ray_1D(name="ray1D", length=200, geom=GEOM0, color=RAY_COLOR):
   """
   if length == 0:
     length=3 #3mm Ray, nur für den Fehler zu vermeiden falls length=0
-  pos, normal = geom
+  pos, axes = geom
+  normal = axes[:,0]
   DOC = get_DOC()
   p1 = Vector(pos)
   p2 = Vector(pos + length*normal)

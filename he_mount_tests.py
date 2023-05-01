@@ -84,39 +84,23 @@ if freecad_da:
 gb1 = Beam(radius=10, angle=0.1,wavelength=1030E-3,pos=(0,0,0))
 gb1.normal = (-1,-1,0)
 gb1.make_circular_distribution(ring_number=2)
-M3 = Curved_Mirror( name="Concav_Mirror")
-M3.aperture = 25.4*2
-# gamma = 33.4906043205826 /180 *np.pi
-# Radius = 600
-# seperation = 120
-# h_StripeM = 10 
-# safety_to_StripeM = 5
-# s = np.sin(gamma)
-# c = np.cos(gamma)
-# vec = np.array((c, s, 0))
-# p_grat = np.array((Radius-seperation, 0, -h_StripeM/2 - safety_to_StripeM))
-M3.pos = (0,0,0)
-# M3.normal =(-1,-1,0)
-point0 = (100,0,0)
-point1 = (0,100,0)
-M3.set_normal_with_2_points(point0, point1)
-gb2 = M3.next_beam(gb1)
-M3.normal *=-1
 # gb1.draw()
 # print(M3.normal)
 # gb2.draw()
-ray1 = Ray(pos = [ -0.41797817  , 9.29026066 ,-19.40315812],normal=[ 0.87347155  ,0.48601921 ,-0.02885788])
+ray1 = Ray(pos=(0,0,100))
 ray1.length=600
 Radius = 600
-StripeM = Cylindrical_Mirror(radius= -Radius/2, name="Stripe_Mirror")
-StripeM.pos = (Radius/2, 0, 0)
+StripeM = Cylindrical_Mirror(radius = Radius,pos=(0,0,100))
+p0=p1=(100,0,100)
+StripeM.set_normal_with_2_points(p0, p1)
 #Cosmetics
-StripeM.aperture=100
+StripeM.aperture=75
 StripeM.draw_dict["height"]=9
 StripeM.draw_dict["thickness"]=50
 StripeM.draw_dict["model_type"]="Stripe"
-ray1.draw()
+# ray1.draw()
 StripeM.draw()
+StripeM.draw_mount()
 # print(M3.normal)
 
 # ray2.draw()
