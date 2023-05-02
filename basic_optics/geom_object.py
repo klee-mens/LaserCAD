@@ -207,7 +207,7 @@ class Geom_Object(object):
         y=np.array([a[1],b[1],c[1]])
         z=np.array([a[2],b[2],c[2]])
         # return np.vstack((x,y,z))
-        return np.vstack((a,b,c))
+        return np.vstack((x,y,z))
     else:
       rot_mat = rotation_matrix_from_vectors(old_normal, new_normal)
       return np.matmul(rot_mat, self._axes)

@@ -48,7 +48,7 @@ def model_ray_cylinder(name="ray", length=200, geom=GEOM0):
   
   obj.Placement = FreeCAD.Placement(Vector(0,0,0), FreeCAD.Rotation(Vector(0,1,0),90), Vector(0,0,0))
   update_geom_info(obj, geom)
-  DOC.recompute()
+  #DOC.recompute()
   return obj
 
 
@@ -83,7 +83,7 @@ def model_ray_1D(name="ray1D", length=200, geom=GEOM0, color=RAY_COLOR):
   obj.Shape = s1
   obj.ViewObject.LineColor = color
   
-  DOC.recompute()
+  #DOC.recompute()
   return obj
   
 

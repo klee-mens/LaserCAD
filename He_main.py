@@ -19,8 +19,8 @@ from basic_optics import Mirror,Lens,Gaussian_Beam,Beam,Cylindrical_Mirror,Inter
 
 from basic_optics.freecad_models import clear_doc, setview, freecad_da, freecad_model_lens, model_table
 
-from basic_optics import Beam, Mirror, Opt_Element, Geom_Object, Curved_Mirror,Thick_Lens, Cylindrical_Mirror
-from basic_optics import Lens, Ray, Composition, Grating, Propagation, Intersection_plane
+from basic_optics import Opt_Element, Geom_Object, Curved_Mirror,Thick_Lens
+from basic_optics import Ray, Composition, Grating, Propagation
 from basic_optics import Refractive_plane
 
 # from basic_optics.mirror import curved_mirror_test
@@ -244,6 +244,9 @@ newlightsource2 = Beam(radius=1, angle=0,wavelength=lam_mid-delta_lamda/2)
 newlightsource2.make_circular_distribution(ring_number=3)
   
 newlightsource = Beam(radius=0, angle=0)
+r=Ray()
+r.wavelength=lam_mid
+r.draw_dict["color"] = cmap( 0.4 )
 rays = []
 for wavel in range(0,newlightsource0._ray_count):
   rn = newlightsource0.get_all_rays()[wavel]
@@ -301,7 +304,7 @@ point0 = p_grat
 point1 = M3.pos + (-100,0,0)
 M3.set_normal_with_2_points(point0, point1)
 
-Curved_Mirror2 = Curved_Mirror(radius=2500, name="Concav_Mirror")
+Curved_Mirror2 = Curved_Mirror(radius=3000, name="Concav_Mirror")
 Curved_Mirror2.aperture = 25.4*2
 Curved_Mirror2.pos = M3.pos + (-100,0,0)
 Curved_Mirror2.normal = (-1,0,0)
@@ -316,7 +319,7 @@ fixlens2.aperture = 25.4/2
 fixlens2.pos = p_grat - 425 * vec
 fixlens2.normal = vec
 
-Curved_Mirror1 = Curved_Mirror(radius=2500, name="Concav_Mirror")
+Curved_Mirror1 = Curved_Mirror(radius=3000, name="Concav_Mirror")
 Curved_Mirror1.aperture = 25.4*2
 Curved_Mirror1.pos = M1.pos + (250,0,0)
 Curved_Mirror1.normal = (1,0,0)
@@ -338,7 +341,7 @@ Cavity2.aperture = 25.4*2
 Cavity2.normal = (1,0,0)
 
 ip = Intersection_plane(dia=100)
-ip.pos = p_grat + vec*500
+ip.pos = p_grat + vec*100
 ip.normal = vec
 
 # pure_cosmetic.draw = useless
@@ -346,6 +349,9 @@ M1.pos = M1.pos-(0,0,4)
 
 
 Stretcher = Composition(name="Strecker", pos=pos0, normal=vec)
+opt_ax = Ray(pos=pos0, normal=vec)
+opt_ax.wavelength = lam_mid
+Stretcher.redefine_optical_axis(opt_ax)
 
 Stretcher.set_light_source(newlightsource)
 Stretcher.add_fixed_elm(Grat)
@@ -379,52 +385,77 @@ seq = [0,1,2,3,0,4,5,0,6,2,7,0,8,9,8,0,7,2,6,0,5,4,0,3,2,1,0,10,11,10]
 
 roundtrip_sequence = seq
 
-roundtrip=1
+# Concav1.draw()
+# Grat.draw()
+
+roundtrip=5
+
 for n in range(roundtrip-1):
-  seq.extend([0,1,2,3,0,4,5,0,6,2,7,0,8,9,8,0,7,2,6,0,5,4,0,3,2,1,0,10,11,10])
-# seq.extend([0,1,2,3,0,4,5,0,6,2,7,0,8,9,8,0,7,2,6,0,5,4,0,3])
+  seq.extend(roundtrip_sequence)
+  
+# seq.extend([0,1])
+
 seq.extend([12])
+
 Stretcher.set_sequence(seq)
-Stretcher.propagate(100)
-Stretcher.pos = (0,0,100)
+# Stretcher.propagate(100)
+# Stretcher.pos = (0,0,100)
+
+# Stretcher.draw_mounts()
 Stretcher.draw_elements()
-Stretcher.draw_mounts()
-# Stretcher.draw_beams()
+# Stretcher.compute_beams()
+
 Stretcher.draw_beams(style="ray_group")
 ip.spot_diagram(Stretcher._beams[-1])
 
-# newbeam = Stretcher._beams[-1]
-# newbeam1= Grat.next_beam(newbeam)
-# newbeam2= Concav1.next_beam(newbeam1)
-# newbeam3= StripeM.next_beam(newbeam2)
-# newbeam4= Concav2.next_beam(newbeam3)
-# newbeam5= Grat.next_beam(newbeam4)
-# newbeam6= flip_mirror2.next_beam(newbeam5)
-# newbeam7= flip_mirror1.next_beam(newbeam6)
-# newbeam8= Grat.next_beam(newbeam7)
-# newbeam9= Concav3.next_beam(newbeam8)
-# newbeam10=StripeM.next_beam(newbeam9)
-# newbeam11=Concav4.next_beam(newbeam10)
-# newbeam12=Grat.next_beam(newbeam11)
+# for n in range(roundtrip-1):
+#   rays = Stretcher._beams[-1].get_all_rays()
+#   for ii in rays:
+#     ii.name = str(n+1) +" "+ ii.name[-16:]
+#   newlightsource = Beam(radius=0, angle=0)
+#   newlightsource.override_rays(rays)
+#   Stretcher = Composition(name="Strecker", pos=pos0, normal=vec)
+#   opt_ax = Ray(pos=pos0, normal=vec)
+#   opt_ax.wavelength = lam_mid
+#   Stretcher.redefine_optical_axis(opt_ax)
+  
+#   # Stretcher.set_light_source(newlightsource)
+  
+#   Stretcher._lightsource = newlightsource
+#   newlightsource.name = Stretcher.name + "_Lightsource"
+#   Stretcher._beams = [Stretcher._lightsource]
+#   group_ls = Stretcher._lightsource.get_all_rays()
+#   counter = 0
+#   for ray in group_ls:
+#     ray.name = Stretcher._lightsource.name + "_" + str(counter)
+#     counter += 1
+#   Stretcher._ray_groups = [group_ls]
+  
+#   Stretcher.add_fixed_elm(Grat)
+#   Stretcher.add_fixed_elm(Concav1)
+#   Stretcher.add_fixed_elm(StripeM)
+#   Stretcher.add_fixed_elm(Concav2)
+#   Stretcher.add_fixed_elm(flip_mirror2)
+#   Stretcher.add_fixed_elm(flip_mirror1)
+#   Stretcher.add_fixed_elm(Concav3)
+#   Stretcher.add_fixed_elm(Concav4)
+#   Stretcher.add_fixed_elm(M1)
+#   Stretcher.add_fixed_elm(Curved_Mirror1)
+#   Stretcher.add_fixed_elm(M3)
+#   Stretcher.add_fixed_elm(Curved_Mirror2)
+#   Stretcher.add_fixed_elm(ip)
+#   Stretcher.add_fixed_elm(pure_cosmetic)
+  
+#   if n<roundtrip-2:
+#     Stretcher.set_sequence(seq)
+#     Stretcher.compute_beams()
+#   else:
+#     seq.extend([12])
+#     Stretcher.set_sequence(seq)
+#     Stretcher.draw_beams(style="ray_group")
+#     ip.spot_diagram(Stretcher._beams[-1])
 
-# newbeam.draw()
-# Grat.draw()
-# StripeM.draw()
-# Concav1.draw()
-# Concav2.draw()
-# Concav3.draw()
-# newbeam1.draw()
-# newbeam2.draw()
-# newbeam3.draw()
-# newbeam4.draw()
-# newbeam5.draw()
-# newbeam6.draw()
-# newbeam7.draw()
-# newbeam8.draw()
-# newbeam9.draw()
-# newbeam10.draw()
-# newbeam11.draw()
-# newbeam12.draw()
+
 
 # results = all_moduls_test()
 

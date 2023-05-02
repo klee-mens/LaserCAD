@@ -155,7 +155,7 @@ def vec_phi_from_matrix(matrix):
   else:
     return vec, -phi
   # print("something is strange with this rotation matrix")
-  # return None
+  # return None0
 
 def rotation_to_axis_angle(R):
     """
@@ -172,15 +172,20 @@ def rotation_to_axis_angle(R):
     """
 
     # Check that R is a valid rotation matrix
-    if not np.allclose(np.dot(R.T, R), np.identity(3)):
-        raise ValueError("Input matrix is not a valid rotation matrix.")
+    # if not np.allclose(np.dot(R.T, R), np.identity(3)):
+    #     raise ValueError("Input matrix is not a valid rotation matrix.")
 
     # Compute the angle of rotation
-    phi = np.arccos((np.trace(R) - 1) / 2)
+    phi = (np.trace(R) - 1) / 2
+    if phi>1:
+      phi = 1 
+    if phi<-1:
+      phi=-1
+    phi = np.arccos(phi)
 
     # Compute the rotation vector
     if np.abs(phi) < 1e-6:
-        vec = np.zeros(3)
+        vec = (1,0,0)
     elif np.abs(phi - np.pi) < 1e-6:
         # In the case of a 180 degree rotation, the axis of rotation can be any vector
         # perpendicular to any of the columns of R that correspond to an eigenvalue of -1.
@@ -221,6 +226,7 @@ def update_geom_info(obj, geom_info, off0=0):
       rotvec, phi = rotation_to_axis_angle(axes)
       rotvec = Vector(rotvec)
       phi *= 180/np.pi
+      # print(rotvec, phi)
       # print(rotvec,phi)
       place0 = obj.Placement
       obj.Placement = Placement(pos, Rotation(rotvec,phi), Vector(0,0,0)).multiply(place0)

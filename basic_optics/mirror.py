@@ -393,8 +393,12 @@ class Cylindrical_Mirror(Mirror):
 
     # If discriminant is negative, no intersection
     if discriminant < 0:
-        
-      
+        print(ray2)
+        ray2.draw()
+        print("ray_origin=",ray_origin)
+        print("ray_direction=",ray_direction)
+        print("cylinder_center=",cylinder_center)
+        print("cylinder_axis=",cylinder_axis)
         return None
 
     # Compute t parameter (parameter along the ray direction)
