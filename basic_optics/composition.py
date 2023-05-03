@@ -118,7 +118,7 @@ class Composition(Opt_Element):
   def redefine_optical_axis(self, ray):
     # zB wenn die wavelength angepasst werden muss
     print("sollte nur gemacht werden, wenn absolut noch kein Element eingefügt wurde")
-    print("kann die ganze Geometrie hart abfucken")
+    #print("kann die ganze Geometrie hart abfucken")
     self.set_geom(ray.get_geom())
     oA = deepcopy(ray)
     oA.name = self.name +"__oA_0"
@@ -128,6 +128,7 @@ class Composition(Opt_Element):
   def recompute_optical_axis(self):
     self.__optical_axis = [self.__optical_axis[0]]
     counter = 1
+    
     for ind in self._sequence:
       elm = self._elements[ind]
       # print("-----", elm)
@@ -135,7 +136,7 @@ class Composition(Opt_Element):
       counter += 1
       newoA.name = self.name + "__oA_" + str(counter)
       self.__optical_axis.append(newoA)
-    newoA.length = self._last_prop
+    self.__optical_axis[-1].length = self._last_prop
 
 
   def get_matrix(self):

@@ -200,12 +200,14 @@ class Geom_Object(object):
         # phi kleiner als 1e-8
         return self._axes
       else:
-        # phi rund 180°, d.h. die drehung ist nicht eindeutig, negieren
-        # willkürlich ax0 und ax1 und behalten ax2 bei um rechtshändiges KooSys
-        # zu erhalten. (ax0 und ax2 würden genau so funktionieren)
         a,b,c = self.get_coordinate_system()
         a = new_normal #just in case
-        return np.vstack((a,-b,c))
+        b*=-1
+        x=np.array([a[0],b[0],c[0]])
+        y=np.array([a[1],b[1],c[1]])
+        z=np.array([a[2],b[2],c[2]])
+        # return np.vstack((x,y,z))
+        return np.vstack((x,y,z))
     else:
       rot_mat = rotation_matrix_from_vectors(old_normal, new_normal)
       return np.matmul(rot_mat, self._axes)

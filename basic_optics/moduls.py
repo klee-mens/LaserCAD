@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 """
 Created on Tue Aug 30 17:03:16 2022
-
 @author: mens
 """
 from .lens import Lens
-from .mirror import Mirror, Curved_Mirror, mirror_mount
+from .mirror import Mirror, Curved_Mirror, mirror_mount,Cylindrical_Mirror
 from .barriers import Barriers
 # from .propagation import Propagation
 # from .composition import Composition_old
@@ -24,14 +23,12 @@ def Make_Telescope(name="Teleskop", f1=100.0, f2=100.0, d0=100.0, lens1_aperture
              lens2_aperture=inch):
   """
   erstellt ein Teleskop mit dem Kram da oben
-
   Bsp:
   teles = Teleskop()
   teles.draw_elements()
   teles.draw_beams()
   teles.draw_mounts()
   teles.draw_rays()
-
   Parameters
   ----------
   name : TYPE, optional
@@ -43,12 +40,9 @@ def Make_Telescope(name="Teleskop", f1=100.0, f2=100.0, d0=100.0, lens1_aperture
     <amplification> des Teleskops an. The default is 100. -> amp=1.0
   d0 : TYPE, optional
     gibt den Abstand pos0 von Teleskop und erster Linse an. The default is 100.
-
   Returns
   -------focal_length = 200
   teles : Composition
-
-
   """
   ls = Beam(radius=1.5, angle=0)
   l1 = Lens(f=f1)
@@ -111,7 +105,6 @@ def Periscope2(name="Periskop", length=160,theta = 90, phi = 0, dist1=75, dist2=
   
   irgendwann einmal:
   the vector between the two mirrors has an angle of <theta> to the z-Axis  
-
   Parameters
   ----------
   name : TYPE, optional
@@ -124,11 +117,9 @@ def Periscope2(name="Periskop", length=160,theta = 90, phi = 0, dist1=75, dist2=
     DESCRIPTION. The default is 75.
   dist2 : TYPE, optional
     DESCRIPTION. The default is 75.
-
   Returns
   -------
   the Compostion
-
   """
   lightsource = Beam(radius=1, angle=0)
   peris = Composition(name=name)
@@ -158,8 +149,6 @@ def Make_White_Cell(name="White Cell", Radius=300, roundtrips4=1, aperture_small
   generiert eine Whitcelle mit Doppelpass (=4*2 round trips)
   legt Anfangsstrahlposition in x,y Ebene bei (0,0,0)
   Spiegel stehen alle senkrecht, d.h. Normale entweder x oder -x
-
-
   """
   pos0 = np.array((0,0,0))
   cm2_hits = roundtrips4*2 - 1
@@ -203,7 +192,7 @@ def Make_White_Cell(name="White Cell", Radius=300, roundtrips4=1, aperture_small
   # seq.append(6)
   whitecell.set_sequence(seq)
   # whitecell.recompute_optical_axis()
-  whitecell.propagate(120)
+  whitecell.propagate(Radius*1.05)
 
   return whitecell
 
@@ -328,18 +317,14 @@ def Make_Amplifier_Typ_II_simple(name="AmpTyp2s", focal_length=600, magnificatio
     """
     generiert die Strahlführung eines einfachen Typ II Verstärkers mit einer Linse
     und einem gekrümmten Spiegel
-
     V = magnification
     f = focal_length
     a = (V+1)/V * f
     b = a*V
     f2 = V/2 * f
-
     Returns
     -------
     composition: Amplifier_TypII_simple
-
-
     """
     Radius2 = magnification*focal_length
     dist1 = (magnification+1) / magnification * focal_length
@@ -450,8 +435,6 @@ def Make_Amplifier_Typ_II_simpler(name="AmpTyp2sr", focal_length=600, magnificat
   AmpTyp2.propagate(120)
   return AmpTyp2
 
-
-
 def Make_Amplifier_Typ_II_UpDown(name="AmpTyp2sr", focal_length=600, magnification=1,
                               roundtrips2=2,
                               aperture_small=0.5*inch, aperture_big=2*inch, beam_sep=15):
@@ -528,113 +511,130 @@ def Make_Amplifier_Typ_II_UpDown(name="AmpTyp2sr", focal_length=600, magnificati
 
 
 
+def Make_Stretcher_old():
+  """
+  tja, versuchen wir mal einen Offner Strecker...
+  Note: When drawing a rooftop mirror, we will draw apure_cosmetic mirror to 
+  confirm the position of the mount. The mirror's geom is the average of two 
+  flip mirror. And its aperture is the periscope_distance.
+  Returns
+  -------
+  TYPE Composition
+    den gesamten, geraytracten Strecker...
+  """
+  # definierende Parameter
+  Radius = 1000 #Radius des großen Konkavspiegels
+  Aperture_concav = 6 * inch
+  h_StripeM = 10 #Höhe des Streifenspiegels
+  gamma = 21 /180 *np.pi # Seperationswinkel zwischen einfallenden und Mittelpunktsstrahl; Alpha = Gamma + Beta
+  grat_const = 1/450 # Gitterkonstante in 1/mm
+  seperation = 100 # Differenz zwischen Gratingposition und Radius
+  lam_mid = 2400e-9 * 1e3 # Zentralwellenlänge in mm
+  delta_lamda = 250e-9*1e3 # Bandbreite in mm
+  number_of_rays = 20
+  safety_to_StripeM = 5 #Abstand der eingehenden Strahlen zum Concav Spiegel in mm
+  periscope_distance = 16
+  
+  # abgeleitete Parameter
+  v = lam_mid/grat_const
+  s = np.sin(gamma)
+  c = np.cos(gamma)
+  a = v/2
+  b = np.sqrt(a**2 - (v**2 - s**2)/(2*(1+c)))
+  sinB = a - b
+  
+  Concav = Curved_Mirror(radius=Radius, name="Concav_Mirror")
+  Concav.pos = (0,0,0)
+  Concav.aperture = Aperture_concav
+  Concav.normal = (-1,0,0)
+  # Concav._axes = np.array([[-1,0,0],[0,0,1],[0,1,0]])
+  # Concav.draw_dict["height"]=40
+  # Concav.draw_dict["thickness"]=25
+  # Concav.draw_dict["model_type"]="Stripe"
+  
+  StripeM = Cylindrical_Mirror(radius= -Radius/2, name="Stripe_Mirror")
+  StripeM.pos = (Radius/2, 0, 0)
+  #Cosmetics
+  StripeM.aperture=75
+  StripeM.draw_dict["height"]=10
+  StripeM.draw_dict["thickness"]=25
+  StripeM.draw_dict["model_type"]="Stripe"
+  
+  Grat = Grating(grat_const=grat_const, name="Gitter")
+  Grat.pos = (Radius-seperation, 0, 0)
+  Grat.normal = (np.sqrt(1-sinB**2), -sinB, 0)
+  
+  ray0 = Ray()
+  p_grat = np.array((Radius-seperation, 0, -h_StripeM/2 - safety_to_StripeM))
+  vec = np.array((c, s, 0))
+  pos0 = p_grat - 250 * vec
+  ray0.normal = vec
+  ray0.pos = pos0
+  ray0.wavelength = lam_mid
+  
+  lightsource = Beam(radius=0, angle=0)
+  wavels = np.linspace(lam_mid-delta_lamda/2, lam_mid+delta_lamda/2, number_of_rays)
+  rays = []
+  cmap = plt.cm.gist_rainbow
+  for wavel in wavels:
+    rn = Ray()
+    # rn.normal = vec
+    # rn.pos = pos0
+    rn.wavelength = wavel
+    x = (wavel - lam_mid + delta_lamda/2) / delta_lamda
+    rn.draw_dict["color"] = cmap( x )
+    rays.append(rn)
+  lightsource.override_rays(rays)
+  
+  nfm1 = - ray0.normal
+  pfm1 = Grat.pos + 400 * nfm1 + (0,0,h_StripeM/2 + safety_to_StripeM + periscope_distance)
+  # subperis = Periscope(length=8, theta=-90, dist1=0, dist2=0)
+  # subperis.pos = pfm1
+  # subperis.normal = nfm1
+  flip_mirror1 = Mirror()
+  flip_mirror1.pos = pfm1
+  flip_mirror1.normal = nfm1 - np.array((0,0,-1))
+  def useless():
+    return None
+  flip_mirror1.draw = useless
+  flip_mirror1.draw_dict["mount_type"] = "dont_draw"
+  
+  flip_mirror2 = Mirror()
+  flip_mirror2.pos = pfm1 - np.array((0,0,periscope_distance))
+  flip_mirror2.normal = nfm1 - np.array((0,0,1))
+  flip_mirror2.draw = useless
+  flip_mirror2.draw_dict["mount_type"] = "dont_draw"
+  
+  pure_cosmetic = Mirror(name="RoofTop_Mirror")
+  pure_cosmetic.draw_dict["model_type"]="Rooftop"
+  pure_cosmetic.draw_dict["mount_type"] = "rooftop_mirror"
+  pure_cosmetic.pos = (flip_mirror1.pos + flip_mirror2.pos ) / 2
+  pure_cosmetic.normal = (flip_mirror1.normal + flip_mirror2.normal ) / 2
+  pure_cosmetic.aperture = periscope_distance
 
-# def Make_Stretcher_old():
-#   """
-#   tja, versuchen wir mal einen Offner Strecker...
-
-#   Returns
-#   -------
-#   TYPE Composition
-#     den gesamten, geraytracten Strecker...
-
-#   """
-#   # definierende Parameter
-#   Radius = 1000 #Radius des großen Konkavspiegels
-#   Aperture_concav = 6 * inch
-#   h_StripeM = 10 #Höhe des Streifenspiegels
-#   gamma = 21 /180 *np.pi # Seperationswinkel zwischen einfallenden und Mittelpunktsstrahl; Alpha = Gamma + Beta
-#   grat_const = 1/450 # Gitterkonstante in 1/mm
-#   seperation = 100 # Differenz zwischen Gratingposition und Radius
-#   lam_mid = 2400e-9 * 1e3 # Zentralwellenlänge in mm
-#   delta_lamda = 250e-9*1e3 # Bandbreite in mm
-#   number_of_rays = 20
-#   safety_to_StripeM = 5 #Abstand der eingehenden Strahlen zum Concav Spiegel in mm
-#   periscope_distance = 8
+  # pure_cosmetic.draw = useless
   
-#   # abgeleitete Parameter
-#   v = lam_mid/grat_const
-#   s = np.sin(gamma)
-#   c = np.cos(gamma)
-#   a = v/2
-#   b = np.sqrt(a**2 - (v**2 - s**2)/(2*(1+c)))
-#   sinB = a - b
+  Stretcher = Composition(name="Strecker", pos=pos0, normal=vec)
   
-#   Concav = Curved_Mirror(radius=Radius, name="Concav_Mirror")
-#   Concav.pos = (0,0,0)
-#   Concav.aperture = Aperture_concav
-#   Concav.normal = (-1,0,0)
+  Stretcher.set_light_source(lightsource)
+  Stretcher.add_fixed_elm(Grat)
+  Stretcher.add_fixed_elm(Concav)
+  Stretcher.add_fixed_elm(StripeM)
+  Stretcher.add_fixed_elm(flip_mirror2)
+  Stretcher.add_fixed_elm(flip_mirror1)
+  Stretcher.add_fixed_elm(pure_cosmetic)
   
-#   StripeM = Curved_Mirror(radius= -Radius/2, name="Stripe_Mirror")
-#   StripeM.pos = (Radius/2, 0, 0)
-#   #Cosmetics
-#   StripeM.aperture=75
-#   StripeM.draw_dict["height"]=10
-#   StripeM.draw_dict["thickness"]=25
-#   StripeM.draw_dict["model_type"]="Stripe"
-  
-#   Grat = Grating(grat_const=grat_const, name="Gitter")
-#   Grat.pos = (Radius-seperation, 0, 0)
-#   Grat.normal = (np.sqrt(1-sinB**2), -sinB, 0)
-  
-#   ray0 = Ray()
-#   p_grat = np.array((Radius-seperation, 0, h_StripeM/2 + safety_to_StripeM))
-#   vec = np.array((c, s, 0))
-#   pos0 = p_grat - 250 * vec
-#   ray0.normal = vec
-#   ray0.pos = pos0
-#   ray0.wavelength = lam_mid
-  
-#   lightsource = Beam(radius=0, angle=0)
-#   wavels = np.linspace(lam_mid-delta_lamda/2, lam_mid+delta_lamda/2, number_of_rays)
-#   rays = []
-#   cmap = plt.cm.gist_rainbow
-#   for wavel in wavels:
-#     rn = Ray()
-#     # rn.normal = vec
-#     # rn.pos = pos0
-#     rn.wavelength = wavel
-#     x = (wavel - lam_mid + delta_lamda/2) / delta_lamda
-#     rn.draw_dict["color"] = cmap( x )
-#     rays.append(rn)
-#   lightsource.override_rays(rays)
-  
-#   nfm1 = - ray0.normal
-#   pfm1 = Grat.pos + 200 * nfm1 + (0,0,-h_StripeM/2 - safety_to_StripeM)
-#   # subperis = Periscope(length=8, theta=-90, dist1=0, dist2=0)
-#   # subperis.pos = pfm1
-#   # subperis.normal = nfm1
-#   flip_mirror1 = Mirror()
-#   flip_mirror1.pos = pfm1
-#   flip_mirror1.normal = nfm1 - np.array((0,0,-1))
+  # for item in subperis._elements:
+  #   Stretcher.add_fixed_elm(item)
   
   
-#   flip_mirror2 = Mirror()
-#   flip_mirror2.pos = pfm1 - np.array((0,0,periscope_distance))
-#   flip_mirror2.normal = nfm1 - np.array((0,0,1))
-
-  
-#   Stretcher = Composition(name="Strecker", pos=pos0, normal=vec)
-  
-#   Stretcher.set_light_source(lightsource)
-#   Stretcher.add_fixed_elm(Grat)
-#   Stretcher.add_fixed_elm(Concav)
-#   Stretcher.add_fixed_elm(StripeM)
-#   Stretcher.add_fixed_elm(flip_mirror1)
-#   Stretcher.add_fixed_elm(flip_mirror2)
-  
-#   # for item in subperis._elements:
-#   #   Stretcher.add_fixed_elm(item)
-  
-  
-#   # seq = [0,1,2,1,0]
-#   # seq = [0,1,2,1,0, 3]
-#   # seq = [0,1,2,1,0, 3,4]
-#   seq = [0,1,2,1,0, 3,4, 0, 1, 2, 1, 0]
-#   Stretcher.set_sequence(seq)
-#   Stretcher.propagate(300)
-#   return Stretcher
-
+  # seq = [0,1,2,1,0]
+  # seq = [0,1,2,1,0, 3]
+  # seq = [0,1,2,1,0, 3,4]
+  seq = [0,1,2,1,0, 3,4, 0, 1, 2, 1, 0]
+  Stretcher.set_sequence(seq)
+  Stretcher.propagate(300)
+  return Stretcher
 
 def Make_Stretcher():
   """
@@ -642,12 +642,10 @@ def Make_Stretcher():
   Note: When drawing a rooftop mirror, we will draw apure_cosmetic mirror to 
   confirm the position of the mount. The mirror's geom is the average of two 
   flip mirror. And its aperture is the periscope_distance.
-
   Returns
   -------
   TYPE Composition
     den gesamten, geraytracten Strecker...
-
   """
   # definierende Parameter
   Radius = 1000 #Radius des großen Konkavspiegels
@@ -758,8 +756,6 @@ def Make_Stretcher():
   Stretcher.propagate(300)
   return Stretcher
 
-
-
 def Make_Amplifier_Typ_II_plane():
   name="AmpTyp2s" 
   focal_length=600 
@@ -836,11 +832,11 @@ def Make_Amplifier_Typ_II_plane():
 
 
 
-def Make_Amplifier_Typ_II_with_theta(roundtrips2=3):
+def Make_Amplifier_Typ_II_with_theta():
   name="AmpTyp2s" 
   focal_length=600 
   magnification=1
-  # roundtrips2=3
+  roundtrips2=3
   aperture_small=1*inch 
   beam_sep=15
   aperture_big = beam_sep * (roundtrips2*2-1)
@@ -1022,3 +1018,5 @@ def Make_Amplifier_Typ_II_Juergen():
   AmpTyp2.pos = (0,0,120)
   AmpTyp2.normal = (1,0,0)
   return AmpTyp2
+
+

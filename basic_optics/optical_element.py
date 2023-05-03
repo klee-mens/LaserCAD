@@ -59,7 +59,7 @@ class Opt_Element(Geom_Object):
     ray2 : Ray
       Ausgangsstrahl
     """
-    return -1
+    return False
 
 
   def next_beam(self, beam):
@@ -77,15 +77,33 @@ class Opt_Element(Geom_Object):
     newb = deepcopy(beam)
     newb.name = "next_" + beam.name
     rays = beam.get_all_rays(by_reference=True)
+    # if beam._distribution == "Gaussian":
+      
     newrays = []
     for ray in rays:
       nr = self.next_ray(ray)
       if not nr:
-        return -1 #Für Elemente die nicht mit Strahlen interagieren wird -1 als beam zurück gegeben
+        return False #Für Elemente die nicht mit Strahlen interagieren wird -1 als beam zurück gegeben
       newrays.append(nr)
     newb.override_rays(newrays)
+    if beam._distribution == "Gaussian":
+      [[A,B],[C,D]] = self._matrix
+      q_parameter = deepcopy(beam.q_para)
+      q_parameter += beam.get_all_rays()[0].length
+      newb.q_para = (A*q_parameter+B)/(C*q_parameter+D)
     return newb
 
+  def next_gauss(self,gaussian):
+      next_gaussian = deepcopy(gaussian)
+      next_middle = self.next_ray(gaussian) #change the length of Gaussian
+      next_gaussian.set_geom(next_middle.get_geom())
+      [[A,B],[C,D]] = self._matrix
+      # print([[A,B],[C,D]])
+      q_parameter = deepcopy(gaussian.q_para)
+      q_parameter += gaussian.length
+      next_gaussian.q_para = (A*q_parameter+B)/(C*q_parameter+D)
+      # print(next_gaussian.q_para)
+      return next_gaussian
 
   def reflection(self, ray):
     """
@@ -108,6 +126,15 @@ class Opt_Element(Geom_Object):
     km = -self.normal
     scpr = np.sum(km*k)
     newk = k-2*scpr*km
+    p0 = ray2.pos
+    # if np.std(ray2.normal-self.normal)<TOLERANCE and np.std(p0-self.pos)<TOLERANCE:
+    #   ray2.pos = p0
+    #   a=ray2.normal
+    #   a=a*-1
+    #   ray3 = Ray(name = ray2.name)
+    #   ray3.pos = p0
+    #   ray3.normal = a
+    #   return ray3
     ray2.normal = newk
     # print("REFL", k, km, scpr, newk, ray2.normal)
     return ray2
@@ -115,11 +142,10 @@ class Opt_Element(Geom_Object):
 
 
   def refraction(self, ray):
-
     ray2 = deepcopy(ray)
     ray2.pos = ray.intersect_with(self) #dadruch wird ray.length verändert(!)
-    radial_vec = ray2.pos - self.pos
     norm = ray2.normal
+    radial_vec = ray2.pos - self.pos
     radius = np.linalg.norm(radial_vec) #Radius im sinne der parax Optik
     ea = self.normal #Einheitsvec in Richtung der optischen Achse oA
     if np.sum(ea * norm) < 0:
@@ -157,8 +183,9 @@ class Opt_Element(Geom_Object):
     norm2 = np.cos(alpha2)*ea + np.sin(alpha2)*em
     ray2.pos = pos2
     ray2.normal = norm2
+    
     return ray2
-
+    
 
   def draw_mount(self):
     if freecad_da:

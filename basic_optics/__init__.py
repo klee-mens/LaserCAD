@@ -15,11 +15,11 @@ Erstellen der 3D Obejkte in FreeCAD
 
 from .geom_object import Geom_Object, TOLERANCE
 from .ray import Ray
-from .beam import Beam
+from .beam import Beam,Gaussian_Beam
 from .optical_element import Opt_Element
 from .lens import Lens
 from .propagation import Propagation
-from .mirror import Mirror, Curved_Mirror
+from .mirror import Mirror, Curved_Mirror, Cylindrical_Mirror
 from .composition import Composition
 from .moduls import Make_Telescope,Make_Periscope, Make_White_Cell,Make_Amplifier_Typ_I_simpler, Make_Amplifier_Typ_I_simple, Make_Amplifier_Typ_II_simple, Make_Stretcher, Make_Amplifier_Typ_II_simpler
 from .constants import inch
@@ -27,6 +27,8 @@ from .grating import Grating
 from .barriers import Barriers
 from .iris import Iris
 from .intersection_plane import Intersection_plane
+from .refractive_plane import Refractive_plane
+from .thick_lens import Thick_Lens
 
 pfad = __file__[0:-9]
 

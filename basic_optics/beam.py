@@ -6,7 +6,7 @@ Created on Mon Aug 22 12:34:44 2022
 """
 
 from basic_optics import Ray, Geom_Object, TOLERANCE
-from basic_optics.freecad_models import model_beam,model_ray_1D
+from basic_optics.freecad_models import model_beam,model_ray_1D,model_Gaussian_beam
 from basic_optics.freecad_models.freecad_model_composition import initialize_composition_old, add_to_composition
 # from .optical_element import Opt_Element
 
@@ -23,13 +23,14 @@ class Beam(Geom_Object):
   average_divegence = ?
 
   """
-  def __init__(self, radius=1, angle=0, name="NewBeam", distribution="cone", **kwargs):
+  def __init__(self, radius=1, angle=0, name="NewBeam",wavelength=1030E-6, distribution="cone", **kwargs):
     super().__init__(name=name, **kwargs)
     self._ray_count = 2
     self._rays = [Ray() for n in range(self._ray_count)]
     self._angle = angle
     self._radius = radius
     self._distribution = distribution
+    self._Bwavelength = wavelength
     if distribution == "cone":
       self.make_cone_distribution()
       self.draw_dict["model"] = "cone"      
@@ -38,13 +39,26 @@ class Beam(Geom_Object):
       self.draw_dict["model"] = "ray_group"      
     elif distribution == "circular":
       self.make_circular_distribution()
-      self.draw_dict["model"] = "ray_group"      
+      self.draw_dict["model"] = "ray_group" 
+    elif distribution == "Gaussian":
+      z0 = wavelength/(np.pi*np.tan(angle)*np.tan(angle))
+      w0 = wavelength/(np.pi*np.tan(angle))
+      if w0>radius:
+        print("Woring: Wrong Radius!")
+      z = z0*pow((radius*radius)/(w0*w0)-1,0.5)
+      if angle<0:
+        z = -z
+      q_para = complex(z,z0)
+      self.wavelength = wavelength
+      self.q_para = q_para
+      self.make_Gaussian_distribution()
+      self.draw_dict["model"] = "Gaussian"
     else:
       # Abortion
       print("Distribution tpye not know. Beam not valid.")
-      print("Allowed distribution types are: 'cone', 'square', 'circular'")
+      print("Allowed distribution types are: 'cone', 'square', 'circular', 'Gaussian'")
       self = -1
-      return -1
+      return None
     
   def make_cone_distribution(self, ray_count=2):
     self._ray_count = ray_count
@@ -58,7 +72,16 @@ class Beam(Geom_Object):
       our = self._rays[n+1]
       our.from_h_alpha_theta(self._radius, self._angle, thetas[n], self)
       our.name = self.name + "_outer_Ray" + str(n)
+  
+  def make_Gaussian_distribution(self, ray_count=2):
+    self._ray_count = 1
+    self._distribution = "Gaussian"
+    self.draw_dict["model"] = "Gaussian"
+    mr = self._rays[0]
+    mr.set_geom(self.get_geom())
+    mr.name = self.name + "_inner_Ray"
 
+  
   def make_square_distribution(self, ray_in_line=3):
     """
     Let the group of rays follow the square distribution
@@ -83,6 +106,7 @@ class Beam(Geom_Object):
         self._rays[ray_counting].set_geom(self.get_geom())
         self._rays[ray_counting].pos=self._rays[ray_counting].pos+(0,n,m)     #change the position of the ray
         self._rays[ray_counting].name=self.name+str(ray_counting)
+        self._rays[ray_counting].wavelength = self._Bwavelength
         ray_counting+=1
     # print(ray_counting) # ray_counting is the number of the rays.
     self._ray_count = ray_counting
@@ -109,20 +133,26 @@ class Beam(Geom_Object):
     ray_counting=0
     radius=self._radius
     for r in np.arange(0,radius+radius/ring_number/2,radius/ring_number):        #r repersents the height of the ray
-      if r!=0:                                                                #if the ray is not in the center
+      
+      if r!=0:                                                                 #if the ray is not in the center
         thetas = np.linspace(0, 2*np.pi, int(r*ring_number/radius)*6+1)        #thetas repersents the rotation angle of the ray
         for n in range(int(r*ring_number/radius)*6):
           our=self._rays[ray_counting]
+          # self._rays[ray_counting].wavelength = self._Bwavelength
           our.from_h_alpha_theta(r, self._angle, thetas[n], self)            # rotate the ray which is not in the center
           our.name=self.name + "_outer_Ray" +str(ray_counting)
           ray_counting+=1
       else:
+        # self._rays[ray_counting].wavelength = self._Bwavelength
         mr=self._rays[ray_counting]
         mr.set_geom(self.get_geom())
         mr.name = self.name + "_inner_Ray"
         ray_counting+=1
     # print(ray_counting) # ray_counting is the number of the rays.
     self._ray_count = ray_counting
+    # print(ray_counting)
+    for r in range(0,self._ray_count):
+      self._rays[r].wavelength = self._Bwavelength
     self._distribution = "circular"
     self.draw_dict["model"] = "ray_group"
 
@@ -147,6 +177,8 @@ class Beam(Geom_Object):
     txt = 'Beam(radius=' + repr(radius)
     txt += ', anlge=' + repr(angle)
     txt += ', distribution=' + repr(self._distribution)
+    if self._distribution == "Gaussian":
+       txt = 'Gaussian_Beam(q_para=' + repr(self.q_para)
     txt += ', ' + super().__repr__()[6::]
     return txt
 
@@ -189,7 +221,7 @@ class Beam(Geom_Object):
     if alph == 0:
       return 0
     else:
-      return - r/alph
+       return - r/np.tan(alph)
 
   def length(self):
     return self.inner_ray().length
@@ -228,10 +260,17 @@ class Beam(Geom_Object):
 
 
   def draw_fc(self):
-    if self.draw_dict["model"] == "cone":
+    if self.draw_dict["model"] == "Gaussian":
+      return model_Gaussian_beam(name=self.name, q_para=self.q_para,
+                                 wavelength=self.wavelength,
+                                 prop=self.get_all_rays()[0].length,
+                                 geom_info=self.get_geom())
+    elif self.draw_dict["model"] == "cone":
       radius, _ = self.radius_angle()
       return model_beam(name=self.name, dia=2*radius, prop=self.length(),
            f=self.focal_length(), geom_info=self.get_geom())
+      # return model_Gaussian_beam(name=self.name, dia=2*radius, prop=self.length(),
+      #      f=self.focal_length(), geom_info=self.get_geom())
     else:
       part = initialize_composition_old(name="ray group")
       container = []
@@ -246,8 +285,32 @@ class Beam(Geom_Object):
 
 
 
+class Gaussian_Beam(Ray):
+# class Gaussian_beam(Geom_Object):
+  def __init__(self, radius=10, angle=0.05, wavelength=1030E-6, name="NewGassian",  **kwargs):
+    super().__init__(name=name, **kwargs)
+    z0 = wavelength/(np.pi*np.tan(angle)*np.tan(angle))
+    w0 = wavelength/(np.pi*np.tan(angle))
+    if w0>radius:
+      print("Woring: Wrong Radius!")
+    z = z0*pow((radius*radius)/(w0*w0)-1,0.5)
+    if angle<0:
+      z = -z
+    q_para = complex(z,z0)
+    self.wavelength = wavelength
+    self.q_para = q_para
+    
+  def __repr__(self):
+    # radius, angle = self.radius_angle()
+    n = len(self.class_name())
+    txt = 'Gaussian_Beam(q_para=' + repr(self.q_para)
+    txt += ', ' + super().__repr__()[n+1::]
+    return txt
 
-
+  def draw_fc(self):
+    return model_Gaussian_beam(name=self.name, q_para=self.q_para,
+                               wavelength=self.wavelength,prop=self.length,
+                               geom_info=self.get_geom())
 
 
 
