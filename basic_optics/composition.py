@@ -155,41 +155,9 @@ class Composition(Opt_Element):
 
   def set_sequence(self, seq):
     self._sequence = list(seq)
-    self.recompute_optical_axis()
+    # self.recompute_optical_axis()
 
 
-  # def compute_ray_groups(self):
-  #   """
-  #   berechnet von einer ray_groups[0] aus alle folgenden Strahlen, default ist
-  #   die Gruppe der Lightsource
-
-  #   Returns
-  #   -------
-  #   array of computed ray_groups
-  #   """
-  #   self._ray_groups = [self._lightsource.get_all_rays()] #erst mal nullen
-  #   for n in self._sequence:
-  #     elm = self._elements[n]
-  #     # if not elm.interacts_with_rays:
-  #     #   continue
-  #     newgroup = []
-  #     newgroup_name = self.name + "__ray_group" + str(n)
-  #     raycounter = 1
-  #     for oldray in self._ray_groups[-1]:
-  #       ray = elm.next_ray(oldray)
-  #       # if not ray == None:
-  #       #   # manche Elemente geben keien validen rays zurück (?)
-  #       if not ray:
-  #         break
-  #       ray.name = newgroup_name + "_ray" + str(raycounter)
-  #       raycounter += 1
-  #       newgroup.append(ray)
-  #     # if len(newgroup) > 0:
-  #     self._ray_groups.append(newgroup)
-  #   for ray in self._ray_groups[-1]:
-  #     ray.length = self._last_prop
-  #     # ray.length = 200
-  #   return deepcopy(self._ray_groups)
 
   def compute_beams(self, external_source=None):
     beamcount = 0

@@ -337,12 +337,12 @@ class Cylindrical_Mirror(Mirror):
     # self.draw_dict["mount_type"] = "POLARIS-K1-Step"
     self.draw_dict["Radius1"] = self.radius
     obj = model_mirror(**self.draw_dict)
-    default = Vector(0,0,1)
-    xx,yy,zz = self.get_coordinate_system()
-    zz = Vector(zz)
-    angle = default.getAngle(zz)*180/np.pi
-    vec = default.cross(zz)
-    rotate(obj, vec, angle, off0=0)
+    # default = Vector(0,0,1)
+    # xx,yy,zz = self.get_coordinate_system()
+    # zz = Vector(zz)
+    # angle = default.getAngle(zz)*180/np.pi
+    # vec = default.cross(zz)
+    # rotate(obj, vec, angle, off0=0)
     return obj
   
   def next_ray_tracing(self, ray):

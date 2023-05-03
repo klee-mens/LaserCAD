@@ -58,18 +58,18 @@ if freecad_da:
 # gb2.draw()
 # gb3.draw()
 # ==========================================================
-Radius = 600 #Radius des großen Konkavspiegels
-Aperture_concav = 100
-h_StripeM = 10 #Höhe des Streifenspiegels
-# gamma = 33.4906043205826 /180 *np.pi # Seperationswinkel zwischen einfallenden und Mittelpunktsstrahl; Alpha = Gamma + Beta
-gamma = 36 /180 *np.pi
-grat_const = 1/1480 # Gitterkonstante in 1/mm
-seperation = 120 # Differenz zwischen Gratingposition und Radius
-lam_mid = 1030e-9 * 1e3 # Zentralwellenlänge in mm
-delta_lamda = 50e-9*1e3 # Bandbreite in mm
-number_of_rays = 20
-safety_to_StripeM = 5 #Abstand der eingehenden Strahlen zum Concav Spiegel in mm
-periscope_distance = 10
+# Radius = 600 #Radius des großen Konkavspiegels
+# Aperture_concav = 100
+# h_StripeM = 10 #Höhe des Streifenspiegels
+# # gamma = 33.4906043205826 /180 *np.pi # Seperationswinkel zwischen einfallenden und Mittelpunktsstrahl; Alpha = Gamma + Beta
+# gamma = 36 /180 *np.pi
+# grat_const = 1/1480 # Gitterkonstante in 1/mm
+# seperation = 120 # Differenz zwischen Gratingposition und Radius
+# lam_mid = 1030e-9 * 1e3 # Zentralwellenlänge in mm
+# delta_lamda = 50e-9*1e3 # Bandbreite in mm
+# number_of_rays = 20
+# safety_to_StripeM = 5 #Abstand der eingehenden Strahlen zum Concav Spiegel in mm
+# periscope_distance = 10
 # ray0 = Ray(pos=[208.49408, 137.95006, 100.     ],normal=[-0.83397755, -0.55179838,  0.        ])
 # ray0 = Ray(pos=[0,0,0],normal=[1,1,0])
 # gb1 = Beam(radius=10, angle=0.1,wavelength=1030E-3,pos=(0,0,0))
@@ -78,17 +78,29 @@ periscope_distance = 10
 # ray1 = Ray(pos=(0,0,100))
 # ray1.length=600
 # Radius = 600
-StripeM = Cylindrical_Mirror(radius = Radius,pos=(0,0,100))
-p0=p1=(-100,0,100)
-StripeM.set_normal_with_2_points(p0, p1)
-StripeM.normal=-StripeM.normal
-StripeM.aperture=75
-StripeM.draw_dict["height"]=9
-StripeM.draw_dict["thickness"]=25
-StripeM.draw_dict["model_type"]="Stripe"
-StripeM.draw()
-StripeM.draw_mount()
 
+# StripeM = Cylindrical_Mirror(radius = 600,pos=(0,0,100))
+# p0=p1=(-100,0,100)
+# StripeM.normal = (1,1,0)
+# # StripeM.set_normal_with_2_points(p0, p1)
+# # StripeM.normal=-StripeM.normal
+# # StripeM.normal = (1,0,0)
+# # a = StripeM.get_axes()
+# # print(a)
+# StripeM.rotate((1,1,0),np.pi/2)
+# # a = StripeM.get_axes()
+# # print(a)
+# StripeM.aperture=75
+# StripeM.draw_dict["height"]=9
+# StripeM.draw_dict["thickness"]=25
+# StripeM.draw_dict["model_type"]="Stripe"
+
+# StripeM.draw()
+# StripeM.draw_mount()
+from basic_optics.moduls import Make_Periscope, Make_Telescope, Make_Amplifier_Typ_II_simple, Make_Stretcher, Make_White_Cell
+a=Make_White_Cell(roundtrips4=8*10)
+ls = Beam()
+a.compute_beams()
 # Concav1 = Cylindrical_Mirror(radius=Radius, name="Concav_Mirror")
 # Concav1.pos = [-277.74575141,  146.94631307,  100.        ]
 # Concav1.aperture = Aperture_concav

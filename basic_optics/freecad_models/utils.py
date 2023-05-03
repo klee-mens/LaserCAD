@@ -222,11 +222,12 @@ def update_geom_info(obj, geom_info, off0=0):
       pos_norm=np.array((geom_info[0],normal))
       update_pos_norm(obj,pos_norm,off0=off0)
     else:
-      # print(axes)
+      # print("axes=",axes)
       rotvec, phi = rotation_to_axis_angle(axes)
       rotvec = Vector(rotvec)
       phi *= 180/np.pi
       # print(rotvec, phi)
       # print(rotvec,phi)
       place0 = obj.Placement
+      # print("phi=",phi)
       obj.Placement = Placement(pos, Rotation(rotvec,phi), Vector(0,0,0)).multiply(place0)
