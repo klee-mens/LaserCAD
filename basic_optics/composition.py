@@ -13,7 +13,7 @@ from .beam import Beam
 from .optical_element import Opt_Element
 from .lens import Lens
 from .mirror import Mirror, Curved_Mirror
-from .freecad_models import warning, freecad_da, initialize_composition, add_to_composition, make_to_ray_part
+from .freecad_models import warning, freecad_da, initialize_composition, add_to_composition, make_to_ray_part,model_table
 import numpy as np
 from copy import deepcopy
 
@@ -205,6 +205,10 @@ class Composition(Opt_Element):
     for elm in self._elements:
       obj = elm.draw_mount()
       container.append(obj)
+    # if freecad_da:
+    #   obj = model_table()
+    #   print("-------------------------------------------------------")
+    #   container.append(obj)
     return self.__container_to_part(self._mounts_part, container)
   
   def draw_rays(self):

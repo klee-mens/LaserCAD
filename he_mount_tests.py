@@ -13,34 +13,41 @@ ind = pfad.rfind("/")
 pfad = pfad[0:ind+1]
 sys.path.append(pfad)
 
-from basic_optics import Mirror,Lens,Gaussian_Beam,Beam,Cylindrical_Mirror,Ray,Curved_Mirror
+from basic_optics import Mirror,Lens,Gaussian_Beam,Beam,Cylindrical_Mirror,Ray,Curved_Mirror,Intersection_plane
 from basic_optics.freecad_models import clear_doc, setview, freecad_da
 from basic_optics.freecad_models.freecad_model_mirror import mirror_mount
 from basic_optics.freecad_models.freecad_model_beam import model_Gaussian_beam
+from basic_optics.freecad_models.freecad_model_mirror import model_table
 
 import numpy as np
 if freecad_da:
   clear_doc()
 
-# rg=Beam(radius=2.5,angle=0.1,pos=(-100,0,100))
-# rg.normal = (1,0,0)
-# rg.make_square_distribution(10)
-# m = Cylindrical_Mirror(name="Standard_Mirror",radius=-200, pos=(100,0,100))
+rg=Beam(radius=2.5,angle=0,pos=(-100,0,100))
+rg.normal = (1,0,0)
+rg.make_circular_distribution(ring_number=4)
+m = Cylindrical_Mirror(name="Standard_Mirror",radius=200, pos=(100,0,100))
 
 # m = Mirror(name="Standard_Mirror", pos=(100,0,100))
-# # m.normal = (1,1,0)
+# m.normal = (1,0,0)
+m.normal = (1,1,0)
 # m.draw_dict["model_type"]="Rooftop"
-# m.aperture = 0
+m.aperture = 100
 # m.normal = (1,0,0)
 # m.draw_dict["mount_type"] = "rooftop_mirror"
-
-# # m.aperture = 25.4*4
-# m.draw()
-# m.draw_mount()
-# rg1 = m.next_beam(rg)
-# rg.draw()
-# rg1.draw()
-
+ip = Intersection_plane()
+ip.pos = (100,-71,100)
+ip.normal = (0,-1,0)
+# m.aperture = 25.4*4
+m.draw()
+ip.draw()
+m.draw_mount()
+rg1 = m.next_beam(rg)
+ip.spot_diagram(rg1)
+rg.draw()
+rg1.draw()
+if freecad_da:
+  model_table()
 # b=model_Gaussian_beam("laser1", -100+100j, 200, 1030E-3)
 # m=Mirror(pos=(0,0,100))
 # m.draw()
@@ -82,14 +89,7 @@ if freecad_da:
 # StripeM = Cylindrical_Mirror(radius = 600,pos=(0,0,100))
 # p0=p1=(-100,0,100)
 # StripeM.normal = (1,1,0)
-# # StripeM.set_normal_with_2_points(p0, p1)
-# # StripeM.normal=-StripeM.normal
-# # StripeM.normal = (1,0,0)
-# # a = StripeM.get_axes()
-# # print(a)
 # StripeM.rotate((1,1,0),np.pi/2)
-# # a = StripeM.get_axes()
-# # print(a)
 # StripeM.aperture=75
 # StripeM.draw_dict["height"]=9
 # StripeM.draw_dict["thickness"]=25
@@ -97,23 +97,10 @@ if freecad_da:
 
 # StripeM.draw()
 # StripeM.draw_mount()
-from basic_optics.moduls import Make_Periscope, Make_Telescope, Make_Amplifier_Typ_II_simple, Make_Stretcher, Make_White_Cell
-a=Make_White_Cell(roundtrips4=8*10)
-ls = Beam()
-a.compute_beams()
-# Concav1 = Cylindrical_Mirror(radius=Radius, name="Concav_Mirror")
-# Concav1.pos = [-277.74575141,  146.94631307,  100.        ]
-# Concav1.aperture = Aperture_concav
-# # Concav1.normal = [-0.96430279,  0.21589063,  0.15333415]
-# Concav1.draw_dict["height"]=6
-# Concav1.draw_dict["thickness"]=25
-# point0 = [202.25425, 146.94631, 100.     ]
-# point1 = [ 22.25424859, 146.94631307, 110.        ]
-# Concav1.set_normal_with_2_points(point0, point1)
-# Concav1.draw_dict["mount_type"] = "dont_draw"
-# Concav1.draw()
-# ray1 = Ray(pos=[1159.95883,  961.53726,  -11.58567],normal=[-0.80703,  0.59051, -0.     ])
-# ray1.draw()
-# ray2.draw()
+
+# from basic_optics.moduls import Make_Periscope, Make_Telescope, Make_Amplifier_Typ_II_simple, Make_Stretcher, Make_White_Cell
+# a=Make_White_Cell(roundtrips4=8*10)
+# ls = Beam()
+# a.compute_beams()
 if freecad_da:
   setview()

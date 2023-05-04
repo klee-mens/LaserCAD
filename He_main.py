@@ -236,13 +236,13 @@ for wavel in wavels:
 lightsource.override_rays(rays)
 
 newlightsource0 = Beam(radius=1, angle=0,wavelength=lam_mid)
-newlightsource0.make_circular_distribution(ring_number=2)
+newlightsource0.make_circular_distribution(ring_number=3)
 
 newlightsource1 = Beam(radius=1, angle=0,wavelength=lam_mid+delta_lamda/2)
-newlightsource1.make_circular_distribution(ring_number=2)
+newlightsource1.make_circular_distribution(ring_number=3)
   
 newlightsource2 = Beam(radius=1, angle=0,wavelength=lam_mid-delta_lamda/2)
-newlightsource2.make_circular_distribution(ring_number=2)
+newlightsource2.make_circular_distribution(ring_number=3)
   
 newlightsource = Beam(radius=0, angle=0)
 r=Ray()
@@ -305,7 +305,7 @@ point0 = p_grat
 point1 = M3.pos + (-100,0,0)
 M3.set_normal_with_2_points(point0, point1)
 
-Curved_Mirror2 = Curved_Mirror(radius=4000, name="Concav_Mirror")
+Curved_Mirror2 = Curved_Mirror(radius=5000, name="Concav_Mirror")
 Curved_Mirror2.aperture = 25.4*2
 Curved_Mirror2.pos = M3.pos + (-100,0,0)
 Curved_Mirror2.normal = (-1,0,0)
@@ -320,7 +320,7 @@ fixlens2.aperture = 25.4/2
 fixlens2.pos = p_grat - 425 * vec
 fixlens2.normal = vec
 
-Curved_Mirror1 = Curved_Mirror(radius=4000, name="Concav_Mirror")
+Curved_Mirror1 = Curved_Mirror(radius=5000, name="Concav_Mirror")
 Curved_Mirror1.aperture = 25.4*2
 Curved_Mirror1.pos = M1.pos + (250,0,0)
 Curved_Mirror1.normal = (1,0,0)
@@ -342,8 +342,10 @@ Cavity2.aperture = 25.4*2
 Cavity2.normal = (1,0,0)
 
 ip = Intersection_plane(dia=100)
-ip.pos = p_grat + vec*100
+ip.pos = p_grat - vec*250
 ip.normal = vec
+# ip.pos = StripeM.pos
+# ip.normal = StripeM.normal
 
 # pure_cosmetic.draw = useless
 M1.pos = M1.pos-(0,0,4)
@@ -387,11 +389,14 @@ Stretcher.add_fixed_elm(pure_cosmetic)
 
 seq = np.array([0,1,2,3,0,4,5,0,6,2,7,0,8,9,8,0,7,2,6,0,5,4,0,3,2,1,0,10,11,10])
 roundtrip_sequence = list(seq)
-
+# seq = np.array([0,1,2,12])
 # Concav1.draw()
 # Grat.draw()
 
-roundtrip=10
+if freecad_da:
+  obj = model_table()
+
+roundtrip=3
 # seq = np.repeat(roundtrip_sequence, roundtrip)
 
 for n in range(roundtrip-1):

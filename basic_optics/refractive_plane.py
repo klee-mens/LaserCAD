@@ -16,8 +16,11 @@ from .freecad_models import model_intersection_plane
 
 
 class Refractive_plane(Opt_Element):
-
+  """
+  The class of Refractive_plane.
+  """
   def __init__(self, r_ref_index = 1.5, **kwargs):
+
     super().__init__(**kwargs)
 
     self.relative_refractive_index = r_ref_index

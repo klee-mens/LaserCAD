@@ -74,11 +74,16 @@ class Intersection_plane(Opt_Element):
         c=RAY_COLOR
       point_c.append(c)
       pos_diff = intersection_point - self.pos
-      if self.draw_dict["dia"]**2<pos_diff[1]**2+pos_diff[2]**2:
-        self.draw_dict["dia"] = pow(pos_diff[1]**2+pos_diff[2]**2,0.5)
+      pos_diff1 = np.dot(pos_diff,np.cross((0,0,1),self.normal))
+      pos_diff2 = np.dot(pos_diff,(0,0,-1))
+      # print(pos_diff1,pos_diff2)
+      # pos_diff[1] = pow(pos_diff1[0]**2+pos_diff1[1]**2+pos_diff1[2]**2,0.5)
+      # pos_diff[2] = pow(pos_diff2[0]**2+pos_diff2[1]**2+pos_diff2[2]**2,0.5)
+      if self.draw_dict["dia"]**2<pos_diff1**2+pos_diff2**2:
+        self.draw_dict["dia"] = pow(pos_diff1**2+pos_diff2**2,0.5)
         self.aperture=self.draw_dict["dia"]
-      point_x.append(pos_diff[1])
-      point_y.append(pos_diff[2])
+      point_x.append(pos_diff1)
+      point_y.append(pos_diff2)
     plt.figure()
     area = (20 * np.random.rand(37))**2
     c = np.sqrt(area)

@@ -98,7 +98,6 @@ class Opt_Element(Geom_Object):
       next_middle = self.next_ray(gaussian) #change the length of Gaussian
       next_gaussian.set_geom(next_middle.get_geom())
       [[A,B],[C,D]] = self._matrix
-      # print([[A,B],[C,D]])
       q_parameter = deepcopy(gaussian.q_para)
       q_parameter += gaussian.length
       next_gaussian.q_para = (A*q_parameter+B)/(C*q_parameter+D)
@@ -126,15 +125,6 @@ class Opt_Element(Geom_Object):
     km = -self.normal
     scpr = np.sum(km*k)
     newk = k-2*scpr*km
-    p0 = ray2.pos
-    # if np.std(ray2.normal-self.normal)<TOLERANCE and np.std(p0-self.pos)<TOLERANCE:
-    #   ray2.pos = p0
-    #   a=ray2.normal
-    #   a=a*-1
-    #   ray3 = Ray(name = ray2.name)
-    #   ray3.pos = p0
-    #   ray3.normal = a
-    #   return ray3
     ray2.normal = newk
     # print("REFL", k, km, scpr, newk, ray2.normal)
     return ray2
