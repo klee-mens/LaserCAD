@@ -236,13 +236,13 @@ for wavel in wavels:
 lightsource.override_rays(rays)
 
 newlightsource0 = Beam(radius=1, angle=0,wavelength=lam_mid)
-newlightsource0.make_circular_distribution(ring_number=3)
+newlightsource0.make_circular_distribution(ring_number=2)
 
 newlightsource1 = Beam(radius=1, angle=0,wavelength=lam_mid+delta_lamda/2)
-newlightsource1.make_circular_distribution(ring_number=3)
+newlightsource1.make_circular_distribution(ring_number=2)
   
 newlightsource2 = Beam(radius=1, angle=0,wavelength=lam_mid-delta_lamda/2)
-newlightsource2.make_circular_distribution(ring_number=3)
+newlightsource2.make_circular_distribution(ring_number=2)
   
 newlightsource = Beam(radius=0, angle=0)
 r=Ray()
@@ -342,7 +342,7 @@ Cavity2.aperture = 25.4*2
 Cavity2.normal = (1,0,0)
 
 ip = Intersection_plane(dia=100)
-ip.pos = p_grat - vec*250
+ip.pos = p_grat + vec*250
 ip.normal = vec
 # ip.pos = StripeM.pos
 # ip.normal = StripeM.normal
@@ -393,10 +393,10 @@ roundtrip_sequence = list(seq)
 # Concav1.draw()
 # Grat.draw()
 
-if freecad_da:
-  obj = model_table()
+# if freecad_da:
+#   obj = model_table()
 
-roundtrip=3
+roundtrip=1
 # seq = np.repeat(roundtrip_sequence, roundtrip)
 
 for n in range(roundtrip-1):

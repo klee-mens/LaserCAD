@@ -2,7 +2,7 @@
 """
 Created on Mon Mar 27 16:06:17 2023
 
-@author: 12816
+@author: HE
 """
 
 from .optical_element import Opt_Element

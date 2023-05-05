@@ -18,36 +18,38 @@ from basic_optics.freecad_models import clear_doc, setview, freecad_da
 from basic_optics.freecad_models.freecad_model_mirror import mirror_mount
 from basic_optics.freecad_models.freecad_model_beam import model_Gaussian_beam
 from basic_optics.freecad_models.freecad_model_mirror import model_table
+from basic_optics import Iris, Composition
 
 import numpy as np
 if freecad_da:
   clear_doc()
 
-rg=Beam(radius=2.5,angle=0,pos=(-100,0,100))
-rg.normal = (1,0,0)
-rg.make_circular_distribution(ring_number=4)
-m = Cylindrical_Mirror(name="Standard_Mirror",radius=200, pos=(100,0,100))
+# rg=Beam(radius=2.5,angle=0,pos=(-100,0,100))
+# rg.normal = (1,0,0)
+# rg.make_circular_distribution(ring_number=4)
+# m = Cylindrical_Mirror(name="Standard_Mirror",radius=200, pos=(100,0,100))
 
-# m = Mirror(name="Standard_Mirror", pos=(100,0,100))
-# m.normal = (1,0,0)
-m.normal = (1,1,0)
-# m.draw_dict["model_type"]="Rooftop"
-m.aperture = 100
-# m.normal = (1,0,0)
-# m.draw_dict["mount_type"] = "rooftop_mirror"
-ip = Intersection_plane()
-ip.pos = (100,-71,100)
-ip.normal = (0,-1,0)
-# m.aperture = 25.4*4
-m.draw()
-ip.draw()
-m.draw_mount()
-rg1 = m.next_beam(rg)
-ip.spot_diagram(rg1)
-rg.draw()
-rg1.draw()
-if freecad_da:
-  model_table()
+# # m = Mirror(name="Standard_Mirror", pos=(100,0,100))
+# # m.normal = (1,0,0)
+# m.normal = (1,1,0)
+# # m.draw_dict["model_type"]="Rooftop"
+# m.aperture = 100
+# # m.normal = (1,0,0)
+# # m.draw_dict["mount_type"] = "rooftop_mirror"
+# ip = Intersection_plane()
+# ip.pos = (100,-71,100)
+# ip.normal = (0,-1,0)
+# # m.aperture = 25.4*4
+# m.draw()
+# ip.draw()
+# m.draw_mount()
+# rg1 = m.next_beam(rg)
+# ip.spot_diagram(rg1)
+# rg.draw()
+# rg1.draw()
+# if freecad_da:
+#   model_table()
+
 # b=model_Gaussian_beam("laser1", -100+100j, 200, 1030E-3)
 # m=Mirror(pos=(0,0,100))
 # m.draw()
@@ -98,9 +100,11 @@ if freecad_da:
 # StripeM.draw()
 # StripeM.draw_mount()
 
-# from basic_optics.moduls import Make_Periscope, Make_Telescope, Make_Amplifier_Typ_II_simple, Make_Stretcher, Make_White_Cell
-# a=Make_White_Cell(roundtrips4=8*10)
-# ls = Beam()
-# a.compute_beams()
+from basic_optics.moduls import Make_Periscope, Make_Telescope, Make_Amplifier_Typ_II_simple, Make_Stretcher, Make_White_Cell
+a=Make_White_Cell(roundtrips4=8)
+a.pos =(0,0,100)
+ls = Beam()
+a.compute_beams()
+a.draw()
 if freecad_da:
   setview()

@@ -417,8 +417,9 @@ def iris_test():
   dia1.draw_mounts()
   dia1.draw_beams()
 
-  ip1.spot_diagram(dia1._ray_groups[ip1_seq])
-  ip2.spot_diagram(dia1._ray_groups[-1])
+  # ip1.spot_diagram(dia1._ray_groups[ip1_seq])
+  # ip2.spot_diagram(dia1._ray_groups[-1])
+  ip2.spot_diagram(dia1._beams[-2])
   return dia1
 
 
