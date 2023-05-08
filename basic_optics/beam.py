@@ -287,7 +287,7 @@ class Beam(Geom_Object):
 
 class Gaussian_Beam(Ray):
 # class Gaussian_beam(Geom_Object):
-  def __init__(self, radius=10, angle=0.05, wavelength=1030E-6, name="NewGassian",  **kwargs):
+  def __init__(self, radius=10, angle=0.02, wavelength=1030E-6, name="NewGassian",  **kwargs):
     super().__init__(name=name, **kwargs)
     z0 = wavelength/(np.pi*np.tan(angle)*np.tan(angle))
     w0 = wavelength/(np.pi*np.tan(angle))
@@ -299,6 +299,10 @@ class Gaussian_Beam(Ray):
     q_para = complex(z,z0)
     self.wavelength = wavelength
     self.q_para = q_para
+
+  def set_length(self, length):
+    # needed for consitency in next_beam function
+    self.length = length
     
   def __repr__(self):
     # radius, angle = self.radius_angle()

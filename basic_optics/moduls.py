@@ -636,6 +636,7 @@ def Make_Stretcher_old():
   Stretcher.propagate(300)
   return Stretcher
 
+
 def Make_Stretcher():
   """
   tja, versuchen wir mal einen Offner Strecker...

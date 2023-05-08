@@ -9,7 +9,7 @@ Created on Sat Aug 20 14:48:12 2022
 # from basic_optics import Geom_Object, Ray, TOLERANCE, Beam
 from .geom_object import Geom_Object, TOLERANCE
 from .ray import Ray
-from .beam import Beam
+from .beam import Beam, Gaussian_Beam
 from .constants import inch
 import numpy as np
 from copy import deepcopy
@@ -74,6 +74,8 @@ class Opt_Element(Geom_Object):
     -------
     next Beam()
     """
+    if type(beam) == type(Gaussian_Beam()):
+      return self.next_gauss(beam)
     newb = deepcopy(beam)
     newb.name = "next_" + beam.name
     rays = beam.get_all_rays(by_reference=True)
