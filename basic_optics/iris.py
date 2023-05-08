@@ -3,7 +3,7 @@
 Created on Mon Mar 27 12:12:58 2023
 
 @author: He
-Ignore this part. Itsd not finished yet.
+Iris cannot be used if the beam distribution is cone
 """
 
 from .freecad_models import model_iris_diaphragms,iris_post
@@ -12,6 +12,7 @@ from copy import deepcopy
 
 
 class Iris(Opt_Element):
+  
   def __init__(self, dia = 20, name = "New_iris_diaphragms",**kwargs):
     super().__init__(name=name, **kwargs)
     self.aperture = dia
@@ -23,13 +24,14 @@ class Iris(Opt_Element):
   def next_ray(self, ray):
     ray2=deepcopy(ray)
     ray2.pos = ray.intersect_with(self)
+    
     ray_pos = ray2.pos
-    """
-    if (ray_pos[1]-self.pos[1])**2+(ray_pos[2]-self.pos[2])**2>self.draw_dict["Radius1"]**2:
+    ray_radi = ray_pos-self.pos
+    if ray_radi[0]**2+ray_radi[1]**2+ray_radi[2]**2>self.draw_dict["Radius1"]**2:
       return None
     else:
       return ray2
-    """
+    
     # return ray2
     return None
     

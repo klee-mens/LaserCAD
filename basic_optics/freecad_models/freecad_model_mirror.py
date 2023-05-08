@@ -178,7 +178,7 @@ def model_stripe_mirror(name="Stripe_Mirror", dia=75, Radius1=250, thickness=25,
   pad.ReferenceAxis = (sketch,['N_Axis'])
   pad.Midplane = 1
   sketch.Visibility = False
-  # print(geom)
+  # print("geom=",geom)
   # obj.Placement = Placement(Vector(0,0,0), Rotation(0,0,90), Vector(0,0,0))
   
   if "color" in kwargs.keys():
@@ -522,11 +522,11 @@ def draw_post_part(name="post_part", base_exists=False, height=12,xshift=0, geom
 
   """
   POS = geom[0]
-  AXES = geom[1]
-  if np.shape(AXES)==(3,):
-    NORMAL=AXES
-  else:
-    NORMAL=AXES[:,0]
+  # AXES = geom[1]
+  # if np.shape(AXES)==(3,):
+  #   NORMAL=AXES
+  # else:
+  #   NORMAL=AXES[:,0]
   if (POS[2]-height<34) or (POS[2]-height>190):
     print("Warning, there is no suitable post holder and slotted base at this height")
   post_length=50
@@ -785,7 +785,7 @@ def draw_post_special(name="TR50_M", height=12,xshift=0, geom=None):
 
   """
   
-  POS = geom[0]
+  # POS = geom[0]
   AXES = geom[1]
   if np.shape(AXES)==(3,):
     NORMAL=AXES

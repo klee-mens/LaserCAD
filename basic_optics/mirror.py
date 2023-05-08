@@ -291,6 +291,15 @@ class Curved_Mirror(Mirror):
     return ray2
 
 class Cylindrical_Mirror(Mirror):
+  """
+  The class of Cylindrical mirror.
+  Cylindrical mirror have those parameters:
+    radius: The curvature of the mirror
+    height: The vertical thickness of the mirror
+    thickness: The horizontal thickness of the mirror
+  The default mirror is placed horizontally, which means the cylinder_center 
+  points tp the z-axis. Use rotate function if you want to rotate the mirror.
+  """
   def __init__(self, radius=200,height=10, thickness=25, **kwargs):
     super().__init__(**kwargs)
     self.radius = radius
@@ -304,6 +313,13 @@ class Cylindrical_Mirror(Mirror):
     return self.__radius
   @radius.setter
   def radius(self, x):
+    """
+    This part is incorrect. Since I don't know the matrix of Cylindrical_Mirror 
+    Parameters
+    ----------
+    x : TYPE
+      DESCRIPTION.
+    """
     self.__radius = x
     if x == 0:
       self._matrix[1,0] = 0
@@ -336,12 +352,12 @@ class Cylindrical_Mirror(Mirror):
     # self.draw_dict["mount_type"] = "POLARIS-K1-Step"
     self.draw_dict["Radius1"] = self.radius
     obj = model_mirror(**self.draw_dict)
-    default = Vector(0,0,1)
-    xx,yy,zz = self.get_coordinate_system()
-    zz = Vector(zz)
-    angle = default.getAngle(zz)*180/np.pi
-    vec = default.cross(zz)
-    rotate(obj, vec, angle, off0=0)
+    # default = Vector(0,0,1)
+    # xx,yy,zz = self.get_coordinate_system()
+    # zz = Vector(zz)
+    # angle = default.getAngle(zz)*180/np.pi
+    # vec = default.cross(zz)
+    # rotate(obj, vec, angle, off0=0)
     return obj
   
   def next_ray_tracing(self, ray):
@@ -431,56 +447,56 @@ class Cylindrical_Mirror(Mirror):
   
   
   
-def intersect_ray_cylinder(ray_origin, ray_direction, cylinder_center, cylinder_axis, cylinder_radius):
-    """
-    Calculates the intersection point of a ray with a cylindrical surface.
+# def intersect_ray_cylinder(ray_origin, ray_direction, cylinder_center, cylinder_axis, cylinder_radius):
+#     """
+#     Calculates the intersection point of a ray with a cylindrical surface.
+#     (Chat_GPT version, too many restrictions be be used)
+#     Args:
+#         ray_origin (numpy array): The origin of the ray, as a 3D vector.
+#         ray_direction (numpy array): The direction of the ray, as a 3D vector.
+#         cylinder_center (numpy array): The center of the cylinder, as a 3D vector.
+#         cylinder_axis (numpy array): The axis of the cylinder, as a 3D vector.
+#         cylinder_radius (float): The radius of the cylinder.
 
-    Args:
-        ray_origin (numpy array): The origin of the ray, as a 3D vector.
-        ray_direction (numpy array): The direction of the ray, as a 3D vector.
-        cylinder_center (numpy array): The center of the cylinder, as a 3D vector.
-        cylinder_axis (numpy array): The axis of the cylinder, as a 3D vector.
-        cylinder_radius (float): The radius of the cylinder.
+#     Returns:
+#         numpy array or None: The intersection point, as a 3D vector, or None if no intersection.
+#     """
 
-    Returns:
-        numpy array or None: The intersection point, as a 3D vector, or None if no intersection.
-    """
+#     # Convert inputs to numpy arrays for vector operations
+#     ray_origin = np.array(ray_origin)
+#     ray_direction = np.array(ray_direction)
+#     cylinder_center = np.array(cylinder_center)
+#     cylinder_axis = np.array(cylinder_axis)
 
-    # Convert inputs to numpy arrays for vector operations
-    ray_origin = np.array(ray_origin)
-    ray_direction = np.array(ray_direction)
-    cylinder_center = np.array(cylinder_center)
-    cylinder_axis = np.array(cylinder_axis)
-
-    # Compute auxiliary vectors
-    oc = ray_origin - cylinder_center
-    a = np.dot(ray_direction, ray_direction) - np.dot(ray_direction, cylinder_axis)**2
-    b = 2 * (np.dot(ray_direction, oc) - np.dot(ray_direction, cylinder_axis) * np.dot(oc, cylinder_axis))
-    c = np.dot(oc, oc) - np.dot(oc, cylinder_axis)**2 - cylinder_radius**2
+#     # Compute auxiliary vectors
+#     oc = ray_origin - cylinder_center
+#     a = np.dot(ray_direction, ray_direction) - np.dot(ray_direction, cylinder_axis)**2
+#     b = 2 * (np.dot(ray_direction, oc) - np.dot(ray_direction, cylinder_axis) * np.dot(oc, cylinder_axis))
+#     c = np.dot(oc, oc) - np.dot(oc, cylinder_axis)**2 - cylinder_radius**2
     
     
-    # Compute discriminant
-    discriminant = b**2 - 4 * a * c
+#     # Compute discriminant
+#     discriminant = b**2 - 4 * a * c
 
-    # If discriminant is negative, no intersection
-    if discriminant < 0:
-        return None
+#     # If discriminant is negative, no intersection
+#     if discriminant < 0:
+#         return None
 
-    # Compute t parameter (parameter along the ray direction)
-    t1 = (-b + np.sqrt(discriminant)) / (2 * a)
-    t2 = (-b - np.sqrt(discriminant)) / (2 * a)
+#     # Compute t parameter (parameter along the ray direction)
+#     t1 = (-b + np.sqrt(discriminant)) / (2 * a)
+#     t2 = (-b - np.sqrt(discriminant)) / (2 * a)
 
-    # Check if intersection is within ray segment
-    if t1 < 0 and t2 < 0:
-        return None
+#     # Check if intersection is within ray segment
+#     if t1 < 0 and t2 < 0:
+#         return None
 
-    # Select smallest positive t
-    t = min(t1, t2) if t1 >= 0 and t2 >= 0 else max(t1, t2)
+#     # Select smallest positive t
+#     t = min(t1, t2) if t1 >= 0 and t2 >= 0 else max(t1, t2)
 
-    # Compute intersection point
-    intersection_point = ray_origin + t * ray_direction
+#     # Compute intersection point
+#     intersection_point = ray_origin + t * ray_direction
 
-    return intersection_point
+#     return intersection_point
 
 def tests():
   m = Mirror(phi=90, theta=0) # einfacher Flip Mirror

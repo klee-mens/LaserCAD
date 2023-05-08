@@ -140,7 +140,7 @@ class Beam(Geom_Object):
           our=self._rays[ray_counting]
           # self._rays[ray_counting].wavelength = self._Bwavelength
           our.from_h_alpha_theta(r, self._angle, thetas[n], self)            # rotate the ray which is not in the center
-          our.name=self.name + "_outer_Ray" +str(ray_counting)
+          our.name=self.name + "_circular_distribution_Ray" +str(ray_counting)
           ray_counting+=1
       else:
         # self._rays[ray_counting].wavelength = self._Bwavelength

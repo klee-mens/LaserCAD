@@ -248,6 +248,7 @@ class Geom_Object(object):
     
     """
     rot_mat = rotation_matrix(vec, phi)
+    # print(rot_mat)
     new_ax = np.matmul(rot_mat, self._axes)
     self.set_axes(new_ax) 
 

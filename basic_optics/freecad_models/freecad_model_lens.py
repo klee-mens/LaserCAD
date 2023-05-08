@@ -180,7 +180,7 @@ def lens_mount(mount_name="mirror_mount", dia=inch,  geom=None,
 
 def lens_mount(mount_name="lens_mount", mount_type="MLH05_M",  
                  geom=None, only_info=False, drawing_post=True,
-                 dia=25.4, **kwargs):
+                 base_exists=True, dia=25.4, **kwargs):
   """
     Build the lens mount, post, post holder and slotted bases of the lens
 
@@ -276,7 +276,8 @@ def lens_mount(mount_name="lens_mount", mount_type="MLH05_M",
     height = dia/2+10
     xshift = 0
     if  drawing_post:
-      post_part=draw_post_part(name="post_part", height=height,xshift=xshift, geom=geom)
+      post_part=draw_post_part(name="post_part",base_exists=base_exists,
+                               height=height,xshift=xshift, geom=geom)
     else:
       
       DOC.recompute()
@@ -311,7 +312,8 @@ def lens_mount(mount_name="lens_mount", mount_type="MLH05_M",
   update_geom_info(obj, geom, off0=offset)
   obj.Label = mount_name
   if  drawing_post:
-    post_part=draw_post_part(name="post_part", height=height,xshift=xshift, geom=geom)
+    post_part=draw_post_part(name="post_part",base_exists=base_exists,
+                             height=height,xshift=xshift, geom=geom)
   else:
     DOC.recompute()
     return obj
@@ -321,7 +323,7 @@ def lens_mount(mount_name="lens_mount", mount_type="MLH05_M",
   DOC.recompute()
   return part
 
-def draw_post_part(name="post_part", height=12,xshift=0, geom=None):
+def draw_post_part(name="post_part", base_exists=False, height=12,xshift=0, geom=None):
   """
   Draw the post part, including post, post holder and base
   Assuming that all optics are placed in the plane of z = 0.
@@ -345,36 +347,61 @@ def draw_post_part(name="post_part", height=12,xshift=0, geom=None):
     A part which includes the post, the post holder and the slotted bases.
 
   """
-  
   POS = geom[0]
-  AXES = geom[1]
-  NORMAL = AXES[:,0]
-  
+  # AXES = geom[1]
+  # if np.shape(AXES)==(3,):
+  #   NORMAL=AXES
+  # else:
+  #   NORMAL=AXES[:,0]
   if (POS[2]-height<34) or (POS[2]-height>190):
     print("Warning, there is no suitable post holder and slotted base at this height")
   post_length=50
-  if POS[2]-height>110:
-    post_length=100
-  elif POS[2]-height>85:
-    post_length=75
-  elif POS[2]-height>60:
-    post_length=50
-  elif POS[2]-height>50:
-    post_length=40
-  elif POS[2]-height>40:
-    post_length=30
+  if base_exists:
+      if POS[2]-height>110:
+        post_length=100
+      elif POS[2]-height>90:
+        post_length=75
+      elif POS[2]-height>65:
+        post_length=50
+      elif POS[2]-height>55:
+        post_length=40
+      elif POS[2]-height>40:
+        post_length=30
+      else:
+        post_length=20
+        post2 = draw_post_holder(name="PH20E_M", height=0,xshift=xshift, geom=geom)
+      post = draw_post(name="TR"+str(post_length)+"_M", height=height,
+                       xshift=xshift,geom=geom)
+      if post_length>20:
+        post2 = draw_post_holder(name="PH"+str(post_length)+"_M", height=0,
+                                 xshift=xshift, geom=geom)
   else:
-    post_length=20
-    post2 = draw_post_holder(name="PH20E_M", height=0,xshift=xshift, geom=geom)
-  post = draw_post(name="TR"+str(post_length)+"_M", height=height,
-                   xshift=xshift,geom=geom)
-  if post_length>90 or post_length<31:
-    post1 = draw_post_base(name="BA2_M", height=0,xshift=xshift, geom=geom)
+      if POS[2]-height>105:
+        post_length=100
+      elif POS[2]-height>85:
+        post_length=75
+      elif POS[2]-height>60:
+        post_length=50
+      elif POS[2]-height>50:
+        post_length=40
+      elif POS[2]-height>35:
+        post_length=30
+      else:
+        post_length=20
+        post2 = draw_post_holder(name="PH"+str(post_length)+"E_M", height=0,
+                                 xshift=xshift, geom=geom)
+      post = draw_post(name="TR"+str(post_length)+"_M", height=height,
+                       xshift=xshift,geom=geom)
+      post2 = draw_post_holder(name="PH"+str(post_length)+"E_M", height=0,
+                               xshift=xshift, geom=geom)
+  if base_exists:
+    if post_length>90 or post_length<31:
+        post1 = draw_post_base(name="BA2_M", height=0,xshift=xshift, geom=geom)
+    else:
+        post1 = draw_post_base(name="BA1L", height=0,xshift=xshift, geom=geom)
   else:
-    post1 = draw_post_base(name="BA1L", height=0,xshift=xshift, geom=geom)
-  if post_length>20:
-    post2 = draw_post_holder(name="PH"+str(post_length)+"_M", height=0,
-                             xshift=xshift, geom=geom)
+    post1 = None
+  
   part = initialize_composition_old(name=name)
   container = post,post1,post2
   add_to_composition(part, container)

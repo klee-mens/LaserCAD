@@ -22,6 +22,7 @@ from basic_optics.freecad_models import clear_doc, setview, freecad_da, freecad_
 from basic_optics import Opt_Element, Geom_Object, Curved_Mirror,Thick_Lens
 from basic_optics import Ray, Composition, Grating, Propagation
 from basic_optics import Refractive_plane
+from basic_optics.freecad_models import add_to_composition
 
 # from basic_optics.mirror import curved_mirror_test
 from basic_optics.tests import all_moduls_test
@@ -235,13 +236,13 @@ for wavel in wavels:
 lightsource.override_rays(rays)
 
 newlightsource0 = Beam(radius=1, angle=0,wavelength=lam_mid)
-newlightsource0.make_circular_distribution(ring_number=3)
+newlightsource0.make_circular_distribution(ring_number=2)
 
 newlightsource1 = Beam(radius=1, angle=0,wavelength=lam_mid+delta_lamda/2)
-newlightsource1.make_circular_distribution(ring_number=3)
+newlightsource1.make_circular_distribution(ring_number=2)
   
 newlightsource2 = Beam(radius=1, angle=0,wavelength=lam_mid-delta_lamda/2)
-newlightsource2.make_circular_distribution(ring_number=3)
+newlightsource2.make_circular_distribution(ring_number=2)
   
 newlightsource = Beam(radius=0, angle=0)
 r=Ray()
@@ -304,7 +305,7 @@ point0 = p_grat
 point1 = M3.pos + (-100,0,0)
 M3.set_normal_with_2_points(point0, point1)
 
-Curved_Mirror2 = Curved_Mirror(radius=3000, name="Concav_Mirror")
+Curved_Mirror2 = Curved_Mirror(radius=5000, name="Concav_Mirror")
 Curved_Mirror2.aperture = 25.4*2
 Curved_Mirror2.pos = M3.pos + (-100,0,0)
 Curved_Mirror2.normal = (-1,0,0)
@@ -319,7 +320,7 @@ fixlens2.aperture = 25.4/2
 fixlens2.pos = p_grat - 425 * vec
 fixlens2.normal = vec
 
-Curved_Mirror1 = Curved_Mirror(radius=3000, name="Concav_Mirror")
+Curved_Mirror1 = Curved_Mirror(radius=5000, name="Concav_Mirror")
 Curved_Mirror1.aperture = 25.4*2
 Curved_Mirror1.pos = M1.pos + (250,0,0)
 Curved_Mirror1.normal = (1,0,0)
@@ -341,8 +342,10 @@ Cavity2.aperture = 25.4*2
 Cavity2.normal = (1,0,0)
 
 ip = Intersection_plane(dia=100)
-ip.pos = p_grat + vec*100
+ip.pos = p_grat + vec*250
 ip.normal = vec
+# ip.pos = StripeM.pos
+# ip.normal = StripeM.normal
 
 # pure_cosmetic.draw = useless
 M1.pos = M1.pos-(0,0,4)
@@ -377,36 +380,53 @@ Stretcher.add_fixed_elm(pure_cosmetic)
 # for item in subperis._elements:
 #   Stretcher.add_fixed_elm(item)
 
-
-seq = [0,1,2,3,0,4,5,0,6,2,7,0,8,9,8,0,7,2,6,0,5,4,0,3,2,1,0,10,11,10]
+# seq = [0,1,2,3,0,4,5,0,6,2,7,0,8,9,8,0,7,2,6,0,5,4,0,3,2,1,0,10,11,10]
 # seq = [0,1,2,1,0, 3]
 
 # seq = [0,1,2,3,0, 4, 5, 6, 2, 7, 0]
 
-roundtrip_sequence = seq
+# from collections import deque
 
+seq = np.array([0,1,2,3,0,4,5,0,6,2,7,0,8,9,8,0,7,2,6,0,5,4,0,3,2,1,0,10,11,10])
+roundtrip_sequence = list(seq)
+# seq = np.array([0,1,2,12])
 # Concav1.draw()
 # Grat.draw()
 
-roundtrip=5
+# if freecad_da:
+#   obj = model_table()
+
+roundtrip=1
+# seq = np.repeat(roundtrip_sequence, roundtrip)
 
 for n in range(roundtrip-1):
-  seq.extend(roundtrip_sequence)
+  # print("step ", n, "of", roundtrip)
+  seq = np.append(seq,roundtrip_sequence)
   
-# seq.extend([0,1])
-
-seq.extend([12])
+seq=np.append(seq, [12])
 
 Stretcher.set_sequence(seq)
-# Stretcher.propagate(100)
-# Stretcher.pos = (0,0,100)
+Stretcher.propagate(100)
+Stretcher.pos = (0,0,100)
 
-# Stretcher.draw_mounts()
+Stretcher.draw_mounts()
 Stretcher.draw_elements()
-# Stretcher.compute_beams()
+Stretcher.compute_beams()
 
-Stretcher.draw_beams(style="ray_group")
+container = []
+for n in range(-32,1):
+  beam = Stretcher._beams[n]
+  beam.draw_dict["model"] = "ray_group"
+  obj = beam.draw()
+  container.append(obj)
+if freecad_da:
+  part = add_to_composition(Stretcher._beams_part, container)
+else:
+  for x in container:
+    Stretcher._beams_part.append(x)
+# Stretcher.draw_beams(style="ray_group")
 ip.spot_diagram(Stretcher._beams[-1])
+
 
 # for n in range(roundtrip-1):
 #   rays = Stretcher._beams[-1].get_all_rays()
@@ -452,6 +472,7 @@ ip.spot_diagram(Stretcher._beams[-1])
 #   else:
 #     seq.extend([12])
 #     Stretcher.set_sequence(seq)
+#     Stretcher.draw_elements()
 #     Stretcher.draw_beams(style="ray_group")
 #     ip.spot_diagram(Stretcher._beams[-1])
 
