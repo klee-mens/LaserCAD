@@ -15,9 +15,9 @@ sys.path.append(pfad)
 
 from basic_optics import Mirror,Lens,Gaussian_Beam,Beam,Cylindrical_Mirror,Ray,Curved_Mirror,Intersection_plane
 from basic_optics.freecad_models import clear_doc, setview, freecad_da
-from basic_optics.freecad_models.freecad_model_mirror import mirror_mount
+from basic_optics.freecad_models.freecad_model_mounts import mirror_mount
 from basic_optics.freecad_models.freecad_model_beam import model_Gaussian_beam
-from basic_optics.freecad_models.freecad_model_mirror import model_table
+from basic_optics.freecad_models.freecad_model_mounts import model_table
 from basic_optics import Iris, Composition
 
 import numpy as np
@@ -100,11 +100,14 @@ if freecad_da:
 # StripeM.draw()
 # StripeM.draw_mount()
 
+from basic_optics.tests import all_moduls_test
+all_moduls_test()
+
+
 from basic_optics.moduls import Make_Periscope, Make_Telescope, Make_Amplifier_Typ_II_simple, Make_Stretcher, Make_White_Cell
-a=Make_White_Cell(roundtrips4=8)
-a.pos =(0,0,100)
-ls = Beam()
-a.compute_beams()
-a.draw()
+# a=Make_White_Cell(roundtrips4=8)
+# amp = Make_Amplifier_Typ_II_simple(roundtrips2=3)
+# amp.pos = (0, 1000, 100)
+# amp.draw()
 if freecad_da:
   setview()

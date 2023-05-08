@@ -235,13 +235,13 @@ for wavel in wavels:
   rays.append(rn)
 lightsource.override_rays(rays)
 
-newlightsource0 = Beam(radius=1, angle=0,wavelength=lam_mid)
+newlightsource0 = Beam(radius=0.5, angle=0,wavelength=lam_mid)
 newlightsource0.make_circular_distribution(ring_number=2)
 
-newlightsource1 = Beam(radius=1, angle=0,wavelength=lam_mid+delta_lamda/2)
+newlightsource1 = Beam(radius=0.5, angle=0,wavelength=lam_mid+delta_lamda/2)
 newlightsource1.make_circular_distribution(ring_number=2)
   
-newlightsource2 = Beam(radius=1, angle=0,wavelength=lam_mid-delta_lamda/2)
+newlightsource2 = Beam(radius=0.5, angle=0,wavelength=lam_mid-delta_lamda/2)
 newlightsource2.make_circular_distribution(ring_number=2)
   
 newlightsource = Beam(radius=0, angle=0)
@@ -284,7 +284,7 @@ flip_mirror2.draw_dict["mount_type"] = "dont_draw"
 
 pure_cosmetic = Mirror(name="RoofTop_Mirror")
 pure_cosmetic.draw_dict["model_type"]="Rooftop"
-pure_cosmetic.draw_dict["mount_type"] = "rooftop_mirror"
+pure_cosmetic.draw_dict["mount_type"] = "rooftop_mirror_mount"
 pure_cosmetic.pos = (flip_mirror1.pos + flip_mirror2.pos ) / 2
 pure_cosmetic.normal = (flip_mirror1.normal + flip_mirror2.normal ) / 2
 pure_cosmetic.aperture = periscope_distance
@@ -351,7 +351,7 @@ ip.normal = vec
 M1.pos = M1.pos-(0,0,4)
 
 
-Stretcher = Composition(name="Strecker", pos=pos0, normal=vec)
+Stretcher = Composition(name="Strecker",base_exists=True, pos=pos0, normal=vec)
 opt_ax = Ray(pos=pos0, normal=vec)
 opt_ax.wavelength = lam_mid
 Stretcher.redefine_optical_axis(opt_ax)
@@ -396,7 +396,7 @@ roundtrip_sequence = list(seq)
 # if freecad_da:
 #   obj = model_table()
 
-roundtrip=1
+roundtrip=3
 # seq = np.repeat(roundtrip_sequence, roundtrip)
 
 for n in range(roundtrip-1):

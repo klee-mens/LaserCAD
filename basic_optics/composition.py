@@ -24,10 +24,11 @@ class Composition(Opt_Element):
   jedem .propagate erweitert wird und sequence, die die Reihenfolge der
   Elemente angibt (meist trivial außer bei multipass)
   """
-  def __init__(self, name="NewComposition", **kwargs):
+  def __init__(self, name="NewComposition",base_exists=True, **kwargs):
     super().__init__(name=name,**kwargs)
     oA = Ray(name=self.name+"__oA_0", pos=self.pos, normal=self.normal)
     oA.length = 0
+    self.base_exists = base_exists
     self.__optical_axis = [oA]
     self._elements = []
     self._sequence = []
@@ -117,7 +118,8 @@ class Composition(Opt_Element):
 
   def redefine_optical_axis(self, ray):
     # zB wenn die wavelength angepasst werden muss
-    print("sollte nur gemacht werden, wenn absolut noch kein Element eingefügt wurde")
+    # print("sollte nur gemacht werden, wenn absolut noch kein Element eingefügt wurde")
+    print("should only be done if absolutely no element has been inserted yet")
     #print("kann die ganze Geometrie hart abfucken")
     self.set_geom(ray.get_geom())
     oA = deepcopy(ray)
@@ -203,6 +205,7 @@ class Composition(Opt_Element):
     self.__init_parts()
     container = []
     for elm in self._elements:
+      elm.draw_dict['base_exists'] = self.base_exists
       obj = elm.draw_mount()
       container.append(obj)
     # if freecad_da:
@@ -285,8 +288,10 @@ class Composition(Opt_Element):
     #checken ob Elm schon mal eingefügt
     # if self in item.group:
     if item in self._elements:
-      warning("Das Element -" + str(item) + "- wurde bereits in <" +
-            self.name + "> eingefügt.")
+      # warning("Das Element -" + str(item) + "- wurde bereits in <" +
+      #       self.name + "> eingefügt.")
+      warning("The Element -" + str(item) + "- has already been inserted in <" +
+            self.name + ".")
     item.group.append(self)
 
   def _pos_changed(self, old_pos, new_pos):

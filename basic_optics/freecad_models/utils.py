@@ -204,6 +204,9 @@ def rotation_to_axis_angle(R):
             vec2 = eigenvectors[j]
             vec = np.cross(vec1, vec2)
             vec /= np.linalg.norm(vec)
+        # if vec[2]==0-1j:
+        #   print(eigenvectors)
+        #   print("axis=",R,"vec=",vec,"phi=",phi)
     else:
         vec = np.array([R[2, 1] - R[1, 2], R[0, 2] - R[2, 0], R[1, 0] - R[0, 1]])
         vec /= (2 * np.sin(phi))

@@ -50,6 +50,7 @@ class Opt_Element(Geom_Object):
   def next_ray(self, ray):
     """
     erzeugt den durch das opt Elem veränderten Strahl und gibt ihn zurück
+    Generates the beam modified by the opt Elem and returns it
     Parameters
     ----------
     ray : Ray
@@ -66,6 +67,7 @@ class Opt_Element(Geom_Object):
     """
     erzeugt den durch das opt Elem veränderten Beam und gibt ihn zurück
     und zwar ultra lazy
+    generates and returns the beam modified by the opt element and ultra 'lazy?'
     Parameters
     ----------
     beam : Beam()
@@ -109,7 +111,9 @@ class Opt_Element(Geom_Object):
     erzeugt den nächsten Strahl aus <Ray> mit Hilfe des Reflexionsgesetzes
     (man beachte die umgedrehte <normal> im Gegensatz zur Konvention in z.B.
     Springer Handbook of Optics and Lasers S. 68)
-
+    generates the next ray from <ray> with the help of the reflection law 
+    (note the inverted <normal> in contrast to the convention in 
+     e.g. Springer Handbook of Optics and Lasers p. 68).
     Parameters
     ----------
     ray : Ray()
@@ -190,7 +194,8 @@ class Opt_Element(Geom_Object):
     return None
 
   def draw_mount_text(self):
-    txt = "Kein Mount für <" +self.name + "> gefunden."
+    # txt = "Kein Mount für <" +self.name + "> gefunden."
+    txt = "There is no mount can be found for the <" +self.name + ">."
     return txt
 
 

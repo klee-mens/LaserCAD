@@ -77,14 +77,14 @@ def model_lens(name="lens", dia=25, Radius1=300, Radius2=0, thickness=3, geom=No
   sketch.MapMode = 'FlatFace'
 
   sketch.addGeometry(Part.LineSegment(Vector(0,0,0),Vector(thickness,0,0)),
-                     False)
+                      False)
   sketch.addConstraint(Sketcher.Constraint('Coincident',0,1,-1,1))
   sketch.addConstraint(Sketcher.Constraint('PointOnObject',0,2,-1))
   sketch.addConstraint(Sketcher.Constraint('DistanceX',0,1,0,2,thickness))
 
   if Radius1 == 0:
     sketch.addGeometry(Part.LineSegment(Vector(0.0,0.0,0),Vector(0,10,0)),
-                       False)
+                        False)
     sketch.addConstraint(Sketcher.Constraint('Coincident',1,1,0,1))
     sketch.addConstraint(Sketcher.Constraint('PointOnObject',1,2,-2))
   else:
@@ -97,7 +97,7 @@ def model_lens(name="lens", dia=25, Radius1=300, Radius2=0, thickness=3, geom=No
 
   if Radius2 == 0:
     sketch.addGeometry(Part.LineSegment(Vector(5.0,0.0,0),Vector(5,10,0)),
-                       False)
+                        False)
     sketch.addConstraint(Sketcher.Constraint('Coincident',2,1,0,2))
     sketch.addConstraint(Sketcher.Constraint('Vertical',2))
   else:
@@ -131,7 +131,7 @@ def model_lens(name="lens", dia=25, Radius1=300, Radius2=0, thickness=3, geom=No
 """
 
 def lens_mount(mount_name="mirror_mount", dia=inch,  geom=None,
-               mount_type="DEFAULT", mesh=True, **kwargs):
+                mount_type="DEFAULT", mesh=True, **kwargs):
   
   
   if dia <= 0.51*inch:
@@ -179,8 +179,8 @@ def lens_mount(mount_name="mirror_mount", dia=inch,  geom=None,
 """
 
 def lens_mount(mount_name="lens_mount", mount_type="MLH05_M",  
-                 geom=None, only_info=False, drawing_post=True,
-                 base_exists=True, dia=25.4, **kwargs):
+                  geom=None, only_info=False, drawing_post=True,
+                  base_exists=True, dia=25.4, **kwargs):
   """
     Build the lens mount, post, post holder and slotted bases of the lens
 
@@ -195,7 +195,7 @@ def lens_mount(mount_name="lens_mount", mount_type="MLH05_M",
         it as 'default'.
         If you don't want to draw the mount, please set the mount_type 
         as 'dont_draw'
-         The default is "MLH05_M".
+          The default is "MLH05_M".
     geom : TYPE, optional
         The geometrical parameter of the lens. The default is None.
     only_info : Boolean, optional
@@ -219,8 +219,8 @@ def lens_mount(mount_name="lens_mount", mount_type="MLH05_M",
         slotted bases.
     examples:
         mount64 = lens_mount(mount_name="mount64", mount_type="default",  
-                         geom=None, only_info=False, drawing_post=True,
-                         dia=25.4*1.5)
+                          geom=None, only_info=False, drawing_post=True,
+                          dia=25.4*1.5)
 
   """
   if mount_type == "dont_draw":
@@ -239,6 +239,7 @@ def lens_mount(mount_name="lens_mount", mount_type="MLH05_M",
   else:
     print("this post should't be placed on the XY plane")
   if mount_type == "default":
+    mount_in_database = True
     if dia<= 25.4/2:
       mount_type = "MLH05_M"
     elif dia <= 25.4:
@@ -250,7 +251,7 @@ def lens_mount(mount_name="lens_mount", mount_type="MLH05_M",
     else:
       print("there is no suitable default mount in the database. Going back to construct a new mount.")
   buf = []
-  with open(thisfolder+"lensmounts.csv") as csvfile:
+  with open(thisfolder+"lensmounts.csv") as csvfile: #-> load_mount_from_csv /_by_name /_what_you_want
     reader = csv.DictReader(csvfile)
     for row in reader:
       buf.append(row)
@@ -271,19 +272,16 @@ def lens_mount(mount_name="lens_mount", mount_type="MLH05_M",
       if not mount_adjusted:
         place = Placement(offset, rotation, Vector(0,0,0))
   if not mount_in_database:
-    if mount_type != "default":
-      print("This mount type is not in the database. Going back to construct a new mount.")
+    print("This mount type is not in the database. Going back to construct a new mount.")
     height = dia/2+10
     xshift = 0
     if  drawing_post:
       post_part=draw_post_part(name="post_part",base_exists=base_exists,
-                               height=height,xshift=xshift, geom=geom)
+                                height=height,xshift=xshift, geom=geom)
     else:
-      
       DOC.recompute()
       return building_mount(Radius1=dia/2,height=height,geom=geom)
     new_mount = building_mount(Radius1=dia/2,height=height,geom=geom)
-
     part = initialize_composition_old(name="mount, post and base")
     container = post_part,new_mount
     add_to_composition(part, container)
@@ -313,7 +311,7 @@ def lens_mount(mount_name="lens_mount", mount_type="MLH05_M",
   obj.Label = mount_name
   if  drawing_post:
     post_part=draw_post_part(name="post_part",base_exists=base_exists,
-                             height=height,xshift=xshift, geom=geom)
+                              height=height,xshift=xshift, geom=geom)
   else:
     DOC.recompute()
     return obj
@@ -371,10 +369,10 @@ def draw_post_part(name="post_part", base_exists=False, height=12,xshift=0, geom
         post_length=20
         post2 = draw_post_holder(name="PH20E_M", height=0,xshift=xshift, geom=geom)
       post = draw_post(name="TR"+str(post_length)+"_M", height=height,
-                       xshift=xshift,geom=geom)
+                        xshift=xshift,geom=geom)
       if post_length>20:
         post2 = draw_post_holder(name="PH"+str(post_length)+"_M", height=0,
-                                 xshift=xshift, geom=geom)
+                                  xshift=xshift, geom=geom)
   else:
       if POS[2]-height>105:
         post_length=100
@@ -389,11 +387,11 @@ def draw_post_part(name="post_part", base_exists=False, height=12,xshift=0, geom
       else:
         post_length=20
         post2 = draw_post_holder(name="PH"+str(post_length)+"E_M", height=0,
-                                 xshift=xshift, geom=geom)
+                                  xshift=xshift, geom=geom)
       post = draw_post(name="TR"+str(post_length)+"_M", height=height,
-                       xshift=xshift,geom=geom)
+                        xshift=xshift,geom=geom)
       post2 = draw_post_holder(name="PH"+str(post_length)+"E_M", height=0,
-                               xshift=xshift, geom=geom)
+                                xshift=xshift, geom=geom)
   if base_exists:
     if post_length>90 or post_length<31:
         post1 = draw_post_base(name="BA2_M", height=0,xshift=xshift, geom=geom)
@@ -529,7 +527,7 @@ def draw_post_base(name="BA1L", height=12,xshift=0, geom=None):
 
   """
 
-  datei1 = thisfolder + "post\\base\\" + name
+  datei1 = thisfolder + "post\\base\\" + name  #import_mseh()
   DOC = get_DOC()
   obj = DOC.addObject("Mesh::Feature", name)
   datei1 += ".stl"
@@ -589,7 +587,7 @@ def building_mount(name="mount",  Radius1=13, Hole_Radius=2, thickness=10,
   sketch.MapMode = 'FlatFace'
   
   sketch.addGeometry(Part.Circle(Vector(0,0,0),Vector(0,0,1),abs(Radius1)),
-                     False)
+                      False)
   sketch.addConstraint(Sketcher.Constraint('Coincident',0,3,-1,1))
   sketch.addConstraint(Sketcher.Constraint('Diameter',0,Radius1*2)) 
   sketch.addGeometry(Part.ArcOfCircle(Part.Circle(Vector(0,0,0),Vector(0,0,1),

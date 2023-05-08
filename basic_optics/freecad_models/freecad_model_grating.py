@@ -8,7 +8,7 @@ Created on Mon Feb 27 12:14:01 2023
 
 from .utils import freecad_da, update_geom_info, get_DOC, GEOM0, thisfolder
 from .freecad_model_composition import initialize_composition_old, add_to_composition
-from .freecad_model_mirror import  mirror_mount
+from .freecad_model_mounts import  mirror_mount
 import numpy as np
 import math
 if freecad_da:
@@ -56,7 +56,7 @@ def model_grating(name="grating", dimensions=DEFUALT_DIM, geom=GEOM0,
   DOC.recompute()
   return obj
 
-def grating_mount(name="grating_mount",height=50,thickness=8,geom=None, **kwargs):
+def grating_mount(name="grating_mount",height=50,thickness=8,base_exists=False,geom=None, **kwargs):
   """
     Build the mount of the grating.
 
@@ -114,7 +114,7 @@ def grating_mount(name="grating_mount",height=50,thickness=8,geom=None, **kwargs
   newaxs = np.array(axes)
   newaxs[:,0] = new_normal
   geom = (new_pos, newaxs)
-  other_mount = mirror_mount(mount_name="mirror_mount",mount_type="default", geom=geom, dia=25.4)
+  other_mount = mirror_mount(mount_name="mirror_mount",mount_type="default",base_exists=base_exists, geom=geom, dia=25.4)
   part = initialize_composition_old(name="Grating mount, post and base")
   container = mount1,mount2,mount3,other_mount
   add_to_composition(part, container)

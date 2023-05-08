@@ -12,7 +12,7 @@ sys.path.append(u"C:/Users/mens/Nextcloud/FreeCAD/opticslib2/basic_objects/freec
 # from .utils import freecad_da, update_geom_info
 from .utils import freecad_da, update_geom_info, get_DOC, thisfolder#, inch
 from .freecad_model_composition import initialize_composition_old, add_to_composition
-from .freecad_model_mirror import draw_post_part
+from .freecad_model_mounts import draw_post_part
 import numpy as np
 #import math
 

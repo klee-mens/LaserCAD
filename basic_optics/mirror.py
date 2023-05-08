@@ -205,7 +205,14 @@ class Mirror(Opt_Element):
     obj = mirror_mount(**helper_dict)
     return obj
 
-
+  def draw_mount_text(self):
+    if self.draw_dict["mount_type"] == "dont_draw":
+      txt = "<" + self.name + ">'s mount will not be drawn."
+    elif self.draw_dict["mount_type"] == "default":
+      txt = "<" + self.name + ">'s mount is the default mount."
+    else:
+      txt = "<" + self.name + ">'s mount is the " + self.draw_dict["mount_type"] + "."
+    return txt
 
 class Curved_Mirror(Mirror):
   def __init__(self, radius=200, **kwargs):
