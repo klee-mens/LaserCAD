@@ -203,7 +203,7 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
     return None
   mesh = True
   mount_adjusted = False
-  mount_in_database= False
+  mount_in_database = False
   mount_rotation = False
   additional_mount = None
   

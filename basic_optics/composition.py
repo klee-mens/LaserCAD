@@ -142,15 +142,27 @@ class Composition(Opt_Element):
 
 
   def get_matrix(self):
-   self._matrix = np.eye(2)
-   self.recompute_optical_axis()
-   for ind in self._sequence:
-     B = self.__optical_axis[ind].length
-     M = self._elements[ind]._matrix
-     self._matrix = np.matmul(np.array([[1,B], [0,1]]), self._matrix )
-     self._matrix = np.matmul(M, self._matrix )
-   self._matrix = np.matmul(np.array([[1,self._last_prop], [0,1]]), self._matrix )
-   return np.array(self._matrix)
+      self._matrix = np.eye(2)
+      self.recompute_optical_axis()
+      ind_before = self._sequence[0]
+      for ind in self._sequence:
+        if (ind-ind_before)==1 or (ind-ind_before)==0: 
+          B = self.__optical_axis[ind].length
+        elif (ind-ind_before)==-1:
+          B = self.__optical_axis[ind_before].length
+        M = self._elements[ind]._matrix
+        # print('ind=',ind)
+        # print('Length=',B)
+        # print('matrix0=',self._matrix)
+        self._matrix = np.matmul(np.array([[1,B], [0,1]]), self._matrix )
+        # print('M=',M)
+        # print('matrix1=',self._matrix)
+        self._matrix = np.matmul(M, self._matrix )
+        ind_before = ind
+       
+      # print('matrix2=',self._matrix)
+      self._matrix = np.matmul(np.array([[1,self._last_prop], [0,1]]), self._matrix )
+      return np.array(self._matrix)
 
   def get_sequence(self):
     return list(self._sequence)

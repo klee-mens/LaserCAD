@@ -20,6 +20,7 @@ class Beam(Geom_Object):
   Base class for a group of rays (you don't say!)
   special funcitoins: make_square_distribution(radius=1, ray_count=5)
   make_circular_distribution(radius=1, ray_count=5)
+  make_Gaussian_distribution()
   average_divegence = ?
 
   """
@@ -287,7 +288,7 @@ class Beam(Geom_Object):
 
 class Gaussian_Beam(Ray):
 # class Gaussian_beam(Geom_Object):
-  def __init__(self, radius=10, angle=0.05, wavelength=1030E-6, name="NewGassian",  **kwargs):
+  def __init__(self, radius=10, angle=0.02, wavelength=1030E-6, name="NewGassian",  **kwargs):
     super().__init__(name=name, **kwargs)
     z0 = wavelength/(np.pi*np.tan(angle)*np.tan(angle))
     w0 = wavelength/(np.pi*np.tan(angle))
@@ -299,6 +300,10 @@ class Gaussian_Beam(Ray):
     q_para = complex(z,z0)
     self.wavelength = wavelength
     self.q_para = q_para
+
+  def set_length(self, length):
+    # needed for consitency in next_beam function
+    self.length = length
     
   def __repr__(self):
     # radius, angle = self.radius_angle()
@@ -306,11 +311,18 @@ class Gaussian_Beam(Ray):
     txt = 'Gaussian_Beam(q_para=' + repr(self.q_para)
     txt += ', ' + super().__repr__()[n+1::]
     return txt
+  
+  # def get_all_rays(self, by_reference=False):
+  #   if by_reference:
+  #     return self
+  #   else:
+  #     return deepcopy(self)
 
   def draw_fc(self):
     return model_Gaussian_beam(name=self.name, q_para=self.q_para,
                                wavelength=self.wavelength,prop=self.length,
                                geom_info=self.get_geom())
+
 
 
 

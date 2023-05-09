@@ -2,12 +2,13 @@
 # -*- coding: utf-8 -*-
 """
 Created on Thu Apr 27 00:51:06 2023
+
 @author: mens
 """
 
 from .composition import Composition
 from .mirror import Mirror
-from .beam import Gaussian_Beam
+from .beam import Beam,Gaussian_Beam
 import numpy as np
 
 class Resonator(Composition):
@@ -37,31 +38,45 @@ class Resonator(Composition):
     else:
       print("Outputcoupler must be a mirror")
       return -1
-    
+  
+  # def set_wavelength(self, wavelength):
+  #   """
+  #   sets the own wavelength and thus the one of the lightsource and eigenmode
+  #   PARAMETER: wavelength in mm
+  #   """
+  #   self.wavelength = wavelength
+  #   self._lightsource.wavelength = wavelength
+  
   def compute_eigenmode(self, start_index=0):
     """
     computes the gaussian TEM00 eigenmode from the matrix law
+
     Returns
     -------
     q : TYPE complex number
       the q parameter
+
     """
     #claculate the matrix with the correct sequence
     noe = len(self._elements)
     seq = [x for x in range(noe)]
     seq.extend([x for x in range(noe-2, 0, -1)])
+    print('seq=',seq)
     prop = np.linalg.norm(self._elements[0].pos-self._elements[1].pos)
     self._last_prop = prop
     self.set_sequence(seq)
-    matrix = self.matrix()
+    matrix = self.get_matrix()
     A = matrix[0,0]
     B = matrix[0,1]
     C = matrix[1,0]
     D = matrix[1,1]
+    print('matrix=',matrix)
     z = (A-D)/(2*C)
     E = -B/C - z**2
     if E < 0:
+      print()
       print("Resonator is unstable")
+      print()
       return -1
     ### set Lightsource accordingly 
     z0 = np.sqrt(E)
@@ -72,7 +87,7 @@ class Resonator(Composition):
     lsgb = self._elements[0].next_beam(gb00)
     self._lightsource = lsgb
     # set sequence for compute beams
-    self.set_sequence([x for x in range(1, noe)])
+    self.set_sequence([x for x in range(1, noe-1)])
     return q_para
   
   def compute_beams(self, external_source=None):

@@ -396,7 +396,7 @@ roundtrip_sequence = list(seq)
 # if freecad_da:
 #   obj = model_table()
 
-roundtrip=3
+roundtrip=11
 # seq = np.repeat(roundtrip_sequence, roundtrip)
 
 for n in range(roundtrip-1):
