@@ -175,7 +175,7 @@ class Composition(Opt_Element):
 
   def compute_beams(self, external_source=None):
     beamcount = 0
-    if external_source:
+    if external_source!=None:
       beamlist = [external_source]
     else:
       beamlist = [self._lightsource]
@@ -222,7 +222,6 @@ class Composition(Opt_Element):
       container.append(obj)
     # if freecad_da:
     #   obj = model_table()
-    #   print("-------------------------------------------------------")
     #   container.append(obj)
     return self.__container_to_part(self._mounts_part, container)
   
@@ -434,9 +433,3 @@ def next_name(name, prefix=""):
 #   comp.add_only_elm(lens1)
 #   comp.add_only_elm(lens2)
 #   return comp
-
-
-
-
-
-

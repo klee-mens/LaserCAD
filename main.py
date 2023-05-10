@@ -18,7 +18,7 @@ inch = 25.4
 
 
 from basic_optics.freecad_models import clear_doc, setview, freecad_da, freecad_model_lens
-from basic_optics import Beam, Mirror, Opt_Element, Geom_Object, Curved_Mirror
+from basic_optics import Beam, Opt_Element, Geom_Object, Curved_Mirror, Mirror
 from basic_optics import Lens, Ray, Composition, Grating, Propagation
 
 from basic_optics.tests import all_moduls_test
@@ -50,7 +50,7 @@ from basic_optics.resonator import Resonator
 
 wavelength = 0.1
 beta = -0.1
-alpha = -8
+alpha = -3
 focal_length = 250
 print("alpha*beta = ", alpha*beta)
 

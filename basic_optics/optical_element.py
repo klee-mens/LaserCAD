@@ -78,7 +78,11 @@ class Opt_Element(Geom_Object):
     """
     newb = deepcopy(beam)
     newb.name = "next_" + beam.name
-    rays = beam.get_all_rays(by_reference=True)
+    if isinstance(beam, Beam):
+      rays = beam.get_all_rays(by_reference=True)
+    else:
+      rays = beam
+    # rays = beam.get_all_rays(by_reference=True)
     # if beam._distribution == "Gaussian":
       
     newrays = []

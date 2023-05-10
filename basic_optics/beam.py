@@ -42,18 +42,23 @@ class Beam(Geom_Object):
       self.make_circular_distribution()
       self.draw_dict["model"] = "ray_group" 
     elif distribution == "Gaussian":
-      z0 = wavelength/(np.pi*np.tan(angle)*np.tan(angle))
-      w0 = wavelength/(np.pi*np.tan(angle))
+      if angle==0:
+        z0=0
+        w0=radius
+      else:
+        z0 = wavelength/(np.pi*np.tan(angle)*np.tan(angle))
+        w0 = wavelength/(np.pi*np.tan(angle))
       if w0>radius:
         print("Woring: Wrong Radius!")
-      z = z0*pow((radius*radius)/(w0*w0)-1,0.5)
-      if angle<0:
-        z = -z
-      q_para = complex(z,z0)
-      self.wavelength = wavelength
-      self.q_para = q_para
-      self.make_Gaussian_distribution()
-      self.draw_dict["model"] = "Gaussian"
+      else:
+        z = z0*pow((radius*radius)/(w0*w0)-1,0.5)
+        if angle<0:
+          z = -z
+        q_para = complex(z,z0)
+        self.wavelength = wavelength
+        self.q_para = q_para
+        self.make_Gaussian_distribution()
+        self.draw_dict["model"] = "Gaussian"
     else:
       # Abortion
       print("Distribution tpye not know. Beam not valid.")
