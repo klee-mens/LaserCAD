@@ -80,7 +80,7 @@ class Opt_Element(Geom_Object):
     newb.name = "next_" + beam.name
     rays = beam.get_all_rays(by_reference=True)
     # if beam._distribution == "Gaussian":
-      
+
     newrays = []
     for ray in rays:
       nr = self.next_ray(ray)
@@ -175,9 +175,9 @@ class Opt_Element(Geom_Object):
     norm2 = np.cos(alpha2)*ea + np.sin(alpha2)*em
     ray2.pos = pos2
     ray2.normal = norm2
-    
+
     return ray2
-    
+
 
   def draw_mount(self):
     if freecad_da:

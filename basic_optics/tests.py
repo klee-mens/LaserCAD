@@ -17,7 +17,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from .iris import Iris
-from .intersection_plane import Intersection_plane 
+from .intersection_plane import Intersection_plane
 
 from .resonator import Resonator
 
@@ -464,7 +464,7 @@ def cavity_test(cm_radius = 200, cavity_length = 425, angle_shift = 2.796834341,
                 cav_height = 100, ls_shift = 35, mr_shift =15,
                 aperture_big = 25.4*2, aperture_small = 25.4/2):
   """
-    
+
 
     Parameters
     ----------
@@ -495,7 +495,7 @@ def cavity_test(cm_radius = 200, cavity_length = 425, angle_shift = 2.796834341,
   m1_y = l_from_m1_to_cm1*np.sin(angle_shift*2/180*np.pi)
 
 
-  ls = Beam(radius=0.1,angle=0.05,wavelength=1030E-6, distribution="Gaussian", 
+  ls = Beam(radius=0.1,angle=0.05,wavelength=1030E-6, distribution="Gaussian",
             pos=(0,0,cav_height))
   cavset=Composition(name="Cavity Setting")
   cavset.set_light_source(ls)
@@ -505,12 +505,12 @@ def cavity_test(cm_radius = 200, cavity_length = 425, angle_shift = 2.796834341,
   m1 = Mirror()
   m1.pos = (0,-m1_y,cav_height)
   point0 = (0,ls_shift,cav_height)
-  point1 = (-cm1_x,0,cav_height) 
+  point1 = (-cm1_x,0,cav_height)
   m1.set_normal_with_2_points(point0, point1)
   m1.aperture = aperture_small
 
   cm1 = Curved_Mirror(radius= cm_radius)
-  cm1.pos = (-cm1_x,0,cav_height) 
+  cm1.pos = (-cm1_x,0,cav_height)
   cm1.normal = (-1,0,0)
   point1 = (0,-m1_y,cav_height)
   point0 = cm1.pos+(cavity_length,0,0)
@@ -544,10 +544,10 @@ def cavity_test(cm_radius = 200, cavity_length = 425, angle_shift = 2.796834341,
   cavset.propagate(25)
   # ip.spot_diagram(cavset._ray_groups[-1])
   cavset.draw()
-  
+
 def Reflective_plane_test(Beam_radius = 2.5, Beam_angle = 0.1):
   """
-    
+
 
     Parameters
     ----------
@@ -580,7 +580,7 @@ def Reflective_plane_test(Beam_radius = 2.5, Beam_angle = 0.1):
   re_test.propagate(50)
   re_test.draw_elements()
   re_test.draw_beams()
-  
+
 def Cylindrical_Mirror_test():
   """
   a simple Cylindrical_Mirror_test
@@ -605,7 +605,7 @@ def Cylindrical_Mirror_test():
   # rg1.length = 2000
   rg.draw()
   rg1.draw()
-  
+
 def Stretcher_Cavity_test():
     Radius = 1000 #Radius des großen Konkavspiegels
     Aperture_concav = 6 * 25.4
@@ -755,7 +755,7 @@ def Stretcher_Cavity_test():
     Stretcher.draw_elements()
     Stretcher.draw_mounts()
     Stretcher.draw_rays()
-    
+
 def Wrong_stretcher_with_two_Cylindrical_Mirror():
   Radius = 1000 #Radius des großen Konkavspiegels
   Aperture_concav = 6 * 25.4
@@ -916,7 +916,7 @@ def Wrong_stretcher_with_two_Cylindrical_Mirror():
   Stretcher.draw_elements()
   Stretcher.draw_mounts()
   Stretcher.draw_rays()
-  
+
 def simple_resonator_test():
   res = Resonator()
   m0 = Mirror()
@@ -930,3 +930,92 @@ def simple_resonator_test():
   res.add_on_axis(m1)
   res.draw()
   return res
+
+
+def three_resonators_test():
+  from basic_optics.resonator import Resonator
+
+  res = Resonator()
+  g = 0.2
+  L = 250
+  R = L / (1-g)
+  wavelength = 0.1
+  res.wavelength = wavelength
+  cm1 = Curved_Mirror(radius=R)
+  cm2 = Curved_Mirror(radius=R)
+  res.add_on_axis(cm1)
+  res.propagate(L)
+  res.add_on_axis(cm2)
+  res.draw()
+
+
+  alpha = -8
+  beta = -0.1
+  print("g1*g2 = ", alpha*beta)
+  focal = 250
+  dist1 = (1-alpha)*focal
+  dist2 = (1-beta)*focal
+  wavelength = 0.1
+  res2 = Resonator()
+  res2.pos += (0,100, 0)
+  mir1 = Mirror()
+  mir2 = Mirror()
+  le1 = Lens(f=focal)
+
+  res2.add_on_axis(mir1)
+  res2.propagate(dist1)
+  res2.add_on_axis(le1)
+  res2.propagate(dist2)
+  res2.add_on_axis(mir2)
+
+  q = res2.compute_eigenmode()
+
+  print()
+  print(res2.matrix())
+  print()
+
+  redu = (1-alpha*beta)*focal
+  mat2 = np.array([[beta*alpha - redu/focal, 2*alpha*redu], [-2*beta/focal, beta*alpha - redu/focal]])
+  print()
+  print()
+  print(mat2)
+  print()
+
+  res2.draw()
+
+
+
+  res3 = Resonator(name="foldedRes")
+  res3.pos += (0,-200, 0)
+
+  alpha = -8
+  beta = -0.1
+  print("g1*g2 = ", alpha*beta)
+  focal = 250
+  dist1 = (1-alpha)*focal
+  dist2 = (1-beta)*focal
+  wavelength = 0.1
+  frac1 = 0.4
+  frac2 = 0.1
+  frac3 = 1 - frac1 - frac2
+
+  mir1 = Mirror(phi=180)
+  mir2 = Mirror(phi=75)
+  mir3 = Mirror(phi=-75)
+  mir4 = Mirror(phi=180)
+  cm = Curved_Mirror(radius=focal*2, phi = 170)
+
+  res3.add_on_axis(mir1)
+  res3.propagate(dist1*frac1)
+  res3.add_on_axis(mir2)
+  res3.propagate(dist1*frac2)
+  res3.add_on_axis(mir3)
+  res3.propagate(dist1*frac3)
+  res3.add_on_axis(cm)
+  res3.propagate(dist2)
+  res3.add_on_axis(mir4)
+
+  res3.compute_eigenmode()
+
+  res3.draw()
+  return res, res2, res3

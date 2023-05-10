@@ -30,23 +30,11 @@ if freecad_da:
 
 inch = 25.4
 
+from basic_optics.tests import three_resonators_test
+
+res1,res2,res3 = three_resonators_test()
 
 
-
-from basic_optics.resonator import Resonator
-
-res = Resonator()
-g = 0.2
-L = 250
-R = L / (1-g)
-wavelength = 0.1
-res.wavelength = wavelength
-cm1 = Curved_Mirror(radius=R)
-cm2 = Curved_Mirror(radius=R)
-res.add_on_axis(cm1)
-res.propagate(L)
-res.add_on_axis(cm2)
-res.draw()
 
 
 if freecad_da:

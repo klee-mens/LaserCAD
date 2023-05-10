@@ -28,7 +28,7 @@ class Composition(Opt_Element):
     super().__init__(name=name,**kwargs)
     oA = Ray(name=self.name+"__oA_0", pos=self.pos, normal=self.normal)
     oA.length = 0
-    self.__optical_axis = [oA]
+    self._optical_axis = [oA]
     self._elements = []
     self._sequence = []
     self._last_prop = 0 #für den Fall, dass eine letzte Propagation nach einem Element noch erwünscht ist
@@ -58,14 +58,14 @@ class Composition(Opt_Element):
     x : float
       Länge um die propagiert wird
     """
-    end_of_axis = self.__optical_axis[-1]
+    end_of_axis = self._optical_axis[-1]
     end_of_axis.length += x
     # self._last_geom = (end_of_axis.endpoint(), end_of_axis.normal)
     # self._matrix = np.matmul( np.array([[1,x], [0,1]]), self._matrix) #braucht keine Sau
     self._last_prop = x #endet mit Propagation
 
   def last_geom(self):
-    end_of_axis = self.__optical_axis[-1]
+    end_of_axis = self._optical_axis[-1]
     return (end_of_axis.endpoint(), end_of_axis.get_axes())
 
   def __add_raw(self, item):
@@ -92,11 +92,11 @@ class Composition(Opt_Element):
     # item.name = self.new_catalogue_entry(item)
     item.set_geom(self.last_geom())
     self.__add_raw(item)
-    newoA_try = item.next_ray(self.__optical_axis[-1])
+    newoA_try = item.next_ray(self._optical_axis[-1])
     if newoA_try:
-      newoA = item.next_ray(self.__optical_axis[-1])
+      newoA = item.next_ray(self._optical_axis[-1])
       newoA.length = 0
-      self.__optical_axis.append(newoA)
+      self._optical_axis.append(newoA)
 
   def add_fixed_elm(self, item):
     """
@@ -122,33 +122,48 @@ class Composition(Opt_Element):
     self.set_geom(ray.get_geom())
     oA = deepcopy(ray)
     oA.name = self.name +"__oA_0"
-    self.__optical_axis = [oA]
+    self._optical_axis = [oA]
     self.recompute_optical_axis()
 
   def recompute_optical_axis(self):
-    self.__optical_axis = [self.__optical_axis[0]]
-    counter = 1
-    
+    self._optical_axis = [self._optical_axis[0]]
+    counter = 0
+
     for ind in self._sequence:
       elm = self._elements[ind]
       # print("-----", elm)
-      newoA = elm.next_ray(self.__optical_axis[-1])
+      newoA = elm.next_ray(self._optical_axis[-1])
       counter += 1
       newoA.name = self.name + "__oA_" + str(counter)
-      self.__optical_axis.append(newoA)
-    self.__optical_axis[-1].length = self._last_prop
+      self._optical_axis.append(newoA)
+    self._optical_axis[-1].length = self._last_prop
 
 
   def matrix(self):
-   self._matrix = np.eye(2)
-   self.recompute_optical_axis()
-   for ind in self._sequence:
-     B = self.__optical_axis[ind].length
-     M = self._elements[ind]._matrix
-     self._matrix = np.matmul(np.array([[1,B], [0,1]]), self._matrix )
-     self._matrix = np.matmul(M, self._matrix )
-   self._matrix = np.matmul(np.array([[1,self._last_prop], [0,1]]), self._matrix )
-   return np.array(self._matrix)
+    """
+    computes the optical matrix of the system
+    each iteration consists of a propagation given by the length of the nth
+    ray of the optical_axis followed by the matrix multiplication with the
+    seq[n] element
+
+    Returns the ABCD-matrix
+    """
+    self._matrix = np.eye(2)
+    self.recompute_optical_axis()
+    counter = -1
+    for ind in self._sequence:
+      counter += 1
+      B = self._optical_axis[counter].length
+      M = self._elements[ind]._matrix
+      self._matrix = np.matmul(np.array([[1,B], [0,1]]), self._matrix )
+      # print("--")
+      # print(B)
+      # print(M)
+      # print("--")
+      self._matrix = np.matmul(M, self._matrix )
+    # self._matrix = np.matmul(np.array([[1,self._last_prop], [0,1]]), self._matrix )
+    self._matrix = np.matmul(np.array([[1,self._last_prop], [0,1]]), self._matrix ) #last propagation
+    return np.array(self._matrix)
 
   def get_sequence(self):
     return list(self._sequence)
@@ -173,7 +188,8 @@ class Composition(Opt_Element):
         beamcount += 1
         beam.name = self.name + "_beam_" + str(beamcount)
         beamlist.append(beam)
-    beam.set_length(self._last_prop)
+    # beam.set_length(self._last_prop)
+    beamlist[-1].set_length(self._last_prop)
     if not external_source:
       self._beams = beamlist
     return beamlist
@@ -210,10 +226,10 @@ class Composition(Opt_Element):
     #   print("-------------------------------------------------------")
     #   container.append(obj)
     return self.__container_to_part(self._mounts_part, container)
-  
+
   def draw_rays(self):
     return self.draw_beams(style="ray_group")
-  
+
 
   def draw(self):
     self.draw_elements()
@@ -300,7 +316,7 @@ class Composition(Opt_Element):
     self._rearange_subobjects_pos(old_pos, new_pos, [self._lightsource]) #sonst wird ls doppelt geshifted
     self._rearange_subobjects_pos(old_pos, new_pos, self._beams[1::])
     self._rearange_subobjects_pos(old_pos, new_pos, [r for rg in self._ray_groups[1::] for r in rg])
-    self._rearange_subobjects_pos(old_pos, new_pos, self.__optical_axis)
+    self._rearange_subobjects_pos(old_pos, new_pos, self._optical_axis)
 
   def _axes_changed(self, old_axes, new_axes):
     """
@@ -314,7 +330,7 @@ class Composition(Opt_Element):
     self._rearange_subobjects_axes(old_axes, new_axes, self._elements)
     self._rearange_subobjects_axes(old_axes, new_axes, self._beams[1::])
     self._rearange_subobjects_axes(old_axes, new_axes, [r for rg in self._ray_groups[1::] for r in rg])
-    self._rearange_subobjects_axes(old_axes, new_axes, self.__optical_axis)
+    self._rearange_subobjects_axes(old_axes, new_axes, self._optical_axis)
 
 
 
