@@ -21,6 +21,7 @@ from .freecad_model_mirror import model_mirror, model_stripe_mirror
 from .freecad_model_grating import model_grating,grating_mount
 from .freecad_model_iris_diaphragms import model_iris_diaphragms,iris_post,model_diaphragms,model_intersection_plane
 from .freecad_model_mounts import mirror_mount,lens_mount,model_table
+from .freecad_inputoutput_test import input_output_test
 pfad = __file__[0:-9]
 
 

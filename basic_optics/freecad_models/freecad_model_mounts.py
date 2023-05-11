@@ -202,7 +202,7 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
   if mount_type == "dont_draw":
     return None
   mesh = True
-  mount_adjusted = False
+  mount_adjusted = True
   mount_in_database = False
   mount_rotation = False
   additional_mount = None
@@ -258,6 +258,18 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
     dia =25.4*2
     if abs(NORMAL[2])<DEFALUT_MAX_ANGULAR_OFFSET/180*np.pi:
       NORMAL[2]=0
+  if model_type == "polarizer":
+    additional_mount = draw_45_Degree_Holder(geom=geom)
+    xshift=25
+    yshift=22
+    shiftvec=Vector(xshift,yshift,0)
+    # normal=Vector(NORMAL)
+    new_normal = rotate_vector(NORMAL,vec=(0,0,1),angle=np.pi/4)
+    geom = (np.array((POS[0]+xshift*NORMAL[0]-yshift*NORMAL[1],
+                      POS[1]+yshift*NORMAL[0]+xshift*NORMAL[1],
+                      POS[2])),new_normal)
+    mount_type = "POLARIS-K2"
+    dia =25.4*2
   if mount_type == "default":
     if dia<= 25.4/2:
       mount_type = "POLARIS-K05"
@@ -381,6 +393,7 @@ def draw_post_part(name="post_part", base_exists=False, height=12,xshift=0, geom
   #   NORMAL=AXES[:,0]
   if (POS[2]-height<34) or (POS[2]-height>190):
     print("Warning, there is no suitable post holder and slotted base at this height")
+    return None
   post_length=50
   if base_exists:
       if POS[2]-height>110:
@@ -879,6 +892,21 @@ def draw_rooftop_mount(xxshift=0,geom=None):
   offset=Vector(xxshift,0,0)
   obj.Placement = Placement(offset, Rotation(0,0,0), Vector(0,0,0))
   update_geom_info(obj,geom,off0=offset)
+  return obj
+
+def draw_45_Degree_Holder(geom=None):
+  mesh = True
+  datei = thisfolder + "mount_meshes\\special mount\\H45CN"
+  if mesh:
+    DOC = get_DOC()
+    obj = DOC.addObject("Mesh::Feature", "H45CN")
+    datei += ".stl"
+    obj.Mesh = Mesh.Mesh(datei)
+  else:
+    datei += ".step"
+    obj = ImportGui.insert(datei, "labor_116")
+  obj.Placement = Placement(Vector(0,0,0), Rotation(0,0,0), Vector(0,0,0))
+  update_geom_info(obj,geom)
   return obj
 
 def rotate_vector(shiftvec=np.array((1.0,0,0)),vec=np.array((1.0,0,0)),angle=0):

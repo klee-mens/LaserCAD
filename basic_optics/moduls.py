@@ -828,6 +828,7 @@ def Make_Stretcher():
     rn.draw_dict["color"] = cmap( x )
     rays.append(rn)
   lightsource.override_rays(rays)
+  lightsource.draw_dict['model'] = "ray_group"
   
   nfm1 = - ray0.normal
   pfm1 = Grat.pos + 200 * nfm1 + (0,0,-h_StripeM/2 - safety_to_StripeM)

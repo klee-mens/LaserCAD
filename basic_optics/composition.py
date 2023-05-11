@@ -24,11 +24,10 @@ class Composition(Opt_Element):
   jedem .propagate erweitert wird und sequence, die die Reihenfolge der
   Elemente angibt (meist trivial außer bei multipass)
   """
-  def __init__(self, name="NewComposition",base_exists=True, **kwargs):
+  def __init__(self, name="NewComposition", **kwargs):
     super().__init__(name=name,**kwargs)
     oA = Ray(name=self.name+"__oA_0", pos=self.pos, normal=self.normal)
     oA.length = 0
-    self.base_exists = base_exists
     self._optical_axis = [oA]
     self._elements = []
     self._sequence = []
@@ -204,10 +203,11 @@ class Composition(Opt_Element):
       container.append(obj)
     return self.__container_to_part(self._elements_part, container)
 
-  def draw_beams(self, style="cone"):
-    liso = self._lightsource
-    if liso._distribution == "cone":
-      liso.draw_dict["model"] = style
+  def draw_beams(self):
+  # def draw_beams(self, style="cone"):
+    # liso = self._lightsource
+    # if liso._distribution == "cone":
+    #   liso.draw_dict["model"] = style
     self.__init_parts()
     self.compute_beams()
     container = []
@@ -222,11 +222,10 @@ class Composition(Opt_Element):
     for elm in self._elements:
       obj = elm.draw_mount()
       container.append(obj)
-      elm.draw_dict['base_exists'] = self.base_exists
     return self.__container_to_part(self._mounts_part, container)
 
-  def draw_rays(self):
-    return self.draw_beams(style="ray_group")
+  # def draw_rays(self):
+  #   return self.draw_beams(style="ray_group")
 
 
   def draw(self):

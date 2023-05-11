@@ -351,7 +351,7 @@ ip.normal = vec
 M1.pos = M1.pos-(0,0,4)
 
 
-Stretcher = Composition(name="Strecker",base_exists=True, pos=pos0, normal=vec)
+Stretcher = Composition(name="Strecker", pos=pos0, normal=vec)
 opt_ax = Ray(pos=pos0, normal=vec)
 opt_ax.wavelength = lam_mid
 Stretcher.redefine_optical_axis(opt_ax)
