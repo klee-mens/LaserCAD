@@ -9,7 +9,7 @@ Created on Sat Aug 20 14:48:12 2022
 # from basic_optics import Geom_Object, Ray, TOLERANCE, Beam
 from .geom_object import Geom_Object, TOLERANCE
 from .ray import Ray
-from .beam import Beam
+from .beam import Beam, Gaussian_Beam
 from .constants import inch
 import numpy as np
 from copy import deepcopy
@@ -50,7 +50,6 @@ class Opt_Element(Geom_Object):
   def next_ray(self, ray):
     """
     erzeugt den durch das opt Elem veränderten Strahl und gibt ihn zurück
-    Generates the beam modified by the opt Elem and returns it
     Parameters
     ----------
     ray : Ray
@@ -67,7 +66,6 @@ class Opt_Element(Geom_Object):
     """
     erzeugt den durch das opt Elem veränderten Beam und gibt ihn zurück
     und zwar ultra lazy
-    generates and returns the beam modified by the opt element and ultra 'lazy?'
     Parameters
     ----------
     beam : Beam()
@@ -76,15 +74,13 @@ class Opt_Element(Geom_Object):
     -------
     next Beam()
     """
+    if type(beam) == type(Gaussian_Beam()):
+      return self.next_gauss(beam)
     newb = deepcopy(beam)
     newb.name = "next_" + beam.name
-    if isinstance(beam, Beam):
-      rays = beam.get_all_rays(by_reference=True)
-    else:
-      rays = beam
-    # rays = beam.get_all_rays(by_reference=True)
+    rays = beam.get_all_rays(by_reference=True)
     # if beam._distribution == "Gaussian":
-      
+
     newrays = []
     for ray in rays:
       nr = self.next_ray(ray)
@@ -115,9 +111,7 @@ class Opt_Element(Geom_Object):
     erzeugt den nächsten Strahl aus <Ray> mit Hilfe des Reflexionsgesetzes
     (man beachte die umgedrehte <normal> im Gegensatz zur Konvention in z.B.
     Springer Handbook of Optics and Lasers S. 68)
-    generates the next ray from <ray> with the help of the reflection law 
-    (note the inverted <normal> in contrast to the convention in 
-     e.g. Springer Handbook of Optics and Lasers p. 68).
+
     Parameters
     ----------
     ray : Ray()
@@ -181,9 +175,9 @@ class Opt_Element(Geom_Object):
     norm2 = np.cos(alpha2)*ea + np.sin(alpha2)*em
     ray2.pos = pos2
     ray2.normal = norm2
-    
+
     return ray2
-    
+
 
   def draw_mount(self):
     if freecad_da:
@@ -198,8 +192,7 @@ class Opt_Element(Geom_Object):
     return None
 
   def draw_mount_text(self):
-    # txt = "Kein Mount für <" +self.name + "> gefunden."
-    txt = "There is no mount can be found for the <" +self.name + ">."
+    txt = "Kein Mount für <" +self.name + "> gefunden."
     return txt
 
 

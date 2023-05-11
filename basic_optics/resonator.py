@@ -8,9 +8,8 @@ Created on Thu Apr 27 00:51:06 2023
 
 from .composition import Composition
 from .mirror import Mirror
-from .beam import Beam,Gaussian_Beam
+from .beam import Gaussian_Beam, Beam
 import numpy as np
-import os
 
 class Resonator(Composition):
   """
@@ -24,7 +23,7 @@ class Resonator(Composition):
     super().__init__(**kwargs)
     self._outputcoupler_index = 0
     self.wavelength = 1030e-6 #Yb in mm
-    
+
   def add_outputcoupler(self, item):
     if type(item) == type(Mirror()):
       self.add_on_axis(item)
@@ -32,22 +31,22 @@ class Resonator(Composition):
     else:
       print("Outputcoupler must be a mirror")
       return -1
-    
+
   def set_outputcoupler_index(self, index):
     if type(self._elements[index]) == type(Mirror()):
       self._outputcoupler_index = index
     else:
       print("Outputcoupler must be a mirror")
       return -1
-  
-  # def set_wavelength(self, wavelength):
-  #   """
-  #   sets the own wavelength and thus the one of the lightsource and eigenmode
-  #   PARAMETER: wavelength in mm
-  #   """
-  #   self.wavelength = wavelength
-  #   self._lightsource.wavelength = wavelength
-  
+
+    def set_wavelength(self, wavelength):
+      """
+      sets the own wavelength and thus the one of the lightsource and eigenmode
+      PARAMETER: wavelength in mm
+      """
+      self.wavelength = wavelength
+      self._lightsource.wavelength = wavelength
+
   def compute_eigenmode(self, start_index=0):
     """
     computes the gaussian TEM00 eigenmode from the matrix law
@@ -62,40 +61,35 @@ class Resonator(Composition):
     noe = len(self._elements)
     seq = [x for x in range(noe)]
     seq.extend([x for x in range(noe-2, 0, -1)])
-    # print('seq=',seq)
     prop = np.linalg.norm(self._elements[0].pos-self._elements[1].pos)
     self._last_prop = prop
     self.set_sequence(seq)
-    matrix = self.get_matrix()
+    matrix = self.matrix()
     A = matrix[0,0]
     B = matrix[0,1]
     C = matrix[1,0]
     D = matrix[1,1]
-    # print('matrix=',matrix)
     z = (A-D)/(2*C)
     E = -B/C - z**2
     if E < 0:
-      print()
       print("Resonator is unstable")
-      print()
-      os._exit()
       return -1
-    ### set Lightsource accordingly 
+    ### set Lightsource accordingly
     z0 = np.sqrt(E)
     q_para = (z +1j*z0)
-    gb00 = Beam(wavelength=self.wavelength,distribution="Gaussian") #der -1 strahl
+    gb00 = Gaussian_Beam(wavelength=self.wavelength) #der -1 strahl
+    # gb00 = Beam(wavelength=self.wavelength, distribution="Gaussian") #der -1 strahl
     gb00.q_para = q_para
     gb00.set_geom(self.get_geom())
     lsgb = self._elements[0].next_beam(gb00)
     self._lightsource = lsgb
     # set sequence for compute beams
-    seq_new = seq
-    del seq_new[0]
-    self.set_sequence(seq_new)
-    # self.set_sequence([x for x in range(1, noe-1)])
-    # self.set_sequence([1,2,1])
+    # self.set_sequence([x for x in range(1, noe)])
+    prop = np.linalg.norm(self._elements[-1].pos-self._elements[-2].pos)
+    self._last_prop = prop
     return q_para
-  
+
   def compute_beams(self, external_source=None):
     self.compute_eigenmode()
+    self.set_sequence([x for x in range(1, len(self._elements)-1)])
     super().compute_beams(external_source)

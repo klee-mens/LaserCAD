@@ -29,7 +29,7 @@ class Composition(Opt_Element):
     oA = Ray(name=self.name+"__oA_0", pos=self.pos, normal=self.normal)
     oA.length = 0
     self.base_exists = base_exists
-    self.__optical_axis = [oA]
+    self._optical_axis = [oA]
     self._elements = []
     self._sequence = []
     self._last_prop = 0 #für den Fall, dass eine letzte Propagation nach einem Element noch erwünscht ist
@@ -59,14 +59,14 @@ class Composition(Opt_Element):
     x : float
       Länge um die propagiert wird
     """
-    end_of_axis = self.__optical_axis[-1]
+    end_of_axis = self._optical_axis[-1]
     end_of_axis.length += x
     # self._last_geom = (end_of_axis.endpoint(), end_of_axis.normal)
     # self._matrix = np.matmul( np.array([[1,x], [0,1]]), self._matrix) #braucht keine Sau
     self._last_prop = x #endet mit Propagation
 
   def last_geom(self):
-    end_of_axis = self.__optical_axis[-1]
+    end_of_axis = self._optical_axis[-1]
     return (end_of_axis.endpoint(), end_of_axis.get_axes())
 
   def __add_raw(self, item):
@@ -93,11 +93,11 @@ class Composition(Opt_Element):
     # item.name = self.new_catalogue_entry(item)
     item.set_geom(self.last_geom())
     self.__add_raw(item)
-    newoA_try = item.next_ray(self.__optical_axis[-1])
+    newoA_try = item.next_ray(self._optical_axis[-1])
     if newoA_try:
-      newoA = item.next_ray(self.__optical_axis[-1])
+      newoA = item.next_ray(self._optical_axis[-1])
       newoA.length = 0
-      self.__optical_axis.append(newoA)
+      self._optical_axis.append(newoA)
 
   def add_fixed_elm(self, item):
     """
@@ -118,51 +118,53 @@ class Composition(Opt_Element):
 
   def redefine_optical_axis(self, ray):
     # zB wenn die wavelength angepasst werden muss
-    # print("sollte nur gemacht werden, wenn absolut noch kein Element eingefügt wurde")
-    print("should only be done if absolutely no element has been inserted yet")
+    print("sollte nur gemacht werden, wenn absolut noch kein Element eingefügt wurde")
     #print("kann die ganze Geometrie hart abfucken")
     self.set_geom(ray.get_geom())
     oA = deepcopy(ray)
     oA.name = self.name +"__oA_0"
-    self.__optical_axis = [oA]
+    self._optical_axis = [oA]
     self.recompute_optical_axis()
 
   def recompute_optical_axis(self):
-    self.__optical_axis = [self.__optical_axis[0]]
-    counter = 1
-    
+    self._optical_axis = [self._optical_axis[0]]
+    counter = 0
+
     for ind in self._sequence:
       elm = self._elements[ind]
       # print("-----", elm)
-      newoA = elm.next_ray(self.__optical_axis[-1])
+      newoA = elm.next_ray(self._optical_axis[-1])
       counter += 1
       newoA.name = self.name + "__oA_" + str(counter)
-      self.__optical_axis.append(newoA)
-    self.__optical_axis[-1].length = self._last_prop
+      self._optical_axis.append(newoA)
+    self._optical_axis[-1].length = self._last_prop
 
 
-  def get_matrix(self):
-      self._matrix = np.eye(2)
-      self.recompute_optical_axis()
-      ind_before = self._sequence[0]
-      for ind in self._sequence:
-        if (ind-ind_before)==1 or (ind-ind_before)==0: 
-          B = self.__optical_axis[ind].length
-        elif (ind-ind_before)==-1:
-          B = self.__optical_axis[ind_before].length
-        M = self._elements[ind]._matrix
-        # print('ind=',ind)
-        # print('Length=',B)
-        # print('matrix0=',self._matrix)
-        self._matrix = np.matmul(np.array([[1,B], [0,1]]), self._matrix )
-        # print('M=',M)
-        # print('matrix1=',self._matrix)
-        self._matrix = np.matmul(M, self._matrix )
-        ind_before = ind
-       
-      # print('matrix2=',self._matrix)
-      self._matrix = np.matmul(np.array([[1,self._last_prop], [0,1]]), self._matrix )
-      return np.array(self._matrix)
+  def matrix(self):
+    """
+    computes the optical matrix of the system
+    each iteration consists of a propagation given by the length of the nth
+    ray of the optical_axis followed by the matrix multiplication with the
+    seq[n] element
+
+    Returns the ABCD-matrix
+    """
+    self._matrix = np.eye(2)
+    self.recompute_optical_axis()
+    counter = -1
+    for ind in self._sequence:
+      counter += 1
+      B = self._optical_axis[counter].length
+      M = self._elements[ind]._matrix
+      self._matrix = np.matmul(np.array([[1,B], [0,1]]), self._matrix )
+      # print("--")
+      # print(B)
+      # print(M)
+      # print("--")
+      self._matrix = np.matmul(M, self._matrix )
+    # self._matrix = np.matmul(np.array([[1,self._last_prop], [0,1]]), self._matrix )
+    self._matrix = np.matmul(np.array([[1,self._last_prop], [0,1]]), self._matrix ) #last propagation
+    return np.array(self._matrix)
 
   def get_sequence(self):
     return list(self._sequence)
@@ -175,7 +177,7 @@ class Composition(Opt_Element):
 
   def compute_beams(self, external_source=None):
     beamcount = 0
-    if external_source!=None:
+    if external_source:
       beamlist = [external_source]
     else:
       beamlist = [self._lightsource]
@@ -187,7 +189,8 @@ class Composition(Opt_Element):
         beamcount += 1
         beam.name = self.name + "_beam_" + str(beamcount)
         beamlist.append(beam)
-    beam.set_length(self._last_prop)
+    # beam.set_length(self._last_prop)
+    beamlist[-1].set_length(self._last_prop)
     if not external_source:
       self._beams = beamlist
     return beamlist
@@ -217,17 +220,14 @@ class Composition(Opt_Element):
     self.__init_parts()
     container = []
     for elm in self._elements:
-      elm.draw_dict['base_exists'] = self.base_exists
       obj = elm.draw_mount()
       container.append(obj)
-    # if freecad_da:
-    #   obj = model_table()
-    #   container.append(obj)
+      elm.draw_dict['base_exists'] = self.base_exists
     return self.__container_to_part(self._mounts_part, container)
-  
+
   def draw_rays(self):
     return self.draw_beams(style="ray_group")
-  
+
 
   def draw(self):
     self.draw_elements()
@@ -299,10 +299,8 @@ class Composition(Opt_Element):
     #checken ob Elm schon mal eingefügt
     # if self in item.group:
     if item in self._elements:
-      # warning("Das Element -" + str(item) + "- wurde bereits in <" +
-      #       self.name + "> eingefügt.")
-      warning("The Element -" + str(item) + "- has already been inserted in <" +
-            self.name + ".")
+      warning("Das Element -" + str(item) + "- wurde bereits in <" +
+            self.name + "> eingefügt.")
     item.group.append(self)
 
   def _pos_changed(self, old_pos, new_pos):
@@ -316,7 +314,7 @@ class Composition(Opt_Element):
     self._rearange_subobjects_pos(old_pos, new_pos, [self._lightsource]) #sonst wird ls doppelt geshifted
     self._rearange_subobjects_pos(old_pos, new_pos, self._beams[1::])
     self._rearange_subobjects_pos(old_pos, new_pos, [r for rg in self._ray_groups[1::] for r in rg])
-    self._rearange_subobjects_pos(old_pos, new_pos, self.__optical_axis)
+    self._rearange_subobjects_pos(old_pos, new_pos, self._optical_axis)
 
   def _axes_changed(self, old_axes, new_axes):
     """
@@ -330,7 +328,7 @@ class Composition(Opt_Element):
     self._rearange_subobjects_axes(old_axes, new_axes, self._elements)
     self._rearange_subobjects_axes(old_axes, new_axes, self._beams[1::])
     self._rearange_subobjects_axes(old_axes, new_axes, [r for rg in self._ray_groups[1::] for r in rg])
-    self._rearange_subobjects_axes(old_axes, new_axes, self.__optical_axis)
+    self._rearange_subobjects_axes(old_axes, new_axes, self._optical_axis)
 
 
 
@@ -433,3 +431,9 @@ def next_name(name, prefix=""):
 #   comp.add_only_elm(lens1)
 #   comp.add_only_elm(lens2)
 #   return comp
+
+
+
+
+
+

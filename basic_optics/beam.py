@@ -20,7 +20,6 @@ class Beam(Geom_Object):
   Base class for a group of rays (you don't say!)
   special funcitoins: make_square_distribution(radius=1, ray_count=5)
   make_circular_distribution(radius=1, ray_count=5)
-  make_Gaussian_distribution()
   average_divegence = ?
 
   """
@@ -34,38 +33,33 @@ class Beam(Geom_Object):
     self._Bwavelength = wavelength
     if distribution == "cone":
       self.make_cone_distribution()
-      self.draw_dict["model"] = "cone"      
+      self.draw_dict["model"] = "cone"
     elif distribution == "square":
       self.make_square_distribution()
-      self.draw_dict["model"] = "ray_group"      
+      self.draw_dict["model"] = "ray_group"
     elif distribution == "circular":
       self.make_circular_distribution()
-      self.draw_dict["model"] = "ray_group" 
+      self.draw_dict["model"] = "ray_group"
     elif distribution == "Gaussian":
-      if angle==0:
-        z0=0
-        w0=radius
-      else:
-        z0 = wavelength/(np.pi*np.tan(angle)*np.tan(angle))
-        w0 = wavelength/(np.pi*np.tan(angle))
+      z0 = wavelength/(np.pi*np.tan(angle)*np.tan(angle))
+      w0 = wavelength/(np.pi*np.tan(angle))
       if w0>radius:
         print("Woring: Wrong Radius!")
-      else:
-        z = z0*pow((radius*radius)/(w0*w0)-1,0.5)
-        if angle<0:
-          z = -z
-        q_para = complex(z,z0)
-        self.wavelength = wavelength
-        self.q_para = q_para
-        self.make_Gaussian_distribution()
-        self.draw_dict["model"] = "Gaussian"
+      z = z0*pow((radius*radius)/(w0*w0)-1,0.5)
+      if angle<0:
+        z = -z
+      q_para = complex(z,z0)
+      self.wavelength = wavelength
+      self.q_para = q_para
+      self.make_Gaussian_distribution()
+      self.draw_dict["model"] = "Gaussian"
     else:
       # Abortion
       print("Distribution tpye not know. Beam not valid.")
       print("Allowed distribution types are: 'cone', 'square', 'circular', 'Gaussian'")
       self = -1
       return None
-    
+
   def make_cone_distribution(self, ray_count=2):
     self._ray_count = ray_count
     self._distribution = "cone"
@@ -78,7 +72,7 @@ class Beam(Geom_Object):
       our = self._rays[n+1]
       our.from_h_alpha_theta(self._radius, self._angle, thetas[n], self)
       our.name = self.name + "_outer_Ray" + str(n)
-  
+
   def make_Gaussian_distribution(self, ray_count=2):
     self._ray_count = 1
     self._distribution = "Gaussian"
@@ -87,7 +81,7 @@ class Beam(Geom_Object):
     mr.set_geom(self.get_geom())
     mr.name = self.name + "_inner_Ray"
 
-  
+
   def make_square_distribution(self, ray_in_line=3):
     """
     Let the group of rays follow the square distribution
@@ -139,7 +133,7 @@ class Beam(Geom_Object):
     ray_counting=0
     radius=self._radius
     for r in np.arange(0,radius+radius/ring_number/2,radius/ring_number):        #r repersents the height of the ray
-      
+
       if r!=0:                                                                 #if the ray is not in the center
         thetas = np.linspace(0, 2*np.pi, int(r*ring_number/radius)*6+1)        #thetas repersents the rotation angle of the ray
         for n in range(int(r*ring_number/radius)*6):
@@ -231,7 +225,7 @@ class Beam(Geom_Object):
 
   def length(self):
     return self.inner_ray().length
-  
+
   def set_length(self, x):
     for ray in self._rays:
       ray.length = x
@@ -285,7 +279,7 @@ class Beam(Geom_Object):
         obj = our.draw_fc()
         container.append(obj)
       add_to_composition(part, container)
-      return part    
+      return part
 
 
 
@@ -305,29 +299,23 @@ class Gaussian_Beam(Ray):
     q_para = complex(z,z0)
     self.wavelength = wavelength
     self.q_para = q_para
+    self._distribution = "Gaussian"
 
   def set_length(self, length):
     # needed for consitency in next_beam function
     self.length = length
-    
+
   def __repr__(self):
     # radius, angle = self.radius_angle()
     n = len(self.class_name())
     txt = 'Gaussian_Beam(q_para=' + repr(self.q_para)
     txt += ', ' + super().__repr__()[n+1::]
     return txt
-  
-  # def get_all_rays(self, by_reference=False):
-  #   if by_reference:
-  #     return self
-  #   else:
-  #     return deepcopy(self)
 
   def draw_fc(self):
     return model_Gaussian_beam(name=self.name, q_para=self.q_para,
                                wavelength=self.wavelength,prop=self.length,
                                geom_info=self.get_geom())
-
 
 
 

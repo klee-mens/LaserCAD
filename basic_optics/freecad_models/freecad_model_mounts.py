@@ -218,10 +218,10 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
     if mount_type!="rooftop_mirror_mount":
       mount_rotation=True
       print("this post should't be placed on the XY plane")
-  if abs(NORMAL[1])<DEFALUT_MAX_ANGULAR_OFFSET/180*np.pi:
-    NORMAL[1]=0
-  if abs(NORMAL[0])<DEFALUT_MAX_ANGULAR_OFFSET/180*np.pi:
-    NORMAL[0]=0
+  # if abs(NORMAL[1])<DEFALUT_MAX_ANGULAR_OFFSET/180*np.pi:
+  #   NORMAL[1]=0
+  # if abs(NORMAL[0])<DEFALUT_MAX_ANGULAR_OFFSET/180*np.pi:
+  #   NORMAL[0]=0
     
   if model_type=="Stripe":
     additional_mount = draw_stripe_mount(thickness=thickness,geom=geom)
