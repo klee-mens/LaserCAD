@@ -40,7 +40,16 @@ class Lens(Opt_Element):
 
   def draw_mount_fc(self):
     return lens_mount(**self.draw_dict)
-
+  
+  def draw_mount_text(self):
+    if self.draw_dict["mount_type"] == "dont_draw":
+      txt = "<" + self.name + ">'s mount will not be drawn."
+    elif self.draw_dict["mount_type"] == "default":
+      txt = "<" + self.name + ">'s mount is the default mount."
+    else:
+      txt = "<" + self.name + ">'s mount is the " + self.draw_dict["mount_type"] + "."
+    return txt
+  
   def __repr__(self):
     n = len(self.class_name())
     txt = 'Lens(f=' + repr(self.focal_length)

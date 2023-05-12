@@ -17,24 +17,23 @@ sys.path.append(pfad)
 inch = 25.4
 
 
-from basic_optics.freecad_models import clear_doc, setview, freecad_da, freecad_model_lens
+from basic_optics.freecad_models import clear_doc, setview, freecad_da
 from basic_optics import Beam, Mirror, Opt_Element, Geom_Object, Curved_Mirror
 from basic_optics import Lens, Ray, Composition, Grating, Propagation
+from basic_optics.freecad_models import input_output_test
+# from basic_optics.tests import all_moduls_test
+from basic_optics.moduls import Make_Stretcher, Make_Telescope
 
-from basic_optics.tests import all_moduls_test
-from basic_optics.moduls import Make_Stretcher
+
+from basic_optics.tests import all_moduls_test, three_resonators_test
 
 
 if freecad_da:
   clear_doc()
 
-inch = 25.4
+a,b,c,d,e = all_moduls_test()
 
-from basic_optics.tests import three_resonators_test
-
-res1,res2,res3 = three_resonators_test()
-
-
+r1,r2,r3 = three_resonators_test()
 
 
 if freecad_da:

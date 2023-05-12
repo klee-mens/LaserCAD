@@ -353,9 +353,7 @@ def all_moduls_test():
 
   stretch = Make_Stretcher()
   stretch.pos = (0, 1500, 100)
-  stretch.draw_elements()
-  stretch.draw_rays()
-  stretch.draw_mounts()
+  stretch.draw()
 
   wcell = Make_White_Cell(roundtrips4=2)
   wcell.pos = (0, 2000, 100)
@@ -935,7 +933,7 @@ def simple_resonator_test():
 def three_resonators_test():
   from basic_optics.resonator import Resonator
 
-  res = Resonator()
+  res = Resonator(name="SimpleRes")
   g = 0.2
   L = 250
   R = L / (1-g)
@@ -956,7 +954,7 @@ def three_resonators_test():
   dist1 = (1-alpha)*focal
   dist2 = (1-beta)*focal
   wavelength = 0.1
-  res2 = Resonator()
+  res2 = Resonator(name="3ElmRes")
   res2.pos += (0,100, 0)
   mir1 = Mirror()
   mir2 = Mirror()

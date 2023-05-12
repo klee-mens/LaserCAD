@@ -160,6 +160,7 @@ def Make_White_Cell(name="White Cell", Radius=300, roundtrips4=1, aperture_small
   cm1_regarding_point = pos_cm2 - (0, seperation/2, 0)
   cm3_regarding_point = pos_cm2 + (0, seperation/2, 0)
 
+  # whitecell = Composition(name=name, pos=pos0,base_exists=False, normal = pos_cm1 - pos0)
   whitecell = Composition(name=name, pos=pos0, normal = pos_cm1 - pos0)
 
   ls = Beam(angle=0, pos=pos0)
@@ -707,6 +708,7 @@ def Make_Stretcher():
     rn.draw_dict["color"] = cmap( x )
     rays.append(rn)
   lightsource.override_rays(rays)
+  lightsource.draw_dict['model'] = "ray_group"
   
   nfm1 = - ray0.normal
   pfm1 = Grat.pos + 200 * nfm1 + (0,0,-h_StripeM/2 - safety_to_StripeM)
@@ -728,7 +730,7 @@ def Make_Stretcher():
   flip_mirror2.draw_dict["mount_type"] = "dont_draw"
   
   pure_cosmetic = Mirror(name="RoofTop_Mirror")
-  pure_cosmetic.draw_dict["mount_type"] = "rooftop_mirror"
+  pure_cosmetic.draw_dict["mount_type"] = "rooftop_mirror_mount"
   pure_cosmetic.pos = (flip_mirror1.pos + flip_mirror2.pos ) / 2
   pure_cosmetic.normal = (flip_mirror1.normal + flip_mirror2.normal ) / 2
   pure_cosmetic.aperture = periscope_distance

@@ -25,6 +25,9 @@ class Grating(Opt_Element):
     self.height = 50
     self.thickness = 8
     self.blazeangel = 32
+    # self.draw_dict['width'] = self.width
+    # self.draw_dict['thickness'] = self.thickness
+    # self.draw_dict['height'] = self.height
     # dims = (self.thickness, self.width, self.height)
     # print("dims:", dims)
     
@@ -55,10 +58,21 @@ class Grating(Opt_Element):
     return model_grating(name=self.name, dimensions=dims, geom=self.get_geom())
   
   def draw_mount_fc(self):
-    obj = grating_mount(name=self.name,height=self.height,thickness=self.thickness, geom=self.get_geom())
+    # helper_dict = dict(self.draw_dict)
+    # obj = grating_mount(**helper_dict)
+    obj = grating_mount(name=self.name,height=self.height,
+                        thickness=self.thickness,#base_exists=self.draw_dict['base_exists'], 
+                        geom=self.get_geom())
     return obj
   
-  
+  def draw_mount_text(self):
+    # if self.mount_type == "dont_draw":
+    #   txt = self.name + "'s mount will not be drawn."
+    # elif self.mount_type == "default":
+      txt = "<" + self.name + ">'s mount is the default mount."
+    # else:
+    #   txt = self.name + "'s mount is " + self.mount_type + "."
+      return txt
   
   
 def grating_test1():

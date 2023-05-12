@@ -342,10 +342,13 @@ class Geom_Object(object):
     by text, returns the text as str
     """
 #     txt = "Das geometrische Objekt <" + self.name + "> wird an die Position "
-    txt = "Das Objekt <" + self.class_name() + ":" +self.name
-    txt += "> wird an die Position "
-    txt += vec2str(self.pos) + " mit der Ausrichtung " + vec2str(self.normal)
-    txt += " gezeichnet."
+    # txt = "Das Objekt <" + self.class_name() + ":" +self.name
+    txt = "The geometric object <" + self.class_name() + ":" + self.name
+    # txt += "> wird an die Position "
+    txt += "> is drawn to the position"
+    # txt += vec2str(self.pos) + " mit der Ausrichtung " + vec2str(self.normal)
+    txt += vec2str(self.pos) + " with the direction " + vec2str(self.normal)
+    # txt += " gezeichnet."
     return txt
 
   def _pos_changed(self, old_pos, new_pos):

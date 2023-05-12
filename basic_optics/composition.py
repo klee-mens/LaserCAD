@@ -203,10 +203,11 @@ class Composition(Opt_Element):
       container.append(obj)
     return self.__container_to_part(self._elements_part, container)
 
-  def draw_beams(self, style="cone"):
-    liso = self._lightsource
-    if liso._distribution == "cone":
-      liso.draw_dict["model"] = style
+  def draw_beams(self):
+  # def draw_beams(self, style="cone"):
+    # liso = self._lightsource
+    # if liso._distribution == "cone":
+    #   liso.draw_dict["model"] = style
     self.__init_parts()
     self.compute_beams()
     container = []
@@ -221,14 +222,11 @@ class Composition(Opt_Element):
     for elm in self._elements:
       obj = elm.draw_mount()
       container.append(obj)
-    # if freecad_da:
-    #   obj = model_table()
-    #   print("-------------------------------------------------------")
-    #   container.append(obj)
     return self.__container_to_part(self._mounts_part, container)
 
-  def draw_rays(self):
-    return self.draw_beams(style="ray_group")
+
+  # def draw_rays(self):
+  #   return self.draw_beams(style="ray_group")
 
 
   def draw(self):
