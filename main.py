@@ -33,15 +33,16 @@ inch = 25.4
 
 from basic_optics.tests import three_resonators_test
 # res1,res2,res3 = three_resonators_test()
-teles = Make_Telescope()
-teles.draw()
-# if freecad_da:
-  # input_output_test()
-# stretcher = Make_Stretcher()
+# teles = Make_Telescope()
+# teles.draw()
+
+if freecad_da:
+  input_output_test()
+stretcher = Make_Stretcher()
 # stretcher.pos=(0,0,100)
 # stretcher.draw_elements()
 # stretcher.draw_rays()
-# stretcher.draw()
+stretcher.draw()
 
 if freecad_da:
   setview()

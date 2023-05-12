@@ -87,11 +87,11 @@ class Intersection_plane(Opt_Element):
     plt.figure()
     # area = (20 * np.random.rand(37))**2
     # c = np.sqrt(area)
-    plt.scatter(point_x,point_y,c=point_c)
+    plt.scatter(point_x,point_y,s=10,c=point_c)
     plt.xlabel("x-axis, or y-axis if you follow the 3D coordinate (mm)")
     plt.ylabel("y-axis, or z-axis if you follow the 3D coordinate (mm)")
     plt.title("The spot diagram at " + self.name)
-    plt.axis('equal')
+    # plt.axis('equal')
     plt.show()
   
   def __repr__(self):
