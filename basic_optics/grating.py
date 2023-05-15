@@ -22,7 +22,7 @@ class Grating(Opt_Element):
     self.grating_constant = grat_const
     #Konstanten zum zeichnen, für die sonstige Berechnung unwichtig
     self.width = 50
-    self.height = 50
+    self.height = 60
     self.thickness = 8
     self.blazeangel = 32
     # self.draw_dict['width'] = self.width

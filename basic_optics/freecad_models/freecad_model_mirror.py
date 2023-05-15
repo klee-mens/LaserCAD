@@ -47,7 +47,7 @@ def model_mirror(model_type="DEFAULT", **kwargs):
     Example:
     mirror47 = mirror("mirror_47", dia=25, d=5, R=200)
   """
-  if model_type == "DEFAULT" or model_type == "Round":
+  if model_type == "DEFAULT" or model_type == "Round" or model_type == "polarizer":
     obj = model_round_mirror(**kwargs)
   elif model_type == "Stripe":
     obj = model_stripe_mirror(**kwargs)

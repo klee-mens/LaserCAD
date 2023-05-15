@@ -101,8 +101,14 @@ if freecad_da:
 # StripeM.draw_mount()
 
 from basic_optics.tests import all_moduls_test
-all_moduls_test()
-
+# all_moduls_test()
+a = Mirror()
+a.aperture=2*25.4
+a.pos=(100,100,100)
+a.normal=(-1,1,0)
+a.draw_dict["model_type"]= "polarizer"
+a.draw()
+a.draw_mount()
 
 from basic_optics.moduls import Make_Periscope, Make_Telescope, Make_Amplifier_Typ_II_simple, Make_Stretcher, Make_White_Cell
 # a=Make_White_Cell(roundtrips4=8)

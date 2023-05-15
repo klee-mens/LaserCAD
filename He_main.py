@@ -61,7 +61,7 @@ lam_mid = 1030e-9 * 1e3 # Zentralwellenlänge in mm
 delta_lamda = 60e-9*1e3 # Bandbreite in mm
 number_of_rays = 20
 safety_to_StripeM = 5 #Abstand der eingehenden Strahlen zum Concav Spiegel in mm
-periscope_distance = 10
+periscope_distance = 12
 
 # abgeleitete Parameter
 v = lam_mid/grat_const
