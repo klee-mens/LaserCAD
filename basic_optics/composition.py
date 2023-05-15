@@ -46,6 +46,7 @@ class Composition(Opt_Element):
     self._ray_groups = [group_ls]
     self._catalogue = {}
     self._drawing_part = -1
+    self.non_opticals = []
 
 
   def propagate(self, x):
@@ -73,9 +74,7 @@ class Composition(Opt_Element):
     self.__no_double_integration_check(item)
     # # Namen ändern, geom setzen, hinzufügen
     item.name = self.new_catalogue_entry(item)
-    # item.set_geom(self.last_geom())
     self._elements.append(item)
-    # self._matrix = np.matmul(item._matrix, self._matrix) #braucht keine Sau
     self._sequence.append(len(self._elements)-1) #neues <item> am Ende der seq
     self._last_prop = 0 #endet mit Element
 
@@ -86,33 +85,26 @@ class Composition(Opt_Element):
 
     updatet _matrix, opt_axis
     """
-    # #checken ob Elm schon mal eingefügt
-    # self.__no_double_integration_check(item)
-    # # Namen ändern, geom setzen, hinzufügen
-    # item.name = self.new_catalogue_entry(item)
     item.set_geom(self.last_geom())
-    self.__add_raw(item)
-    newoA_try = item.next_ray(self._optical_axis[-1])
-    if newoA_try:
+    if hasattr(item, "next_ray"): 
+      self.__add_raw(item)
       newoA = item.next_ray(self._optical_axis[-1])
       newoA.length = 0
       self._optical_axis.append(newoA)
-
+    # ignore non-optical Elm, e.g. Geom_Obj, cosmetics
+    else:
+      self.non_opticals.append(item)
+ 
   def add_fixed_elm(self, item):
     """
     fügt <item> genau an der Stelle <item.get_geom()> ein
 
     updated entsprechend add_on_axis
     """
-    # #checken ob Elm schon mal eingefügt
-    # self.__no_double_integration_check(item)
-    # # Namen ändern, geom setzen, hinzufügen
-    # item.name = self.new_catalogue_entry(item)
-    # item.set_geom(self.last_geom())
-    # last_pos = self.last_geom()[0] #wird eh auf Neuberechnung der Matrix mit sequence raus laufen
-    # dist = np.linalg.norm(item.pos - last_pos)
-    # self._matrix = np.matmul( np.array([[1,dist], [0,1]]), self._matrix)
-    self.__add_raw(item)
+    if hasattr(item, "next_ray"): 
+      self.__add_raw(item)
+    else:
+      self.non_opticals.append(item)
 
 
   def redefine_optical_axis(self, ray):
@@ -201,6 +193,9 @@ class Composition(Opt_Element):
     for elm in self._elements:
       obj = elm.draw()
       container.append(obj)
+    for elm in self.non_opticals:
+      obj = elm.draw()
+      container.append(obj)
     return self.__container_to_part(self._elements_part, container)
 
   def draw_beams(self):
@@ -225,7 +220,10 @@ class Composition(Opt_Element):
     return self.__container_to_part(self._mounts_part, container)
 
 
-  # def draw_rays(self):
+  # def draw_rays(self): 
+  #   """
+  #   DEPRECATED, use self._lightsource.draw_dict["model"] = "ray_group" instead
+  #   """
   #   return self.draw_beams(style="ray_group")
 
 
@@ -297,11 +295,10 @@ class Composition(Opt_Element):
 
   def __no_double_integration_check(self, item):
     #checken ob Elm schon mal eingefügt
-    # if self in item.group:
     if item in self._elements:
       warning("Das Element -" + str(item) + "- wurde bereits in <" +
             self.name + "> eingefügt.")
-    item.group.append(self)
+    # item.group.append(self)
 
   def _pos_changed(self, old_pos, new_pos):
     """

@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 from .iris import Iris
 from .intersection_plane import Intersection_plane
 
-from .resonator import Resonator
+from .resonator import LinearResonator
 
 # from iris import Iris
 # from intersection_plane import Intersection_plane
@@ -931,9 +931,9 @@ def simple_resonator_test():
 
 
 def three_resonators_test():
-  from basic_optics.resonator import Resonator
+  from basic_optics.resonator import LinearResonator
 
-  res = Resonator(name="SimpleRes")
+  res = LinearResonator(name="SimpleRes")
   g = 0.2
   L = 250
   R = L / (1-g)
@@ -954,7 +954,7 @@ def three_resonators_test():
   dist1 = (1-alpha)*focal
   dist2 = (1-beta)*focal
   wavelength = 0.1
-  res2 = Resonator(name="3ElmRes")
+  res2 = LinearResonator(name="3ElmRes")
   res2.pos += (0,100, 0)
   mir1 = Mirror()
   mir2 = Mirror()
@@ -983,7 +983,7 @@ def three_resonators_test():
 
 
 
-  res3 = Resonator(name="foldedRes")
+  res3 = LinearResonator(name="foldedRes")
   res3.pos += (0,-200, 0)
 
   alpha = -8

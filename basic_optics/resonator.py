@@ -8,10 +8,10 @@ Created on Thu Apr 27 00:51:06 2023
 
 from .composition import Composition
 from .mirror import Mirror
-from .beam import Gaussian_Beam, Beam
+from .beam import Gaussian_Beam
 import numpy as np
 
-class Resonator(Composition):
+class LinearResonator(Composition):
   """
   class for laser resonators
   inherits from composition
