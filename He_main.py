@@ -136,60 +136,24 @@ ray0.normal = vec
 ray0.pos = pos0
 ray0.wavelength = lam_mid
 
-lightsource = Beam(radius=0, angle=0)
 wavels = np.linspace(lam_mid-delta_lamda/2, lam_mid+delta_lamda/2, number_of_rays)
-rays = []
 cmap = plt.cm.gist_rainbow
-for wavel in wavels:
-  rn = Ray()
-  # rn.normal = vec
-  # rn.pos = pos0
-  rn.wavelength = wavel
-  x = (wavel - lam_mid + delta_lamda/2) / delta_lamda
-  
-  rn.draw_dict["color"] = cmap( x )
-  rays.append(rn)
-lightsource.override_rays(rays)
-Ring_number = 1
+Ring_number = 2
 Beam_radius = 3.5
-newlightsource0 = Beam(radius=Beam_radius, angle=0,wavelength=lam_mid)
-newlightsource0.make_circular_distribution(ring_number=Ring_number)
-
-newlightsource3 = Beam(radius=Beam_radius, angle=0,wavelength=lam_mid+delta_lamda/4)
-newlightsource3.make_circular_distribution(ring_number=Ring_number)
-
-newlightsource1 = Beam(radius=Beam_radius, angle=0,wavelength=lam_mid+delta_lamda/2)
-newlightsource1.make_circular_distribution(ring_number=Ring_number)
-
-newlightsource2 = Beam(radius=Beam_radius, angle=0,wavelength=lam_mid-delta_lamda/2)
-newlightsource2.make_circular_distribution(ring_number=Ring_number)
-
-newlightsource4 = Beam(radius=Beam_radius, angle=0,wavelength=lam_mid-delta_lamda/4)
-newlightsource4.make_circular_distribution(ring_number=Ring_number)
+beam_number = 0
+lightsource = []
+rays=[]
+for wavel in wavels:
+  lightsource=Beam(radius=Beam_radius, angle=0,wavelength=wavel)
+  lightsource.make_circular_distribution(ring_number=Ring_number)
+  for ray_number in range(0,lightsource._ray_count):
+    rn = lightsource.get_all_rays()[ray_number]
+    x = (wavel - lam_mid + delta_lamda/2) / delta_lamda
+    rn.draw_dict["color"] = cmap( x )
+    rays.append(rn)
+  beam_number+=1
   
 newlightsource = Beam(radius=0, angle=0)
-r=Ray()
-r.wavelength=lam_mid
-r.draw_dict["color"] = cmap( 0.4 )
-rays = []
-for wavel in range(0,newlightsource0._ray_count):
-  rn = newlightsource0.get_all_rays()[wavel]
-  rn.draw_dict["color"] = cmap( 0.4 )
-  rays.append(rn)
-# for wavel in range(0,newlightsource1._ray_count):
-  rn = newlightsource1.get_all_rays()[wavel]
-  rn.draw_dict["color"] = cmap( 0.8 )
-  rays.append(rn)
-# for wavel in range(0,newlightsource2._ray_count):
-  rn = newlightsource2.get_all_rays()[wavel]
-  rn.draw_dict["color"] = cmap( 0 )
-  rays.append(rn)
-  # rn = newlightsource3.get_all_rays()[wavel]
-  # rn.draw_dict["color"] = cmap( 0.6 )
-  # rays.append(rn)
-  # rn = newlightsource4.get_all_rays()[wavel]
-  # rn.draw_dict["color"] = cmap( 0.2 )
-  # rays.append(rn)
   
 newlightsource.override_rays(rays)
 newlightsource.draw_dict['model'] = "ray_group"
@@ -219,27 +183,6 @@ pure_cosmetic.pos = (flip_mirror1.pos + flip_mirror2.pos ) / 2
 pure_cosmetic.normal = (flip_mirror1.normal + flip_mirror2.normal ) / 2
 pure_cosmetic.aperture = periscope_distance
 
-M1 = Mirror()
-M1.aperture = 25.4/2
-M1.pos = pos0 - (0,0,periscope_distance)
-point0 = p_grat - (0,0,periscope_distance)
-point1 = M1.pos + (100,0,0)
-M1.set_normal_with_2_points([point0], point1)
-
-# M3 = Curved_Mirror(radius=2500, name="Concav_Mirror")
-M3 = Mirror()
-M3.aperture = 25.4/2
-M3.pos = p_grat - 400 * vec
-# M3.normal = -vec
-point0 = p_grat
-point1 = M3.pos + (-100,0,0)
-M3.set_normal_with_2_points(point0, point1)
-
-Curved_Mirror2 = Curved_Mirror(radius=5000, name="Concav_Mirror")
-Curved_Mirror2.aperture = 25.4*2
-Curved_Mirror2.pos = M3.pos + (-100,0,0)
-Curved_Mirror2.normal = (-1,0,0)
-
 fixlens1 = Lens(f=100)
 fixlens1.aperture = 25.4/2
 fixlens1.pos = p_grat - 445 * vec
@@ -250,36 +193,9 @@ fixlens2.aperture = 25.4/2
 fixlens2.pos = p_grat - 425 * vec
 fixlens2.normal = vec
 
-Curved_Mirror1 = Curved_Mirror(radius=5000, name="Concav_Mirror")
-Curved_Mirror1.aperture = 25.4*2
-Curved_Mirror1.pos = M1.pos + (250,0,0)
-Curved_Mirror1.normal = (1,0,0)
-# point0 = M1.pos
-# point1 = p_grat - (-100,0,periscope_distance)
-# M2.set_normal_with_2_points([point0], point1)
-
-Cavity1 = Curved_Mirror(radius=500, name="Concav_Mirror")
-Cavity1.pos = point1
-Cavity1.aperture = 25.4*2
-# Concav1.normal = (-1,0,0)
-point0 = Curved_Mirror1.pos
-point1 = Cavity1.pos + (100,0,0)
-Cavity1.set_normal_with_2_points(point0, point1)
-
-Cavity2 = Curved_Mirror(radius=500, name="Concav_Mirror")
-Cavity2.pos = Concav1.pos + (500,0,0)
-Cavity2.aperture = 25.4*2
-Cavity2.normal = (1,0,0)
-
 ip = Intersection_plane(dia=100)
-ip.pos = p_grat - vec*1000 - (0,0,periscope_distance)
+ip.pos = p_grat - vec*5000 - (0,0,periscope_distance)
 ip.normal = vec
-# ip.pos = StripeM.pos
-# ip.normal = StripeM.normal
-
-# pure_cosmetic.draw = useless
-M1.pos = M1.pos-(0,0,4)
-
 
 Stretcher = Composition(name="Strecker", pos=pos0, normal=vec)
 opt_ax = Ray(pos=pos0, normal=vec)
@@ -295,12 +211,6 @@ Stretcher.add_fixed_elm(flip_mirror2)
 Stretcher.add_fixed_elm(flip_mirror1)
 Stretcher.add_fixed_elm(Concav3)
 Stretcher.add_fixed_elm(Concav4)
-# Stretcher.add_fixed_elm(M1)
-# Stretcher.add_fixed_elm(Curved_Mirror1)
-# # Stretcher.add_fixed_elm(Concav1)
-# # Stretcher.add_fixed_elm(Concav2)
-# Stretcher.add_fixed_elm(M3)
-# Stretcher.add_fixed_elm(Curved_Mirror2)
 Stretcher.add_fixed_elm(ip)
 # Stretcher.add_fixed_elm(fixlens1)
 # Stretcher.add_fixed_elm(fixlens2)
@@ -309,20 +219,8 @@ Stretcher.add_fixed_elm(pure_cosmetic)
 
 # for item in subperis._elements:
 #   Stretcher.add_fixed_elm(item)
-
-# seq = [0,1,2,3,0,4,5,0,6,2,7,0,8,9,8,0,7,2,6,0,5,4,0,3,2,1,0,10,11,10]
-# seq = [0,1,2,1,0, 3]
-
-# seq = [0,1,2,3,0, 4, 5, 6, 2, 7, 0]
-
-# from collections import deque
-
-# seq = np.array([0,1,2,3,0,4,5,0,6,2,7,0,8,9,8,0,7,2,6,0,5,4,0,3,2,1,0,10,11,10])
 seq = np.array([0,1,2,3,0,4,5,0,6,2,7,0])
 roundtrip_sequence = list(seq)
-# seq = np.array([0,1,2,12])
-# Concav1.draw()
-# Grat.draw()
 
 # if freecad_da:
 #   obj = model_table()

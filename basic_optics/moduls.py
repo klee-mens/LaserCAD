@@ -773,7 +773,7 @@ def Make_Stretcher():
   Radius = 1000 #Radius des großen Konkavspiegels
   Aperture_concav = 6 * inch
   h_StripeM = 10 #Höhe des Streifenspiegels
-  gamma = 21 /180 *np.pi # Seperationswinkel zwischen einfallenden und Mittelpunktsstrahl; Alpha = Gamma + Beta
+  gamma = 5 /180 *np.pi # Seperationswinkel zwischen einfallenden und Mittelpunktsstrahl; Alpha = Gamma + Beta
   grat_const = 1/450 # Gitterkonstante in 1/mm
   seperation = 100 # Differenz zwischen Gratingposition und Radius
   lam_mid = 2400e-9 * 1e3 # Zentralwellenlänge in mm
