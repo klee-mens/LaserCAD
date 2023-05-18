@@ -84,7 +84,26 @@ class Intersection_plane(Opt_Element):
         self.aperture=self.draw_dict["dia"]
       point_x.append(pos_diff1)
       point_y.append(pos_diff2)
-    plt.figure()
+    ray_middle = rays[int(len(rays)/2)]
+    point_x_middle = point_x[int(len(rays)/2)]
+    point_y_middle = point_y[int(len(rays)/2)]
+    diff_x = [x-point_x_middle for x in point_x]
+    diff_y = [y-point_y_middle for y in point_y]
+    ray_lam = [ray.wavelength for ray in rays]
+    tilt_x = [np.arcsin(ray.normal[1]) for ray in rays]
+    tilt_y = [np.arcsin(ray.normal[2]) for ray in rays]
+    plt.figure(1)
+    ax1=plt.subplot(2,2,1)
+    plt.plot(ray_lam, diff_x)
+    ax2=plt.subplot(2,2,2)
+    plt.plot(ray_lam, diff_y)
+    ax3=plt.subplot(2,2,3)
+    plt.plot(ray_lam, tilt_x)
+    ax4=plt.subplot(2,2,4)
+    plt.plot(ray_lam, tilt_y)
+    plt.show()
+    
+    plt.figure(2)
     # area = (20 * np.random.rand(37))**2
     # c = np.sqrt(area)
     plt.scatter(point_x,point_y,s=10,c=point_c)

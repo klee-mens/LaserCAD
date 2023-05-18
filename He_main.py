@@ -58,7 +58,7 @@ grat_const = 1/450 # Gitterkonstante in 1/mm
 seperation = 100 # Differenz zwischen Gratingposition und Radius
 lam_mid = 2400e-9 * 1e3 # Zentralwellenlänge in mm
 delta_lamda = 250e-9*1e3 # Bandbreite in mm
-number_of_rays = 14
+number_of_rays = 15
 safety_to_StripeM = 5 #Abstand der eingehenden Strahlen zum Concav Spiegel in mm, Distance of incoming beams to Concav mirror in mm
 periscope_distance = 12
 
@@ -133,7 +133,7 @@ Concav.aperture = Aperture_concav
 Concav.normal = (-1,0,0)
 
 StripeM = Curved_Mirror(radius= -Radius/2, name="Stripe_Mirror")
-StripeM.pos = (Radius/2-0.06, 0, 0)
+StripeM.pos = (Radius/2-0.05, 0, 0)
 #Cosmetics
 StripeM.aperture=75
 StripeM.draw_dict["height"]=10
@@ -193,7 +193,7 @@ lightsource.draw_dict['model'] = "ray_group"
 # nfm1 = - ray0.normal
 # pfm1 = Grat.pos + 900 * nfm1 + (0,0,h_StripeM/2 + safety_to_StripeM + periscope_distance)
 nfm1 = - ray0.normal
-pfm1 = Grat.pos + 800 * nfm1 + (0,0,-h_StripeM/2 - safety_to_StripeM)
+pfm1 = Grat.pos + 900 * nfm1 + (0,0,-h_StripeM/2 - safety_to_StripeM)
 # subperis = Periscope(length=8, theta=-90, dist1=0, dist2=0)
 # subperis.pos = pfm1
 # subperis.normal = nfm1
@@ -218,8 +218,22 @@ pure_cosmetic.pos = (flip_mirror1.pos + flip_mirror2.pos ) / 2
 pure_cosmetic.normal = (flip_mirror1.normal + flip_mirror2.normal ) / 2
 pure_cosmetic.aperture = periscope_distance
 
+M1=Mirror()
+M1.pos = p_grat - vec*300 + (0,0,periscope_distance)
+p0 = p_grat + (0,0,periscope_distance)
+p1 = M1.pos - (0,0,50)
+M1.set_normal_with_2_points(p0, p1)
+
+M2=Mirror()
+M2.pos = p1
+p0 = M1.pos
+p1 = M2.pos + (50,0,0)
+M2.set_normal_with_2_points(p0, p1)
+M1.draw_dict["mount_type"]=M2.draw_dict["mount_type"]="dont_draw"
+
 ip = Intersection_plane(dia=100)
-ip.pos = p_grat - vec*800 + (0,0,periscope_distance)
+# ip.pos = p_grat - vec*800 + (0,0,periscope_distance)
+ip.pos = p1
 ip.normal = vec
 
 Stretcher = Composition(name="Strecker", pos=pos0, normal=vec)
@@ -234,6 +248,8 @@ Stretcher.add_fixed_elm(StripeM)
 # Stretcher.add_fixed_elm(Concav2)
 Stretcher.add_fixed_elm(flip_mirror1)
 Stretcher.add_fixed_elm(flip_mirror2)
+Stretcher.add_fixed_elm(M1)
+Stretcher.add_fixed_elm(M2)
 # Stretcher.add_fixed_elm(Concav3)
 # Stretcher.add_fixed_elm(Concav4)
 Stretcher.add_fixed_elm(ip)
@@ -243,7 +259,7 @@ Stretcher.add_fixed_elm(pure_cosmetic)
 # for item in subperis._elements:
 #   Stretcher.add_fixed_elm(item)
 # seq = np.array([0,1,2,3,0,4,5,0,6,2,7,0])
-seq = np.array([0,1,2,1,0,3,4,0,1,2,1,0])
+seq = np.array([0,1,2,1,0,3,4,0,1,2,1,0,5,6,7])
 roundtrip_sequence = list(seq)
 
 # if freecad_da:
@@ -256,7 +272,7 @@ roundtrip=1
 #   # print("step ", n, "of", roundtrip)
 #   seq = np.append(seq,roundtrip_sequence)
   
-seq=np.append(seq, [5])
+# seq=np.append(seq, [5])
 
 Stretcher.set_sequence(seq)
 Stretcher.propagate(100)
