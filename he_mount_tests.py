@@ -103,9 +103,9 @@ if freecad_da:
 from basic_optics.tests import all_moduls_test
 # all_moduls_test()
 a = Mirror()
-a.aperture=2*25.4
-a.pos=(100,100,100)
-a.normal=(-1,1,0)
+a.aperture=25.4
+a.pos=(0,0,100)
+a.normal=(1,0,0)
 a.draw_dict["model_type"]= "polarizer"
 a.draw()
 a.draw_mount()

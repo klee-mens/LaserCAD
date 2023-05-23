@@ -59,8 +59,9 @@ seperation = 100 # Differenz zwischen Gratingposition und Radius
 lam_mid = 2400e-9 * 1e3 # Zentralwellenlänge in mm
 delta_lamda = 250e-9*1e3 # Bandbreite in mm
 number_of_rays = 15
-safety_to_StripeM = 5 #Abstand der eingehenden Strahlen zum Concav Spiegel in mm, Distance of incoming beams to Concav mirror in mm
+safety_to_StripeM = 7.5 #Abstand der eingehenden Strahlen zum Concav Spiegel in mm, Distance of incoming beams to Concav mirror in mm
 periscope_distance = 10
+c0 = 299792458*1000 #mm/s
 
 # abgeleitete Parameter
 v = lam_mid/grat_const
@@ -133,7 +134,7 @@ Concav.aperture = Aperture_concav
 Concav.normal = (-1,0,0)
 
 StripeM = Curved_Mirror(radius= -Radius/2, name="Stripe_Mirror")
-StripeM.pos = (Radius/2-0.045, 0, 0)
+StripeM.pos = (Radius/2-0.06, 0, 0)
 #Cosmetics
 StripeM.aperture=75
 StripeM.draw_dict["height"]=10
@@ -148,7 +149,7 @@ ray0 = Ray()
 # p_grat = np.array((Radius-seperation, 0, -h_StripeM/2 - safety_to_StripeM))
 p_grat = np.array((Radius-seperation, 0, h_StripeM/2 + safety_to_StripeM))
 vec = np.array((c, s, 0))
-pos0 = p_grat - 250 * vec
+pos0 = p_grat - 1000 * vec
 ray0.normal = vec
 ray0.pos = pos0
 ray0.wavelength = lam_mid
@@ -276,13 +277,12 @@ roundtrip=1
 # seq=np.append(seq, [5])
 
 Stretcher.set_sequence(seq)
-Stretcher.propagate(100)
+Stretcher.propagate(50)
 Stretcher.pos = (0,0,120)
 
 Stretcher.draw_mounts()
 Stretcher.draw_elements()
 # Stretcher.compute_beams()
-
 # container = []
 # for n in range(-32,1):
 #   beam = Stretcher._beams[n]
@@ -294,14 +294,34 @@ Stretcher.draw_elements()
 # else:
 #   for x in container:
 #     Stretcher._beams_part.append(x)
-
 Stretcher.draw_beams()
+pathlength = {}
+for ii in range(Stretcher._beams[0]._ray_count):
+  wavelength = Stretcher._beams[0].get_all_rays()[ii].wavelength
+  pathlength[wavelength] = 0
+for jj in range(len(Stretcher._beams)-1):
+  for ii in Stretcher._beams[jj].get_all_rays():
+    a=pathlength[ii.wavelength]
+    pathlength[ii.wavelength] = a +ii.length
+ray_lam = [ray.wavelength for ray in Stretcher._beams[0].get_all_rays()]
+path = [pathlength[ii] for ii in ray_lam]
+delay_mid = path[int(len(path)/2)]/c0
+delay = [(pa/c0-delay_mid)*1E9 for pa in path]
+plt.close("all")
 ip.spot_diagram(Stretcher._beams[-2])
-
+plt.figure(3)
+ax1=plt.subplot(1,2,1)
+plt.plot(ray_lam,path)
+plt.ylabel("pathlength (mm)")
+plt.xlabel("wavelength (mm)")
+plt.title("Pathlength at different wavelength")
+ax1=plt.subplot(1,2,2)
+plt.plot(ray_lam,delay)
+plt.ylabel("delay (ns)")
+plt.xlabel("wavelength (mm)")
+plt.title("Delay at different wavelength")
+plt.show()
 # print(Stretcher._beams[-1].get_all_rays())
-
-
-
 
 if freecad_da:
 

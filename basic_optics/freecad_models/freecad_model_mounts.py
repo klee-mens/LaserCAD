@@ -259,17 +259,25 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
     if abs(NORMAL[2])<DEFALUT_MAX_ANGULAR_OFFSET/180*np.pi:
       NORMAL[2]=0
   if model_type == "polarizer":
-    additional_mount = draw_45_Degree_Holder(geom=geom)
     xshift=25
     yshift=22
-    shiftvec=Vector(xshift,yshift,0)
+    if dia >25.4 and dia<=25.4*2:
+      additional_mount = draw_45_Degree_Holder(dia=25.4*2,geom=geom)
+      mount_type = "POLARIS-K2"
+      dia =25.4*2
+    elif dia<=25.4:
+      additional_mount = draw_45_Degree_Holder(dia=25.4,geom=geom)
+      xshift=12.5
+      yshift=11
+      mount_type = "POLARIS-K1"
+      dia =25.4
+    # shiftvec=Vector(xshift,yshift,0)
     # normal=Vector(NORMAL)
     new_normal = rotate_vector(NORMAL,vec=(0,0,1),angle=np.pi/4)
     geom = (np.array((POS[0]+xshift*NORMAL[0]-yshift*NORMAL[1],
                       POS[1]+yshift*NORMAL[0]+xshift*NORMAL[1],
                       POS[2])),new_normal)
-    mount_type = "POLARIS-K2"
-    dia =25.4*2
+
   if mount_type == "default":
     if dia<= 25.4/2:
       mount_type = "POLARIS-K05"
@@ -894,9 +902,12 @@ def draw_rooftop_mount(xxshift=0,geom=None):
   update_geom_info(obj,geom,off0=offset)
   return obj
 
-def draw_45_Degree_Holder(geom=None):
+def draw_45_Degree_Holder(dia = 25.4*2, geom=None):
   mesh = True
-  datei = thisfolder + "mount_meshes\\special mount\\H45CN"
+  if dia == 25.4*2:
+    datei = thisfolder + "mount_meshes\\special mount\\H45CN"
+  else:
+    datei = thisfolder + "mount_meshes\\special mount\\H45"
   if mesh:
     DOC = get_DOC()
     obj = DOC.addObject("Mesh::Feature", "H45CN")

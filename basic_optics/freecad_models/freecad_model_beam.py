@@ -105,6 +105,7 @@ def model_Gaussian_beam (name="Gaussian_beam",q_para=-100+200j,prop=200,waveleng
     z_end = z_start+prop
     w0 = pow(wavelength*z0/np.pi,0.5)
     w_start = w0 * pow(1+(z_start/z0)**2,0.5)
+    print("w_sart=",w_start)
     w_end = w0 * pow(1+(z_end/z0)**2,0.5)
     
     obj = DOC.addObject('PartDesign::Body', name)
