@@ -29,7 +29,7 @@ from .iris import Iris
 from .intersection_plane import Intersection_plane
 from .refractive_plane import Refractive_plane
 from .thick_lens import Thick_Lens
-from .resonator import Resonator
+from .resonator import LinearResonator
 
 pfad = __file__[0:-9]
 

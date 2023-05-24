@@ -328,6 +328,10 @@ class Geom_Object(object):
     freecad_models, normally returns a reference to the corresponding
     FreeCAD object
     """
+    self.update_draw_dict()
+    return self.freecad_model(**self.draw_dict)
+
+  def freecad_model(self, **kwargs):
     #ToDo: fürs Debugging hier einfach einen Zylinder mit norm uns k zeichnen
     return None
 

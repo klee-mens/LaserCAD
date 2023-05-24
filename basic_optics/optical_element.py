@@ -59,8 +59,12 @@ class Opt_Element(Geom_Object):
     ray2 : Ray
       Ausgangsstrahl
     """
-    return False
+    return self.just_pass_through(ray)
 
+  def just_pass_through(self, ray):
+    ray2 = deepcopy(ray)
+    ray2.pos = ray.intersect_with(self) #dadruch wird ray.length verändert(!)
+    return ray2
 
   def next_beam(self, beam):
     """
@@ -88,11 +92,11 @@ class Opt_Element(Geom_Object):
         return False #Für Elemente die nicht mit Strahlen interagieren wird -1 als beam zurück gegeben
       newrays.append(nr)
     newb.override_rays(newrays)
-    if beam._distribution == "Gaussian":
-      [[A,B],[C,D]] = self._matrix
-      q_parameter = deepcopy(beam.q_para)
-      q_parameter += beam.get_all_rays()[0].length
-      newb.q_para = (A*q_parameter+B)/(C*q_parameter+D)
+    # if beam._distribution == "Gaussian":
+    #   [[A,B],[C,D]] = self._matrix
+    #   q_parameter = deepcopy(beam.q_para)
+    #   q_parameter += beam.get_all_rays()[0].length
+    #   newb.q_para = (A*q_parameter+B)/(C*q_parameter+D)
     return newb
 
   def next_gauss(self,gaussian):

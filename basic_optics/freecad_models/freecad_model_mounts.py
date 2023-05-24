@@ -258,26 +258,35 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
     dia =25.4*2
     if abs(NORMAL[2])<DEFALUT_MAX_ANGULAR_OFFSET/180*np.pi:
       NORMAL[2]=0
-  if model_type == "polarizer":
-    xshift=25
-    yshift=22
-    if dia >25.4 and dia<=25.4*2:
-      additional_mount = draw_45_Degree_Holder(dia=25.4*2,geom=geom)
-      mount_type = "POLARIS-K2"
-      dia =25.4*2
-    elif dia<=25.4:
-      additional_mount = draw_45_Degree_Holder(dia=25.4,geom=geom)
-      xshift=12.5
-      yshift=11
-      mount_type = "POLARIS-K1"
-      dia =25.4
+  if "polarizer" in model_type:
+    mt=float(model_type.replace("_polarizer", ""))
+    mount_type = "POLARIS-K1"
+    dia =25.4
+    if mt == 45:
+      xshift=25
+      yshift=22
+      if dia >25.4 and dia<=25.4*2:
+        additional_mount = draw_Degree_Holder(dia=25.4*2,geom=geom)
+        mount_type = "POLARIS-K2"
+        dia =25.4*2
+      elif dia<=25.4:
+        additional_mount = draw_Degree_Holder(geom=geom)
+        xshift=12.5
+        yshift=11
+    elif mt == 56:
+      additional_mount = draw_Degree_Holder(angle=56,geom=geom)
+      xshift=21
+      yshift=26
+    else:
+      additional_mount = draw_Degree_Holder(angle=65,geom=geom)
+      xshift=17
+      yshift=27
     # shiftvec=Vector(xshift,yshift,0)
-    # normal=Vector(NORMAL)
-    new_normal = rotate_vector(NORMAL,vec=(0,0,1),angle=np.pi/4)
+    normal=Vector(NORMAL)
+    new_normal = rotate_vector(NORMAL,vec=(0,0,1),angle=mt/180*np.pi)
     geom = (np.array((POS[0]+xshift*NORMAL[0]-yshift*NORMAL[1],
                       POS[1]+yshift*NORMAL[0]+xshift*NORMAL[1],
                       POS[2])),new_normal)
-
   if mount_type == "default":
     if dia<= 25.4/2:
       mount_type = "POLARIS-K05"
@@ -369,6 +378,36 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
   DOC.recompute()
   return part
 
+def model_lamuda_plane(name = "lamuda_plane",drawing_post=True,base_exists=False,geom = None):
+  POS = geom[0]
+  AXES = geom[1]
+  NORMAL = AXES[:,0]
+  mesh =True
+  DOC = get_DOC()
+  if abs(NORMAL[2])<DEFALUT_MAX_ANGULAR_OFFSET/180*np.pi:
+    NORMAL[2]=0
+  datei = thisfolder + "mount_meshes\\adjusted mirror mount\\lamuda_plane"
+  if mesh:
+    DOC = get_DOC()
+    obj = DOC.addObject("Mesh::Feature", "rooftop mirror mount")
+    datei += ".stl"
+    obj.Mesh = Mesh.Mesh(datei)
+  else:
+    datei += ".step"
+    obj = ImportGui.insert(datei, "labor_116")
+  offset=Vector(0,0,0)
+  obj.Placement = Placement(offset, Rotation(0,0,0), Vector(0,0,0))
+  update_geom_info(obj,geom,off0=offset)
+  height = 33.35
+  xshift = 0
+  if  drawing_post:
+    post_part=draw_post_part(name="post_part",base_exists=base_exists,
+                             height=height,xshift=xshift, geom=geom)
+  part = initialize_composition_old(name="mount, post and base")
+  container = post_part,obj
+  add_to_composition(part, container)
+  return part
+  
 def draw_post_part(name="post_part", base_exists=False, height=12,xshift=0, geom=None):
   """
   Draw the post part, including post, post holder and base
@@ -902,15 +941,20 @@ def draw_rooftop_mount(xxshift=0,geom=None):
   update_geom_info(obj,geom,off0=offset)
   return obj
 
-def draw_45_Degree_Holder(dia = 25.4*2, geom=None):
+def draw_Degree_Holder(dia = 25.4,angle = 45, geom=None):
   mesh = True
-  if dia == 25.4*2:
-    datei = thisfolder + "mount_meshes\\special mount\\H45CN"
+  if angle == 45:
+    if dia == 25.4*2:
+      datei = thisfolder + "mount_meshes\\special mount\\H45CN"
+    else:
+      datei = thisfolder + "mount_meshes\\special mount\\H45"
+  elif angle == 56:
+    datei = thisfolder + "mount_meshes\\special mount\\56_degree_mounts"
   else:
-    datei = thisfolder + "mount_meshes\\special mount\\H45"
+    datei = thisfolder + "mount_meshes\\special mount\\65_degree_mounts"
   if mesh:
     DOC = get_DOC()
-    obj = DOC.addObject("Mesh::Feature", "H45CN")
+    obj = DOC.addObject("Mesh::Feature", "polarizer_mounts")
     datei += ".stl"
     obj.Mesh = Mesh.Mesh(datei)
   else:

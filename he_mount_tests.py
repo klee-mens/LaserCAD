@@ -17,7 +17,7 @@ from basic_optics import Mirror,Lens,Gaussian_Beam,Beam,Cylindrical_Mirror,Ray,C
 from basic_optics.freecad_models import clear_doc, setview, freecad_da
 from basic_optics.freecad_models.freecad_model_mounts import mirror_mount
 from basic_optics.freecad_models.freecad_model_beam import model_Gaussian_beam
-from basic_optics.freecad_models.freecad_model_mounts import model_table
+from basic_optics.freecad_models.freecad_model_mounts import model_table,model_lamuda_plane
 from basic_optics import Iris, Composition
 
 import numpy as np
@@ -106,8 +106,11 @@ a = Mirror()
 a.aperture=25.4
 a.pos=(0,0,100)
 a.normal=(1,0,0)
-a.draw_dict["model_type"]= "polarizer"
+a.draw_dict["model_type"]= "65_polarizer"
 a.draw()
+# if freecad_da:
+#   obj = model_lamuda_plane(geom=a.get_geom())
+
 a.draw_mount()
 
 from basic_optics.moduls import Make_Periscope, Make_Telescope, Make_Amplifier_Typ_II_simple, Make_Stretcher, Make_White_Cell

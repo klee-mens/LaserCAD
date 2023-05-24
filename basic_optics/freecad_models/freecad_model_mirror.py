@@ -53,7 +53,8 @@ def model_mirror(model_type="DEFAULT", **kwargs):
     obj = model_stripe_mirror(**kwargs)
   elif model_type == "Rooftop":
     obj = model_rooftop_mirror(**kwargs)
-     
+  else:
+    obj = model_round_mirror(**kwargs)
   return obj
 
 

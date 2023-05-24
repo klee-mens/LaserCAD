@@ -243,6 +243,7 @@ opt_ax = Ray(pos=pos0, normal=vec)
 opt_ax.wavelength = lam_mid
 Stretcher.redefine_optical_axis(opt_ax)
 
+
 Stretcher.set_light_source(lightsource)
 Stretcher.add_fixed_elm(Grat)
 Stretcher.add_fixed_elm(Concav)
@@ -305,6 +306,13 @@ for jj in range(len(Stretcher._beams)-1):
     pathlength[ii.wavelength] = a +ii.length
 ray_lam = [ray.wavelength for ray in Stretcher._beams[0].get_all_rays()]
 path = [pathlength[ii] for ii in ray_lam]
+
+path_diff = [ii-path[int(len(path)/2)] for ii in path]
+fai = [path_diff[ii]/ray_lam[ii]*2*np.pi for ii in range(len(path))]
+omega = [c0/ii*2*np.pi for ii in ray_lam]
+para = np.polyfit(omega, fai, 5)
+fai2 = [20*para[0]*ii**3+12*para[1]*ii**2+6*para[2]*ii+2*para[3] for ii in omega]
+# fai2 = [para[0]*ii**5+para[1]*ii**4+para[2]*ii**3+para[3]*ii**2+para[4]*ii+para[5] for ii in omega]
 delay_mid = path[int(len(path)/2)]/c0
 delay = [(pa/c0-delay_mid)*1E9 for pa in path]
 plt.close("all")
@@ -315,14 +323,33 @@ plt.plot(ray_lam,path)
 plt.ylabel("pathlength (mm)")
 plt.xlabel("wavelength (mm)")
 plt.title("Pathlength at different wavelength")
+plt.axhline(path[int(len(path)/2)], color = 'black', linewidth = 1)
 ax1=plt.subplot(1,2,2)
 plt.plot(ray_lam,delay)
 plt.ylabel("delay (ns)")
 plt.xlabel("wavelength (mm)")
 plt.title("Delay at different wavelength")
-plt.show()
-# print(Stretcher._beams[-1].get_all_rays())
+plt.axhline(0, color = 'black', linewidth = 1)
+plt.figure(4)
 
+plt.plot(omega,fai)
+plt.axhline(0, color = 'black', linewidth = 1)
+plt.ylabel("φ(ω) (1/s)")
+plt.xlabel("angular frequency (1/s)")
+plt.figure(5)
+fai2 = [ii*10E30 for ii in fai2]
+plt.plot(omega,fai2)
+plt.ylabel("GDD (fs^2)")
+plt.xlabel("angular frequency (1/s)")
+fai2 = [para[0]*ii**5+para[1]*ii**4+para[2]*ii**3+para[3]*ii**2+para[4]*ii+para[5] for ii in omega]
+plt.figure(6)
+plt.scatter(omega,fai,s=10)
+plt.plot(omega,fai2)
+plt.axhline(0, color = 'black', linewidth = 1)
+plt.ylabel("φ(ω) (1/s)")
+plt.xlabel("angular frequency (1/s)")
+# print(Stretcher._beams[-1].get_all_rays())
+plt.show()
 if freecad_da:
 
   setview()

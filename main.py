@@ -23,7 +23,7 @@ from basic_optics import Lens, Ray, Composition, Grating, Propagation
 from basic_optics.freecad_models import input_output_test
 # from basic_optics.tests import all_moduls_test
 from basic_optics.moduls import Make_Stretcher, Make_Telescope
-from basic_optics.resonator import Resonator
+from basic_optics.resonator import LinearResonator
 
 
 
@@ -55,8 +55,8 @@ angle2 = 5
 End_Mirror1 = Mirror(phi=180)
 M1 = Mirror(phi = -(180-angle1))
 M_TFP = Mirror(phi = -(180-angle_TFP))
-M_TFP.aperture = inch*2
-M_TFP.draw_dict["model_type"] = "polarizer"
+M_TFP.aperture = inch
+M_TFP.draw_dict["model_type"] = "56_polarizer"
 Curved_Mirror = Curved_Mirror(phi=-(180-angle2),radius=750)
 Curved_Mirror.aperture = 2 * inch
 End_Mirror2 = Mirror()
@@ -66,10 +66,10 @@ ip = Intersection_plane()
 ip.pos = (317.,  -0., 100.)+(0.30653, -0.95186,  0.)*500
 
 ip.normal
-# Comp = Composition(pos=(10,0,100),normal=(-1,0,0))
-Comp = Resonator(pos= (0,0,100),normal=(-1,0,0))
-# Comp.set_light_source(lightsourse)
-# Comp.propagate(10)
+Comp = Composition(pos=(10,0,100),normal=(-1,0,0))
+# Comp = LinearResonator(pos= (0,0,100),normal=(-1,0,0))
+Comp.set_light_source(lightsourse)
+Comp.propagate(10)
 Comp.add_on_axis(End_Mirror1)
 Comp.propagate(d1)
 Comp.add_on_axis(M1)
@@ -91,10 +91,10 @@ seq=np.append(seq, [0,1])
 Comp.set_sequence(seq)
 Comp.propagate(500)
 
-q = Comp.compute_eigenmode()
+# q = Comp.compute_eigenmode()
 
 Comp.draw()
-from basic_optics.tests import three_resonators_test
+# from basic_optics.tests import three_resonators_test
 # a=three_resonators_test()
 
 

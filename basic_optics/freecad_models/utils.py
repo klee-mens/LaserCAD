@@ -22,6 +22,8 @@ try:
   DOC = FreeCAD.activeDocument()
   print(DOC)
   from FreeCAD import Vector, Placement, Rotation
+  import Mesh
+  import ImportGui
 except:
   freecad_da = False
   DOC = None
@@ -227,3 +229,25 @@ def update_geom_info(obj, geom_info, off0=0):
       phi *= 180/np.pi
       place0 = obj.Placement
       obj.Placement = Placement(pos, Rotation(rotvec,phi), Vector(0,0,0)).multiply(place0)
+
+
+def load_STL(stl_file, name="new_mesh", geom=None, off0=0, 
+             color=(90,90,90), **kwargs):
+  DOC = get_DOC()
+  obj = DOC.addObject("Mesh::Feature", name)
+  obj.Mesh = Mesh.Mesh(stl_file)
+  obj.Label = name
+  update_geom_info(obj, geom, off0)
+  obj.ViewObject.ShapeColor = color
+
+  DOC.recompute()
+  return obj
+
+def load_STEP(step_file, name="new_step", geom=None, off0=0, **kwargs):
+  DOC = get_DOC()
+  obj = ImportGui.insert(step_file, DOC_NAME)
+  obj.Label = name
+  update_geom_info(obj, geom, off0)
+
+  DOC.recompute()
+  return obj
