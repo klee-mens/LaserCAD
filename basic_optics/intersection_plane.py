@@ -92,7 +92,7 @@ class Intersection_plane(Opt_Element):
     ray_lam = [ray.wavelength for ray in rays]
     tilt_x = [np.arcsin(ray.normal[1]) for ray in rays]
     tilt_y = [np.arcsin(ray.normal[2]) for ray in rays]
-    plt.figure(1)
+    plt.figure()
     ax1=plt.subplot(2,2,1)
     plt.plot(ray_lam, diff_x)
     plt.ylabel("x-shift (mm)")
@@ -119,7 +119,7 @@ class Intersection_plane(Opt_Element):
     plt.axhline(0, color = 'black', linewidth = 1)
     # plt.show()
     
-    plt.figure(2)
+    plt.figure()
     # area = (20 * np.random.rand(37))**2
     # c = np.sqrt(area)
     plt.scatter(point_x,point_y,s=10,c=point_c)

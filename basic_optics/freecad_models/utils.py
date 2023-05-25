@@ -232,7 +232,7 @@ def update_geom_info(obj, geom_info, off0=0):
 
 
 def load_STL(stl_file, name="new_mesh", geom=None, off0=0, 
-             color=(90,90,90), **kwargs):
+             color=(0.90,0.90,0.90), **kwargs):
   DOC = get_DOC()
   obj = DOC.addObject("Mesh::Feature", name)
   obj.Mesh = Mesh.Mesh(stl_file)

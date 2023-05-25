@@ -58,7 +58,7 @@ grat_const = 1/450 # Gitterkonstante in 1/mm
 seperation = 100 # Differenz zwischen Gratingposition und Radius
 lam_mid = 2400e-9 * 1e3 # Zentralwellenlänge in mm
 delta_lamda = 250e-9*1e3 # Bandbreite in mm
-number_of_rays = 15
+number_of_rays = 30
 safety_to_StripeM = 7.5 #Abstand der eingehenden Strahlen zum Concav Spiegel in mm, Distance of incoming beams to Concav mirror in mm
 periscope_distance = 10
 c0 = 299792458*1000 #mm/s
@@ -228,7 +228,7 @@ M1.set_normal_with_2_points(p0, p1)
 M2=Mirror()
 M2.pos = p1
 p0 = M1.pos
-p1 = M2.pos + (800,0,0)
+p1 = M2.pos + (850,0,0)
 M2.set_normal_with_2_points(p0, p1)
 M1.draw_dict["mount_type"]=M2.draw_dict["mount_type"]="dont_draw"
 

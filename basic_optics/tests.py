@@ -1017,3 +1017,71 @@ def three_resonators_test():
 
   res3.draw()
   return res, res2, res3
+
+def Lib_Resonator_test():
+  inch = 25.4
+
+  # from basic_optics.tests import three_resonators_test
+  # res1,res2,res3 = three_resonators_test()
+  # teles = Make_Telescope()
+  # teles.draw()
+
+  # if freecad_da:
+  #   input_output_test()
+  # stretcher = Make_Stretcher()
+  # stretcher.pos=(0,0,100)
+  # stretcher.draw_elements()
+  # stretcher.draw_rays()
+  # stretcher.draw()
+
+  d1 = 317
+  d2 = 126
+  d3 = 285
+  d4 = 384
+  angle1 = (np.pi-(np.arctan(7/8)+np.arctan(3/5)))*180/np.pi
+  angle_TFP = 56 * 2
+  angle2 = 5
+  End_Mirror1 = Mirror(phi=180)
+  M1 = Mirror(phi = -(180-angle1))
+  M_TFP = Mirror(phi = -(180-angle_TFP))
+  M_TFP.aperture = inch
+  M_TFP.draw_dict["model_type"] = "56_polarizer"
+  Curved = Curved_Mirror(phi=-(180-angle2),radius=750)
+  Curved.aperture = 2 * inch
+  End_Mirror2 = Mirror()
+  lightsourse=Beam(distribution="cone")
+  lightsourse.normal = (-1,0,0)
+  ip = Intersection_plane()
+  ip.pos = (317.,  -0., 100.)+(0.30653, -0.95186,  0.)*500
+
+  ip.normal = (0.30653, -0.95186,  0.)
+  Comp = Composition(pos=(317,0,100),normal=(-1,0,0))
+  # Comp = LinearResonator(pos= (0,0,100),normal=(-1,0,0))
+  Comp.set_light_source(lightsourse)
+  Comp.propagate(317)
+  Comp.add_on_axis(End_Mirror1)
+  Comp.propagate(d1)
+  Comp.add_on_axis(M1)
+  Comp.propagate(d2)
+  Comp.add_on_axis(M_TFP)
+  Comp.propagate(d3)
+  Comp.add_on_axis(Curved)
+  Comp.propagate(d4)
+  Comp.add_on_axis(End_Mirror2)
+
+
+  seq = np.array([0,1,2,3,4,3,2,1])
+  roundtrip_sequence = list(seq)
+
+  roundtrip=1
+  for n in range(roundtrip-1):
+    seq = np.append(seq,roundtrip_sequence)
+  seq=np.append(seq, [0,1])
+  Comp.set_sequence(seq)
+  Comp.propagate(500)
+
+  # q = Comp.compute_eigenmode()
+
+  Comp.draw()
+  # from basic_optics.tests import three_resonators_test
+  # a=three_resonators_test()

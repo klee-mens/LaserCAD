@@ -16,6 +16,7 @@ import numpy as np
 #import math
 
 DEFALUT_MAX_ANGULAR_OFFSET = 10
+DEFAULT_COLOR_LENS = (0/255,170/255,124/255)
 
 import csv
 if freecad_da:
@@ -122,7 +123,7 @@ def model_lens(name="lens", dia=25, Radius1=300, Radius2=0, thickness=3, geom=No
   rev.Reversed = 1
   sketch.Visibility = False
 
-  obj.ViewObject.ShapeColor = (0.0, 0.32 , 0.0)
+  obj.ViewObject.ShapeColor = DEFAULT_COLOR_LENS
   obj.ViewObject.Transparency = 50
   update_geom_info(obj, geom)
   DOC.recompute()

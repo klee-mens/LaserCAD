@@ -5,6 +5,7 @@ Created on Mon May  8 16:36:42 2023
 @author: 12816
 """
 from .utils import freecad_da, update_geom_info, get_DOC, rotate, thisfolder#,translate 
+from .utils import load_STL,load_STEP
 from .freecad_model_lens import model_lens
 from .freecad_model_composition import initialize_composition_old, add_to_composition
 import numpy as np
@@ -121,18 +122,14 @@ def lens_mount(mount_name="lens_mount", mount_type="MLH05_M",
   else:
     datei = thisfolder + "mount_meshes\\lens\\" + mount_type
   if mesh:
-    
-    obj = DOC.addObject("Mesh::Feature", mount_name)
     datei += ".stl"
-    obj.Mesh = Mesh.Mesh(datei)
+    obj = load_STL(datei,mount_name)
   else:
     datei += ".step"
-    obj = ImportGui.insert(datei, "labor_116")
-
+    obj = load_STEP(datei,mount_name)
   if not mount_adjusted:
     obj.Placement = place
   update_geom_info(obj, geom, off0=offset)
-  obj.Label = mount_name
   if  drawing_post:
     post_part=draw_post_part(name="post_part",base_exists=base_exists,
                              height=height,xshift=xshift, geom=geom)
@@ -156,11 +153,13 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
     mount_name : String, optional
         The name of the mount. The default is "mirror_mount".
     model_type : String, optional
-        The tpye fo the mirror. There are some special mount for stripe mirror
+        The tpye of the mirror. There are some special mount for stripe mirror
         and rooftop mirror.
         Set the model_type as 'rooftop_mirror_mount' if you want to draw rooftop 
         mirror mount.
         Set the model_type as 'Stripe' if you want to draw stripe mirror mount.
+        Set the model_type as '45_polarizer', '56_polarizer' or '65_polarizer' 
+        if you want to draw a polarizer mount.
         The default is "DEFAULT".
     mount_type : String, optional
         The type of the mount.You can check 'mirrormounts.csv' to find mount in
@@ -177,6 +176,8 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
     drawing_post : Boolean, optional
         Determine if you want to draw the post.
         Set it as True if you want to draw the post. The default is True.
+    base_exists : Boolean, optional
+        Determine if you want to draw the base. The default is True.
     dia : float/int, optional
         The diameter of the mirror. Please input it correctly if you want to 
         select the appropriate mount automatically.
@@ -330,12 +331,11 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
   else:
     datei = thisfolder + "mount_meshes\\mirror\\" + mount_type
   if mesh:
-    obj = DOC.addObject("Mesh::Feature", mount_name)
     datei += ".stl"
-    obj.Mesh = Mesh.Mesh(datei)
+    obj = load_STL(datei,mount_name)
   else:
     datei += ".step"
-    obj = ImportGui.insert(datei, "labor_116")
+    obj = load_STEP(datei,mount_name)
     
   if mount_rotation:
     #obj.Placement = Placement(Vector(0,0,0), Rotation(0,0,90), Vector(0,0,0))
@@ -379,22 +379,40 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
   return part
 
 def model_lamuda_plane(name = "lamuda_plane",drawing_post=True,base_exists=False,geom = None):
+  """
+  To build the model for lamuda plane
+
+  Parameters
+  ----------
+  name : String, optional
+    The name of the model. The default is "lamuda_plane".
+  drawing_post : Boolean, optional
+      Determine if you want to draw the post.
+      Set it as True if you want to draw the post. The default is True.
+  base_exists : Boolean, optional
+      Determine if you want to draw the base. The default is True.
+  geom : TYPE, optional
+    The geom info of the mount. The default is None.
+
+  Returns
+  -------
+  part : TYPE
+    DESCRIPTION.
+
+  """
   POS = geom[0]
   AXES = geom[1]
   NORMAL = AXES[:,0]
   mesh =True
-  DOC = get_DOC()
   if abs(NORMAL[2])<DEFALUT_MAX_ANGULAR_OFFSET/180*np.pi:
     NORMAL[2]=0
   datei = thisfolder + "mount_meshes\\adjusted mirror mount\\lamuda_plane"
   if mesh:
-    DOC = get_DOC()
-    obj = DOC.addObject("Mesh::Feature", "rooftop mirror mount")
     datei += ".stl"
-    obj.Mesh = Mesh.Mesh(datei)
+    obj = load_STL(datei, name = "lamuda_plane")
   else:
     datei += ".step"
-    obj = ImportGui.insert(datei, "labor_116")
+    obj = load_STEP(datei, name = "lamuda_plane")
   offset=Vector(0,0,0)
   obj.Placement = Placement(offset, Rotation(0,0,0), Vector(0,0,0))
   update_geom_info(obj,geom,off0=offset)
@@ -519,11 +537,8 @@ def draw_post(name="TR50_M", height=12,xshift=0, geom=None):
   """
   
   datei1 = thisfolder + "post\\" + name
-  DOC = get_DOC()
-  obj = DOC.addObject("Mesh::Feature", name)
   datei1 += ".stl"
-  obj.Mesh = Mesh.Mesh(datei1)
-  obj.Label = name
+  obj = load_STL(datei1, name = name)
   post_length= int("".join(list(filter(str.isdigit,name))))
   height=-post_length-height
   offset=Vector(xshift,0,height)
@@ -561,14 +576,9 @@ def draw_post_holder (name="PH50_M", height=0,xshift=0, geom=None):
     NORMAL=AXES
   else:
     NORMAL=AXES[:,0]
-  # NORMAL = AXES[:,0]
-  
   datei1 = thisfolder + "post\\post_holder\\" + name
-  DOC = get_DOC()
-  obj = DOC.addObject("Mesh::Feature", name)
   datei1 += ".stl"
-  obj.Mesh = Mesh.Mesh(datei1)
-  obj.Label = name
+  obj = load_STL(datei1, name=name)
   Geom_ground = (np.array((POS[0],POS[1],0)), np.array((NORMAL)))
   if name =="PH100_M":
     offset=Vector(xshift+4.3,-1.5,height+54)
@@ -651,10 +661,8 @@ def draw_post_base(name="BA1L", height=0,xshift=0, geom=None):
   
   datei1 = thisfolder + "post\\base\\" + name
   DOC = get_DOC()
-  obj = DOC.addObject("Mesh::Feature", name)
   datei1 += ".stl"
-  obj.Mesh = Mesh.Mesh(datei1)
-  obj.Label = name
+  obj = load_STL(datei1, name=name)
   Geom_ground = (np.array((POS[0],POS[1],0)), np.array((NORMAL)))
   if name == "BA1L":
     offset=Vector(xshift,0,height)
@@ -668,8 +676,6 @@ def draw_post_base(name="BA1L", height=0,xshift=0, geom=None):
     offset=Vector(xshift,0,height+4.5)
     obj.Placement = Placement(offset, Rotation(90,0,90), Vector(0,0,0))
     update_geom_info(obj, Geom_ground, off0=offset)
-  # obj.ViewObject.ShapeColor = (0.86,0.08,0.24)
-  # obj.ViewObject.Transparency = 50
   DOC.recompute()
   return obj
 
@@ -708,10 +714,8 @@ def draw_post_special(name="TR50_M", height=12,xshift=0, geom=None):
   DOC = get_DOC()
   ground = np.array((NORMAL[0],NORMAL[1],0))
   ground = ground/(pow(NORMAL[0]**2+NORMAL[1]**2,0.5))
-  obj = DOC.addObject("Mesh::Feature", name)
   datei1 += ".stl"
-  obj.Mesh = Mesh.Mesh(datei1)
-  obj.Label = name
+  obj = load_STL(datei1, name=name)
   if name =="TR50_M":
     offset=Vector(xshift,height,0)
     obj.Placement = Placement(offset, Rotation(90,-90,90), Vector(0,0,0))
@@ -845,14 +849,14 @@ def draw_large_mount(thickness=30,geom=None):
   
   mesh = True
   datei = thisfolder + "mount_meshes\\special mount\\large mirror mount"
+  DOC = get_DOC()
   if mesh:
-    DOC = get_DOC()
-    obj = DOC.addObject("Mesh::Feature", "large mirror mount")
     datei += ".stl"
-    obj.Mesh = Mesh.Mesh(datei)
+    obj = load_STL(datei, name="large mirror mount")
   else:
     datei += ".step"
-    obj = ImportGui.insert(datei, "labor_116")
+    # obj = ImportGui.insert(datei, "labor_116")
+    obj = load_STEP(datei, name="large mirror mount")
   offset=Vector(thickness-30,0,0)
   obj.Placement = Placement(offset, Rotation(0,0,0), Vector(0,0,0))
   update_geom_info(obj,geom,off0=offset)
@@ -896,13 +900,12 @@ def draw_stripe_mount(thickness=25,geom=None):
   mesh = True
   datei = thisfolder + "mount_meshes\\special mount\\Stripe mirror mount"
   if mesh:
-    DOC = get_DOC()
-    obj = DOC.addObject("Mesh::Feature", "Stripe mirror mount")
     datei += ".stl"
-    obj.Mesh = Mesh.Mesh(datei)
+    obj = load_STL(datei, name="Stripe mirror mount")
   else:
     datei += ".step"
-    obj = ImportGui.insert(datei, "labor_116")
+    # obj = ImportGui.insert(datei, "labor_116")
+    obj = load_STEP(datei, name="Stripe mirror mount")
   offset=Vector(thickness-25,0,0)
   obj.Placement = Placement(offset, Rotation(0,0,0), Vector(0,0,0))
   update_geom_info(obj,geom,off0=offset)
@@ -929,13 +932,11 @@ def draw_rooftop_mount(xxshift=0,geom=None):
   mesh = True
   datei = thisfolder + "mount_meshes\\special mount\\rooftop mirror mount"
   if mesh:
-    DOC = get_DOC()
-    obj = DOC.addObject("Mesh::Feature", "rooftop mirror mount")
     datei += ".stl"
-    obj.Mesh = Mesh.Mesh(datei)
+    obj = load_STL(datei, name="rooftop mirror mount")
   else:
     datei += ".step"
-    obj = ImportGui.insert(datei, "labor_116")
+    obj = load_STEP(datei, name="rooftop mirror mount")
   offset=Vector(xxshift,0,0)
   obj.Placement = Placement(offset, Rotation(0,0,0), Vector(0,0,0))
   update_geom_info(obj,geom,off0=offset)
@@ -953,13 +954,11 @@ def draw_Degree_Holder(dia = 25.4,angle = 45, geom=None):
   else:
     datei = thisfolder + "mount_meshes\\special mount\\65_degree_mounts"
   if mesh:
-    DOC = get_DOC()
-    obj = DOC.addObject("Mesh::Feature", "polarizer_mounts")
     datei += ".stl"
-    obj.Mesh = Mesh.Mesh(datei)
+    obj = load_STL(datei, name="polarizer_mounts")
   else:
     datei += ".step"
-    obj = ImportGui.insert(datei, "labor_116")
+    obj = load_STEP(datei, name="polarizer_mounts")
   obj.Placement = Placement(Vector(0,0,0), Rotation(0,0,0), Vector(0,0,0))
   update_geom_info(obj,geom)
   return obj
@@ -979,8 +978,8 @@ def rotate_vector(shiftvec=np.array((1.0,0,0)),vec=np.array((1.0,0,0)),angle=0):
 
   Returns
   -------
-  TYPE
-    DESCRIPTION.
+  vector:
+    retated vector
 
   """
   shiftvec = Vector(shiftvec)
@@ -988,6 +987,33 @@ def rotate_vector(shiftvec=np.array((1.0,0,0)),vec=np.array((1.0,0,0)),angle=0):
   return shiftvec*math.cos(angle)+vec.cross(shiftvec)*math.sin(angle)+vec*(vec*shiftvec)*(1-math.cos(angle))
 
 def load_mount_from_csv(mount_type = "default",model_type="lens"):
+  """
+  Loading mount data from the csv file
+  Parameters
+  ----------
+  mount_type : string
+    The type of the mount. The default is "default".
+  model_type : string, optional
+    The type of the model ('lens' or mirror). The default is "lens".
+  Returns
+  -------
+  mount_in_database : Bool
+    To judge if the mount is in the database.
+  aperture : float/int, optional
+    the aperture of the mount.
+  height : float/int, optional
+    distance from the center of the mirror to the bottom of the mount.
+  price : float/int, optional
+    The price of the mount.
+  xshift : float/int, optional
+    distance from the center of the mirror to the cavity at the bottom of the 
+    mount.
+  place : Placement
+    The placement of the mount.
+  offset : TYPE
+    DESCRIPTION.
+
+  """
   buf = []
   mount_in_database = False
   aperture =height = price = xshift =0
@@ -1016,10 +1042,7 @@ def load_mount_from_csv(mount_type = "default",model_type="lens"):
 def model_table():
   datei1 = thisfolder + "post\\optical breadboard.stl" 
   DOC = get_DOC()
-  obj = DOC.addObject("Mesh::Feature", "optical breadboard")
-  obj.Mesh = Mesh.Mesh(datei1)
-  obj.Label = "optical breadboard"
+  obj = load_STL(datei1, name="optical breadboard")
   obj.Placement =Placement(Vector(-750,-400,0),Rotation(0,0,0), Vector(0,0,0))
-  
   DOC.recompute()
   return obj
