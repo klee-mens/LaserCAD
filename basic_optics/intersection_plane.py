@@ -122,6 +122,8 @@ class Intersection_plane(Opt_Element):
     # area = (20 * np.random.rand(37))**2
     # c = np.sqrt(area)
     plt.scatter(point_x,point_y,s=10,c=point_c)
+    plt.xlim(-0.0015,0.0015)
+    plt.ylim(-0.0015,0.0015)
     plt.xlabel("x-axis (mm)")
     plt.ylabel("y-axis (mm)")
     plt.title("The spot diagram at " + self.name)

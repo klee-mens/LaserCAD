@@ -51,7 +51,7 @@ from basic_optics.tests import iris_test
 
 Radius = 1000 #Radius des großen Konkavspiegels
 Aperture_concav = 6 * 25.4
-h_StripeM = 5 #Höhe des Streifenspiegels
+h_StripeM = 10 #Höhe des Streifenspiegels
 # gamma = 33.4906043205826 /180 *np.pi # Seperationswinkel zwischen einfallenden und Mittelpunktsstrahl; Alpha = Gamma + Beta
 gamma = 7.475916410316995 /180 *np.pi #AOI = 36.5
 grat_const = 1/450 # Gitterkonstante in 1/mm
@@ -59,7 +59,7 @@ seperation = 100 # Differenz zwischen Gratingposition und Radius
 lam_mid = 2400e-9 * 1e3 # Zentralwellenlänge in mm
 delta_lamda = 250e-9*1e3 # Bandbreite in mm
 number_of_rays = 30
-safety_to_StripeM = 7.5 #Abstand der eingehenden Strahlen zum Concav Spiegel in mm, Distance of incoming beams to Concav mirror in mm
+safety_to_StripeM = 5 #Abstand der eingehenden Strahlen zum Concav Spiegel in mm, Distance of incoming beams to Concav mirror in mm
 periscope_distance = 10
 c0 = 299792458*1000 #mm/s
 
@@ -134,10 +134,10 @@ Concav.aperture = Aperture_concav
 Concav.normal = (-1,0,0)
 
 StripeM = Curved_Mirror(radius= -Radius/2, name="Stripe_Mirror")
-StripeM.pos = (Radius/2-0.06, 0, 0)
+StripeM.pos = (Radius/2-0.059, 0, 0)
 #Cosmetics
 StripeM.aperture=75
-StripeM.draw_dict["height"]=10
+StripeM.draw_dict["height"]=h_StripeM
 StripeM.draw_dict["thickness"]=25
 StripeM.draw_dict["model_type"]="Stripe"
 
@@ -236,7 +236,7 @@ ip = Intersection_plane(dia=100)
 # ip.pos = p_grat - vec*800 + (0,0,periscope_distance)
 ip.pos = p1
 # ip.normal = vec
-ip.normal= (-1,0,0)
+ip.normal= (1,0,0)
 
 Stretcher = Composition(name="Strecker", pos=pos0, normal=vec)
 opt_ax = Ray(pos=pos0, normal=vec)
@@ -295,6 +295,9 @@ Stretcher.draw_elements()
 # else:
 #   for x in container:
 #     Stretcher._beams_part.append(x)
+"""
+Calculate the pathlength, phase shift and GVD
+"""
 Stretcher.draw_beams()
 pathlength = {}
 for ii in range(Stretcher._beams[0]._ray_count):
@@ -339,11 +342,11 @@ plt.xlabel("angular frequency (1/s)")
 plt.figure()
 fai2 = [ii*10E30 for ii in fai2]
 plt.plot(omega,fai2)
-plt.ylabel("GDD (fs^2)")
+plt.ylabel("GVD (fs^2)")
 plt.xlabel("angular frequency (1/s)")
 fai2 = [para[0]*ii**5+para[1]*ii**4+para[2]*ii**3+para[3]*ii**2+para[4]*ii+para[5] for ii in omega]
 plt.figure()
-plt.scatter(omega,fai,s=10)
+plt.scatter(omega,fai,s=5)
 plt.plot(omega,fai2)
 plt.axhline(0, color = 'black', linewidth = 1)
 plt.ylabel("φ(ω) (1/s)")
@@ -351,5 +354,4 @@ plt.xlabel("angular frequency (1/s)")
 # print(Stretcher._beams[-1].get_all_rays())
 plt.show()
 if freecad_da:
-
   setview()

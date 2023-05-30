@@ -12,7 +12,7 @@ from basic_optics.freecad_models import freecad_da
 NAME0="unnamed"
 POS0 = np.array((0,0,80)) #Strahlhöhe 80 mm
 NORM0 = np.array((1,0,0)) #Strahl startet in x-Richtung
-TOLERANCE = 1e-8 #Wert ab dem zwei Größen (meist Winkel) als gleich angenommen werden
+TOLERANCE = 1e-9 #Wert ab dem zwei Größen (meist Winkel) als gleich angenommen werden
 
 
 
