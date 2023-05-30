@@ -194,7 +194,7 @@ lightsource.draw_dict['model'] = "ray_group"
 # nfm1 = - ray0.normal
 # pfm1 = Grat.pos + 900 * nfm1 + (0,0,h_StripeM/2 + safety_to_StripeM + periscope_distance)
 nfm1 = - ray0.normal
-pfm1 = Grat.pos + 800 * nfm1 + (0,0,-h_StripeM/2 - safety_to_StripeM)
+pfm1 = Grat.pos + 870 * nfm1 + (0,0,-h_StripeM/2 - safety_to_StripeM)
 # subperis = Periscope(length=8, theta=-90, dist1=0, dist2=0)
 # subperis.pos = pfm1
 # subperis.normal = nfm1
@@ -220,7 +220,7 @@ pure_cosmetic.normal = (flip_mirror1.normal + flip_mirror2.normal ) / 2
 pure_cosmetic.aperture = periscope_distance
 
 M1=Mirror()
-M1.pos = p_grat - vec*750 + (0,0,periscope_distance)
+M1.pos = p_grat - vec*840 + (0,0,periscope_distance)
 p0 = p_grat + (0,0,periscope_distance)
 p1 = M1.pos - (0,0,50)
 M1.set_normal_with_2_points(p0, p1)
@@ -316,8 +316,8 @@ fai2 = [20*para[0]*ii**3+12*para[1]*ii**2+6*para[2]*ii+2*para[3] for ii in omega
 delay_mid = path[int(len(path)/2)]/c0
 delay = [(pa/c0-delay_mid)*1E9 for pa in path]
 plt.close("all")
-ip.spot_diagram(Stretcher._beams[-2])
-plt.figure(3)
+ip.spot_diagram(Stretcher._beams[-2],aberration_analysis=True)
+plt.figure()
 ax1=plt.subplot(1,2,1)
 plt.plot(ray_lam,path)
 plt.ylabel("pathlength (mm)")
@@ -330,19 +330,19 @@ plt.ylabel("delay (ns)")
 plt.xlabel("wavelength (mm)")
 plt.title("Delay at different wavelength")
 plt.axhline(0, color = 'black', linewidth = 1)
-plt.figure(4)
+plt.figure()
 
 plt.plot(omega,fai)
 plt.axhline(0, color = 'black', linewidth = 1)
 plt.ylabel("φ(ω) (1/s)")
 plt.xlabel("angular frequency (1/s)")
-plt.figure(5)
+plt.figure()
 fai2 = [ii*10E30 for ii in fai2]
 plt.plot(omega,fai2)
 plt.ylabel("GDD (fs^2)")
 plt.xlabel("angular frequency (1/s)")
 fai2 = [para[0]*ii**5+para[1]*ii**4+para[2]*ii**3+para[3]*ii**2+para[4]*ii+para[5] for ii in omega]
-plt.figure(6)
+plt.figure()
 plt.scatter(omega,fai,s=10)
 plt.plot(omega,fai2)
 plt.axhline(0, color = 'black', linewidth = 1)

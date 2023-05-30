@@ -40,7 +40,7 @@ class Intersection_plane(Opt_Element):
     return model_intersection_plane(**self.draw_dict)
   
   
-  def spot_diagram(self, beam):
+  def spot_diagram(self, beam, aberration_analysis=False):
     """
       Draw the Spot diagram at the intersection plane
 
@@ -92,33 +92,32 @@ class Intersection_plane(Opt_Element):
     ray_lam = [ray.wavelength for ray in rays]
     tilt_x = [np.arcsin(ray.normal[1]) for ray in rays]
     tilt_y = [np.arcsin(ray.normal[2]) for ray in rays]
-    plt.figure()
-    ax1=plt.subplot(2,2,1)
-    plt.plot(ray_lam, diff_x)
-    plt.ylabel("x-shift (mm)")
-    plt.xlabel("wavelength (mm)")
-    plt.title("The displacement in the x direction at " + self.name)
-    plt.axhline(0, color = 'black', linewidth = 1)
-    ax2=plt.subplot(2,2,2)
-    plt.plot(ray_lam, diff_y)
-    plt.ylabel("y-shift (mm)")
-    plt.xlabel("wavelength (mm)")
-    plt.title("The displacement in the y direction at " + self.name)
-    plt.axhline(0, color = 'black', linewidth = 1)
-    ax3=plt.subplot(2,2,3)
-    plt.plot(ray_lam, tilt_x)
-    plt.ylabel("x-tilt (rad)")
-    plt.xlabel("wavelength (mm)")
-    plt.title("The tilt in the x direction at " + self.name)
-    plt.axhline(0, color = 'black', linewidth = 1)
-    ax4=plt.subplot(2,2,4)
-    plt.plot(ray_lam, tilt_y)
-    plt.ylabel("y-tilt (rad)")
-    plt.xlabel("wavelength (mm)")
-    plt.title("The tilt in the y direction at " + self.name)
-    plt.axhline(0, color = 'black', linewidth = 1)
-    # plt.show()
-    
+    if aberration_analysis:
+      plt.figure()
+      ax1=plt.subplot(2,2,1)
+      plt.plot(ray_lam, diff_x)
+      plt.ylabel("x-shift (mm)")
+      plt.xlabel("wavelength (mm)")
+      plt.title("The displacement in the x direction at " + self.name)
+      plt.axhline(0, color = 'black', linewidth = 1)
+      ax2=plt.subplot(2,2,2)
+      plt.plot(ray_lam, diff_y)
+      plt.ylabel("y-shift (mm)")
+      plt.xlabel("wavelength (mm)")
+      plt.title("The displacement in the y direction at " + self.name)
+      plt.axhline(0, color = 'black', linewidth = 1)
+      ax3=plt.subplot(2,2,3)
+      plt.plot(ray_lam, tilt_x)
+      plt.ylabel("x-tilt (rad)")
+      plt.xlabel("wavelength (mm)")
+      plt.title("The tilt in the x direction at " + self.name)
+      plt.axhline(0, color = 'black', linewidth = 1)
+      ax4=plt.subplot(2,2,4)
+      plt.plot(ray_lam, tilt_y)
+      plt.ylabel("y-tilt (rad)")
+      plt.xlabel("wavelength (mm)")
+      plt.title("The tilt in the y direction at " + self.name)
+      plt.axhline(0, color = 'black', linewidth = 1)
     plt.figure()
     # area = (20 * np.random.rand(37))**2
     # c = np.sqrt(area)

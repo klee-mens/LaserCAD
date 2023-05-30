@@ -67,45 +67,13 @@ if freecad_da:
 # gb2.draw()
 # gb3.draw()
 # ==========================================================
-# Radius = 600 #Radius des großen Konkavspiegels
-# Aperture_concav = 100
-# h_StripeM = 10 #Höhe des Streifenspiegels
-# # gamma = 33.4906043205826 /180 *np.pi # Seperationswinkel zwischen einfallenden und Mittelpunktsstrahl; Alpha = Gamma + Beta
-# gamma = 36 /180 *np.pi
-# grat_const = 1/1480 # Gitterkonstante in 1/mm
-# seperation = 120 # Differenz zwischen Gratingposition und Radius
-# lam_mid = 1030e-9 * 1e3 # Zentralwellenlänge in mm
-# delta_lamda = 50e-9*1e3 # Bandbreite in mm
-# number_of_rays = 20
-# safety_to_StripeM = 5 #Abstand der eingehenden Strahlen zum Concav Spiegel in mm
-# periscope_distance = 10
-# ray0 = Ray(pos=[208.49408, 137.95006, 100.     ],normal=[-0.83397755, -0.55179838,  0.        ])
-# ray0 = Ray(pos=[0,0,0],normal=[1,1,0])
-# gb1 = Beam(radius=10, angle=0.1,wavelength=1030E-3,pos=(0,0,0))
-# gb1.normal = (-1,-1,0)
-# gb1.make_circular_distribution(ring_number=2)
-# ray1 = Ray(pos=(0,0,100))
-# ray1.length=600
-# Radius = 600
-
-# StripeM = Cylindrical_Mirror(radius = 600,pos=(0,0,100))
-# p0=p1=(-100,0,100)
-# StripeM.normal = (1,1,0)
-# StripeM.rotate((1,1,0),np.pi/2)
-# StripeM.aperture=75
-# StripeM.draw_dict["height"]=9
-# StripeM.draw_dict["thickness"]=25
-# StripeM.draw_dict["model_type"]="Stripe"
-
-# StripeM.draw()
-# StripeM.draw_mount()
 
 from basic_optics.tests import all_moduls_test
 # all_moduls_test()
 a = Mirror()
 a.aperture=25.4
 a.pos=(0,0,100)
-a.normal=(1,0,0)
+a.normal=(1,1,0)
 a.draw_dict["model_type"]= "65_polarizer"
 a.draw()
 # if freecad_da:

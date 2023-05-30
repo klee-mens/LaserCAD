@@ -916,11 +916,11 @@ def Wrong_stretcher_with_two_Cylindrical_Mirror():
   Stretcher.draw_rays()
 
 def simple_resonator_test():
-  res = Resonator()
+  res = LinearResonator()
   m0 = Mirror()
   le = Lens(f=250)
   m1 = Mirror()
-  res = Resonator()
+  res = LinearResonator()
   res.add_on_axis(m0)
   res.propagate(500)
   res.add_on_axis(le)
