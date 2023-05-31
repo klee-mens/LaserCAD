@@ -24,7 +24,7 @@ DEFALUT_MAX_ANGULAR_OFFSET = 10
 
 def lens_mount(mount_name="lens_mount", mount_type="MLH05_M",  
                  geom=None, only_info=False, drawing_post=True,
-                 base_exists=True, dia=25.4, **kwargs):
+                 base_exists=False, dia=25.4, **kwargs):
   """
     Build the lens mount, post, post holder and slotted bases of the lens
 

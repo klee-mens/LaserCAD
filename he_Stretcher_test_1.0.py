@@ -136,6 +136,8 @@ ray0.normal = vec
 ray0.pos = pos0
 ray0.wavelength = lam_mid
 
+Ring_number = 1
+Beam_radius = 3.5
 lightsource = Beam(radius=0, angle=0)
 wavels = np.linspace(lam_mid-delta_lamda/2, lam_mid+delta_lamda/2, number_of_rays)
 rays = []
@@ -148,10 +150,17 @@ for wavel in wavels:
   x = (wavel - lam_mid + delta_lamda/2) / delta_lamda
   
   rn.draw_dict["color"] = cmap( x )
-  rays.append(rn)
+  
+  rg = Beam(radius=Beam_radius, angle=0,wavelength=wavel)
+  rg.make_circular_distribution(ring_number=Ring_number)
+  for ray_number in range(0,rg._ray_count):
+    rn = rg.get_all_rays()[ray_number]
+    rn.draw_dict["color"] = cmap( x )
+    rays.append(rn)
+  # rays.append(rn)
 lightsource.override_rays(rays)
-Ring_number = 1
-Beam_radius = 3.5
+lightsource.draw_dict['model'] = "ray_group"
+
 newlightsource0 = Beam(radius=Beam_radius, angle=0,wavelength=lam_mid)
 newlightsource0.make_circular_distribution(ring_number=Ring_number)
 
@@ -167,7 +176,7 @@ newlightsource2.make_circular_distribution(ring_number=Ring_number)
 newlightsource4 = Beam(radius=Beam_radius, angle=0,wavelength=lam_mid-delta_lamda/4)
 newlightsource4.make_circular_distribution(ring_number=Ring_number)
   
-newlightsource = Beam(radius=0, angle=0)
+oldlightsource = Beam(radius=0, angle=0)
 r=Ray()
 r.wavelength=lam_mid
 r.draw_dict["color"] = cmap( 0.4 )
@@ -191,8 +200,22 @@ for wavel in range(0,newlightsource0._ray_count):
   # rn.draw_dict["color"] = cmap( 0.2 )
   # rays.append(rn)
   
+oldlightsource.override_rays(rays)
+oldlightsource.draw_dict['model'] = "ray_group"
+
+newlightsource = Beam(radius=0, angle=0)
+wavels = np.linspace(lam_mid-delta_lamda/2, lam_mid+delta_lamda/2, number_of_rays)
+rays = []
+cmap = plt.cm.gist_rainbow
+for wavel in wavels:
+  rn = Ray()
+  rn.wavelength = wavel
+  x = (wavel - lam_mid + delta_lamda/2) / delta_lamda
+  rn.draw_dict["color"] = cmap( x )
+  rays.append(rn)
 newlightsource.override_rays(rays)
 newlightsource.draw_dict['model'] = "ray_group"
+
 nfm1 = - ray0.normal
 pfm1 = Grat.pos + 600 * nfm1 + (0,0,h_StripeM/2 + safety_to_StripeM + periscope_distance)
 # subperis = Periscope(length=8, theta=-90, dist1=0, dist2=0)
@@ -357,10 +380,70 @@ Stretcher.compute_beams()
 #     Stretcher._beams_part.append(x)
 
 Stretcher.draw_beams()
-ip.spot_diagram(Stretcher._beams[-2])
+ip.spot_diagram(Stretcher._beams[-2],aberration_analysis=True)
 
 print(Stretcher._beams[-2].get_all_rays())
 
+# Stretcher1 = Composition(name="Strecker", pos=pos0, normal=vec)
+# opt_ax = Ray(pos=pos0, normal=vec)
+# opt_ax.wavelength = lam_mid
+# Stretcher1.redefine_optical_axis(opt_ax)
+
+# Stretcher1.set_light_source(newlightsource)
+# Stretcher1.add_fixed_elm(Grat)
+# Stretcher1.add_fixed_elm(Concav1)
+# Stretcher1.add_fixed_elm(StripeM)
+# Stretcher1.add_fixed_elm(Concav2)
+# Stretcher1.add_fixed_elm(flip_mirror2)
+# Stretcher1.add_fixed_elm(flip_mirror1)
+# Stretcher1.add_fixed_elm(Concav3)
+# Stretcher1.add_fixed_elm(Concav4)
+# # Stretcher1.add_fixed_elm(M1)
+# # Stretcher1.add_fixed_elm(Curved_Mirror1)
+# # # Stretcher1.add_fixed_elm(Concav1)
+# # # Stretcher1.add_fixed_elm(Concav2)
+# # Stretcher1.add_fixed_elm(M3)
+# # Stretcher1.add_fixed_elm(Curved_Mirror2)
+# Stretcher1.add_fixed_elm(ip)
+# # Stretcher1.add_fixed_elm(fixlens1)
+# # Stretcher1.add_fixed_elm(fixlens2)
+
+# Stretcher1.add_fixed_elm(pure_cosmetic)
+
+# # for item in subperis._elements:
+# #   Stretcher.add_fixed_elm(item)
+
+# # seq = [0,1,2,3,0,4,5,0,6,2,7,0,8,9,8,0,7,2,6,0,5,4,0,3,2,1,0,10,11,10]
+# # seq = [0,1,2,1,0, 3]
+
+# # seq = [0,1,2,3,0, 4, 5, 6, 2, 7, 0]
+
+# # from collections import deque
+
+# # seq = np.array([0,1,2,3,0,4,5,0,6,2,7,0,8,9,8,0,7,2,6,0,5,4,0,3,2,1,0,10,11,10])
+# seq = np.array([0,1,2,3,0,4,5,0,6,2,7,0])
+# roundtrip_sequence = list(seq)
+# # seq = np.array([0,1,2,12])
+# # Concav1.draw()
+# # Grat.draw()
+
+# # if freecad_da:
+# #   obj = model_table()
+
+# roundtrip=1
+# # seq = np.repeat(roundtrip_sequence, roundtrip)
+
+# # for n in range(roundtrip-1):
+# #   # print("step ", n, "of", roundtrip)
+# #   seq = np.append(seq,roundtrip_sequence)
+  
+# seq=np.append(seq, [8])
+
+# Stretcher1.set_sequence(seq)
+# Stretcher1.propagate(100)
+# Stretcher1.pos = (0,0,100)
+# Stretcher1.draw_beams()
+# ip.spot_diagram(Stretcher1._beams[-2])
 
 # results = all_moduls_test()
 

@@ -75,7 +75,7 @@ class Intersection_plane(Opt_Element):
       point_c.append(c)
       pos_diff = intersection_point - self.pos
       pos_diff1 = np.dot(pos_diff,np.cross((0,0,1),self.normal))
-      pos_diff2 = np.dot(pos_diff,(0,0,1))
+      pos_diff2 = np.dot(pos_diff,(0,0,-1))
       # print(pos_diff1,pos_diff2)
       # pos_diff[1] = pow(pos_diff1[0]**2+pos_diff1[1]**2+pos_diff1[2]**2,0.5)
       # pos_diff[2] = pow(pos_diff2[0]**2+pos_diff2[1]**2+pos_diff2[2]**2,0.5)
@@ -122,8 +122,8 @@ class Intersection_plane(Opt_Element):
     # area = (20 * np.random.rand(37))**2
     # c = np.sqrt(area)
     plt.scatter(point_x,point_y,s=10,c=point_c)
-    plt.xlim(-0.0015,0.0015)
-    plt.ylim(-0.0015,0.0015)
+    # plt.xlim(-0.0015,0.0015)
+    # plt.ylim(-0.0015,0.0015)
     plt.xlabel("x-axis (mm)")
     plt.ylabel("y-axis (mm)")
     plt.title("The spot diagram at " + self.name)

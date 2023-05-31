@@ -228,15 +228,16 @@ M1.set_normal_with_2_points(p0, p1)
 M2=Mirror()
 M2.pos = p1
 p0 = M1.pos
-p1 = M2.pos + (850,0,0)
+print(M2.pos)
+p1 = M2.pos + (932.85969667,0,0)
 M2.set_normal_with_2_points(p0, p1)
 M1.draw_dict["mount_type"]=M2.draw_dict["mount_type"]="dont_draw"
 
 ip = Intersection_plane(dia=100)
 # ip.pos = p_grat - vec*800 + (0,0,periscope_distance)
-ip.pos = p1
+ip.pos = (1000,p1[1],p1[2])
 # ip.normal = vec
-ip.normal= (1,0,0)
+ip.normal= (-1,0,0)
 
 Stretcher = Composition(name="Strecker", pos=pos0, normal=vec)
 opt_ax = Ray(pos=pos0, normal=vec)
