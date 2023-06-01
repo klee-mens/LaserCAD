@@ -19,7 +19,7 @@ inch = 25.4
 
 from basic_optics.freecad_models import clear_doc, setview, freecad_da, freecad_model_lens
 from basic_optics import Beam, Mirror, Opt_Element, Geom_Object, Curved_Mirror, Intersection_plane
-from basic_optics import Lens, Ray, Composition, Grating, Propagation,Cylindrical_Mirror
+from basic_optics import Lens, Ray, Composition, Grating,Cylindrical_Mirror
 from basic_optics.freecad_models import input_output_test
 # from basic_optics.tests import all_moduls_test
 from basic_optics.moduls import Make_Stretcher, Make_Telescope

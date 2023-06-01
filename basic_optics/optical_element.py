@@ -155,10 +155,10 @@ class Opt_Element(Geom_Object):
       ca = np.sum(ea * norm)
       cs = np.sum(es * norm)
       alpha = np.arctan(cr/ca)
-      vm = np.sqrt(cr**2 + ca**2)
-      parax1 = np.array((radius, alpha))
-      rad2, alpha2 = np.matmul(self._matrix, parax1)
-      pos2 = self.pos + er * rad2 #neue posiion
+      vm = np.sqrt(cr**2 + ca**2) #length of the raz.normal projected in the meridional plane
+      parax1 = np.array((radius, alpha)) #classic matrix optics
+      rad2, alpha2 = np.matmul(self._matrix, parax1) #classic matrix optics
+      pos2 = self.pos + er * rad2 #neue position
       norm2 = vm*np.cos(alpha2)*ea + vm*np.sin(alpha2)*er + cs*es # neue normale
       ray2.pos = pos2
       ray2.normal = norm2

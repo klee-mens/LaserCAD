@@ -19,9 +19,9 @@ from basic_optics import Mirror,Lens,Gaussian_Beam,Beam,Cylindrical_Mirror,Inter
 
 from basic_optics.freecad_models import clear_doc, setview, freecad_da, freecad_model_lens, model_table
 
-from basic_optics import Opt_Element, Geom_Object, Curved_Mirror,Thick_Lens
-from basic_optics import Ray, Composition, Grating, Propagation
-from basic_optics import Refractive_plane
+from basic_optics import Opt_Element, Geom_Object, Curved_Mirror
+from basic_optics import Ray, Composition, Grating
+# from basic_optics import Refractive_plane
 from basic_optics.freecad_models import add_to_composition
 
 # from basic_optics.mirror import curved_mirror_test
@@ -59,9 +59,9 @@ grat_const = 1/1480 # Gitterkonstante in 1/mm
 seperation = 50 # Differenz zwischen Gratingposition und Radius
 lam_mid = 1030e-9 * 1e3 # Zentralwellenlänge in mm
 delta_lamda = 60e-9*1e3 # Bandbreite in mm
-number_of_rays = 20
+number_of_rays = 100
 safety_to_StripeM = 5 #Abstand der eingehenden Strahlen zum Concav Spiegel in mm
-periscope_distance = 12
+periscope_distance = 10
 
 # abgeleitete Parameter
 v = lam_mid/grat_const
@@ -70,8 +70,8 @@ c = np.cos(gamma)
 a = v/2
 b = np.sqrt(a**2 - (v**2 - s**2)/(2*(1+c)))
 sinB = a - b
-# print("angle=",(gamma+np.arcsin(sinB))*180/np.pi)
-
+print("angle=",(gamma+np.arcsin(sinB))*180/np.pi)
+ 
 Concav1 = Cylindrical_Mirror(radius=Radius, name="Concav_Mirror")
 Concav1.pos = (0,0,-h_StripeM/2 - safety_to_StripeM)
 Concav1.aperture = Aperture_concav
@@ -382,7 +382,7 @@ Stretcher.compute_beams()
 Stretcher.draw_beams()
 ip.spot_diagram(Stretcher._beams[-2],aberration_analysis=True)
 
-print(Stretcher._beams[-2].get_all_rays())
+# print(Stretcher._beams[-2].get_all_rays())
 
 # Stretcher1 = Composition(name="Strecker", pos=pos0, normal=vec)
 # opt_ax = Ray(pos=pos0, normal=vec)

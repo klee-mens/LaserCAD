@@ -19,9 +19,9 @@ from basic_optics import Mirror,Lens,Gaussian_Beam,Beam,Cylindrical_Mirror,Inter
 
 from basic_optics.freecad_models import clear_doc, setview, freecad_da, freecad_model_lens, model_table
 
-from basic_optics import Opt_Element, Geom_Object, Curved_Mirror,Thick_Lens
-from basic_optics import Ray, Composition, Grating, Propagation
-from basic_optics import Refractive_plane
+from basic_optics import Opt_Element, Geom_Object, Curved_Mirror
+from basic_optics import Ray, Composition, Grating
+# from basic_optics import Refractive_plane
 from basic_optics.freecad_models import add_to_composition
 
 # from basic_optics.mirror import curved_mirror_test
@@ -134,7 +134,7 @@ Concav.aperture = Aperture_concav
 Concav.normal = (-1,0,0)
 
 StripeM = Curved_Mirror(radius= -Radius/2, name="Stripe_Mirror")
-StripeM.pos = (Radius/2-0.059, 0, 0)
+StripeM.pos = (Radius/2-0.06, 0, 0)
 #Cosmetics
 StripeM.aperture=75
 StripeM.draw_dict["height"]=h_StripeM
@@ -237,7 +237,7 @@ ip = Intersection_plane(dia=100)
 # ip.pos = p_grat - vec*800 + (0,0,periscope_distance)
 ip.pos = (1000,p1[1],p1[2])
 # ip.normal = vec
-ip.normal= (-1,0,0)
+ip.normal= (1,0,0)
 
 Stretcher = Composition(name="Strecker", pos=pos0, normal=vec)
 opt_ax = Ray(pos=pos0, normal=vec)

@@ -14,7 +14,6 @@ from copy import deepcopy
 import numpy as np
 
 
-
 class Beam(Geom_Object):
   """
   Base class for a group of rays (you don't say!)

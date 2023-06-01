@@ -46,7 +46,7 @@ class Grating(Opt_Element):
     
     sinA = np.sum( sagit * np.cross(r1, norm) )
     # print("sinA:", sinA)
-    sinB = order * ray.wavelength / self.grating_constant - sinA
+    sinB = order * ray.wavelength/ self.grating_constant - sinA
     ray2 = deepcopy(ray)
     ray2.name = "next_" + ray.name
     ray2.pos = pos

@@ -1016,7 +1016,7 @@ def load_mount_from_csv(mount_type = "default",model_type="lens"):
   """
   buf = []
   mount_in_database = False
-  aperture =height = price = xshift =0
+  aperture =height = price = xshift =place= offset=0
   offset = Vector(0,0,0)
   rotation = Rotation(0,0,0)
   with open(thisfolder+model_type+"mounts.csv") as csvfile: 
