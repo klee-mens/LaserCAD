@@ -32,8 +32,8 @@ if freecad_da:
 
 # inch = 25.4
 
-# # from basic_optics.tests import three_resonators_test
-# # res1,res2,res3 = three_resonators_test()
+from basic_optics.tests import three_resonators_test
+res1,res2,res3 = three_resonators_test()
 # # teles = Make_Telescope()
 # # teles.draw()
 
@@ -91,69 +91,70 @@ if freecad_da:
 # # from basic_optics.tests import three_resonators_test
 # # a=three_resonators_test()
 
-plt.close("all")
-M1 = Curved_Mirror(pos=(100,-200,100))
-M1.radius = 100
-ls = Beam(radius=5, angle=0)
-ls.make_square_distribution(10)
-ip = Intersection_plane(name="focal point")
-comp=Composition(pos=(0,-200,100))
-comp.set_light_source(ls)
-comp.propagate(100)
-comp.add_on_axis(M1)
-comp.propagate(50-0.1)
-comp.add_on_axis(ip)
-comp.propagate(50+0.1)
-comp.draw()
-ip.spot_diagram(comp._beams[-1])
+# plt.close("all")
+# M1 = Curved_Mirror(pos=(100,-200,100))
+# M1.radius = 100
+# ls = Beam(radius=5, angle=0)
+# ls.make_square_distribution(10)
+# ip = Intersection_plane(name="focal point")
+# comp=Composition(pos=(0,-200,100))
+# comp.set_light_source(ls)
+# comp.propagate(100)
+# comp.add_on_axis(M1)
+# comp.propagate(50-0.1)
+# comp.add_on_axis(ip)
+# comp.propagate(50+0.1)
+# comp.draw()
+# ip.spot_diagram(comp._beams[-1])
 
-M1= Cylindrical_Mirror(radius=100,height=20,pos=(100,200,100))
-M1.aperture = 25.4*2
-M1.rotate((1,0,0), -90/180*np.pi)
-M1.normal=(1,1,0)
-ip1 = Intersection_plane(name="focal point",pos=(100,200-50*np.sqrt(2),100),normal=(0,1,0))
-ls = Beam(radius=5, angle=0)
-ls.make_square_distribution(10)
-comp1=Composition(pos=(0,200,100))
-comp1.set_light_source(ls)
-comp1.add_fixed_elm(M1)
-comp1.add_fixed_elm(ip1)
-comp1.propagate(50)
-comp1.draw()
-ip1.spot_diagram(comp1._beams[-1])
+# M1= Cylindrical_Mirror(radius=100,height=20,pos=(100,200,100))
+# M1.aperture = 25.4*2
+# M1.rotate((1,0,0), -90/180*np.pi)
+# M1.normal=(1,1,0)
+# ip1 = Intersection_plane(name="focal point",pos=(100,200-50*np.sqrt(2),100),normal=(0,1,0))
+# ls = Beam(radius=5, angle=0)
+# ls.make_square_distribution(10)
+# comp1=Composition(pos=(0,200,100))
+# comp1.set_light_source(ls)
+# comp1.add_fixed_elm(M1)
+# comp1.add_fixed_elm(ip1)
+# comp1.propagate(50)
+# comp1.draw()
+# ip1.spot_diagram(comp1._beams[-1])
 
-f1=100
-f2=200
-d0=100
-lens1_aperture = 25.4
-lens2_aperture = 25.4*2
-ls = Beam(radius=5, angle=0)
-ls.make_square_distribution(10)
-l1 = Lens(f=f1)
-l1.aperture = lens1_aperture
-# p2 = Propagation(f1+f2)
-l2 = Lens(f=f2)
-l2.aperture = lens2_aperture
-amp = f2/f1
-d3 = f1*(1+amp)*amp - d0*amp*amp
-# p3 = Propagation(d3)
-ip1= Intersection_plane(name="focal point")
-ip2=Intersection_plane(name="end")
-teles = Composition()
-teles.set_light_source(ls)
-teles.propagate(d0)
-teles.add_on_axis(l1)
-teles.propagate(f1-0.09)
-teles.add_on_axis(ip1)
-teles.propagate(f2+0.09)
-teles.add_on_axis(l2)
-teles.propagate(d3)
-teles.add_on_axis(ip2)
-teles.propagate(5)
-teles.amplification = amp
-teles.draw()
-ip1.spot_diagram(teles._beams[-4])
-ip2.spot_diagram(teles._beams[-1])
+# f1=100
+# f2=200
+# d0=100
+# lens1_aperture = 25.4
+# lens2_aperture = 25.4*2
+# ls = Beam(radius=5, angle=0)
+# ls.make_square_distribution(10)
+# l1 = Lens(f=f1)
+# l1.aperture = lens1_aperture
+# # p2 = Propagation(f1+f2)
+# l2 = Lens(f=f2)
+# l2.aperture = lens2_aperture
+# amp = f2/f1
+# d3 = f1*(1+amp)*amp - d0*amp*amp
+# # p3 = Propagation(d3)
+# ip1= Intersection_plane(name="focal point")
+# ip2=Intersection_plane(name="end")
+# teles = Composition()
+# teles.set_light_source(ls)
+# teles.propagate(d0)
+# teles.add_on_axis(l1)
+# teles.propagate(f1-0.09)
+# teles.add_on_axis(ip1)
+# teles.propagate(f2+0.09)
+# teles.add_on_axis(l2)
+# teles.propagate(d3)
+# teles.add_on_axis(ip2)
+# teles.propagate(5)
+# teles.amplification = amp
+# teles.draw()
+# ip1.spot_diagram(teles._beams[-4])
+# ip2.spot_diagram(teles._beams[-1])
+
 
 # alpha = -8
 # beta = -0.1

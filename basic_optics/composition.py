@@ -155,6 +155,7 @@ class Composition(Opt_Element):
       self._matrix = np.matmul(M, self._matrix )
     # self._matrix = np.matmul(np.array([[1,self._last_prop], [0,1]]), self._matrix )
     self._matrix = np.matmul(np.array([[1,self._last_prop], [0,1]]), self._matrix ) #last propagation
+    
     return np.array(self._matrix)
 
   def get_sequence(self):

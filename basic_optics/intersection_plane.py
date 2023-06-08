@@ -90,8 +90,8 @@ class Intersection_plane(Opt_Element):
     diff_x = [x-point_x_middle for x in point_x]
     diff_y = [y-point_y_middle for y in point_y]
     ray_lam = [ray.wavelength for ray in rays]
-    tilt_x = [np.arcsin(ray.normal[1]) for ray in rays]
-    tilt_y = [np.arcsin(ray.normal[2]) for ray in rays]
+    tilt_x = [np.arcsin(ray.normal[1])-np.arcsin(ray_middle.normal[1]) for ray in rays]
+    tilt_y = [np.arcsin(ray.normal[2])-np.arcsin(ray_middle.normal[2]) for ray in rays]
     if aberration_analysis:
       plt.figure()
       ax1=plt.subplot(2,2,1)

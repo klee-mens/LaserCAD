@@ -71,15 +71,15 @@ if freecad_da:
 from basic_optics.tests import all_moduls_test
 # all_moduls_test()
 a = Mirror()
-a.aperture=25.4
-a.pos=(0,0,100)
-a.normal=(1,1,0)
+a.aperture=25.4/2
+# a.pos=(0,0,100)
+# a.normal=(1,1,0)
 a.draw_dict["model_type"]= "65_polarizer"
 a.draw()
 # if freecad_da:
 #   obj = model_lamuda_plane(geom=a.get_geom())
 
-a.draw_mount()
+# a.draw_mount()
 
 from basic_optics.moduls import Make_Periscope, Make_Telescope, Make_Amplifier_Typ_II_simple, Make_Stretcher, Make_White_Cell
 # a=Make_White_Cell(roundtrips4=8)

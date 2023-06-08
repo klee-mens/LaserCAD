@@ -21,7 +21,7 @@ if freecad_da:
   from math import pi
  
 DEFALUT_MAX_ANGULAR_OFFSET = 10
-
+price = 0
 def lens_mount(mount_name="lens_mount", mount_type="MLH05_M",  
                  geom=None, only_info=False, drawing_post=True,
                  base_exists=False, dia=25.4, **kwargs):
@@ -378,7 +378,7 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
   DOC.recompute()
   return part
 
-def model_lamuda_plane(name = "lamuda_plane",drawing_post=True,base_exists=False,geom = None):
+def model_lamda_plane(name = "lamuda_plane",drawing_post=True,base_exists=False,geom = None):
   """
   To build the model for lamuda plane
 
@@ -406,13 +406,13 @@ def model_lamuda_plane(name = "lamuda_plane",drawing_post=True,base_exists=False
   mesh =True
   if abs(NORMAL[2])<DEFALUT_MAX_ANGULAR_OFFSET/180*np.pi:
     NORMAL[2]=0
-  datei = thisfolder + "mount_meshes\\adjusted mirror mount\\lamuda_plane"
+  datei = thisfolder + "mount_meshes\\adjusted mirror mount\\lamda_plane"
   if mesh:
     datei += ".stl"
-    obj = load_STL(datei, name = "lamuda_plane")
+    obj = load_STL(datei, name = "lamda_plane")
   else:
     datei += ".step"
-    obj = load_STEP(datei, name = "lamuda_plane")
+    obj = load_STEP(datei, name = "lamda_plane")
   offset=Vector(0,0,0)
   obj.Placement = Placement(offset, Rotation(0,0,0), Vector(0,0,0))
   update_geom_info(obj,geom,off0=offset)

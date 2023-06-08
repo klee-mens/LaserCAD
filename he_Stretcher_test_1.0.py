@@ -50,7 +50,7 @@ from basic_optics.tests import iris_test
 # from basic_optics.tests import Intersection_plane_spot_diagram_test
 
 Radius = 600 #Radius des großen Konkavspiegels
-Aperture_concav = 100
+Aperture_concav = 6*25.4
 h_StripeM = 10 #Höhe des Streifenspiegels
 # gamma = 33.4906043205826 /180 *np.pi # Seperationswinkel zwischen einfallenden und Mittelpunktsstrahl; Alpha = Gamma + Beta
 gamma = 18.8239722389914963 /180 *np.pi #AOI = 60
@@ -59,9 +59,9 @@ grat_const = 1/1480 # Gitterkonstante in 1/mm
 seperation = 50 # Differenz zwischen Gratingposition und Radius
 lam_mid = 1030e-9 * 1e3 # Zentralwellenlänge in mm
 delta_lamda = 60e-9*1e3 # Bandbreite in mm
-number_of_rays = 100
+number_of_rays = 15
 safety_to_StripeM = 5 #Abstand der eingehenden Strahlen zum Concav Spiegel in mm
-periscope_distance = 10
+periscope_distance = 12
 
 # abgeleitete Parameter
 v = lam_mid/grat_const
@@ -84,8 +84,8 @@ Concav1.set_normal_with_2_points(point0, point1)
 Concav1.draw_dict["mount_type"] = "dont_draw"
 
 StripeM = Cylindrical_Mirror(radius= -Radius/2, name="Stripe_Mirror")
+# StripeM.pos = (Radius/2-0.63, 0, 0)
 StripeM.pos = (Radius/2, 0, 0)
-#Cosmetics
 StripeM.aperture=50
 StripeM.draw_dict["height"]=9
 StripeM.draw_dict["thickness"]=25
@@ -129,7 +129,7 @@ Concav4.set_normal_with_2_points(point0, point1)
 Concav4.draw_dict["mount_type"] = "dont_draw"
 
 ray0 = Ray()
-p_grat = np.array((Radius-seperation, 0, -h_StripeM/2 - safety_to_StripeM))
+p_grat = np.array((Radius-seperation, 0, h_StripeM/2 + safety_to_StripeM + periscope_distance))
 vec = np.array((c, s, 0))
 pos0 = p_grat - 250 * vec
 ray0.normal = vec
@@ -148,19 +148,16 @@ for wavel in wavels:
   # rn.pos = pos0
   rn.wavelength = wavel
   x = (wavel - lam_mid + delta_lamda/2) / delta_lamda
-  
   rn.draw_dict["color"] = cmap( x )
-  
   rg = Beam(radius=Beam_radius, angle=0,wavelength=wavel)
   rg.make_circular_distribution(ring_number=Ring_number)
   for ray_number in range(0,rg._ray_count):
     rn = rg.get_all_rays()[ray_number]
     rn.draw_dict["color"] = cmap( x )
     rays.append(rn)
-  # rays.append(rn)
 lightsource.override_rays(rays)
 lightsource.draw_dict['model'] = "ray_group"
-
+"""
 newlightsource0 = Beam(radius=Beam_radius, angle=0,wavelength=lam_mid)
 newlightsource0.make_circular_distribution(ring_number=Ring_number)
 
@@ -175,7 +172,7 @@ newlightsource2.make_circular_distribution(ring_number=Ring_number)
 
 newlightsource4 = Beam(radius=Beam_radius, angle=0,wavelength=lam_mid-delta_lamda/4)
 newlightsource4.make_circular_distribution(ring_number=Ring_number)
-  
+
 oldlightsource = Beam(radius=0, angle=0)
 r=Ray()
 r.wavelength=lam_mid
@@ -202,7 +199,7 @@ for wavel in range(0,newlightsource0._ray_count):
   
 oldlightsource.override_rays(rays)
 oldlightsource.draw_dict['model'] = "ray_group"
-
+"""
 newlightsource = Beam(radius=0, angle=0)
 wavels = np.linspace(lam_mid-delta_lamda/2, lam_mid+delta_lamda/2, number_of_rays)
 rays = []
@@ -217,7 +214,7 @@ newlightsource.override_rays(rays)
 newlightsource.draw_dict['model'] = "ray_group"
 
 nfm1 = - ray0.normal
-pfm1 = Grat.pos + 600 * nfm1 + (0,0,h_StripeM/2 + safety_to_StripeM + periscope_distance)
+pfm1 = Grat.pos + 600 * nfm1 + (0,0,-h_StripeM/2 - safety_to_StripeM - periscope_distance)
 # subperis = Periscope(length=8, theta=-90, dist1=0, dist2=0)
 # subperis.pos = pfm1
 # subperis.normal = nfm1
@@ -230,7 +227,7 @@ flip_mirror1.draw = useless
 flip_mirror1.draw_dict["mount_type"] = "dont_draw"
 
 flip_mirror2 = Mirror()
-flip_mirror2.pos = pfm1 - np.array((0,0,periscope_distance))
+flip_mirror2.pos = pfm1 + np.array((0,0,periscope_distance))
 flip_mirror2.normal = nfm1 - np.array((0,0,1))
 flip_mirror2.draw = useless
 flip_mirror2.draw_dict["mount_type"] = "dont_draw"
@@ -296,7 +293,7 @@ Cavity2.normal = (1,0,0)
 
 ip = Intersection_plane(dia=100)
 ip.pos = p_grat - vec*1000 - (0,0,periscope_distance)
-ip.normal = vec
+ip.normal = -vec
 # ip.pos = StripeM.pos
 # ip.normal = StripeM.normal
 
@@ -311,13 +308,13 @@ Stretcher.redefine_optical_axis(opt_ax)
 
 Stretcher.set_light_source(newlightsource)
 Stretcher.add_fixed_elm(Grat)
-Stretcher.add_fixed_elm(Concav1)
-Stretcher.add_fixed_elm(StripeM)
-Stretcher.add_fixed_elm(Concav2)
-Stretcher.add_fixed_elm(flip_mirror2)
-Stretcher.add_fixed_elm(flip_mirror1)
 Stretcher.add_fixed_elm(Concav3)
+Stretcher.add_fixed_elm(StripeM)
 Stretcher.add_fixed_elm(Concav4)
+Stretcher.add_fixed_elm(flip_mirror1)
+Stretcher.add_fixed_elm(flip_mirror2)
+Stretcher.add_fixed_elm(Concav1)
+Stretcher.add_fixed_elm(Concav2)
 # Stretcher.add_fixed_elm(M1)
 # Stretcher.add_fixed_elm(Curved_Mirror1)
 # # Stretcher.add_fixed_elm(Concav1)
@@ -361,7 +358,7 @@ seq=np.append(seq, [8])
 
 Stretcher.set_sequence(seq)
 Stretcher.propagate(100)
-Stretcher.pos = (0,0,100)
+Stretcher.pos = (0,0,120)
 
 Stretcher.draw_mounts()
 Stretcher.draw_elements()
@@ -380,6 +377,7 @@ Stretcher.compute_beams()
 #     Stretcher._beams_part.append(x)
 
 Stretcher.draw_beams()
+plt.close("all")
 ip.spot_diagram(Stretcher._beams[-2],aberration_analysis=True)
 
 # print(Stretcher._beams[-2].get_all_rays())
