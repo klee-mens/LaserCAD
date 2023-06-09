@@ -378,7 +378,8 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
   DOC.recompute()
   return part
 
-def model_lamda_plane(name = "lamuda_plane",drawing_post=True,base_exists=False,geom = None):
+def model_lamda_plane(name = "lamuda_plane",drawing_post=True,base_exists=False,
+                      geom = None, **kwargs):
   """
   To build the model for lamuda plane
 
@@ -417,7 +418,7 @@ def model_lamda_plane(name = "lamuda_plane",drawing_post=True,base_exists=False,
   obj.Placement = Placement(offset, Rotation(0,0,0), Vector(0,0,0))
   update_geom_info(obj,geom,off0=offset)
   height = 33.35
-  xshift = 0
+  xshift = 3
   if  drawing_post:
     post_part=draw_post_part(name="post_part",base_exists=base_exists,
                              height=height,xshift=xshift, geom=geom)

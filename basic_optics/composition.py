@@ -109,7 +109,8 @@ class Composition(Opt_Element):
 
   def redefine_optical_axis(self, ray):
     # zB wenn die wavelength angepasst werden muss
-    print("sollte nur gemacht werden, wenn absolut noch kein Element eingefügt wurde")
+    # print("sollte nur gemacht werden, wenn absolut noch kein Element eingefügt wurde")
+    print("should only be done if absolutely no element has been inserted yet")
     #print("kann die ganze Geometrie hart abfucken")
     self.set_geom(ray.get_geom())
     oA = deepcopy(ray)

@@ -450,7 +450,7 @@ class Cylindrical_Mirror(Mirror):
 
 class Lam_Plane(Mirror):
   
-  def __init__(self,thickness=5, **kwargs):
+  def __init__(self,thickness=1, **kwargs):
     super().__init__(**kwargs)
     self.aperture = 25.4/2
     self.draw_dict["thickness"]=thickness
@@ -462,7 +462,6 @@ class Lam_Plane(Mirror):
 
   def draw_mount_fc(self):
     self.update_draw_dict()
-    self.draw_dict["dia"]=self.aperture
     helper_dict = dict(self.draw_dict)
     obj = model_lamda_plane(**helper_dict)
     return obj

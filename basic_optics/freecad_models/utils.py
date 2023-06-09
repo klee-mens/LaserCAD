@@ -191,6 +191,14 @@ def rotation_to_axis_angle(R):
     elif np.abs(phi - np.pi) < 1e-6:
         # In the case of a 180 degree rotation, the axis of rotation can be any vector
         # perpendicular to any of the columns of R that correspond to an eigenvalue of -1.
+        for i in range(3):
+          for j in range(3):
+            if abs(R[i][j])<1E-10:
+              R[i][j]=0
+            if abs(R[i][j]-1)<1E-10:
+              R[i][j]=1
+            if abs(R[i][j]+1)<1E-10:
+              R[i][j]=-1
         eigenvalues, eigenvectors = np.linalg.eig(R)
         eigenvectors = eigenvectors.T
         mask = np.isclose(eigenvalues, -1)
@@ -209,7 +217,7 @@ def rotation_to_axis_angle(R):
     else:
         vec = np.array([R[2, 1] - R[1, 2], R[0, 2] - R[2, 0], R[1, 0] - R[0, 1]])
         vec /= (2 * np.sin(phi))
-
+    
     return vec, phi
 
 def update_geom_info(obj, geom_info, off0=0):
@@ -225,6 +233,7 @@ def update_geom_info(obj, geom_info, off0=0):
       update_pos_norm(obj,pos_norm,off0=off0)
     else:
       rotvec, phi = rotation_to_axis_angle(axes)
+      # rotvec, phi = vec_phi_from_matrix(axes)
       rotvec = Vector(rotvec)
       phi *= 180/np.pi
       place0 = obj.Placement
