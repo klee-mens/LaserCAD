@@ -15,7 +15,7 @@ ind = pfad.rfind("/")
 pfad = pfad[0:ind+1]
 sys.path.append(pfad)
 
-from basic_optics import Mirror,Lens,Gaussian_Beam,Beam,Cylindrical_Mirror,Intersection_plane
+from basic_optics import Mirror,Lens,Gaussian_Beam,Beam,Cylindrical_Mirror,Intersection_plane,Cylindrical_Mirror1
 
 from basic_optics.freecad_models import clear_doc, setview, freecad_da, freecad_model_lens, model_table
 
@@ -85,7 +85,7 @@ Concav1.draw_dict["mount_type"] = "dont_draw"
 
 StripeM = Cylindrical_Mirror(radius= -Radius/2, name="Stripe_Mirror")
 # StripeM.pos = (Radius/2-0.63, 0, 0)
-StripeM.pos = (Radius/2, 0, 0)
+StripeM.pos = (Radius/2-0.37, 0, 0)
 StripeM.aperture=50
 StripeM.draw_dict["height"]=9
 StripeM.draw_dict["thickness"]=25

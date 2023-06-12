@@ -466,7 +466,25 @@ class Lam_Plane(Mirror):
     obj = model_lamda_plane(**helper_dict)
     return obj
   
-  
+class Cylindrical_Mirror1(Cylindrical_Mirror):
+  @property
+  def radius(self):
+    return self.__radius
+  @radius.setter
+  def radius(self, x):
+    """
+    This part is incorrect. Since I don't know the matrix of Cylindrical_Mirror 
+    Parameters
+    ----------
+    x : TYPE
+      DESCRIPTION.
+    """
+    self.__radius = x
+    if x == 0:
+      self._matrix[1,0] = 0
+    else:
+      self._matrix[1,0] = 0
+
 
 def tests():
   m = Mirror(phi=90, theta=0) # einfacher Flip Mirror

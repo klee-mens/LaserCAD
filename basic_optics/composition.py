@@ -150,8 +150,7 @@ class Composition(Opt_Element):
       M = self._elements[ind]._matrix
       self._matrix = np.matmul(np.array([[1,B], [0,1]]), self._matrix )
       # print("--")
-      # print(B)
-      # print(M)
+      # print(self._matrix)
       # print("--")
       self._matrix = np.matmul(M, self._matrix )
     # self._matrix = np.matmul(np.array([[1,self._last_prop], [0,1]]), self._matrix )
