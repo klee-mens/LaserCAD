@@ -71,24 +71,28 @@ TFP2 = Mirror()
 TFP2.pos = (-185-150-165,0,0)
 TFP2.normal = (-1,1,0)
 TFP2.draw_dict["model_type"] = "45_polarizer"
+M2 = Mirror(pos = (0,-30,0))
+M2.normal = (0,-1,0)
 
 ls=Beam(radius=1,angle=0)
 
-comp=Composition(pos = (0,-30,0),normal=(0,1,0))
-opt_ax = Ray(pos = (0,-30,0),normal=(0,1,0))
+comp=Composition(pos = (-550,0,0),normal=(1,0,0))
+opt_ax = Ray(pos = (-550,0,0),normal=(1,0,0))
 comp.redefine_optical_axis(opt_ax)
 comp.set_light_source(ls)
-comp.add_fixed_elm(TFP1)
+comp.add_fixed_elm(TFP1) #0
 comp.add_fixed_elm(lam_4)
 comp.add_fixed_elm(ip1)
 comp.add_fixed_elm(M1)
 comp.add_fixed_elm(CM1)
-comp.add_fixed_elm(CM2)
+comp.add_fixed_elm(CM2) #5
 comp.add_fixed_elm(lam_2)
 comp.add_fixed_elm(ip2)
 comp.add_fixed_elm(TFP2)
+comp.add_fixed_elm(M2)
 
-seq = np.array([0,1,2,3,4,5,4,3,2,1,6,7,8])
+# seq = np.array([0,1,2,3,4,5,4,3,2,1,6,7,8])
+seq = np.array([7,6,1,2,3,4,5,4,3,2,1,0,9,0,1,2,3,4,5,4,3,2,1,6,7,8])
 
 comp.set_sequence(seq)
 comp.propagate(50)

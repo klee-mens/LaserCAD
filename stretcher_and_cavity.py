@@ -19,7 +19,7 @@ from basic_optics import Mirror,Lens,Gaussian_Beam,Beam,Cylindrical_Mirror,Inter
 from basic_optics.freecad_models import clear_doc, setview, freecad_da, freecad_model_lens, model_table
 
 from basic_optics import Opt_Element, Geom_Object, Curved_Mirror
-from basic_optics import Ray, Composition, Grating
+from basic_optics import Ray, Composition, Grating, Lam_Plane
 # from basic_optics import Refractive_plane
 from basic_optics.freecad_models import add_to_composition
 
@@ -49,7 +49,7 @@ from basic_optics.tests import iris_test
 # from basic_optics.tests import Intersection_plane_spot_diagram_test
 
 Radius = 600 #Radius des großen Konkavspiegels
-Aperture_concav = 6*25.4
+Aperture_concav = 100
 h_StripeM = 10 #Höhe des Streifenspiegels
 # gamma = 33.4906043205826 /180 *np.pi # Seperationswinkel zwischen einfallenden und Mittelpunktsstrahl; Alpha = Gamma + Beta
 gamma = 18.8239722389914963 /180 *np.pi #AOI = 60
@@ -61,6 +61,7 @@ delta_lamda = 60e-9*1e3 # Bandbreite in mm
 number_of_rays = 15
 safety_to_StripeM = 5 #Abstand der eingehenden Strahlen zum Concav Spiegel in mm
 periscope_distance = 12
+c0 = 299792458*1000 #mm/s
 
 # abgeleitete Parameter
 v = lam_mid/grat_const
@@ -135,8 +136,8 @@ ray0.normal = vec
 ray0.pos = pos0
 ray0.wavelength = lam_mid
 
-Ring_number = 1
-Beam_radius = 3.5
+Ring_number = 2
+Beam_radius = 1
 lightsource = Beam(radius=0, angle=0)
 wavels = np.linspace(lam_mid-delta_lamda/2, lam_mid+delta_lamda/2, number_of_rays)
 rays = []
@@ -146,7 +147,7 @@ for wavel in wavels:
   # rn.normal = vec
   # rn.pos = pos0
   rn.wavelength = wavel
-  x = (wavel - lam_mid + delta_lamda/2) / delta_lamda
+  x = 1-(wavel - lam_mid + delta_lamda/2) / delta_lamda
   rn.draw_dict["color"] = cmap( x )
   rg = Beam(radius=Beam_radius, angle=0,wavelength=wavel)
   rg.make_circular_distribution(ring_number=Ring_number)
@@ -157,18 +158,29 @@ for wavel in wavels:
 lightsource.override_rays(rays)
 lightsource.draw_dict['model'] = "ray_group"
 
-newlightsource = Beam(radius=0, angle=0)
+centerlightsource = Beam(radius=0, angle=0)
 wavels = np.linspace(lam_mid-delta_lamda/2, lam_mid+delta_lamda/2, number_of_rays)
 rays = []
 cmap = plt.cm.gist_rainbow
 for wavel in wavels:
   rn = Ray()
   rn.wavelength = wavel
-  x = (wavel - lam_mid + delta_lamda/2) / delta_lamda
+  x = 1-(wavel - lam_mid + delta_lamda/2) / delta_lamda
   rn.draw_dict["color"] = cmap( x )
+  # print(wavel,x,cmap( x ))
   rays.append(rn)
-newlightsource.override_rays(rays)
-newlightsource.draw_dict['model'] = "ray_group"
+centerlightsource.override_rays(rays)
+centerlightsource.draw_dict['model'] = "ray_group"
+
+centerray = Beam(radius=0, angle=0)
+ray1 = Ray()
+ray1.wavelength = lam_mid - 11.15e-9*1e3
+# ray1.wavelength = lam_mid + delta_lamda/2
+ray1.draw_dict["color"] = cmap( 0.5 )
+rays = []
+rays.append(ray1)
+centerray.override_rays(rays)
+centerray.draw_dict['model'] = "ray_group"
 
 nfm1 = - ray0.normal
 pfm1 = Grat.pos + 600 * nfm1 + (0,0,h_StripeM/2 + safety_to_StripeM + periscope_distance)
@@ -210,7 +222,7 @@ p0 = Stretcher_M0.pos
 p1 = TFP2.pos - (100,0,0)
 point1 =p1
 TFP2.set_normal_with_2_points(p0, p1)
-
+Lam_Plane2=Lam_Plane(pos=TFP2.pos-(50,0,0))
 Stretcher_M2 = Mirror(pos = p_grat - vec*500 + (0,0,periscope_distance))
 p0 = Stretcher_M2.pos + (250,0,0)
 p1 = p_grat + (0,0,periscope_distance)
@@ -221,23 +233,25 @@ TFP1 = Mirror(pos=p0)
 TFP1.normal = (-1,1,0)
 TFP1.draw_dict["model_type"] = "45_polarizer"
 TFP1.draw_dict["thickness"] = 2
+Lam_Plane1=Lam_Plane(pos=TFP1.pos+(50,0,0))
 Matrix_fixing_Mirror1 = Cylindrical_Mirror(radius=Radius*3/2,pos=p0+(600,0,-10))
 Matrix_fixing_Mirror1.normal=(1,0,0)
 Matrix_fixing_Mirror1.rotate((1,0,0), np.pi/2)
 # Matrix_fixing_Mirror2 = Mirror(pos=Matrix_fixing_Mirror1.pos-(Radius*3/4-0.083,0,11))
-Matrix_fixing_Mirror2 = Mirror(pos=Matrix_fixing_Mirror1.pos-(Radius*3/4,0,10))
+Matrix_fixing_Mirror2 = Mirror(pos=Matrix_fixing_Mirror1.pos-(Radius*3/4,0,10.5))
 Matrix_fixing_Mirror2.normal=(-1,0,0)
-
+Matrix_fixing_Mirror2.draw_dict["mount_type"] = "KS1"
 cavity_mirror1 = Mirror()
 cavity_mirror1.pos = TFP1.pos -(0,50,0)
 p0 = TFP1.pos
-p1 = TFP2.pos+(100,0,0)
+p1 = TFP2.pos+(200,0,0)
 cavity_mirror1.set_normal_with_2_points(p0, p1)
 cavity_mirror2 = Mirror(pos=p1)
+cavity_mirror2.aperture = 25.4*2
 p0 = cavity_mirror1.pos
 p1 = TFP2.pos
 cavity_mirror2.set_normal_with_2_points(p0, p1)
-Cavity_mirror = Curved_Mirror(radius=6000)
+Cavity_mirror = Curved_Mirror(radius=8000)
 Cavity_mirror.aperture = 2*25.4
 Cavity_mirror.pos = point1
 Cavity_mirror.normal = (-1,0,0)
@@ -247,12 +261,14 @@ ip = Intersection_plane(dia=100)
 ip.pos = TFP2.pos
 ip.normal = (-1,0,0)
 
-Comp = Composition(name="Strecker", pos=point1, normal=(1,0,0))
-opt_ax = Ray(pos=point1, normal=(1,0,0))
+Comp = Composition(name="Strecker", pos=TFP2.pos - (0,100,0), normal=(0,1,0))
+opt_ax = Ray(pos=TFP2.pos - (0,100,0), normal=(0,1,0))
+# Comp = Composition(name="Strecker", pos=point1, normal=(1,0,0))
+# opt_ax = Ray(pos=point1, normal=(1,0,0))
 opt_ax.wavelength = lam_mid
 Comp.redefine_optical_axis(opt_ax)
 
-Comp.set_light_source(newlightsource)
+Comp.set_light_source(centerray)
 Comp.add_fixed_elm(TFP2)
 Comp.add_fixed_elm(Stretcher_M0)
 Comp.add_fixed_elm(Stretcher_M1)
@@ -276,14 +292,16 @@ Comp.add_fixed_elm(ip)
 
 
 Comp.add_fixed_elm(pure_cosmetic)
+Comp.add_fixed_elm(Lam_Plane1)
+Comp.add_fixed_elm(Lam_Plane2)
+seq = np.array([1,2,3,4,5,6,3,7,8,3,9,5,10,3,11,12,13,12,13,12,13,12,14,15,16,17])
+seq1 = np.array([0,1,2,3,4,5,6,3,7,8,3,9,5,10,3,11,12,13,12,13,12,13,12,14,15,16,17])
 
-seq = np.array([0,1,2,3,4,5,6,3,7,8,3,9,5,10,3,11,12,13,12,13,12,13,12,14,15,16,17])
-
-roundtrip_sequence = list(seq)
+roundtrip_sequence = list(seq1)
 # if freecad_da:
 #   obj = model_table()
 
-roundtrip=75
+roundtrip=1
 # seq = np.repeat(roundtrip_sequence, roundtrip)
 for n in range(roundtrip-1):
   # print("step ", n, "of", roundtrip)
@@ -298,9 +316,10 @@ Comp.pos = (0,0,100)
 Comp.draw_mounts()
 Comp.draw_elements()
 Comp.compute_beams()
+# plt.close("all")
 
 container = []
-for n in range(-29,1):
+for n in range(-28,1):
   beam = Comp._beams[n]
   beam.draw_dict["model"] = "ray_group"
   obj = beam.draw()
@@ -311,11 +330,60 @@ else:
   for x in container:
     Comp._beams_part.append(x)
 
-# plt.close("all")
-ip.spot_diagram(Comp._beams[-1],aberration_analysis=True)
+diff = []
+roundtrip_group = []
+for n in range(26,27*roundtrip,27):
+  beam = Comp._beams[n]
+  rayss=beam.get_all_rays()
+  for ray in rayss:
+    intersection_point =  ray.intersection(ip)
+  diff_new = intersection_point - ip.pos
+  diff_R = np.sqrt(diff_new[1]**2+diff_new[2]**2)
+  diff.append(diff_R)
+  roundtrip_group.append(n//27+1)
+plt.figure()
+plt.scatter(roundtrip_group,diff,s=10)
+plt.ylabel("diff_radius (mm)")
+plt.xlabel("roundtrip")
+plt.show()
 
-
-
+if Comp._lightsource == centerlightsource:
+  ip.spot_diagram(Comp._beams[-1],aberration_analysis=True)
+  pathlength = {}
+  for ii in range(Comp._beams[0]._ray_count):
+    wavelength = Comp._beams[0].get_all_rays()[ii].wavelength
+    pathlength[wavelength] = 0
+  for jj in range(len(Comp._beams)-1):
+    for ii in Comp._beams[jj].get_all_rays():
+      a=pathlength[ii.wavelength]
+      pathlength[ii.wavelength] = a +ii.length
+  ray_lam = [ray.wavelength for ray in Comp._beams[0].get_all_rays()]
+  path = [pathlength[ii] for ii in ray_lam]
+  path_diff = [ii-path[int(len(path)/2)] for ii in path]
+  fai = [path_diff[ii]/ray_lam[ii]*2*np.pi for ii in range(len(path))]
+  omega = [c0/ii*2*np.pi for ii in ray_lam]
+  para = np.polyfit(omega, fai, 5)
+  fai2 = [20*para[0]*ii**3+12*para[1]*ii**2+6*para[2]*ii+2*para[3] for ii in omega]
+  # fai2 = [para[0]*ii**5+para[1]*ii**4+para[2]*ii**3+para[3]*ii**2+para[4]*ii+para[5] for ii in omega]
+  delay_mid = path[int(len(path)/2)]/c0
+  delay = [(pa/c0-delay_mid)*1E9 for pa in path]
+  plt.figure()
+  ax1=plt.subplot(1,2,1)
+  plt.plot(ray_lam,path)
+  plt.ylabel("pathlength (mm)")
+  plt.xlabel("wavelength (mm)")
+  plt.title("Pathlength at different wavelength")
+  plt.axhline(path[int(len(path)/2)], color = 'black', linewidth = 1)
+  ax1=plt.subplot(1,2,2)
+  plt.plot(ray_lam,delay)
+  plt.ylabel("delay (ns)")
+  plt.xlabel("wavelength (mm)")
+  plt.title("Delay at different wavelength")
+  plt.axhline(0, color = 'black', linewidth = 1)
+  plt.show()
+  # plt.figure()
+# else:
+  # ip.spot_diagram(Comp._beams[-1],aberration_analysis=False)
 if freecad_da:
 
   setview()

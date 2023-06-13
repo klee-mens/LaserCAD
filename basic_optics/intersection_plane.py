@@ -57,6 +57,7 @@ class Intersection_plane(Opt_Element):
     point_x = []
     point_y = []
     point_c = []
+    ray_lam = []
     # if isinstance(beam, RayGroup) or isinstance(beam, Beam):
     if isinstance(beam, Beam):
       rays = beam.get_all_rays()
@@ -66,6 +67,7 @@ class Intersection_plane(Opt_Element):
     for point_i in rays:
       intersection_point = point_i.intersection(self)
       lamuda = point_i.wavelength
+      ray_lam.append(lamuda)
       if lamuda>=400e-6 and lamuda<=780e-6:
         c = cmap((lamuda-400e-6)/380e-6)
       elif 'color' in point_i.draw_dict:
@@ -89,7 +91,7 @@ class Intersection_plane(Opt_Element):
     point_y_middle = point_y[int(len(rays)/2)]
     diff_x = [x-point_x_middle for x in point_x]
     diff_y = [y-point_y_middle for y in point_y]
-    ray_lam = [ray.wavelength for ray in rays]
+    # ray_lam = [ray.wavelength for ray in rays]
     tilt_x = [np.arcsin(ray.normal[1])-np.arcsin(ray_middle.normal[1]) for ray in rays]
     tilt_y = [np.arcsin(ray.normal[2])-np.arcsin(ray_middle.normal[2]) for ray in rays]
     if aberration_analysis:
