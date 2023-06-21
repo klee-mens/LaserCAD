@@ -166,7 +166,7 @@ for wavel in wavels:
   lightsource.make_circular_distribution(ring_number=Ring_number)
   for ray_number in range(0,lightsource._ray_count):
     rn = lightsource.get_all_rays()[ray_number]
-    x = (wavel - lam_mid + delta_lamda/2) / delta_lamda
+    x = 1-(wavel - lam_mid + delta_lamda/2) / delta_lamda
     rn.draw_dict["color"] = cmap( x )
     rays.append(rn)
   beam_number+=1
@@ -185,7 +185,7 @@ for wavel in wavels:
   # rn.normal = vec
   # rn.pos = pos0
   rn.wavelength = wavel
-  x = (wavel - lam_mid + delta_lamda/2) / delta_lamda
+  x =1 - (wavel - lam_mid + delta_lamda/2) / delta_lamda
   rn.draw_dict["color"] = cmap( x )
   rays.append(rn)
 lightsource.override_rays(rays)

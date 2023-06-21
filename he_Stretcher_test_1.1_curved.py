@@ -79,8 +79,8 @@ Concav.aperture = Aperture_concav
 Concav.normal = (-1,0,0)
 
 StripeM = Curved_Mirror(radius= -Radius/2, name="Stripe_Mirror")
-# StripeM.pos = (Radius/2-0.155, 0, 0)
-StripeM.pos = (Radius/2, 0, 0)
+StripeM.pos = (Radius/2-0.125, 0, 0)
+# StripeM.pos = (Radius/2, 0, 0)
 StripeM.aperture=75
 StripeM.draw_dict["height"]=h_StripeM
 StripeM.draw_dict["thickness"]=25
@@ -183,7 +183,7 @@ ip.pos = p_grat - vec*1000 - (0,0,periscope_distance)
 ip.normal = -vec
 
 Stretcher = Composition(name="Strecker", pos=pos0, normal=vec)
-opt_ax = Ray(pos=pos0+(0,0.1,1), normal=vec+(0,0.1,0.1))
+opt_ax = Ray(pos=pos0, normal=vec)
 opt_ax.wavelength = lam_mid
 Stretcher.redefine_optical_axis(opt_ax)
 

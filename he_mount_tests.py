@@ -17,7 +17,7 @@ from basic_optics import Mirror,Lens,Gaussian_Beam,Beam,Cylindrical_Mirror,Ray,C
 from basic_optics.freecad_models import clear_doc, setview, freecad_da
 from basic_optics.freecad_models.freecad_model_mounts import mirror_mount
 from basic_optics.freecad_models.freecad_model_beam import model_Gaussian_beam
-from basic_optics.freecad_models.freecad_model_mounts import model_table,model_lamuda_plane
+from basic_optics.freecad_models.freecad_model_mounts import model_table,model_lamda_plane
 from basic_optics import Iris, Composition
 
 import numpy as np
@@ -70,15 +70,14 @@ if freecad_da:
 
 from basic_optics.tests import all_moduls_test
 # all_moduls_test()
-a = Mirror()
-a.aperture=25.4/2
-# a.pos=(0,0,100)
-# a.normal=(1,1,0)
-a.draw_dict["model_type"]= "65_polarizer"
-a.draw()
-# if freecad_da:
-#   obj = model_lamuda_plane(geom=a.get_geom())
-
+pure_cosmetic = Mirror(name="RoofTop_Mirror")
+pure_cosmetic.draw_dict["model_type"]="Rooftop"
+pure_cosmetic.draw_dict["mount_type"] = "rooftop_mirror_mount"
+pure_cosmetic.pos = (0,0,100)
+pure_cosmetic.normal = (-1,0.,0)
+pure_cosmetic.aperture = 10
+pure_cosmetic.draw()
+pure_cosmetic.draw_mount()
 # a.draw_mount()
 
 from basic_optics.moduls import Make_Periscope, Make_Telescope, Make_Amplifier_Typ_II_simple, Make_Stretcher, Make_White_Cell

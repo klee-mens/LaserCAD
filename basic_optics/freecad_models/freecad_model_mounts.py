@@ -236,7 +236,7 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
     dia =25.4*2
   if mount_type =="rooftop_mirror_mount":
     additional_mount = draw_rooftop_mount(xxshift=dia/2,geom=geom)
-    xshift=57+dia/2-12.2
+    xshift=57+dia/2-17.2
     zshift=-5
     shiftvec=Vector(xshift,0,zshift)
     default=Vector(1,0,0)
@@ -245,6 +245,8 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
     angle = default.getAngle(normal)
     if angle!=0:
       vec = default.cross(normal)
+      if np.linalg.norm(vec)==0:
+        vec = (0,0,1) 
       vec = vec/np.linalg.norm(vec)
       shiftvec = rotate_vector(shiftvec=shiftvec,vec=vec,angle=angle)
       default_axis = rotate_vector(shiftvec=default_axis,vec=vec,angle=angle)

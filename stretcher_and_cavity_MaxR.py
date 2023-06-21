@@ -47,7 +47,7 @@ from basic_optics.tests import iris_test
 # iris_test()
 
 # from basic_optics.tests import Intersection_plane_spot_diagram_test
-def cavity_and_stretcher(C_radius = 8000,vertical_mat=True,want_to_draw=True,roundtrip=1,centerlamda=1030e-9*1e3,s_shift=0,ls="CR"):
+def cavity_and_stretcher(C_radius = 8000,vertical_mat=True,want_to_draw=True,roundtrip=1,centerlamda=1030e-9*1e3,s_shift=0):
   Radius = 600 #Radius des großen Konkavspiegels
   Aperture_concav = 100
   h_StripeM = 10 #Höhe des Streifenspiegels
@@ -279,13 +279,8 @@ def cavity_and_stretcher(C_radius = 8000,vertical_mat=True,want_to_draw=True,rou
   # opt_ax = Ray(pos=TFP2.pos - (0,100,0), normal=(0,1,0))
   opt_ax.wavelength = lam_mid
   Comp.redefine_optical_axis(opt_ax)
-  if ls == "CB":
-    Comp.set_light_source(centerlightsource)
-  elif ls == "CR":
-    Comp.set_light_source(centerray)
-  else:
-    Comp.set_light_source(lightsource)
-  # Comp.set_light_source(centerray)
+  
+  Comp.set_light_source(centerray)
   Comp.add_fixed_elm(TFP2)
   Comp.add_fixed_elm(Stretcher_M0)
   Comp.add_fixed_elm(Stretcher_M1)
@@ -352,6 +347,7 @@ def cavity_and_stretcher(C_radius = 8000,vertical_mat=True,want_to_draw=True,rou
     diff = []
     roundtrip_group = []
     max_diff = 0
+    max_roundtrip = 0
     for n in range(26,27*roundtrip,27):
       beam = Comp._beams[n]
       rayss=beam.get_all_rays()
@@ -359,17 +355,18 @@ def cavity_and_stretcher(C_radius = 8000,vertical_mat=True,want_to_draw=True,rou
         intersection_point =  ray.intersection(ip)
       diff_new = intersection_point - ip.pos
       diff_R = np.sqrt(diff_new[1]**2+diff_new[2]**2)
-      diff.append(diff_R)
-      roundtrip_group.append(n//27+1)
       if max_diff<diff_R: #and n>roundtrip/2:
         max_diff = diff_R
-    print(max_diff)
-    plt.figure()
+        roundtrip_mark=n//27+1
+    return max_diff
+    #   diff.append(diff_R)
+    #   roundtrip_group.append(n//27+1)
+    # plt.figure()
     # plt.plot(roundtrip_group,diff)
-    plt.scatter(roundtrip_group,diff,s=10)
-    plt.ylabel("diff_radius (mm)")
-    plt.xlabel("roundtrip")
-    plt.show()
+    # # plt.scatter(roundtrip_group,diff,s=10)
+    # plt.ylabel("diff_radius (mm)")
+    # plt.xlabel("roundtrip")
+    # plt.show()
   elif Comp._lightsource == centerlightsource:
     ip.spot_diagram(Comp._beams[-1],aberration_analysis=True)
     pathlength = {}
@@ -437,15 +434,35 @@ def Cal_matrix(Comp=Composition()):
   # Comp._matrix = np.matmul(np.array([[1,Comp._last_prop], [0,1]]), Comp._matrix ) #last propagation
   return np.array(Comp._matrix)
 
-roundtrip=1
-centerlamda = 1000E-6
+roundtrip=1000
+# centerlamda = 1030E-6
 C_radius = 8000
 # StripeM_shift = 0.1185
-StripeM_shift = 0.148
-# CB=CenterBeam CR=CenterRay 
-ls="CB"
-cavity_and_stretcher(C_radius=C_radius,vertical_mat=True,want_to_draw=True,roundtrip=roundtrip,centerlamda=centerlamda,s_shift=StripeM_shift,ls=ls)
-# StripeM_shift = 0
+StripeM_shift = 0
+lam_mid = 1030E-6
+delta_lamda = 60E-6
+number_of_rays = 5
+wavels = np.linspace(lam_mid-delta_lamda/2, lam_mid+delta_lamda/2, number_of_rays)
+wavelength_group = []
+max_R = []
+for wavel in wavels:
+  max_R.append(cavity_and_stretcher(want_to_draw=False,roundtrip = roundtrip,centerlamda=wavel,s_shift=StripeM_shift))
+legend = []
+plt.figure()
+for i in range(130,150,2):
+  max_R_S = []
+  for wavel in wavels:
+    # max_R_S.append(cavity_and_stretcher(want_to_draw=False,roundtrip = roundtrip,centerlamda=wavel,s_shift=0.1185))
+    max_R_S.append(cavity_and_stretcher(want_to_draw=False,roundtrip = roundtrip,centerlamda=wavel,s_shift=i/1000))
+  plt.plot(wavels*1E6,max_R_S)
+  legend.append('maximun deviation with small movement '+str(i/1000))
+legend.append('maximun deviation')
+plt.plot(wavels*1E6,max_R)
+# plt.plot(wavels*1E6,max_R_S)
+plt.legend(legend,loc = 'upper right')
+plt.xlabel("wavelength (nm)")
+plt.ylabel("maximun deviation(mm)")
+plt.show()
 # mat1 = cavity_and_stretcher(C_radius=C_radius,vertical_mat=True,want_to_draw=False,roundtrip=roundtrip,centerlamda=centerlamda,s_shift=StripeM_shift)
 # if roundtrip<10:
 #   mat2 = cavity_and_stretcher(C_radius=C_radius,vertical_mat=False,roundtrip=roundtrip,centerlamda=centerlamda,s_shift=StripeM_shift)
