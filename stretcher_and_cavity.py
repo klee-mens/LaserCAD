@@ -437,14 +437,15 @@ def Cal_matrix(Comp=Composition()):
   # Comp._matrix = np.matmul(np.array([[1,Comp._last_prop], [0,1]]), Comp._matrix ) #last propagation
   return np.array(Comp._matrix)
 
-roundtrip=1
-centerlamda = 1000E-6
+roundtrip=1000
+centerlamda = 1027E-6
 C_radius = 8000
-# StripeM_shift = 0.1185
-StripeM_shift = 0.148
+#StripeM_shift = 0.1185
+StripeM_shift = 0.14
+#StripeM_shift = 0
 # CB=CenterBeam CR=CenterRay 
-ls="CB"
-cavity_and_stretcher(C_radius=C_radius,vertical_mat=True,want_to_draw=True,roundtrip=roundtrip,centerlamda=centerlamda,s_shift=StripeM_shift,ls=ls)
+ls="CR"
+cavity_and_stretcher(C_radius=C_radius,vertical_mat=True,want_to_draw=False,roundtrip=roundtrip,centerlamda=centerlamda,s_shift=StripeM_shift,ls=ls)
 # StripeM_shift = 0
 # mat1 = cavity_and_stretcher(C_radius=C_radius,vertical_mat=True,want_to_draw=False,roundtrip=roundtrip,centerlamda=centerlamda,s_shift=StripeM_shift)
 # if roundtrip<10:

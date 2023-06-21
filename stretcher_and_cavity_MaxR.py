@@ -322,7 +322,7 @@ def cavity_and_stretcher(C_radius = 8000,vertical_mat=True,want_to_draw=True,rou
   seq=np.append(seq, [18])
   
   Comp.set_sequence(seq)
-  Comp.propagate(100)
+  # Comp.propagate(1)
   Comp.pos = (0,0,100)
   if want_to_draw:
     Comp.draw_mounts()  
@@ -358,7 +358,10 @@ def cavity_and_stretcher(C_radius = 8000,vertical_mat=True,want_to_draw=True,rou
       if max_diff<diff_R: #and n>roundtrip/2:
         max_diff = diff_R
         roundtrip_mark=n//27+1
-    return max_diff
+    
+    # return max_diff
+    return Cal_matrix(Comp=Comp)
+    # return Comp.matrix()
     #   diff.append(diff_R)
     #   roundtrip_group.append(n//27+1)
     # plt.figure()
@@ -434,35 +437,113 @@ def Cal_matrix(Comp=Composition()):
   # Comp._matrix = np.matmul(np.array([[1,Comp._last_prop], [0,1]]), Comp._matrix ) #last propagation
   return np.array(Comp._matrix)
 
-roundtrip=1000
+roundtrip=2
 # centerlamda = 1030E-6
 C_radius = 8000
 # StripeM_shift = 0.1185
 StripeM_shift = 0
 lam_mid = 1030E-6
 delta_lamda = 60E-6
-number_of_rays = 5
+number_of_rays = 15
 wavels = np.linspace(lam_mid-delta_lamda/2, lam_mid+delta_lamda/2, number_of_rays)
-wavelength_group = []
-max_R = []
+matA = []
+matB = []
+matC = []
+matD = []
 for wavel in wavels:
-  max_R.append(cavity_and_stretcher(want_to_draw=False,roundtrip = roundtrip,centerlamda=wavel,s_shift=StripeM_shift))
-legend = []
+   a =(cavity_and_stretcher(vertical_mat=True,want_to_draw=False,roundtrip = roundtrip,centerlamda=wavel,s_shift=StripeM_shift))
+   matA.append(a[0][0])
+   matB.append(a[0][1])
+   matC.append(a[1][0])
+   matD.append(a[1][1])
+
 plt.figure()
-for i in range(130,150,2):
-  max_R_S = []
-  for wavel in wavels:
-    # max_R_S.append(cavity_and_stretcher(want_to_draw=False,roundtrip = roundtrip,centerlamda=wavel,s_shift=0.1185))
-    max_R_S.append(cavity_and_stretcher(want_to_draw=False,roundtrip = roundtrip,centerlamda=wavel,s_shift=i/1000))
-  plt.plot(wavels*1E6,max_R_S)
-  legend.append('maximun deviation with small movement '+str(i/1000))
-legend.append('maximun deviation')
-plt.plot(wavels*1E6,max_R)
-# plt.plot(wavels*1E6,max_R_S)
-plt.legend(legend,loc = 'upper right')
+a1 =plt.subplot(2,2,1)
+plt.plot(wavels*1E6,matA)
+wavelength_group = []
 plt.xlabel("wavelength (nm)")
-plt.ylabel("maximun deviation(mm)")
+plt.ylabel("matrix number A")
+a1 =plt.subplot(2,2,2)
+plt.plot(wavels*1E6,matB)
+wavelength_group = []
+plt.xlabel("wavelength (nm)")
+plt.ylabel("matrix number B")
+a1 =plt.subplot(2,2,3)
+plt.plot(wavels*1E6,matC)
+wavelength_group = []
+plt.xlabel("wavelength (nm)")
+plt.ylabel("matrix number C")
+a1 =plt.subplot(2,2,4)
+plt.plot(wavels*1E6,matD)
+wavelength_group = []
+plt.xlabel("wavelength (nm)")
+plt.ylabel("matrix number D")
+matA = []
+matB = []
+matC = []
+matD = []
+for wavel in wavels:
+   a =(cavity_and_stretcher(vertical_mat=False,want_to_draw=False,roundtrip = roundtrip,centerlamda=wavel,s_shift=StripeM_shift))
+   matA.append(a[0][0])
+   matB.append(a[0][1])
+   matC.append(a[1][0])
+   matD.append(a[1][1])
+plt.figure()
+a1 =plt.subplot(2,2,1)
+plt.plot(wavels*1E6,matA)
+wavelength_group = []
+plt.xlabel("wavelength (nm)")
+plt.ylabel("matrix number A")
+a1 =plt.subplot(2,2,2)
+plt.plot(wavels*1E6,matB)
+wavelength_group = []
+plt.xlabel("wavelength (nm)")
+plt.ylabel("matrix number B")
+a1 =plt.subplot(2,2,3)
+plt.plot(wavels*1E6,matC)
+wavelength_group = []
+plt.xlabel("wavelength (nm)")
+plt.ylabel("matrix number C")
+a1 =plt.subplot(2,2,4)
+plt.plot(wavels*1E6,matD)
+wavelength_group = []
+plt.xlabel("wavelength (nm)")
+plt.ylabel("matrix number D")
 plt.show()
+# max_R = []
+# for wavel in wavels:
+#   max_R.append(cavity_and_stretcher(want_to_draw=False,roundtrip = roundtrip,centerlamda=wavel,s_shift=StripeM_shift))
+# legend = []
+# plt.figure()
+# for i in range(130,150,2):
+#   max_R_S = []
+#   for wavel in wavels:
+#     # max_R_S.append(cavity_and_stretcher(want_to_draw=False,roundtrip = roundtrip,centerlamda=wavel,s_shift=0.1185))
+#     max_R_S.append(cavity_and_stretcher(want_to_draw=False,roundtrip = roundtrip,centerlamda=wavel,s_shift=i/1000))
+#   plt.plot(wavels*1E6,max_R_S)
+#   legend.append('maximun deviation with small movement '+str(i/1000))
+# max_R_S = []
+# for wavel in wavels:
+#   # max_R_S.append(cavity_and_stretcher(want_to_draw=False,roundtrip = roundtrip,centerlamda=wavel,s_shift=0.1185))
+#   max_R_S.append(cavity_and_stretcher(want_to_draw=False,roundtrip = roundtrip,centerlamda=wavel,s_shift=0.1185))
+# plt.plot(wavels*1E6,max_R_S)
+# legend.append('maximun deviation with small movement '+str(0.1185)+ 'mm')
+
+# max_R_S = []
+# for wavel in wavels:
+#   # max_R_S.append(cavity_and_stretcher(want_to_draw=False,roundtrip = roundtrip,centerlamda=wavel,s_shift=0.1185))
+#   max_R_S.append(cavity_and_stretcher(want_to_draw=False,roundtrip = roundtrip,centerlamda=wavel,s_shift=0.14))
+# plt.plot(wavels*1E6,max_R_S)
+# legend.append('maximun deviation with small movement '+str(0.14)+ 'mm')
+
+# legend.append('maximun deviation')
+# plt.plot(wavels*1E6,max_R)
+# # plt.plot(wavels*1E6,max_R_S)
+# plt.legend(legend,loc = 'upper right')
+# plt.xlabel("wavelength (nm)")
+# plt.ylabel("maximun deviation(mm)")
+# plt.show()
+
 # mat1 = cavity_and_stretcher(C_radius=C_radius,vertical_mat=True,want_to_draw=False,roundtrip=roundtrip,centerlamda=centerlamda,s_shift=StripeM_shift)
 # if roundtrip<10:
 #   mat2 = cavity_and_stretcher(C_radius=C_radius,vertical_mat=False,roundtrip=roundtrip,centerlamda=centerlamda,s_shift=StripeM_shift)
