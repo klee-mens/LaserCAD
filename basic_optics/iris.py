@@ -6,7 +6,7 @@ Created on Mon Mar 27 12:12:58 2023
 Iris cannot be used if the beam distribution is cone
 """
 
-from .freecad_models import model_iris_diaphragms,iris_post
+from freecad_models import model_iris_diaphragms,iris_post
 from .optical_element import Opt_Element
 from copy import deepcopy
 

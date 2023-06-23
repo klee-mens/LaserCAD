@@ -12,8 +12,8 @@ from .ray import Ray
 from .beam import Beam #,RayGroup
 import matplotlib.pyplot as plt
 # from .freecad_models import model_intersection_plane,iris_post
-from .freecad_models import model_intersection_plane
-from .freecad_models.freecad_model_ray import RAY_COLOR
+from freecad_models import model_intersection_plane
+from freecad_models.freecad_model_ray import RAY_COLOR
 
 
 class Intersection_plane(Opt_Element):

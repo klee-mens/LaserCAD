@@ -6,7 +6,8 @@ Created on Thu Aug 18 10:46:05 2022
 """
 
 import numpy as np
-from basic_optics.freecad_models import freecad_da
+# from basic_optics.freecad_models import freecad_da
+from freecad_models import freecad_da
 
 
 NAME0="unnamed"

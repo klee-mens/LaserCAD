@@ -10,8 +10,8 @@ import numpy as np
 from copy import deepcopy
 from .optical_element import Opt_Element
 from .ray import Ray
-from .freecad_models import model_grating
-from .freecad_models import grating_mount
+from freecad_models import model_grating
+from freecad_models import grating_mount
 
 class Grating(Opt_Element):
   """

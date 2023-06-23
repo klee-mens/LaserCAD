@@ -1025,7 +1025,6 @@ def Lib_Resonator_test():
   # res1,res2,res3 = three_resonators_test()
   # teles = Make_Telescope()
   # teles.draw()
-
   # if freecad_da:
   #   input_output_test()
   # stretcher = Make_Stretcher()
