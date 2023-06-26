@@ -10,8 +10,8 @@ import numpy as np
 from copy import deepcopy
 from .optical_element import Opt_Element
 from .ray import Ray
-from .freecad_models import model_grating
-from .freecad_models import grating_mount
+from freecad_models import model_grating
+from freecad_models import grating_mount
 
 class Grating(Opt_Element):
   """
@@ -22,7 +22,7 @@ class Grating(Opt_Element):
     self.grating_constant = grat_const
     #Konstanten zum zeichnen, für die sonstige Berechnung unwichtig
     self.width = 50
-    self.height = 50
+    self.height = 60
     self.thickness = 8
     self.blazeangel = 32
     # self.draw_dict['width'] = self.width
@@ -46,7 +46,7 @@ class Grating(Opt_Element):
     
     sinA = np.sum( sagit * np.cross(r1, norm) )
     # print("sinA:", sinA)
-    sinB = order * ray.wavelength / self.grating_constant - sinA
+    sinB = order * ray.wavelength/ self.grating_constant - sinA
     ray2 = deepcopy(ray)
     ray2.name = "next_" + ray.name
     ray2.pos = pos

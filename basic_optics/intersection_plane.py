@@ -12,8 +12,8 @@ from .ray import Ray
 from .beam import Beam #,RayGroup
 import matplotlib.pyplot as plt
 # from .freecad_models import model_intersection_plane,iris_post
-from .freecad_models import model_intersection_plane
-from .freecad_models.freecad_model_ray import RAY_COLOR
+from freecad_models import model_intersection_plane
+from freecad_models.freecad_model_ray import RAY_COLOR
 
 
 class Intersection_plane(Opt_Element):
@@ -40,7 +40,7 @@ class Intersection_plane(Opt_Element):
     return model_intersection_plane(**self.draw_dict)
   
   
-  def spot_diagram(self, beam):
+  def spot_diagram(self, beam, aberration_analysis=False):
     """
       Draw the Spot diagram at the intersection plane
 
@@ -57,6 +57,7 @@ class Intersection_plane(Opt_Element):
     point_x = []
     point_y = []
     point_c = []
+    ray_lam = []
     # if isinstance(beam, RayGroup) or isinstance(beam, Beam):
     if isinstance(beam, Beam):
       rays = beam.get_all_rays()
@@ -66,6 +67,7 @@ class Intersection_plane(Opt_Element):
     for point_i in rays:
       intersection_point = point_i.intersection(self)
       lamuda = point_i.wavelength
+      ray_lam.append(lamuda)
       if lamuda>=400e-6 and lamuda<=780e-6:
         c = cmap((lamuda-400e-6)/380e-6)
       elif 'color' in point_i.draw_dict:
@@ -75,7 +77,7 @@ class Intersection_plane(Opt_Element):
       point_c.append(c)
       pos_diff = intersection_point - self.pos
       pos_diff1 = np.dot(pos_diff,np.cross((0,0,1),self.normal))
-      pos_diff2 = np.dot(pos_diff,(0,0,-1))
+      pos_diff2 = np.dot(pos_diff,(0,0,1))
       # print(pos_diff1,pos_diff2)
       # pos_diff[1] = pow(pos_diff1[0]**2+pos_diff1[1]**2+pos_diff1[2]**2,0.5)
       # pos_diff[2] = pow(pos_diff2[0]**2+pos_diff2[1]**2+pos_diff2[2]**2,0.5)
@@ -84,14 +86,52 @@ class Intersection_plane(Opt_Element):
         self.aperture=self.draw_dict["dia"]
       point_x.append(pos_diff1)
       point_y.append(pos_diff2)
+    ray_middle = rays[int(len(rays)/2)]
+    point_x_middle = point_x[int(len(rays)/2)]
+    point_y_middle = point_y[int(len(rays)/2)]
+    diff_x = [x-point_x_middle for x in point_x]
+    diff_y = [y-point_y_middle for y in point_y]
+    # ray_lam = [ray.wavelength for ray in rays]
+    tilt_x = [np.arcsin(ray.normal[1])-np.arcsin(ray_middle.normal[1]) for ray in rays]
+    tilt_y = [np.arcsin(ray.normal[2])-np.arcsin(ray_middle.normal[2]) for ray in rays]
+    if aberration_analysis:
+      plt.figure()
+      ax1=plt.subplot(2,2,1)
+      plt.plot(ray_lam, diff_x)
+      plt.ylabel("x-shift (mm)")
+      plt.xlabel("wavelength (mm)")
+      plt.title("The displacement in the x direction at " + self.name)
+      plt.axhline(0, color = 'black', linewidth = 1)
+      ax2=plt.subplot(2,2,2)
+      plt.plot(ray_lam, diff_y)
+      plt.ylabel("y-shift (mm)")
+      plt.xlabel("wavelength (mm)")
+      plt.title("The displacement in the y direction at " + self.name)
+      plt.axhline(0, color = 'black', linewidth = 1)
+      ax3=plt.subplot(2,2,3)
+      plt.plot(ray_lam, tilt_x)
+      plt.ylabel("x-tilt (rad)")
+      plt.xlabel("wavelength (mm)")
+      plt.title("The tilt in the x direction at " + self.name)
+      plt.axhline(0, color = 'black', linewidth = 1)
+      ax4=plt.subplot(2,2,4)
+      plt.plot(ray_lam, tilt_y)
+      plt.ylabel("y-tilt (rad)")
+      plt.xlabel("wavelength (mm)")
+      plt.title("The tilt in the y direction at " + self.name)
+      plt.axhline(0, color = 'black', linewidth = 1)
     plt.figure()
     # area = (20 * np.random.rand(37))**2
     # c = np.sqrt(area)
-    plt.scatter(point_x,point_y,c=point_c)
-    plt.xlabel("x-axis, or y-axis if you follow the 3D coordinate (mm)")
-    plt.ylabel("y-axis, or z-axis if you follow the 3D coordinate (mm)")
+    plt.scatter(point_x,point_y,s=10,c=point_c)
+    # plt.xlim(-0.0015,0.0015)
+    # plt.ylim(-0.0015,0.0015)
+    plt.xlabel("x-axis (mm)")
+    plt.ylabel("y-axis (mm)")
     plt.title("The spot diagram at " + self.name)
-    plt.axis('equal')
+    # plt.axhline(0, color = 'black', linewidth = 1,linestyle = '--')
+    # plt.axvline(0, color = 'black', linewidth = 1,linestyle = '--')
+    # plt.axis('equal')
     plt.show()
   
   def __repr__(self):

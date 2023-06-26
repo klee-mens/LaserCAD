@@ -6,13 +6,14 @@ Created on Mon Aug 22 12:34:44 2022
 """
 
 from basic_optics import Ray, Geom_Object, TOLERANCE
-from basic_optics.freecad_models import model_beam,model_ray_1D,model_Gaussian_beam
-from basic_optics.freecad_models.freecad_model_composition import initialize_composition_old, add_to_composition
+# import Ray, Geom_Object, TOLERANCE
+# from basic_optics.freecad_models import model_beam,model_ray_1D,model_Gaussian_beam
+from freecad_models import model_beam,model_ray_1D,model_Gaussian_beam
+from freecad_models.freecad_model_composition import initialize_composition_old, add_to_composition
 # from .optical_element import Opt_Element
 
 from copy import deepcopy
 import numpy as np
-
 
 
 class Beam(Geom_Object):

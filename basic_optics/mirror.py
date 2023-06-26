@@ -9,7 +9,7 @@ Created on Wed Aug 24 16:28:07 2022
 # from basic_optics.freecad_models import model_mirror, freecad_da
 from .geom_object import TOLERANCE, NORM0
 from .ray import Ray
-from .freecad_models import model_mirror, mirror_mount, model_stripe_mirror
+from freecad_models import model_mirror, mirror_mount, model_stripe_mirror, model_lamda_plane
 from .optical_element import Opt_Element
 import numpy as np
 from copy import deepcopy
@@ -23,7 +23,7 @@ except:
   freecad_da = False
   DOC = None
 
-from .freecad_models.utils import freecad_da, update_geom_info, get_DOC, rotate, thisfolder
+from freecad_models.utils import freecad_da, update_geom_info, get_DOC, rotate, thisfolder
 
 class Mirror(Opt_Element):
   """
@@ -398,11 +398,6 @@ class Cylindrical_Mirror(Mirror):
     ray_direction = np.array(ray_direction)
     cylinder_center = np.array(cylinder_center)
     cylinder_axis = np.array(cylinder_axis)
-    
-    # oc = ray_origin - cylinder_center
-    # a = np.dot(ray_direction, ray_direction) - np.dot(ray_direction, cylinder_axis)**2
-    # b = 2 * (np.dot(ray_direction, oc) - np.dot(ray_direction, cylinder_axis) * np.dot(oc, cylinder_axis))
-    # c = np.dot(oc, oc) - np.dot(oc, cylinder_axis)**2 - self.radius**2
     middle_vec = cylinder_center + cylinder_axis * (np.dot(ray_origin,cylinder_axis) - np.dot(cylinder_center,cylinder_axis))-ray_origin
     middle_vec2 = cylinder_axis*(np.dot(ray_direction,cylinder_axis))-ray_direction
     a = np.dot(middle_vec2 , middle_vec2)
@@ -451,59 +446,44 @@ class Cylindrical_Mirror(Mirror):
     dist = p0-ray.pos
     ray.length=np.sqrt(dist[0]**2+dist[1]**2+dist[2]**2)
     return ray2
+
+class Lam_Plane(Mirror):
   
+  def __init__(self,thickness=1, **kwargs):
+    super().__init__(**kwargs)
+    self.aperture = 25.4/2
+    self.draw_dict["thickness"]=thickness
+
+  def next_ray(self, ray):
+    ray2=deepcopy(ray)
+    ray2.pos = ray.intersect_with(self)
+    return ray2
+
+  def draw_mount_fc(self):
+    self.update_draw_dict()
+    helper_dict = dict(self.draw_dict)
+    obj = model_lamda_plane(**helper_dict)
+    return obj
   
-  
-# def intersect_ray_cylinder(ray_origin, ray_direction, cylinder_center, cylinder_axis, cylinder_radius):
-#     """
-#     Calculates the intersection point of a ray with a cylindrical surface.
-#     (Chat_GPT version, too many restrictions be be used)
-#     Args:
-#         ray_origin (numpy array): The origin of the ray, as a 3D vector.
-#         ray_direction (numpy array): The direction of the ray, as a 3D vector.
-#         cylinder_center (numpy array): The center of the cylinder, as a 3D vector.
-#         cylinder_axis (numpy array): The axis of the cylinder, as a 3D vector.
-#         cylinder_radius (float): The radius of the cylinder.
+class Cylindrical_Mirror1(Cylindrical_Mirror):
+  @property
+  def radius(self):
+    return self.__radius
+  @radius.setter
+  def radius(self, x):
+    """
+    This part is incorrect. Since I don't know the matrix of Cylindrical_Mirror 
+    Parameters
+    ----------
+    x : TYPE
+      DESCRIPTION.
+    """
+    self.__radius = x
+    if x == 0:
+      self._matrix[1,0] = 0
+    else:
+      self._matrix[1,0] = 0
 
-#     Returns:
-#         numpy array or None: The intersection point, as a 3D vector, or None if no intersection.
-#     """
-
-#     # Convert inputs to numpy arrays for vector operations
-#     ray_origin = np.array(ray_origin)
-#     ray_direction = np.array(ray_direction)
-#     cylinder_center = np.array(cylinder_center)
-#     cylinder_axis = np.array(cylinder_axis)
-
-#     # Compute auxiliary vectors
-#     oc = ray_origin - cylinder_center
-#     a = np.dot(ray_direction, ray_direction) - np.dot(ray_direction, cylinder_axis)**2
-#     b = 2 * (np.dot(ray_direction, oc) - np.dot(ray_direction, cylinder_axis) * np.dot(oc, cylinder_axis))
-#     c = np.dot(oc, oc) - np.dot(oc, cylinder_axis)**2 - cylinder_radius**2
-    
-    
-#     # Compute discriminant
-#     discriminant = b**2 - 4 * a * c
-
-#     # If discriminant is negative, no intersection
-#     if discriminant < 0:
-#         return None
-
-#     # Compute t parameter (parameter along the ray direction)
-#     t1 = (-b + np.sqrt(discriminant)) / (2 * a)
-#     t2 = (-b - np.sqrt(discriminant)) / (2 * a)
-
-#     # Check if intersection is within ray segment
-#     if t1 < 0 and t2 < 0:
-#         return None
-
-#     # Select smallest positive t
-#     t = min(t1, t2) if t1 >= 0 and t2 >= 0 else max(t1, t2)
-
-#     # Compute intersection point
-#     intersection_point = ray_origin + t * ray_direction
-
-#     return intersection_point
 
 def tests():
   m = Mirror(phi=90, theta=0) # einfacher Flip Mirror

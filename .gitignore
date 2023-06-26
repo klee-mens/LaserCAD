@@ -1,5 +1,7 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
+work/
+FreeCAD/
 *.py[cod]
 *$py.class
 
@@ -130,3 +132,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# FreeCAD stuff
+.FCStd
+.FCStd1
