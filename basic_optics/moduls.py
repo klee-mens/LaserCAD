@@ -5,7 +5,6 @@ Created on Tue Aug 30 17:03:16 2022
 """
 from .lens import Lens
 from .mirror import Mirror, Curved_Mirror, mirror_mount,Cylindrical_Mirror
-from .barriers import Barriers
 # from .propagation import Propagation
 # from .composition import Composition_old
 from .composition import Composition
@@ -65,21 +64,6 @@ def Make_Telescope(name="Teleskop", f1=100.0, f2=100.0, d0=100.0, lens1_aperture
 
 
   return teles
-
-def diaphragms_test(name="diaphragms_test"):
-  dia = Barriers(dia=50)
-  # dia.pos = (150,0,0)
-  ls = Beam(angle=0)
-  # dia.spot_diagram(ls)
-  dia1 = Composition(name=name)
-  # dia1.pos = (0,0,0)
-  # dia1.normal = (1,0,0)
-  dia1.set_light_source(ls)
-  dia1.propagate(150)
-  # dia1.add_fixed_elm(dia)
-  dia1.add_on_axis(dia)
-  return dia1
-
 
 
 def Make_Periscope(name="Periskop", length=150, theta = 90, dist1=75, dist2=75):
@@ -653,7 +637,7 @@ def Make_Stretcher():
   Radius = 1000 #Radius des großen Konkavspiegels
   Aperture_concav = 6 * inch
   h_StripeM = 10 #Höhe des Streifenspiegels
-  gamma = 21 /180 *np.pi # Seperationswinkel zwischen einfallenden und Mittelpunktsstrahl; Alpha = Gamma + Beta
+  gamma = 5 /180 *np.pi # Seperationswinkel zwischen einfallenden und Mittelpunktsstrahl; Alpha = Gamma + Beta
   grat_const = 1/450 # Gitterkonstante in 1/mm
   seperation = 100 # Differenz zwischen Gratingposition und Radius
   lam_mid = 2400e-9 * 1e3 # Zentralwellenlänge in mm

@@ -7,7 +7,7 @@ Created on Wed Apr 12 09:05:00 2023
 
 # from basic_optics import Opt_Element
 # from .basic_optics.freecad_models import model_lens
-from .freecad_models import model_lens, lens_mount
+from freecad_models import model_lens, lens_mount
 from .optical_element import Opt_Element
 from .geom_object import TOLERANCE
 

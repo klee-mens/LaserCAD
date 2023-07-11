@@ -10,8 +10,8 @@ import numpy as np
 from copy import deepcopy
 from .optical_element import Opt_Element
 from .ray import Ray
-from .freecad_models import model_grating
-from .freecad_models import grating_mount
+from ..freecad_models import model_grating
+from ..freecad_models import grating_mount
 
 class Grating(Opt_Element):
   """
@@ -22,7 +22,7 @@ class Grating(Opt_Element):
     self.grating_constant = grat_const
     #Konstanten zum zeichnen, für die sonstige Berechnung unwichtig
     self.width = 50
-    self.height = 50
+    self.height = 60
     self.thickness = 8
     self.blazeangel = 32
     # self.draw_dict['width'] = self.width
@@ -43,14 +43,22 @@ class Grating(Opt_Element):
     r1 = ray.normal #einfallender Strahl
     pos = ray.intersect_with(self)
     # print("Gitternorm, Raynorm", norm, r1)
+    sagital_component = np.sum(r1 * sagit)
     
     sinA = np.sum( sagit * np.cross(r1, norm) )
     # print("sinA:", sinA)
-    sinB = order * ray.wavelength / self.grating_constant - sinA
+    sinB = order * ray.wavelength/ self.grating_constant - sinA
+    # print(sinB)
     ray2 = deepcopy(ray)
     ray2.name = "next_" + ray.name
     ray2.pos = pos
-    ray2.normal = np.sqrt(1-sinB**2) * norm + sinB * gratAx
+    ray2.normal = (np.sqrt(1-sinB**2) * norm + sinB * gratAx) * np.sqrt(1-sagital_component**2) + sagital_component * sagit
+    
+    k_prop = np.cross(norm,np.cross(ray.normal*2*np.pi/ray.wavelength,norm))
+    k_p_out = k_prop+order*2*np.pi/self.grating_constant*gratAx
+    k_r = k_p_out + abs(np.sqrt((2*np.pi/ray.wavelength)**2-np.linalg.norm(k_p_out)**2))*norm
+    n_r = k_r/np.linalg.norm(k_r)
+    ray2.normal = n_r
     return ray2
   
   def draw_fc(self):

@@ -13,7 +13,7 @@ from .beam import Beam
 from .optical_element import Opt_Element
 from .lens import Lens
 from .mirror import Mirror, Curved_Mirror
-from .freecad_models import warning, freecad_da, initialize_composition, add_to_composition, make_to_ray_part,model_table
+from ..freecad_models import warning, freecad_da, initialize_composition, add_to_composition, make_to_ray_part,model_table
 import numpy as np
 from copy import deepcopy
 
@@ -109,7 +109,8 @@ class Composition(Opt_Element):
 
   def redefine_optical_axis(self, ray):
     # zB wenn die wavelength angepasst werden muss
-    print("sollte nur gemacht werden, wenn absolut noch kein Element eingefügt wurde")
+    # print("sollte nur gemacht werden, wenn absolut noch kein Element eingefügt wurde")
+    print("should only be done if absolutely no element has been inserted yet")
     #print("kann die ganze Geometrie hart abfucken")
     self.set_geom(ray.get_geom())
     oA = deepcopy(ray)
@@ -149,12 +150,12 @@ class Composition(Opt_Element):
       M = self._elements[ind]._matrix
       self._matrix = np.matmul(np.array([[1,B], [0,1]]), self._matrix )
       # print("--")
-      # print(B)
-      # print(M)
+      # print(self._matrix)
       # print("--")
       self._matrix = np.matmul(M, self._matrix )
     # self._matrix = np.matmul(np.array([[1,self._last_prop], [0,1]]), self._matrix )
     self._matrix = np.matmul(np.array([[1,self._last_prop], [0,1]]), self._matrix ) #last propagation
+    
     return np.array(self._matrix)
 
   def get_sequence(self):
@@ -428,9 +429,3 @@ def next_name(name, prefix=""):
 #   comp.add_only_elm(lens1)
 #   comp.add_only_elm(lens2)
 #   return comp
-
-
-
-
-
-
