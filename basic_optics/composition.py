@@ -13,7 +13,7 @@ from .beam import Beam
 from .optical_element import Opt_Element
 from .lens import Lens
 from .mirror import Mirror, Curved_Mirror
-from freecad_models import warning, freecad_da, initialize_composition, add_to_composition, make_to_ray_part,model_table
+from ..freecad_models import warning, freecad_da, initialize_composition, add_to_composition, make_to_ray_part,model_table
 import numpy as np
 from copy import deepcopy
 

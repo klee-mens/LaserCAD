@@ -22,6 +22,10 @@ if freecad_da:
  
 DEFALUT_MAX_ANGULAR_OFFSET = 10
 price = 0
+DEFALUT_MOUNT_COLOR = (0.75,0.75,0.75)
+DEFALUT_POST_COLOR = (0.8,0.8,0.8)
+DEFALUT_HOLDER_COLOR = (0.2,0.2,0.2)
+
 def lens_mount(mount_name="lens_mount", mount_type="MLH05_M",  
                  geom=None, only_info=False, drawing_post=True,
                  base_exists=False, dia=25.4, **kwargs):
@@ -123,13 +127,13 @@ def lens_mount(mount_name="lens_mount", mount_type="MLH05_M",
     datei = thisfolder + "mount_meshes\\lens\\" + mount_type
   if mesh:
     datei += ".stl"
-    obj = load_STL(datei,mount_name)
+    obj = load_STL(datei,mount_name,color = DEFALUT_MOUNT_COLOR)
   else:
     datei += ".step"
     obj = load_STEP(datei,mount_name)
   if not mount_adjusted:
     obj.Placement = place
-  update_geom_info(obj, geom, off0=offset)
+  update_geom_info(obj, [geom[0],NORMAL], off0=offset)
   if  drawing_post:
     post_part=draw_post_part(name="post_part",base_exists=base_exists,
                              height=height,xshift=xshift, geom=geom)
@@ -211,7 +215,7 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
   POS = geom[0]
   AXES = geom[1]
   NORMAL = AXES[:,0]
-  
+  print("Mirror normal=",NORMAL)  
   DOC = get_DOC()
   if abs(NORMAL[2])<DEFALUT_MAX_ANGULAR_OFFSET/180*np.pi:
     NORMAL[2]=0
@@ -233,6 +237,8 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
                       POS[2])),np.array((-NORMAL[0],-NORMAL[1],
                       NORMAL[2])))
     mount_type = "POLARIS-K2"
+    POS = geom[0]
+    NORMAL = geom[1]
     dia =25.4*2
   if mount_type =="rooftop_mirror_mount":
     additional_mount = draw_rooftop_mount(xxshift=dia/2,geom=geom)
@@ -259,6 +265,8 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
     geom = (new_pos,new_normal)
     mount_type = "POLARIS-K2"
     dia =25.4*2
+    POS = geom[0]
+    NORMAL = geom[1]
     if abs(NORMAL[2])<DEFALUT_MAX_ANGULAR_OFFSET/180*np.pi:
       NORMAL[2]=0
   if "polarizer" in model_type:
@@ -290,6 +298,8 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
     geom = (np.array((POS[0]+xshift*NORMAL[0]-yshift*NORMAL[1],
                       POS[1]+yshift*NORMAL[0]+xshift*NORMAL[1],
                       POS[2])),new_normal)
+    POS = geom[0]
+    NORMAL = geom[1]
   if mount_type == "default":
     if dia<= 25.4/2:
       mount_type = "POLARIS-K05"
@@ -334,7 +344,7 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
     datei = thisfolder + "mount_meshes\\mirror\\" + mount_type
   if mesh:
     datei += ".stl"
-    obj = load_STL(datei,mount_name)
+    obj = load_STL(datei,mount_name,color=DEFALUT_MOUNT_COLOR)
   else:
     datei += ".step"
     obj = load_STEP(datei,mount_name)
@@ -348,11 +358,11 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
       post1 = draw_post_special(name="BA2_M", height=0,xshift=xshift, geom=geom)
       if mount_adjusted:
         rotate(obj,Vector(1,0,0),90)
-        update_geom_info(obj,geom)
+        update_geom_info(obj,[POS,NORMAL])
       else:
         obj.Placement = place
         rotate(obj,Vector(1,0,0),90)
-        update_geom_info(obj,geom,off0=offset)
+        update_geom_info(obj,[POS,NORMAL],off0=offset)
         
       obj.Label = mount_name
       part = initialize_composition_old(name="mount, post and base")
@@ -362,10 +372,10 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
       return part
   if not mount_adjusted:
     obj.Placement = place
-    update_geom_info(obj, geom, off0=offset)
+    update_geom_info(obj, [POS,NORMAL], off0=offset)
 
   else:
-    update_geom_info(obj,geom)
+    update_geom_info(obj,[POS,NORMAL])
   obj.Label = mount_name
   
   if  drawing_post:
@@ -412,7 +422,7 @@ def model_lamda_plane(name = "lamuda_plane",drawing_post=True,base_exists=False,
   datei = thisfolder + "mount_meshes\\adjusted mirror mount\\lamda_plane"
   if mesh:
     datei += ".stl"
-    obj = load_STL(datei, name = "lamda_plane")
+    obj = load_STL(datei, name = "lamda_plane", color=DEFALUT_MOUNT_COLOR)
   else:
     datei += ".step"
     obj = load_STEP(datei, name = "lamda_plane")
@@ -541,7 +551,7 @@ def draw_post(name="TR50_M", height=12,xshift=0, geom=None):
   
   datei1 = thisfolder + "post\\" + name
   datei1 += ".stl"
-  obj = load_STL(datei1, name = name)
+  obj = load_STL(datei1, name = name,color = DEFALUT_POST_COLOR)
   post_length= int("".join(list(filter(str.isdigit,name))))
   height=-post_length-height
   offset=Vector(xshift,0,height)
@@ -581,7 +591,7 @@ def draw_post_holder (name="PH50_M", height=0,xshift=0, geom=None):
     NORMAL=AXES[:,0]
   datei1 = thisfolder + "post\\post_holder\\" + name
   datei1 += ".stl"
-  obj = load_STL(datei1, name=name)
+  obj = load_STL(datei1, name=name,color=DEFALUT_HOLDER_COLOR)
   Geom_ground = (np.array((POS[0],POS[1],0)), np.array((NORMAL)))
   if name =="PH100_M":
     offset=Vector(xshift+4.3,-1.5,height+54)
@@ -665,7 +675,7 @@ def draw_post_base(name="BA1L", height=0,xshift=0, geom=None):
   datei1 = thisfolder + "post\\base\\" + name
   DOC = get_DOC()
   datei1 += ".stl"
-  obj = load_STL(datei1, name=name)
+  obj = load_STL(datei1, name=name,color=DEFALUT_HOLDER_COLOR)
   Geom_ground = (np.array((POS[0],POS[1],0)), np.array((NORMAL)))
   if name == "BA1L":
     offset=Vector(xshift,0,height)
@@ -718,7 +728,7 @@ def draw_post_special(name="TR50_M", height=12,xshift=0, geom=None):
   ground = np.array((NORMAL[0],NORMAL[1],0))
   ground = ground/(pow(NORMAL[0]**2+NORMAL[1]**2,0.5))
   datei1 += ".stl"
-  obj = load_STL(datei1, name=name)
+  obj = load_STL(datei1, name=name,color=DEFALUT_POST_COLOR)
   if name =="TR50_M":
     offset=Vector(xshift,height,0)
     obj.Placement = Placement(offset, Rotation(90,-90,90), Vector(0,0,0))
@@ -855,7 +865,7 @@ def draw_large_mount(thickness=30,geom=None):
   DOC = get_DOC()
   if mesh:
     datei += ".stl"
-    obj = load_STL(datei, name="large mirror mount")
+    obj = load_STL(datei, name="large mirror mount",color=DEFALUT_MOUNT_COLOR)
   else:
     datei += ".step"
     # obj = ImportGui.insert(datei, "labor_116")
@@ -904,7 +914,7 @@ def draw_stripe_mount(thickness=25,geom=None):
   datei = thisfolder + "mount_meshes\\special mount\\Stripe mirror mount"
   if mesh:
     datei += ".stl"
-    obj = load_STL(datei, name="Stripe mirror mount")
+    obj = load_STL(datei, name="Stripe mirror mount",color=DEFALUT_MOUNT_COLOR)
   else:
     datei += ".step"
     # obj = ImportGui.insert(datei, "labor_116")
@@ -936,7 +946,7 @@ def draw_rooftop_mount(xxshift=0,geom=None):
   datei = thisfolder + "mount_meshes\\special mount\\rooftop mirror mount"
   if mesh:
     datei += ".stl"
-    obj = load_STL(datei, name="rooftop mirror mount")
+    obj = load_STL(datei, name="rooftop mirror mount",color=DEFALUT_MOUNT_COLOR)
   else:
     datei += ".step"
     obj = load_STEP(datei, name="rooftop mirror mount")
@@ -958,7 +968,7 @@ def draw_Degree_Holder(dia = 25.4,angle = 45, geom=None):
     datei = thisfolder + "mount_meshes\\special mount\\65_degree_mounts"
   if mesh:
     datei += ".stl"
-    obj = load_STL(datei, name="polarizer_mounts")
+    obj = load_STL(datei, name="polarizer_mounts",color=DEFALUT_MOUNT_COLOR)
   else:
     datei += ".step"
     obj = load_STEP(datei, name="polarizer_mounts")
