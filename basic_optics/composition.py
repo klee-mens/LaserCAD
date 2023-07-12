@@ -86,7 +86,7 @@ class Composition(Opt_Element):
     updatet _matrix, opt_axis
     """
     item.set_geom(self.last_geom())
-    if hasattr(item, "next_ray"): 
+    if hasattr(item, "next_ray"):
       self.__add_raw(item)
       newoA = item.next_ray(self._optical_axis[-1])
       newoA.length = 0
@@ -94,14 +94,14 @@ class Composition(Opt_Element):
     # ignore non-optical Elm, e.g. Geom_Obj, cosmetics
     else:
       self.non_opticals.append(item)
- 
+
   def add_fixed_elm(self, item):
     """
     fügt <item> genau an der Stelle <item.get_geom()> ein
 
     updated entsprechend add_on_axis
     """
-    if hasattr(item, "next_ray"): 
+    if hasattr(item, "next_ray"):
       self.__add_raw(item)
     else:
       self.non_opticals.append(item)
@@ -110,8 +110,7 @@ class Composition(Opt_Element):
   def redefine_optical_axis(self, ray):
     # zB wenn die wavelength angepasst werden muss
     # print("sollte nur gemacht werden, wenn absolut noch kein Element eingefügt wurde")
-    print("should only be done if absolutely no element has been inserted yet")
-    #print("kann die ganze Geometrie hart abfucken")
+    # print("should only be done if absolutely no element has been inserted yet")
     self.set_geom(ray.get_geom())
     oA = deepcopy(ray)
     oA.name = self.name +"__oA_0"
@@ -155,7 +154,7 @@ class Composition(Opt_Element):
       self._matrix = np.matmul(M, self._matrix )
     # self._matrix = np.matmul(np.array([[1,self._last_prop], [0,1]]), self._matrix )
     self._matrix = np.matmul(np.array([[1,self._last_prop], [0,1]]), self._matrix ) #last propagation
-    
+
     return np.array(self._matrix)
 
   def get_sequence(self):
@@ -221,7 +220,7 @@ class Composition(Opt_Element):
     return self.__container_to_part(self._mounts_part, container)
 
 
-  # def draw_rays(self): 
+  # def draw_rays(self):
   #   """
   #   DEPRECATED, use self._lightsource.draw_dict["model"] = "ray_group" instead
   #   """
