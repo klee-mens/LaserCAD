@@ -1,16 +1,70 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Jun 22 10:56:05 2023
+Created on Tue Jun 27 22:34:31 2023
 
-@author: 12816
+@author: mens
 """
 
-from .. basic_optics import Mirror, Beam, Composition, inch, Curved_Mirror, Ray
-from .. basic_optics import Cylindrical_Mirror,Grating
-import matplotlib.pyplot as plt
 import numpy as np
+import sys
+
+pfad = __file__
+pfad = pfad.replace("\\","/") #folder conventions windows linux stuff
+ind = pfad.rfind("/")
+pfad = pfad[0:ind-1]
+ind = pfad.rfind("/")
+pfad = pfad[0:ind]
+if not pfad in sys.path:
+  sys.path.append(pfad)
 
 
+from LaserCAD.freecad_models import clear_doc, setview, freecad_da
+from LaserCAD.basic_optics import Mirror, Beam, Composition, inch, Curved_Mirror, Ray, Geom_Object
+from LaserCAD.basic_optics import Grating, Opt_Element
+import matplotlib.pyplot as plt
+from LaserCAD.freecad_models.utils import thisfolder, load_STL
+
+if freecad_da:
+  clear_doc()
+
+# =============================================================================
+# Draw the seed laser and seed beam
+# =============================================================================
+start_point = (0,0,104) #see CLPF-2400-10-60-0_8 sn2111348_Manual
+seed_beam_radius = 2.5/2 #see CLPF-2400-10-60-0_8 sn2111348_Manual
+
+distance_seed_laser_stretcher = 600
+
+seed_laser = Geom_Object(name="IPG_Seed_Laser")
+seed_laser.pos = start_point
+
+stl_file=thisfolder+"\mount_meshes\special mount\Laser_Head-Body.stl"
+seed_laser.draw_dict["stl_file"]=stl_file
+color = (170/255, 170/255, 127/255)
+seed_laser.draw_dict["color"]=color
+seed_laser.freecad_model = load_STL
+
+faraday_isolator_6mm = Opt_Element(name="Faraday_Isolator")
+stl_file=thisfolder+"\mount_meshes\special mount\Faraday-Isolatoren-Body.stl"
+faraday_isolator_6mm.draw_dict["stl_file"]=stl_file
+color = (10/255, 20/255, 230/255)
+faraday_isolator_6mm.draw_dict["color"]=color
+faraday_isolator_6mm.freecad_model = load_STL
+
+faraday_isolator_6mm.pos = start_point + np.array((45,0,0))
+
+seed_beam = Beam(angle=0, radius=seed_beam_radius, pos=start_point)
+seed_beam.set_length(distance_seed_laser_stretcher)
+seed_inner_ray = seed_beam.inner_ray()
+seed_end_geom = (seed_inner_ray.endpoint(), seed_inner_ray.get_axes())
+
+
+
+# =============================================================================
+# Create and draw the stretcher
+# =============================================================================
+def dont():
+  return None
 def Make_Stretcher_chromeo():
   """
   constructs an Offner Stretcher with an on axis helper composition
@@ -52,7 +106,7 @@ def Make_Stretcher_chromeo():
   Concav = Curved_Mirror(radius=radius_concave, name="Concav_Mirror")
   Concav.aperture = aperture_concave
 
-  StripeM = Cylindrical_Mirror(radius= -radius_concave/2, name="Stripe_Mirror")
+  StripeM = Curved_Mirror(radius= -radius_concave/2, name="Stripe_Mirror")
   #Cosmetics
   StripeM.aperture = width_stripe_mirror
   StripeM.draw_dict["height"] = height_stripe_mirror
@@ -117,8 +171,7 @@ def Make_Stretcher_chromeo():
   Stretcher.propagate(periscope_height)
   RoofTop2 = Mirror(phi=0, theta=90)
   Stretcher.add_on_axis(RoofTop2)
-  def dont():
-    return None
+
   RoofTop1.draw = dont
   RoofTop1.draw_dict["mount_type"] = "dont_draw"
   RoofTop2.draw = dont
@@ -140,126 +193,73 @@ def Make_Stretcher_chromeo():
   return Stretcher
 
 
-def Make_Stretcher():
-  """
-  tja, versuchen wir mal einen Offner Strecker...
-  Note: When drawing a rooftop mirror, we will draw apure_cosmetic mirror to
-  confirm the position of the mount. The mirror's geom is the average of two
-  flip mirror. And its aperture is the periscope_distance.
-
-  Returns
-  -------
-  TYPE Composition
-    den gesamten, geraytracten Strecker...
-
-  """
-  # definierende Parameter
-  Radius = 1000 #Radius des großen Konkavspiegels
-  Aperture_concav = 6 * inch
-  h_StripeM = 10 #Höhe des Streifenspiegels
-  gamma = 5 /180 *np.pi # Seperationswinkel zwischen einfallenden und Mittelpunktsstrahl; Alpha = Gamma + Beta
-  grat_const = 1/450 # Gitterkonstante in 1/mm
-  seperation = 100 # Differenz zwischen Gratingposition und Radius
-  lam_mid = 2400e-9 * 1e3 # Zentralwellenlänge in mm
-  delta_lamda = 250e-9*1e3 # Bandbreite in mm
-  number_of_rays = 20
-  safety_to_StripeM = 5 #Abstand der eingehenden Strahlen zum Concav Spiegel in mm
-  periscope_distance = 8
-  distance_rooftop_gratig = 200 # in mm
-
-  # abgeleitete Parameter
-  v = lam_mid/grat_const
-  s = np.sin(gamma)
-  c = np.cos(gamma)
-  a = v/2
-  b = np.sqrt(a**2 - (v**2 - s**2)/(2*(1+c)))
-  sinB = a - b
-
-  Concav = Curved_Mirror(radius=Radius, name="Concav_Mirror")
-  Concav.pos = (0,0,0)
-  Concav.aperture = Aperture_concav
-  Concav.normal = (-1,0,0)
-
-  StripeM = Curved_Mirror(radius= -Radius/2, name="Stripe_Mirror")
-  StripeM.pos = (Radius/2, 0, 0)
-  #Cosmetics
-  StripeM.aperture=75
-  StripeM.draw_dict["height"]=10
-  StripeM.draw_dict["thickness"]=25
-  StripeM.draw_dict["model_type"]="Stripe"
-
-  Grat = Grating(grat_const=grat_const, name="Gitter")
-  Grat.pos = (Radius-seperation, 0, 0)
-  Grat.normal = (np.sqrt(1-sinB**2), -sinB, 0)
-
-  ray0 = Ray()
-  p_grat = np.array((Radius-seperation, 0, h_StripeM/2 + safety_to_StripeM))
-  vec = np.array((c, s, 0))
-  pos0 = p_grat - 250 * vec
-  ray0.normal = vec
-  ray0.pos = pos0
-  ray0.wavelength = lam_mid
-
-  lightsource = Beam(radius=0, angle=0)
-  wavels = np.linspace(lam_mid-delta_lamda/2, lam_mid+delta_lamda/2, number_of_rays)
-  rays = []
-  cmap = plt.cm.gist_rainbow
-  for wavel in wavels:
-    rn = Ray()
-    # rn.normal = vec
-    # rn.pos = pos0
-    rn.wavelength = wavel
-    x = (wavel - lam_mid + delta_lamda/2) / delta_lamda
-    rn.draw_dict["color"] = cmap( x )
-    rays.append(rn)
-  lightsource.override_rays(rays)
-  lightsource.draw_dict['model'] = "ray_group"
-
-  nfm1 = - ray0.normal
-  pfm1 = Grat.pos + distance_rooftop_gratig * nfm1 + (0,0,-h_StripeM/2 - safety_to_StripeM)
-  # subperis = Periscope(length=8, theta=-90, dist1=0, dist2=0)
-  # subperis.pos = pfm1
-  # subperis.normal = nfm1
-  flip_mirror1 = Mirror()
-  flip_mirror1.pos = pfm1
-  flip_mirror1.normal = nfm1 - np.array((0,0,-1))
-  def useless():
-    return None
-  flip_mirror1.draw = useless
-  flip_mirror1.draw_dict["mount_type"] = "dont_draw"
-
-  flip_mirror2 = Mirror()
-  flip_mirror2.pos = pfm1 - np.array((0,0,periscope_distance))
-  flip_mirror2.normal = nfm1 - np.array((0,0,1))
-  flip_mirror2.draw = useless
-  flip_mirror2.draw_dict["mount_type"] = "dont_draw"
-
-  pure_cosmetic = Mirror(name="RoofTop_Mirror")
-  pure_cosmetic.draw_dict["mount_type"] = "rooftop_mirror_mount"
-  pure_cosmetic.pos = (flip_mirror1.pos + flip_mirror2.pos ) / 2
-  pure_cosmetic.normal = (flip_mirror1.normal + flip_mirror2.normal ) / 2
-  pure_cosmetic.aperture = periscope_distance
-
-  pure_cosmetic.draw = useless
-
-  Stretcher = Composition(name="Strecker", pos=pos0, normal=vec)
-
-  Stretcher.set_light_source(lightsource)
-  Stretcher.add_fixed_elm(Grat)
-  Stretcher.add_fixed_elm(Concav)
-  Stretcher.add_fixed_elm(StripeM)
-  Stretcher.add_fixed_elm(flip_mirror1)
-  Stretcher.add_fixed_elm(flip_mirror2)
-  Stretcher.add_fixed_elm(pure_cosmetic)
-
-  # for item in subperis._elements:
-  #   Stretcher.add_fixed_elm(item)
+Stretcher = Make_Stretcher_chromeo()
+Stretcher.set_geom(seed_end_geom)
 
 
-  # seq = [0,1,2,1,0]
-  # seq = [0,1,2,1,0, 3]
-  # seq = [0,1,2,1,0, 3,4]
-  seq = [0,1,2,1,0, 3,4, 0, 1, 2, 1, 0]
-  Stretcher.set_sequence(seq)
-  Stretcher.propagate(300)
-  return Stretcher
+# =============================================================================
+# The pulse picker
+# =============================================================================
+from LaserCAD.basic_optics.mirror import Lam_Plane
+
+tfp_angle = 65 #tfp angle of incidence in degree
+flip_mirror_push_down = 8 # distance to push the first mirror out ouf the seed beam
+tfp_push_forward = 1 # distance to push the TFP forward, so that the beam can pass through
+
+PulsePicker = Composition(name="PulsePicker")
+lightsource_pp = Beam(angle=0, radius=seed_beam_radius)
+PulsePicker.set_light_source(lightsource_pp)
+PulsePicker.propagate(distance_seed_laser_stretcher*0.2)
+FlipMirror_pp = Mirror(phi=-90)
+PulsePicker.add_on_axis(FlipMirror_pp)
+FlipMirror_pp.pos += (0,0,flip_mirror_push_down)
+PulsePicker.propagate(200)
+Lambda2 = Lam_Plane()
+PulsePicker.add_on_axis(Lambda2)
+PulsePicker.propagate(310)
+Back_Mirror_PP = Mirror()
+PulsePicker.add_on_axis(Back_Mirror_PP)
+PulsePicker.propagate(30)
+Lambda4 = Lam_Plane()
+PulsePicker.add_on_axis(Lambda4)
+PulsePicker.propagate(30)
+
+PockelsCell = Opt_Element(name="PockelZellePulsPicker")
+# Pockels cell is pure cosmetics
+stl_file=thisfolder+"\mount_meshes\special mount\pockels_cell_easy_steal-Body.stl"
+PockelsCell.draw_dict["stl_file"]=stl_file
+color = (239/255, 239/255, 239/255)
+PockelsCell.draw_dict["color"]=color
+PockelsCell.freecad_model = load_STL
+
+PulsePicker.add_on_axis(PockelsCell)
+
+PulsePicker.propagate(140)
+TFP_pp = Mirror(phi = -180+2*tfp_angle)
+TFP_pp.draw_dict["color"] = (1.0, 0.0, 2.0)
+TFP_pp.draw_dict["thickness"] = 3
+PulsePicker.add_on_axis(TFP_pp)
+TFP_pp.pos += -1 * TFP_pp.normal * tfp_push_forward
+PulsePicker.recompute_optical_axis()
+PulsePicker.propagate(250)
+FlipMirror2_pp = Mirror(phi=-90)
+PulsePicker.add_on_axis(FlipMirror2_pp)
+PulsePicker.propagate(400)
+
+PulsePicker.set_geom(Stretcher.last_geom())
+
+
+
+
+# =============================================================================
+# Draw Selection
+# =============================================================================
+seed_laser.draw()
+faraday_isolator_6mm.draw()
+seed_beam.draw()
+Stretcher.draw()
+PulsePicker.draw()
+
+
+if freecad_da:
+  setview()
