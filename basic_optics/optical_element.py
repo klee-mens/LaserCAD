@@ -13,7 +13,7 @@ from .beam import Beam, Gaussian_Beam
 from .constants import inch
 import numpy as np
 from copy import deepcopy
-from freecad_models import freecad_da
+from .. freecad_models import freecad_da
 
 
 

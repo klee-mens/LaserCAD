@@ -5,7 +5,7 @@ Created on Thu Jun 22 10:53:52 2023
 @author: 12816
 """
 
-from moduls import Make_Telescope
+from .. moduls import Make_Telescope
 
 
 def telescope_test():  

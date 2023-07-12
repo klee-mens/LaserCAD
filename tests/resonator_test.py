@@ -111,7 +111,7 @@ def three_resonators_test():
   res3.draw()
   return res, res2, res3
 
-def Lib_Resonator_test():
+def Lab_Resonator_test():
   inch = 25.4
 
   # from basic_optics.tests import three_resonators_test
@@ -174,3 +174,5 @@ def Lib_Resonator_test():
   Comp.draw()
   
   return Comp
+
+Lab_Resonator_test()

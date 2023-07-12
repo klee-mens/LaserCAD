@@ -5,11 +5,14 @@ Created on Mon Aug 22 12:34:44 2022
 @author: mens
 """
 
-from basic_optics import Ray, Geom_Object, TOLERANCE
+# from basic_optics import Ray, Geom_Object, TOLERANCE
+from . constants import TOLERANCE
+from . geom_object import Geom_Object
+from . ray import Ray
 # import Ray, Geom_Object, TOLERANCE
 # from basic_optics.freecad_models import model_beam,model_ray_1D,model_Gaussian_beam
-from freecad_models import model_beam,model_ray_1D,model_Gaussian_beam
-from freecad_models.freecad_model_composition import initialize_composition_old, add_to_composition
+from .. freecad_models import model_beam,model_ray_1D,model_Gaussian_beam
+from .. freecad_models.freecad_model_composition import initialize_composition_old, add_to_composition
 # from .optical_element import Opt_Element
 
 from copy import deepcopy
@@ -63,16 +66,19 @@ class Beam(Geom_Object):
 
   def make_cone_distribution(self, ray_count=2):
     self._ray_count = ray_count
+    self._rays = [Ray() for n in range(self._ray_count)]
     self._distribution = "cone"
     self.draw_dict["model"] = "cone"
     mr = self._rays[0]
     mr.set_geom(self.get_geom())
     mr.name = self.name + "_inner_Ray"
+    mr.wavelength = self._Bwavelength
     thetas = np.linspace(0, 2*np.pi, self._ray_count)
     for n in range(self._ray_count-1):
       our = self._rays[n+1]
       our.from_h_alpha_theta(self._radius, self._angle, thetas[n], self)
       our.name = self.name + "_outer_Ray" + str(n)
+      our.wavelength = self._Bwavelength
 
   def make_Gaussian_distribution(self, ray_count=2):
     self._ray_count = 1

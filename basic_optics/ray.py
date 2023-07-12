@@ -4,10 +4,11 @@ Created on Fri Aug 19 11:53:43 2022
 
 @author: mens
 """
-
-from basic_optics import Geom_Object, TOLERANCE
 import numpy as np
-from freecad_models import freecad_da, model_ray_1D
+from . constants import TOLERANCE
+from . geom_object import Geom_Object
+from .. freecad_models import freecad_da, model_ray_1D
+
 
 DEFAULT_LENGTH = 200
 

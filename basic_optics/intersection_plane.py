@@ -12,8 +12,8 @@ from .ray import Ray
 from .beam import Beam #,RayGroup
 import matplotlib.pyplot as plt
 # from .freecad_models import model_intersection_plane,iris_post
-from freecad_models import model_intersection_plane
-from freecad_models.freecad_model_ray import RAY_COLOR
+from ..freecad_models import model_intersection_plane
+from ..freecad_models.freecad_model_ray import RAY_COLOR
 
 
 class Intersection_plane(Opt_Element):
@@ -66,10 +66,11 @@ class Intersection_plane(Opt_Element):
     cmap = plt.cm.gist_rainbow
     for point_i in rays:
       intersection_point = point_i.intersection(self)
+      # print(intersection_point)
       lamuda = point_i.wavelength
       ray_lam.append(lamuda)
       if lamuda>=400e-6 and lamuda<=780e-6:
-        c = cmap((lamuda-400e-6)/380e-6)
+        c = cmap(1-(lamuda-400e-6)/380e-6)
       elif 'color' in point_i.draw_dict:
         c = point_i.draw_dict["color"]
       else:
@@ -133,6 +134,7 @@ class Intersection_plane(Opt_Element):
     # plt.axvline(0, color = 'black', linewidth = 1,linestyle = '--')
     # plt.axis('equal')
     plt.show()
+    return point_x,point_y
   
   def __repr__(self):
     n = len(self.class_name())

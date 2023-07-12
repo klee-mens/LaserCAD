@@ -5,7 +5,7 @@ Created on Thu Jun 22 10:56:05 2023
 @author: 12816
 """
 
-from basic_optics import Mirror, Lens, Beam, Composition, inch,Curved_Mirror
+from .. basic_optics import Mirror, Lens, Beam, Composition, inch,Curved_Mirror
 import numpy as np
 
 
