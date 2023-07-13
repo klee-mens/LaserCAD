@@ -274,8 +274,10 @@ class Beam(Geom_Object):
                                  geom_info=self.get_geom())
     elif self.draw_dict["model"] == "cone":
       radius, _ = self.radius_angle()
-      return model_beam(name=self.name, dia=2*radius, prop=self.length(),
-           f=self.focal_length(), geom_info=self.get_geom())
+      # return model_beam(name=self.name, dia=2*radius, prop=self.length(),
+           # f=self.focal_length(), geom_info=self.get_geom(), **self.draw_dict)
+      return model_beam(dia=2*radius, prop=self.length(), f=self.focal_length(),
+                        geom_info=self.get_geom(), **self.draw_dict)
       # return model_Gaussian_beam(name=self.name, dia=2*radius, prop=self.length(),
       #      f=self.focal_length(), geom_info=self.get_geom())
     else:

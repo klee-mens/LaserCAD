@@ -32,8 +32,9 @@ if freecad_da:
 # =============================================================================
 start_point = (0,0,104) #see CLPF-2400-10-60-0_8 sn2111348_Manual
 seed_beam_radius = 2.5/2 #see CLPF-2400-10-60-0_8 sn2111348_Manual
-
-distance_seed_laser_stretcher = 600
+distance_seed_laser_stretcher = 600 #the complete distance
+distance_6_mm_faraday = 45
+distance_faraday_mirror = 100
 
 seed_laser = Geom_Object(name="IPG_Seed_Laser")
 seed_laser.pos = start_point
@@ -54,11 +55,17 @@ faraday_isolator_6mm.freecad_model = load_STL
 faraday_isolator_6mm.pos = start_point + np.array((45,0,0))
 
 seed_beam = Beam(angle=0, radius=seed_beam_radius, pos=start_point)
-seed_beam.set_length(distance_seed_laser_stretcher)
-seed_inner_ray = seed_beam.inner_ray()
-seed_end_geom = (seed_inner_ray.endpoint(), seed_inner_ray.get_axes())
 
-
+Seed = Composition(name="Seed")
+Seed.set_light_source(seed_beam)
+Seed.add_on_axis(seed_laser)
+Seed.propagate(distance_6_mm_faraday)
+Seed.add_on_axis(faraday_isolator_6mm)
+Flip0 = Mirror(phi=90)
+Seed.propagate(distance_faraday_mirror)
+Seed.add_on_axis(Flip0)
+Seed.propagate(distance_seed_laser_stretcher-distance_6_mm_faraday-distance_faraday_mirror)
+seed_end_geom = Seed.last_geom()
 
 # =============================================================================
 # Create and draw the stretcher
@@ -138,7 +145,7 @@ def Make_Stretcher_chromeo():
     # rn.normal = vec
     # rn.pos = pos0
     rn.wavelength = wavel
-    x = (wavel - lambda_mid + delta_lamda/2) / delta_lamda
+    x = 1-(wavel - lambda_mid + delta_lamda/2) / delta_lamda
     rn.draw_dict["color"] = cmap( x )
     rays.append(rn)
   lightsource.override_rays(rays)
@@ -244,22 +251,136 @@ PulsePicker.recompute_optical_axis()
 PulsePicker.propagate(250)
 FlipMirror2_pp = Mirror(phi=-90)
 PulsePicker.add_on_axis(FlipMirror2_pp)
+PulsePicker.propagate(200)
+Lambda2_2_pp = Lam_Plane()
+PulsePicker.add_on_axis(Lambda2_2_pp)
 PulsePicker.propagate(400)
 
 PulsePicker.set_geom(Stretcher.last_geom())
 
 
+# =============================================================================
+# Regen Amp1 Section
+# =============================================================================
+from LaserCAD.basic_optics import LinearResonator, Lens
+
+
+def Make_Amplifier_I():
+
+  tfp_angle = 65
+  tfp_aperture = 2*inch
+  angle_on_sphere = 10
+  alpha = -8
+  beta = -0.1
+  print("g1*g2 = ", alpha*beta)
+  focal = 250
+  dist1 = (1-alpha)*focal
+  dist2 = (1-beta)*focal
+  wavelength = 2400*1e-6
+  frac1 = 0.6
+  frac2 = 0.04
+  frac3 = 0.05
+  frac4 = 0.02
+  frac5 = 1 - frac1 - frac2 - frac3 - frac4
+
+  mir1 = Mirror(phi=180)
+  TFP1 = Mirror(phi= 180 - 2*tfp_angle)
+  TFP1.draw_dict["color"] = (1.0, 0.0, 2.0)
+  TFP1.aperture = tfp_aperture
+  TFP2 = Mirror(phi= - 180 + 2*tfp_angle)
+  TFP2.draw_dict["color"] = (1.0, 0.0, 2.0)
+  TFP2.aperture = tfp_aperture
+  mir4 = Mirror(phi=180)
+  cm = Curved_Mirror(radius=focal*2, phi = 180 - angle_on_sphere)
+
+  PockelsCell = Opt_Element(name="PockelZellePulsPicker")
+  # Pockels cell is pure cosmetics
+  stl_file=thisfolder+"\mount_meshes\special mount\pockels_cell_easy_steal-Body.stl"
+  PockelsCell.draw_dict["stl_file"]=stl_file
+  color = (239/255, 239/255, 239/255)
+  PockelsCell.draw_dict["color"]=color
+  PockelsCell.freecad_model = load_STL
+
+  Lambda2 = Lam_Plane()
+
+  amp1 = LinearResonator(name="foldedRes")
+  amp1.set_wavelength(wavelength)
+  amp1.add_on_axis(mir1)
+  amp1.propagate(dist1*frac1)
+  amp1.add_on_axis(TFP1)
+  amp1.propagate(dist1*frac2)
+  amp1.add_on_axis(PockelsCell)
+  amp1.propagate(dist1*frac3)
+  amp1.add_on_axis(Lambda2)
+  amp1.propagate(dist1*frac4)
+  amp1.add_on_axis(TFP2)
+  amp1.propagate(dist1*frac5)
+  amp1.add_on_axis(cm)
+  amp1.propagate(dist2*0.9)
+
+
+  crystal = Beam(radius=3, angle=0)
+  crystal.draw_dict['color'] = (182/255, 109/255, 46/255)
+  crystal.set_length(10)
+
+  amp1.add_on_axis(crystal)
+  amp1.propagate(dist2*0.1)
+  amp1.add_on_axis(mir4)
+
+  amp1.compute_eigenmode()
+  return amp1
+
+# PulsePicker.normal = (1,2,0)
+
+pp_last_pos, pp_last_ax = PulsePicker.last_geom()
+helper = Beam()
+helper.set_geom(PulsePicker.last_geom())
+
+Amplifier_I = Make_Amplifier_I()
+Amplifier_I.compute_beams()
+amp_beams = Amplifier_I._beams
+in_beam = amp_beams[1]
+
+
+phi = in_beam.angle_to(helper)
+Amplifier_I.rotate((0,0,1), -phi)
+amp_beams = Amplifier_I._beams
+in_beam = amp_beams[1]
+in_pos, in_ax = in_beam.get_geom()
+Amplifier_I.pos += pp_last_pos - in_pos
+
+# =============================================================================
+# Pump Amp1
+# =============================================================================
+pump_geom = Amplifier_I._elements[-1].get_geom()
+Pump = Composition(name="Pump")
+Pump.set_geom(pump_geom)
+pump_light = Beam(radius=0.2, angle=0.03)
+pump_light.draw_dict["color"] = (1.0, 1.0, 0.0)
+Pump.set_light_source(pump_light)
+Pump.propagate(120)
+PumpMirror = Mirror(phi=-90)
+Pump.add_on_axis(PumpMirror)
+Pump.propagate(90)
+PumpLens = Lens(f=120+90)
+Pump.add_on_axis(PumpLens)
+Pump.propagate(190)
+
+
+
+
+# out_beam = amp_beams[3]
 
 
 # =============================================================================
 # Draw Selection
 # =============================================================================
-seed_laser.draw()
-faraday_isolator_6mm.draw()
-seed_beam.draw()
+
+Seed.draw()
 Stretcher.draw()
 PulsePicker.draw()
-
+Amplifier_I.draw()
+Pump.draw()
 
 if freecad_da:
   setview()

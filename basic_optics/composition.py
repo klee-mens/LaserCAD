@@ -312,6 +312,7 @@ class Composition(Opt_Element):
     self._rearange_subobjects_pos(old_pos, new_pos, self._beams[1::])
     self._rearange_subobjects_pos(old_pos, new_pos, [r for rg in self._ray_groups[1::] for r in rg])
     self._rearange_subobjects_pos(old_pos, new_pos, self._optical_axis)
+    self._rearange_subobjects_pos(old_pos, new_pos, self.non_opticals)
 
   def _axes_changed(self, old_axes, new_axes):
     """
@@ -326,6 +327,7 @@ class Composition(Opt_Element):
     self._rearange_subobjects_axes(old_axes, new_axes, self._beams[1::])
     self._rearange_subobjects_axes(old_axes, new_axes, [r for rg in self._ray_groups[1::] for r in rg])
     self._rearange_subobjects_axes(old_axes, new_axes, self._optical_axis)
+    self._rearange_subobjects_axes(old_axes, new_axes, self.non_opticals)
 
 
 

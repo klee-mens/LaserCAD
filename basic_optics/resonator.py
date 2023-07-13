@@ -39,13 +39,13 @@ class LinearResonator(Composition):
       print("Outputcoupler must be a mirror")
       return -1
 
-    def set_wavelength(self, wavelength):
-      """
-      sets the own wavelength and thus the one of the lightsource and eigenmode
-      PARAMETER: wavelength in mm
-      """
-      self.wavelength = wavelength
-      self._lightsource.wavelength = wavelength
+  def set_wavelength(self, wavelength):
+    """
+    sets the own wavelength and thus the one of the lightsource and eigenmode
+    PARAMETER: wavelength in mm
+    """
+    self.wavelength = wavelength
+    self._lightsource.wavelength = wavelength
 
   def compute_eigenmode(self, start_index=0):
     """
