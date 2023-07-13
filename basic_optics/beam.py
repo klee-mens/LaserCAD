@@ -313,6 +313,9 @@ class Gaussian_Beam(Ray):
   def set_length(self, length):
     # needed for consitency in next_beam function
     self.length = length
+		
+  def waist(self):
+    return np.sqrt( self.wavelength / np.pi * np.imag(self.q_para) )
 
   def __repr__(self):
     # radius, angle = self.radius_angle()
