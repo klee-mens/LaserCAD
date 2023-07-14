@@ -215,7 +215,7 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
   POS = geom[0]
   AXES = geom[1]
   NORMAL = AXES[:,0]
-  print("Mirror normal=",NORMAL)  
+  # print("Mirror normal=",NORMAL)  
   DOC = get_DOC()
   if abs(NORMAL[2])<DEFALUT_MAX_ANGULAR_OFFSET/180*np.pi:
     NORMAL[2]=0

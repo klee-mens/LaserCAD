@@ -182,11 +182,11 @@ class Beam(Geom_Object):
   def __repr__(self):
     radius, angle = self.radius_angle()
     txt = 'Beam(radius=' + repr(radius)
-    txt += ', anlge=' + repr(angle)
+    txt += ', angle=' + repr(angle)
     txt += ', distribution=' + repr(self._distribution)
     if self._distribution == "Gaussian":
        txt = 'Gaussian_Beam(q_para=' + repr(self.q_para)
-    txt += ', ' + super().__repr__()[6::]
+    txt += ', ' + super().__repr__()[5::]
     return txt
 
   def radius_angle(self):
