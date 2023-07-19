@@ -32,12 +32,12 @@ if freecad_da:
 # =============================================================================
 start_point = (0,0,104) #see CLPF-2400-10-60-0_8 sn2111348_Manual
 seed_beam_radius = 2.5/2 #see CLPF-2400-10-60-0_8 sn2111348_Manual
-distance_seed_laser_stretcher = 600 #the complete distance
+distance_seed_laser_stretcher = 400 #the complete distance
 distance_6_mm_faraday = 45
 distance_faraday_mirror = 100
 
 seed_laser = Geom_Object(name="IPG_Seed_Laser")
-seed_laser.pos = start_point
+# seed_laser.pos = start_point
 
 stl_file=thisfolder+"\mount_meshes\special mount\Laser_Head-Body.stl"
 seed_laser.draw_dict["stl_file"]=stl_file
@@ -57,6 +57,7 @@ faraday_isolator_6mm.pos = start_point + np.array((45,0,0))
 seed_beam = Beam(angle=0, radius=seed_beam_radius, pos=start_point)
 
 Seed = Composition(name="Seed")
+Seed.pos = start_point
 Seed.set_light_source(seed_beam)
 Seed.add_on_axis(seed_laser)
 Seed.propagate(distance_6_mm_faraday)
@@ -378,9 +379,9 @@ Pump.propagate(190)
 
 Seed.draw()
 Stretcher.draw()
-PulsePicker.draw()
-Amplifier_I.draw()
-Pump.draw()
+# PulsePicker.draw()
+# Amplifier_I.draw()
+# Pump.draw()
 
 if freecad_da:
   setview()
