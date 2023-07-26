@@ -70,6 +70,20 @@ def model_beam(name="beam", dia=10, prop=200,  f=130, color=DEFAULT_COLOR_CRIMSO
   DOC.recompute()
   return obj
 
+def model_asti_beam (name="beam", dia1=10,dia2=10, prop=200,  f1=100,f2=150, color=DEFAULT_COLOR_CRIMSON, 
+               geom_info=None):
+  DOC = get_DOC()
+  obj = DOC.addObject('PartDesign::Body', name)
+  sketch = obj.newObject('Sketcher::SketchObject', name+'_sketch')
+  sketch.MapMode = 'FlatFace'
+  sketch.addGeometry(Part.Ellipse(Vector(-dia1,-0,0),Vector(0,-dia2,0),Vector(0,0,0)),False)
+  sketch.addConstraint(Sketcher.Constraint('Coincident',0,3,-1,1)) 
+  sketch.addConstraint(Sketcher.Constraint('PointOnObject',1,1,-1)) 
+  sketch.addConstraint(Sketcher.Constraint('DistanceX',-1,1,1,1,dia1)) 
+  sketch.addConstraint(Sketcher.Constraint('DistanceY',-1,1,2,1,dia2)) 
+  
+  
+
 def model_Gaussian_beam (name="Gaussian_beam",q_para=-100+200j,prop=200,wavelength=650E-6,
                           color=DEFAULT_COLOR_CRIMSON,beam_count=1, geom_info=None):
     """

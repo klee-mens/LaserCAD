@@ -557,6 +557,7 @@ def draw_post(name="TR50_M", height=12,xshift=0, geom=None):
   offset=Vector(xshift,0,height)
   obj.Placement = Placement(offset, Rotation(90,0,90), Vector(0,0,0))
   update_geom_info(obj, geom, off0=offset)
+  # print(obj.Placement)
   return obj
 
 def draw_post_holder (name="PH50_M", height=0,xshift=0, geom=None):
@@ -638,7 +639,6 @@ def draw_post_holder (name="PH50_M", height=0,xshift=0, geom=None):
     offset=Vector(xshift-4.5,-5.5,height+31.25)
     obj.Placement = Placement(offset, Rotation(90,0,90), Vector(0,0,0))
     update_geom_info(obj, Geom_ground, off0=offset)
-
   return obj
 
 def draw_post_base(name="BA1L", height=0,xshift=0, geom=None):

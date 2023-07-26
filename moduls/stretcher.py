@@ -136,7 +136,19 @@ def Make_Stretcher_old():
   Stretcher.propagate(300)
   return Stretcher
 
-def Make_Stretcher():
+def Make_Stretcher(
+        Radius = 1000, #Radius des großen Konkavspiegels
+        Aperture_concav = 6 * inch,
+        h_StripeM = 10, #Höhe des Streifenspiegels
+        gamma = 5 /180 *np.pi, # Seperationswinkel zwischen einfallenden und Mittelpunktsstrahl; Alpha = Gamma + Beta
+        grat_const = 1/450, # Gitterkonstante in 1/mm
+        seperation = 100, # Differenz zwischen Gratingposition und Radius
+        lam_mid = 2400e-9 * 1e3, # Zentralwellenlänge in mm
+        delta_lamda = 250e-9*1e3, # Bandbreite in mm
+        number_of_rays = 20,
+        safety_to_StripeM = 5, #Abstand der eingehenden Strahlen zum Concav Spiegel in mm
+        periscope_distance = 8,
+        ):
   """
   tja, versuchen wir mal einen Offner Strecker...
   Note: When drawing a rooftop mirror, we will draw apure_cosmetic mirror to 
@@ -150,17 +162,17 @@ def Make_Stretcher():
 
   """
   # definierende Parameter
-  Radius = 1000 #Radius des großen Konkavspiegels
-  Aperture_concav = 6 * inch
-  h_StripeM = 10 #Höhe des Streifenspiegels
-  gamma = 5 /180 *np.pi # Seperationswinkel zwischen einfallenden und Mittelpunktsstrahl; Alpha = Gamma + Beta
-  grat_const = 1/450 # Gitterkonstante in 1/mm
-  seperation = 100 # Differenz zwischen Gratingposition und Radius
-  lam_mid = 2400e-9 * 1e3 # Zentralwellenlänge in mm
-  delta_lamda = 250e-9*1e3 # Bandbreite in mm
-  number_of_rays = 20
-  safety_to_StripeM = 5 #Abstand der eingehenden Strahlen zum Concav Spiegel in mm
-  periscope_distance = 8
+  # Radius = 1000 #Radius des großen Konkavspiegels
+  # Aperture_concav = 6 * inch
+  # h_StripeM = 10 #Höhe des Streifenspiegels
+  # gamma = 5 /180 *np.pi # Seperationswinkel zwischen einfallenden und Mittelpunktsstrahl; Alpha = Gamma + Beta
+  # grat_const = 1/450 # Gitterkonstante in 1/mm
+  # seperation = 100 # Differenz zwischen Gratingposition und Radius
+  # lam_mid = 2400e-9 * 1e3 # Zentralwellenlänge in mm
+  # delta_lamda = 250e-9*1e3 # Bandbreite in mm
+  # number_of_rays = 20
+  # safety_to_StripeM = 5 #Abstand der eingehenden Strahlen zum Concav Spiegel in mm
+  # periscope_distance = 8
   
   # abgeleitete Parameter
   v = lam_mid/grat_const

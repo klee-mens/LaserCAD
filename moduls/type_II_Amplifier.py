@@ -205,13 +205,13 @@ def Make_Amplifier_Typ_II_UpDown(name="AmpTyp2sr", focal_length=600, magnificati
   
   return AmpTyp2
 
-def Make_Amplifier_Typ_II_plane():
-  name="AmpTyp2s" 
-  focal_length=600 
-  magnification=1
-  roundtrips2=2
-  aperture_small=1*inch 
-  beam_sep=15
+def Make_Amplifier_Typ_II_plane(name="AmpTyp2s" ,focal_length=600 ,magnification=1,roundtrips2=2,aperture_small=1*inch ,beam_sep=15):
+  # name="AmpTyp2s" 
+  # focal_length=600 
+  # magnification=1
+  # roundtrips2=2
+  # aperture_small=1*inch 
+  # beam_sep=15
   aperture_big = beam_sep * (roundtrips2+1)
   
   Radius2 = magnification*focal_length
@@ -279,13 +279,13 @@ def Make_Amplifier_Typ_II_plane():
   AmpTyp2.pos = (0,0,120)
   return AmpTyp2
 
-def Make_Amplifier_Typ_II_with_theta():
-  name="AmpTyp2s" 
-  focal_length=600 
-  magnification=1
-  roundtrips2=3
-  aperture_small=1*inch 
-  beam_sep=15
+def Make_Amplifier_Typ_II_with_theta(name="AmpTyp2s" ,focal_length=600 ,magnification=1,roundtrips2=3,aperture_small=1*inch ,beam_sep=15):
+  # name="AmpTyp2s" 
+  # focal_length=600 
+  # magnification=1
+  # roundtrips2=3
+  # aperture_small=1*inch 
+  # beam_sep=15
   aperture_big = beam_sep * (roundtrips2*2-1)
   
   Radius2 = magnification*focal_length
@@ -361,13 +361,13 @@ def Make_Amplifier_Typ_II_with_theta():
   return AmpTyp2
 
 
-def Make_Amplifier_Typ_II_Juergen():
-  name="AmpTyp2s" 
-  focal_length=600 
-  magnification=1
-  roundtrips2=4
-  aperture_small=1*inch 
-  beam_sep=10
+def Make_Amplifier_Typ_II_Juergen(name="AmpTyp2s" ,focal_length=600 ,magnification=1,roundtrips2=4,aperture_small=1*inch ,beam_sep=10):
+  # name="AmpTyp2s" 
+  # focal_length=600 
+  # magnification=1
+  # roundtrips2=4
+  # aperture_small=1*inch 
+  # beam_sep=10
   aperture_big = beam_sep * (roundtrips2*2-1)
   
   Radius2 = magnification*focal_length

@@ -87,4 +87,4 @@ def telescope_GUI():
   window.columnconfigure([0,1],weight=1, minsize=50)
   window.mainloop()
   
-telescope_GUI()
+# telescope_GUI()

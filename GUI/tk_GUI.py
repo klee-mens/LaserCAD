@@ -23,7 +23,7 @@ import numpy as np
 from copy import deepcopy
 import tkinter as tk
 
-def GUI():
+def GUI(path=""):
   global comp, element_list,ls
 
   comp = Composition()
@@ -95,6 +95,7 @@ def GUI():
       element_prop.append(float(prop_input.get()))
       if freecad_da:
         clear_doc()
+      L1.config(text = "A new element has been added at the end of composition.")
       comp=Composition()
       comp.set_light_source(ls)
       for ele in range(len(element_list)):
@@ -175,6 +176,7 @@ def GUI():
       # if freecad_da:
       #   clear_doc()
       # comp.draw()
+      L1.config(text = "The light source is set.")
       lsWindow.destroy()
     btn_convert = tk.Button(
         master=lsWindow,
@@ -222,7 +224,7 @@ def GUI():
       comp.propagate(50)
       if freecad_da:
         clear_doc()
-      
+      L1.config(text = "A new Lens has been added.")
       comp=Composition()
       comp.set_light_source(ls)
       for ele in element_list:
@@ -328,7 +330,7 @@ def GUI():
       comp.propagate(50)
       if freecad_da:
         clear_doc()
-      
+      L1.config(text = "A new Mirror has been added.")
       comp=Composition()
       comp.set_light_source(ls)
       for ele in element_list:
@@ -445,7 +447,7 @@ def GUI():
       comp.propagate(50)
       if freecad_da:
         clear_doc()
-      
+      L1.config(text = "A new Grating has been added.")
       comp=Composition()
       comp.set_light_source(ls)
       for ele in element_list:
@@ -573,8 +575,9 @@ def GUI():
       command=clear_settings,font=(font_name,font_size)
   )
   
+  L1 = tk.Label(window,text="This is the FreeCAD user interface. Please set up the light source first, and then add the optical elements you want",font=(font_name,font_size))
   def coading():
-    fp = open('samples.py', 'w+')
+    fp = open(path+'\\samples.py', 'w+')
     fp.truncate(0)
     myself = open(__file__,"r")
     line = myself.readlines()
@@ -594,6 +597,7 @@ def GUI():
     for ele in range(len(element_list)):
       fp.write("comp.add_fixed_elm(a"+str(ele)+")\n")
     fp.write("comp.draw()")
+    L1.config(text = "code generated. Saved as 'sample.py'.")
     fp.close()
   btn_coading = tk.Button(
       master=window,
@@ -608,6 +612,9 @@ def GUI():
   btn_delete.grid(row=6, column=0, padx=10)
   btn_clear.grid(row=7, column=0, padx=10)
   btn_coading.grid(row=8, column=0, padx=10)
-  window.rowconfigure([0,1,2,3,4,5,6,7,8],weight=1, minsize=50)
+  L1.grid(row=9,column=0,padx=10)
+  window.rowconfigure([0,1,2,3,4,5,6,7,8,9],weight=1, minsize=50)
   window.columnconfigure([0],weight=1, minsize=300)
   window.mainloop()
+
+# GUI()
