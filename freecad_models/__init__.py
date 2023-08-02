@@ -16,7 +16,7 @@ from .utils import freecad_da, start_DOC, get_DOC, warning, clear_doc, setview
 from .freecad_model_lens import model_lens
 from .freecad_model_ray import model_ray_1D
 from .freecad_model_beam import model_beam, model_Gaussian_beam
-from .freecad_model_composition import initialize_composition, add_to_composition, make_to_ray_part
+from .freecad_model_composition import initialize_composition, add_to_composition
 from .freecad_model_mirror import model_mirror, model_stripe_mirror
 from .freecad_model_grating import model_grating,grating_mount
 from .freecad_model_iris_diaphragms import model_iris_diaphragms,iris_post,model_diaphragms,model_intersection_plane

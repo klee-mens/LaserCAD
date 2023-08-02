@@ -6,14 +6,12 @@ Created on Sun Aug 21 20:47:17 2022
 @author: mens
 """
 
-# from basic_optics import Opt_Element, Beam, Ray, Lens, Propagation, Mirror
-# from basic_optics.freecad_models import warning, freecad_da, initialize_composition, add_to_composition
 from .ray import Ray
 from .beam import Beam
 from .optical_element import Opt_Element
-from .lens import Lens
-from .mirror import Mirror, Curved_Mirror
-from ..freecad_models import warning, freecad_da, initialize_composition, add_to_composition, make_to_ray_part,model_table
+# from .lens import Lens
+# from .mirror import Mirror, Curved_Mirror
+from ..freecad_models import warning, freecad_da, initialize_composition, add_to_composition
 import numpy as np
 from copy import deepcopy
 
@@ -40,10 +38,10 @@ class Composition(Opt_Element):
     self._beams = [self._lightsource]
     group_ls = self._lightsource.get_all_rays()
     counter = 0
-    for ray in group_ls:
-      ray.name = self._lightsource.name + "_" + str(counter)
-      counter += 1
-    self._ray_groups = [group_ls]
+    # for ray in group_ls:
+    #   ray.name = self._lightsource.name + "_" + str(counter)
+    #   counter += 1
+    # self._ray_groups = [group_ls]
     self._catalogue = {}
     self._drawing_part = -1
     self.non_opticals = []
@@ -61,8 +59,6 @@ class Composition(Opt_Element):
     """
     end_of_axis = self._optical_axis[-1]
     end_of_axis.length += x
-    # self._last_geom = (end_of_axis.endpoint(), end_of_axis.normal)
-    # self._matrix = np.matmul( np.array([[1,x], [0,1]]), self._matrix) #braucht keine Sau
     self._last_prop = x #endet mit Propagation
 
   def last_geom(self):
@@ -165,7 +161,6 @@ class Composition(Opt_Element):
     # self.recompute_optical_axis()
 
 
-
   def compute_beams(self, external_source=None):
     beamcount = 0
     if external_source:
@@ -180,7 +175,6 @@ class Composition(Opt_Element):
         beamcount += 1
         beam.name = self.name + "_beam_" + str(beamcount)
         beamlist.append(beam)
-    # beam.set_length(self._last_prop)
     beamlist[-1].set_length(self._last_prop)
     if not external_source:
       self._beams = beamlist
@@ -199,10 +193,6 @@ class Composition(Opt_Element):
     return self.__container_to_part(self._elements_part, container)
 
   def draw_beams(self):
-  # def draw_beams(self, style="cone"):
-    # liso = self._lightsource
-    # if liso._distribution == "cone":
-    #   liso.draw_dict["model"] = style
     self.__init_parts()
     self.compute_beams()
     container = []
@@ -219,19 +209,10 @@ class Composition(Opt_Element):
       container.append(obj)
     return self.__container_to_part(self._mounts_part, container)
 
-
-  # def draw_rays(self):
-  #   """
-  #   DEPRECATED, use self._lightsource.draw_dict["model"] = "ray_group" instead
-  #   """
-  #   return self.draw_beams(style="ray_group")
-
-
   def draw(self):
     self.draw_elements()
     self.draw_beams()
     self.draw_mounts()
-    # self.draw_rays()
 
   def __container_to_part(self, part, container):
     if freecad_da:
@@ -244,19 +225,20 @@ class Composition(Opt_Element):
   def __init_parts(self):
     if self._drawing_part == -1:
       if freecad_da:
-        d,e,m,b,r = initialize_composition(self.name)
+        # d,e,m,b,r = initialize_composition(self.name)
+        d,e,m,b = initialize_composition(self.name)
         self._drawing_part = d
         self._elements_part = e
         self._mounts_part = m
         self._beams_part = b
-        self._rays_part = r
+        # self._rays_part = r
       else:
         self._elements_part = []
         self._mounts_part = []
-        self._rays_part = []
+        # self._rays_part = []
         self._beams_part = []
-        self._drawing_part = [self._elements_part, self._mounts_part,
-                                self._rays_part, self._beams_part]
+        # self._drawing_part = [self._elements_part, self._mounts_part, self._rays_part, self._beams_part]
+        self._drawing_part = [self._elements_part, self._mounts_part, self._beams_part]
 
 
   def set_light_source(self, ls):
@@ -276,7 +258,7 @@ class Composition(Opt_Element):
     for ray in group_ls:
       ray.name = self._lightsource.name + "_" + str(counter)
       counter += 1
-    self._ray_groups = [group_ls]
+    # self._ray_groups = [group_ls]
 
 
   def new_catalogue_entry(self, item):
@@ -298,7 +280,6 @@ class Composition(Opt_Element):
     if item in self._elements:
       warning("Das Element -" + str(item) + "- wurde bereits in <" +
             self.name + "> eingefügt.")
-    # item.group.append(self)
 
   def _pos_changed(self, old_pos, new_pos):
     """
@@ -310,7 +291,7 @@ class Composition(Opt_Element):
     self._rearange_subobjects_pos(old_pos, new_pos, self._elements)
     self._rearange_subobjects_pos(old_pos, new_pos, [self._lightsource]) #sonst wird ls doppelt geshifted
     self._rearange_subobjects_pos(old_pos, new_pos, self._beams[1::])
-    self._rearange_subobjects_pos(old_pos, new_pos, [r for rg in self._ray_groups[1::] for r in rg])
+    # self._rearange_subobjects_pos(old_pos, new_pos, [r for rg in self._ray_groups[1::] for r in rg])
     self._rearange_subobjects_pos(old_pos, new_pos, self._optical_axis)
     self._rearange_subobjects_pos(old_pos, new_pos, self.non_opticals)
 
@@ -325,7 +306,7 @@ class Composition(Opt_Element):
     self._rearange_subobjects_axes(old_axes, new_axes, [self._lightsource]) #sonst wird ls doppelt geshifted
     self._rearange_subobjects_axes(old_axes, new_axes, self._elements)
     self._rearange_subobjects_axes(old_axes, new_axes, self._beams[1::])
-    self._rearange_subobjects_axes(old_axes, new_axes, [r for rg in self._ray_groups[1::] for r in rg])
+    # self._rearange_subobjects_axes(old_axes, new_axes, [r for rg in self._ray_groups[1::] for r in rg])
     self._rearange_subobjects_axes(old_axes, new_axes, self._optical_axis)
     self._rearange_subobjects_axes(old_axes, new_axes, self.non_opticals)
 
@@ -343,90 +324,4 @@ def next_name(name, prefix=""):
   return prefix + name[0:ind] + "_" + suffix
 
 
-# def Composition_lens_test():
-#   fok = 100
-#   beam1 = Beam(3, 0.02)
-#   p1 = Propagation(d=1.5*fok)
-#   l1 = Lens(f=fok)
-#   p2 = Propagation(d=3*fok)
 
-#   vergAbb = Composition_old(name="VergrAbb")
-#   vergAbb._lightsource = beam1
-#   vergAbb.add(p1)
-#   vergAbb.add(l1)
-#   vergAbb.add(p2)
-# #   vergAbb.add(p2) # kann eingeschaltet werden um Warnung zu triggern
-# #   beams = vergAbb.compute_beams()
-#   return vergAbb
-
-# def Teleskop_test():
-#   fok = 120
-#   # beam1 = Beam(1, 0.05)
-#   beam1 = Beam(2.0, 0.0)
-#   p1 = Propagation(d=fok)
-#   l1 = Lens(f=fok)
-#   p2 = Propagation(d=2*fok)
-#   l2 = Lens(f=fok)
-#   p3 = Propagation(d=fok)
-
-#   teles = Composition_old(name="Teleskop")
-#   teles._lightsource = beam1
-#   teles.add(p1)
-#   teles.add(l1)
-#   teles.add(p2)
-#   teles.add(l2)
-#   teles.add(p3)
-# #   teles.add(p2) # kann eingeschaltet werden um Warnung zu triggern
-# #   beams = teles.compute_beams()
-#   return teles
-
-
-# def Composition_mirror_test():
-#   a = Composition_old(name="4FlipTrip")
-#   r = Beam(radius=4, angle=0)
-# #   r = Beam(radius=4, angle=0, pos = (0, 0, 85))
-#   a._lightsource = r
-#   m = Mirror(phi=90)
-#   p = Propagation(d=300)
-#   m2 = Mirror(phi=90)
-#   p2 = Propagation(d=300)
-#   m3 = Mirror(phi=90)
-#   p3 = Propagation(d=300)
-#   p4 = Propagation(d=300)
-#   a.add(p)
-#   a.add(m)
-#   a.add(p2)
-#   a.add(m2)
-#   a.add(p3)
-#   a.add(m3)
-#   a.add(p4)
-
-# #   a.draw()
-# #   a.compute_beams()
-#   #a.draw_mounts()
-#   return a
-
-# def Mirror_Teleskop_test():
-#   c = Composition_old(name="MirrorTelescope")
-#   ls = Beam(angle=0)
-#   p1 = Propagation(d=100)
-#   cm1 = Curved_Mirror(radius=100, phi=180-10)
-#   p2 = Propagation(d=100)
-#   cm2 = Curved_Mirror(radius=100, phi=10-180)
-#   p3 = Propagation(d=100)
-
-#   c._lightsource = ls
-#   c.add(p1)
-#   c.add(cm1)
-#   c.add(p2)
-#   c.add(cm2)
-#   c.add(p3)
-#   return c
-
-# def add_only_elem_test():
-#   comp = Composition_old()
-#   lens1 = Lens(f=200, pos=(100, 0, 80))
-#   lens2 = Lens(f=200, pos=(500, 0, 80))
-#   comp.add_only_elm(lens1)
-#   comp.add_only_elm(lens2)
-#   return comp

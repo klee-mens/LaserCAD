@@ -6,17 +6,17 @@ Created on Wed Aug 24 12:48:34 2022
 """
 
 
-import sys
+# import sys
 # sys.path.append(u'/home/mens/Nextcloud/FreeCAD/opticslib2/basic_objects/freecad_models')
 # sys.path.append(u"C:/Users/mens/Nextcloud/FreeCAD/opticslib2/basic_objects/freecad_models")
 
 # from .utils import freecad_da, update_geom_info
-from .utils import freecad_da, update_geom_info, get_DOC
-if freecad_da:
-  from FreeCAD import Vector
-  import Part
-  import Sketcher
-  from math import pi
+from .utils import get_DOC
+# if freecad_da:
+  # from FreeCAD import Vector
+  # import Part
+  # import Sketcher
+  # from math import pi
   
   
 def initialize_composition_old(name="compostion"):
@@ -45,11 +45,12 @@ def initialize_composition(name="compostion"):
   beams_part.adjustRelativeLinks(mainpart)
   mainpart.addObject(beams_part)
   
-  rays_part = DOC.addObject('App::Part', name+"_rays")
-  rays_part.Label = name+"_rays"
-  rays_part.adjustRelativeLinks(mainpart)
-  mainpart.addObject(rays_part)
-  return (mainpart, elements_part, mounts_part, beams_part, rays_part)
+  # rays_part = DOC.addObject('App::Part', name+"_rays")
+  # rays_part.Label = name+"_rays"
+  # rays_part.adjustRelativeLinks(mainpart)
+  # mainpart.addObject(rays_part)
+  # return (mainpart, elements_part, mounts_part, beams_part, rays_part)
+  return (mainpart, elements_part, mounts_part, beams_part)
 
 
 def add_to_composition(part, container):
@@ -61,14 +62,14 @@ def add_to_composition(part, container):
       obj.adjustRelativeLinks(part)
       part.addObject(obj)
 
-def make_to_ray_part(name, part, container):
-  DOC = get_DOC()
-  name += "_rays"
-  counter = 0
-  sub_parts= []
-  for raygroup in container:
-    counter += 1
-    subpart = DOC.addObject("App::Part", name+"_"+str(counter))
-    add_to_composition(subpart, raygroup)
-    sub_parts.append(subpart)
-  add_to_composition(part, sub_parts)
+# def make_to_ray_part(name, part, container):
+#   DOC = get_DOC()
+#   name += "_rays"
+#   counter = 0
+#   sub_parts= []
+#   for raygroup in container:
+#     counter += 1
+#     subpart = DOC.addObject("App::Part", name+"_"+str(counter))
+#     add_to_composition(subpart, raygroup)
+#     sub_parts.append(subpart)
+#   add_to_composition(part, sub_parts)

@@ -6,7 +6,6 @@ Created on Sat Aug 20 14:48:12 2022
 @author: mens
 """
 
-# from basic_optics import Geom_Object, Ray, TOLERANCE, Beam
 from .geom_object import Geom_Object, TOLERANCE
 from .ray import Ray
 from .beam import Beam, Gaussian_Beam
@@ -35,14 +34,15 @@ class Opt_Element(Geom_Object):
   def __init__(self, **kwargs):
     super().__init__(**kwargs)
     self._matrix = np.eye(2)
-    self.aperture = 1*inch # Apertur in mm, wichtig für Klippingabfrage
+    self.aperture = 1*inch # Apertur in mm, wichtig für Klippingabfrage (not yet implemented)
     self.length = 0 #Länge in mm, die meisten opt Elemente sind 2D, also 0
-    self.group = [] # falls das Element in eine Baugruppe eingesetzt wird
+    # self.group = [] # falls das Element in eine Baugruppe eingesetzt wird
     #Parameter zum zeichnen
-    self.draw_dict.update({"dia":self.aperture, "thickness":5,
-                           "model_type":"DEFAULT", "mount_type": "default",
+    self.draw_dict.update({"dia":self.aperture, 
+                           "thickness":5,
+                           "model_type":"DEFAULT", 
+                           "mount_type": "default",
                            "mount_name": self.name+"_mount"})
-    # self.interacts_with_rays = True
 
   def matrix(self):
     return np.array(self._matrix)

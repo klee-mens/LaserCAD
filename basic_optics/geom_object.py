@@ -6,12 +6,8 @@ Created on Thu Aug 18 10:46:05 2022
 """
 
 import numpy as np
-# from basic_optics.freecad_models import freecad_da
 from .constants import TOLERANCE, NAME0, NORM0, POS0
 from .. freecad_models import freecad_da
-
-
-
 
 
 
@@ -99,7 +95,8 @@ class Geom_Object(object):
     self._axes = np.eye(3)
     # das eigene Kordinatensystem, die erste Spalte ist immer die Normale
     self._axes = self._updated_axes(normal, NORM0)
-    self.draw_dict = {"name": self.name, "geom":self.get_geom()} #für die Cosmetics
+    # the raw_dict contains all important parameters for the FreeCAD models
+    self.draw_dict = {"name": self.name, "geom":self.get_geom()} 
 
 
   @property
@@ -221,12 +218,11 @@ class Geom_Object(object):
     vec = obj.normal
     c = np.cross(self.normal, vec)
     abs_c = np.linalg.norm(c)
-    if abs_c > 1: #because you now rounding errors and stuff
+    if abs_c > 1: #because you know rounding errors and stuff
       abs_c = 1
     elif abs_c < -1:
       abs_c = -1
     sign = 1 if np.sum(c * self._axes[:,1]) >= 0 else -1
-    # print("SINUS:", np.linalg.norm(c))
     return np.arcsin(abs_c)*sign
 
   def rotate(self, vec, phi):
@@ -253,7 +249,6 @@ class Geom_Object(object):
 
     """
     rot_mat = rotation_matrix(vec, phi)
-    # print(rot_mat)
     new_ax = np.matmul(rot_mat, self._axes)
     self.set_axes(new_ax)
 
@@ -350,14 +345,9 @@ class Geom_Object(object):
     "drawn", i.e. all relevant parameters from the <draw_dict> will be
     by text, returns the text as str
     """
-#     txt = "Das geometrische Objekt <" + self.name + "> wird an die Position "
-    # txt = "Das Objekt <" + self.class_name() + ":" +self.name
     txt = "The geometric object <" + self.class_name() + ":" + self.name
-    # txt += "> wird an die Position "
     txt += "> is drawn to the position"
-    # txt += vec2str(self.pos) + " mit der Ausrichtung " + vec2str(self.normal)
     txt += vec2str(self.pos) + " with the direction " + vec2str(self.normal)
-    # txt += " gezeichnet."
     return txt
 
   def _pos_changed(self, old_pos, new_pos):
@@ -424,19 +414,7 @@ class Geom_Object(object):
     delta_pos = new_pos - old_pos
     for obj in objs:
       obj.pos += delta_pos
-
-  # def is_equal(self, obj):
-  #   """
-  #   checkt ob <self> und obj äquivalent sind, also ob sie die gleichen Einträge
-  #   haben
-  #   returns True/False
-  #   """
-  #   d1 = self.__dict__
-  #   d2 = obj.__dict__
-  #   res = True
-  #   for key in d1.keys():
-  #     res &= np.all( d1[key] == d2[key] )
-  #   return res
+      
 
 
 def tests():

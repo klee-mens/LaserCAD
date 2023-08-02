@@ -178,6 +178,9 @@ class Beam(Geom_Object):
     self._rays = rays
     self._axes = rays[0].get_axes()
     self._pos = rays[0].pos
+    for n in range(len(rays)):
+      rays[n].name = self.name + "_ray" + str(n)
+    rays[0].name = self.name + "_middle_ray"
 
   def __repr__(self):
     radius, angle = self.radius_angle()
