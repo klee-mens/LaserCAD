@@ -57,6 +57,7 @@ faraday_isolator_6mm.pos = start_point + np.array((45,0,0))
 seed_beam = Beam(angle=0, radius=seed_beam_radius, pos=start_point)
 
 Seed = Composition(name="Seed")
+Seed.normal = (1,2,0)
 Seed.pos = start_point
 Seed.set_light_source(seed_beam)
 Seed.add_on_axis(seed_laser)
@@ -331,24 +332,18 @@ def Make_Amplifier_I():
   amp1.compute_eigenmode()
   return amp1
 
-# PulsePicker.normal = (1,2,0)
 
 pp_last_pos, pp_last_ax = PulsePicker.last_geom()
 helper = Beam()
 helper.set_geom(PulsePicker.last_geom())
+h = helper.normal
+h[2] = 0
+helper.normal = h
+
 
 Amplifier_I = Make_Amplifier_I()
-Amplifier_I.compute_beams()
-amp_beams = Amplifier_I._beams
-in_beam = amp_beams[1]
-
-
-phi = in_beam.angle_to(helper)
-Amplifier_I.rotate((0,0,1), -phi)
-amp_beams = Amplifier_I._beams
-in_beam = amp_beams[1]
-in_pos, in_ax = in_beam.get_geom()
-Amplifier_I.pos += pp_last_pos - in_pos
+Amplifier_I.set_input_coupler_index(3)
+Amplifier_I.set_geom(PulsePicker.last_geom())
 
 # =============================================================================
 # Pump Amp1
@@ -379,9 +374,9 @@ Pump.propagate(190)
 
 Seed.draw()
 Stretcher.draw()
-# PulsePicker.draw()
-# Amplifier_I.draw()
-# Pump.draw()
+PulsePicker.draw()
+Amplifier_I.draw()
+Pump.draw()
 
 if freecad_da:
   setview()
