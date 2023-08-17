@@ -331,9 +331,21 @@ class Gaussian_Beam(Ray):
     return model_Gaussian_beam(name=self.name, q_para=self.q_para,
                                wavelength=self.wavelength,prop=self.length,
                                geom_info=self.get_geom())
-
-
-
+  
+  def radius(self):
+    z = np.real(self.q_para)
+    zr = np.imag(self.q_para)
+    return self.waist() * np.sqrt(1 + (z/zr)**2)
+  
+  def divergence(self):
+    z = np.real(self.q_para)
+    zr = np.imag(self.q_para)
+    return np.sign(z) * self.waist() / zr
+    
+  def transform_to_cone_beam(self):
+    cone = Beam(name=self.name, radius=self.radius(), angle=self.divergence())
+    cone.set_geom(self.get_geom())
+    return cone
 
 if __name__ == "__main__":
   b = Beam(name = "Strahlo", radius=2)

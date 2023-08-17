@@ -65,12 +65,19 @@ class LinearResonator(Composition):
 
     """
     self._input_coupler_index = index
+    self.compute_beams()
     if forward:
-      direction = self._optical_axis[index].get_axes()
+      direction = self._beams[index].get_axes()
     else:
       helper = Gaussian_Beam()
-      helper.normal = - self._optical_axis[index].normal
+      helper.normal = - self._beams[index-1].normal
       direction = helper.get_axes()
+    # if forward:
+    #   direction = self._optical_axis[index].get_axes()
+    # else:
+    #   helper = Gaussian_Beam()
+    #   helper.normal = - self._optical_axis[index].normal
+    #   direction = helper.get_axes()
     rot_mat = np.linalg.inv(direction)
     self.set_axes(rot_mat)
     old_pos = self._elements[index].pos
@@ -138,3 +145,18 @@ class LinearResonator(Composition):
     self.compute_eigenmode()
     self.set_sequence([x for x in range(1, len(self._elements)-1)])
     super().compute_beams(external_source)
+    
+  def transform_gauss_to_cone_beams(self):
+    self.compute_beams()
+    cones = []
+    for gb in self._beams:
+      cones.append( gb.transform_to_cone_beam() )
+    return cones
+
+  def draw_with_cones(self):
+    self.draw_elements()
+    self.draw_mounts()
+    self.compute_beams()
+    cones = self.transform_gauss_to_cone_beams()
+    for cone in cones:
+      cone.draw()

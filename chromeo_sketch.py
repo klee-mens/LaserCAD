@@ -272,24 +272,27 @@ def Make_Amplifier_I():
   tfp_angle = 65
   tfp_aperture = 2*inch
   angle_on_sphere = 10
-  alpha = -8
-  beta = -0.1
+  alpha = -0.8
+  beta = -0.8
   print("g1*g2 = ", alpha*beta)
-  focal = 250
+  focal = 500
   dist1 = (1-alpha)*focal
   dist2 = (1-beta)*focal
   wavelength = 2400*1e-6
-  frac1 = 0.6
-  frac2 = 0.04
-  frac3 = 0.05
-  frac4 = 0.02
-  frac5 = 1 - frac1 - frac2 - frac3 - frac4
+  
+  # geometric restrictions
+  dist_tfp1_2 = 230
+  dist_tfp1_pockels = 50
+  dist_pockels_lambda = 115
+  dist_tfp2_sphere = 400
+  dist_m1_tfp1 = dist1 - dist_tfp1_2 - dist_tfp2_sphere
+  dist_crystal_end = 15
 
   mir1 = Mirror(phi=180)
-  TFP1 = Mirror(phi= 180 - 2*tfp_angle)
+  TFP1 = Mirror(phi= 180 - 2*tfp_angle, name="TFP1")
   TFP1.draw_dict["color"] = (1.0, 0.0, 2.0)
   TFP1.aperture = tfp_aperture
-  TFP2 = Mirror(phi= - 180 + 2*tfp_angle)
+  TFP2 = Mirror(phi= - 180 + 2*tfp_angle, name="TFP2")
   TFP2.draw_dict["color"] = (1.0, 0.0, 2.0)
   TFP2.aperture = tfp_aperture
   mir4 = Mirror(phi=180)
@@ -308,17 +311,17 @@ def Make_Amplifier_I():
   amp1 = LinearResonator(name="foldedRes")
   amp1.set_wavelength(wavelength)
   amp1.add_on_axis(mir1)
-  amp1.propagate(dist1*frac1)
+  amp1.propagate(dist_m1_tfp1)
   amp1.add_on_axis(TFP1)
-  amp1.propagate(dist1*frac2)
+  amp1.propagate(dist_tfp1_pockels)
   amp1.add_on_axis(PockelsCell)
-  amp1.propagate(dist1*frac3)
+  amp1.propagate(dist_pockels_lambda)
   amp1.add_on_axis(Lambda2)
-  amp1.propagate(dist1*frac4)
+  amp1.propagate(dist_tfp1_2-dist_tfp1_pockels-dist_pockels_lambda)
   amp1.add_on_axis(TFP2)
-  amp1.propagate(dist1*frac5)
+  amp1.propagate(dist_tfp2_sphere)
   amp1.add_on_axis(cm)
-  amp1.propagate(dist2*0.9)
+  amp1.propagate(dist2 - dist_crystal_end)
 
 
   crystal = Beam(radius=3, angle=0)
@@ -326,7 +329,7 @@ def Make_Amplifier_I():
   crystal.set_length(10)
 
   amp1.add_on_axis(crystal)
-  amp1.propagate(dist2*0.1)
+  amp1.propagate(dist_crystal_end)
   amp1.add_on_axis(mir4)
 
   amp1.compute_eigenmode()
@@ -342,8 +345,9 @@ helper.normal = h
 
 
 Amplifier_I = Make_Amplifier_I()
-Amplifier_I.set_input_coupler_index(3)
+Amplifier_I.set_input_coupler_index(1)
 Amplifier_I.set_geom(PulsePicker.last_geom())
+
 
 # =============================================================================
 # Pump Amp1
@@ -355,7 +359,7 @@ pump_light = Beam(radius=0.2, angle=0.03)
 pump_light.draw_dict["color"] = (1.0, 1.0, 0.0)
 Pump.set_light_source(pump_light)
 Pump.propagate(120)
-PumpMirror = Mirror(phi=-90)
+PumpMirror = Mirror(phi=90)
 Pump.add_on_axis(PumpMirror)
 Pump.propagate(90)
 PumpLens = Lens(f=120+90)
@@ -372,11 +376,19 @@ Pump.propagate(190)
 # Draw Selection
 # =============================================================================
 
-Seed.draw()
-Stretcher.draw()
+# Seed.draw()
+# Stretcher.draw()
 PulsePicker.draw()
 Amplifier_I.draw()
-Pump.draw()
+# Pump.draw()
+Amplifier_I.pos += (0,0,300)
+# Amplifier_I.transform_gauss_to_cone_beams()
+# Amplifier_I.draw_with_cones()
+
+from LaserCAD.moduls.type_II_Amplifier import Make_Amplifier_Typ_II_Juergen
+
+#amp2 = Make_Amplifier_Typ_II_Juergen()
+#amp2.draw()
 
 if freecad_da:
   setview()
