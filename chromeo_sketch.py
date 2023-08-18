@@ -378,17 +378,24 @@ Pump.propagate(190)
 
 # Seed.draw()
 # Stretcher.draw()
-PulsePicker.draw()
+# PulsePicker.draw()
 Amplifier_I.draw()
 # Pump.draw()
-Amplifier_I.pos += (0,0,300)
-# Amplifier_I.transform_gauss_to_cone_beams()
-# Amplifier_I.draw_with_cones()
+#Amplifier_I.pos += (0,0,300)
+Amplifier_I.draw_dict["beam_model"] = "cone"
+Amplifier_I.draw()
 
 from LaserCAD.moduls.type_II_Amplifier import Make_Amplifier_Typ_II_Juergen
+from LaserCAD.basic_optics.beam import Gaussian_Beam
 
-#amp2 = Make_Amplifier_Typ_II_Juergen()
-#amp2.draw()
+#gb = Gaussian_Beam()
+#gb.draw()
+#gb.draw_dict["model"] = "cone"
+#gb.pos += (0,50, 0)
+#gb.draw()
+
+# amp2 = Make_Amplifier_Typ_II_Juergen()
+# amp2.draw()
 
 if freecad_da:
   setview()

@@ -24,6 +24,7 @@ class LinearResonator(Composition):
     self._output_coupler_index = 0
     self._input_coupler_index = 0
     self.wavelength = 1030e-6 #Yb in mm
+    self.draw_dict["beam_model"] = "Gaussian"
 
   def add_output_coupler(self, item):
     if type(item) == type(Mirror()):
@@ -72,12 +73,6 @@ class LinearResonator(Composition):
       helper = Gaussian_Beam()
       helper.normal = - self._beams[index-1].normal
       direction = helper.get_axes()
-    # if forward:
-    #   direction = self._optical_axis[index].get_axes()
-    # else:
-    #   helper = Gaussian_Beam()
-    #   helper.normal = - self._optical_axis[index].normal
-    #   direction = helper.get_axes()
     rot_mat = np.linalg.inv(direction)
     self.set_axes(rot_mat)
     old_pos = self._elements[index].pos
@@ -145,6 +140,9 @@ class LinearResonator(Composition):
     self.compute_eigenmode()
     self.set_sequence([x for x in range(1, len(self._elements)-1)])
     super().compute_beams(external_source)
+    for beam in self._beams:
+      beam.draw_dict["model"] = self.draw_dict["beam_model"]
+        
     
   def transform_gauss_to_cone_beams(self):
     self.compute_beams()
@@ -153,10 +151,12 @@ class LinearResonator(Composition):
       cones.append( gb.transform_to_cone_beam() )
     return cones
 
-  def draw_with_cones(self):
-    self.draw_elements()
-    self.draw_mounts()
-    self.compute_beams()
-    cones = self.transform_gauss_to_cone_beams()
-    for cone in cones:
-      cone.draw()
+    
+
+  # def draw_with_cones(self):
+  #   self.draw_elements()
+  #   self.draw_mounts()
+  #   self.compute_beams()
+  #   cones = self.transform_gauss_to_cone_beams()
+  #   for cone in cones:
+  #     cone.draw()

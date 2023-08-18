@@ -312,6 +312,7 @@ class Gaussian_Beam(Ray):
     self.wavelength = wavelength
     self.q_para = q_para
     self._distribution = "Gaussian"
+    self.draw_dict["model"] = "Gaussian"
 
   def set_length(self, length):
     # needed for consitency in next_beam function
@@ -328,9 +329,19 @@ class Gaussian_Beam(Ray):
     return txt
 
   def draw_fc(self):
-    return model_Gaussian_beam(name=self.name, q_para=self.q_para,
-                               wavelength=self.wavelength,prop=self.length,
-                               geom_info=self.get_geom())
+    if self.draw_dict["model"] == "Gaussian":
+      return model_Gaussian_beam(name=self.name, q_para=self.q_para,
+                                 wavelength=self.wavelength,prop=self.length,
+                                 geom_info=self.get_geom())
+    if self.draw_dict["model"] == "cone":
+      # quicker method with nearly the same look in most cases
+      radius = self.radius()
+      focal_length = - radius / self.divergence()
+      col = (244/255, 22/255, 112/255)
+      return model_beam(dia=2*radius, prop=self.length, f=focal_length,
+                        geom_info=self.get_geom(), color=col, **self.draw_dict)
+    else:
+      return -1
   
   def radius(self):
     z = np.real(self.q_para)
@@ -345,6 +356,7 @@ class Gaussian_Beam(Ray):
   def transform_to_cone_beam(self):
     cone = Beam(name=self.name, radius=self.radius(), angle=self.divergence())
     cone.set_geom(self.get_geom())
+    cone.set_length(self.length)
     return cone
 
 if __name__ == "__main__":
