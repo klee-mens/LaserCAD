@@ -96,7 +96,7 @@ class Geom_Object(object):
     # das eigene Kordinatensystem, die erste Spalte ist immer die Normale
     self._axes = self._updated_axes(normal, NORM0)
     # the raw_dict contains all important parameters for the FreeCAD models
-    self.draw_dict = {"name": self.name, "geom":self.get_geom()} 
+    self.draw_dict = {"name": self.name, "geom":self.get_geom()}
 
 
   @property
@@ -335,6 +335,7 @@ class Geom_Object(object):
     #ToDo: fürs Debugging hier einfach einen Zylinder mit norm uns k zeichnen
     return None
 
+
   def draw_text(self):
     """
     falls FreeCAD nicht zur Verfügung steht, wird das Objekt in die Konsole
@@ -414,7 +415,7 @@ class Geom_Object(object):
     delta_pos = new_pos - old_pos
     for obj in objs:
       obj.pos += delta_pos
-      
+
 
 
 def tests():

@@ -8,7 +8,8 @@ Created on Sun Aug 21 20:47:17 2022
 
 from .ray import Ray
 from .beam import Beam
-from .optical_element import Opt_Element
+# from .optical_element import Opt_Element
+from .geom_object import Geom_Object
 # from .lens import Lens
 # from .mirror import Mirror, Curved_Mirror
 from ..freecad_models import warning, freecad_da, initialize_composition, add_to_composition
@@ -16,7 +17,8 @@ import numpy as np
 from copy import deepcopy
 
 
-class Composition(Opt_Element):
+# class Composition(Opt_Element):
+class Composition(Geom_Object):
   """
   Komposition von Elementen, besitzt optical Axis die mit jedem Element und
   jedem .propagate erweitert wird und sequence, die die Reihenfolge der

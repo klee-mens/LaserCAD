@@ -19,7 +19,7 @@ if not pfad in sys.path:
 
 
 from LaserCAD.freecad_models import clear_doc, setview, freecad_da
-from LaserCAD.basic_optics import Mirror, Beam, Composition, inch, Curved_Mirror, Ray, Geom_Object
+from LaserCAD.basic_optics import Mirror, Beam, Composition, inch, Curved_Mirror, Ray, Geom_Object, Component
 from LaserCAD.basic_optics import Grating, Opt_Element
 import matplotlib.pyplot as plt
 from LaserCAD.freecad_models.utils import thisfolder, load_STL
@@ -36,7 +36,7 @@ distance_seed_laser_stretcher = 400 #the complete distance
 distance_6_mm_faraday = 45
 distance_faraday_mirror = 100
 
-seed_laser = Geom_Object(name="IPG_Seed_Laser")
+seed_laser = Component(name="IPG_Seed_Laser")
 # seed_laser.pos = start_point
 
 stl_file=thisfolder+"\mount_meshes\special mount\Laser_Head-Body.stl"
@@ -279,7 +279,7 @@ def Make_Amplifier_I():
   dist1 = (1-alpha)*focal
   dist2 = (1-beta)*focal
   wavelength = 2400*1e-6
-  
+
   # geometric restrictions
   dist_tfp1_2 = 230
   dist_tfp1_pockels = 50
