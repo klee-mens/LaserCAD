@@ -376,11 +376,11 @@ Pump.propagate(190)
 # Draw Selection
 # =============================================================================
 
-# Seed.draw()
-# Stretcher.draw()
-# PulsePicker.draw()
+Seed.draw()
+Stretcher.draw()
+PulsePicker.draw()
 Amplifier_I.draw()
-# Pump.draw()
+Pump.draw()
 #Amplifier_I.pos += (0,0,300)
 Amplifier_I.draw_dict["beam_model"] = "cone"
 Amplifier_I.draw()
