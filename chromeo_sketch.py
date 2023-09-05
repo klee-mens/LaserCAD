@@ -344,9 +344,84 @@ h[2] = 0
 helper.normal = h
 
 
-Amplifier_I = Make_Amplifier_I()
-Amplifier_I.set_input_coupler_index(1)
+
+
+
+
+
+
+
+# =============================================================================
+# simple Amp1
+# =============================================================================
+# calculus
+A_target = 4.908738521234052 #from gain simlutation
+focal = 2500 
+lam_mid = 2.4e-3
+A_natural = lam_mid * focal
+geometrie_factor = A_target / A_natural
+total_length = focal * (1 - np.sqrt(1 - geometrie_factor**2))
+
+# design params
+dist_mir_pz = 20
+dist_pz_lambda = 115
+dist_lambda_tfp = 70
+dist_tfp_fold1 = 65
+last = total_length - dist_mir_pz - dist_pz_lambda - dist_lambda_tfp -dist_tfp_fold1
+tfp_aperture = 2*inch
+tfp_angle = 65
+
+# optics
+
+mir1 = Mirror(phi=180)
+TFP1 = Mirror(phi= 180 - 2*tfp_angle, name="TFP1")
+TFP1.draw_dict["color"] = (1.0, 0.0, 2.0)
+TFP1.aperture = tfp_aperture
+
+cm = Curved_Mirror(radius=focal*2, phi = 180)
+PockelsCell = Opt_Element(name="PockelZelleRes1")
+# Pockels cell is pure cosmetics
+stl_file=thisfolder+"\mount_meshes\special mount\pockels_cell_easy_steal-Body.stl"
+PockelsCell.draw_dict["stl_file"]=stl_file
+color = (239/255, 239/255, 239/255)
+PockelsCell.draw_dict["color"]=color
+PockelsCell.freecad_model = load_STL
+Lambda2 = Lam_Plane()
+
+fold1 = Mirror(phi=90)
+
+simres = LinearResonator(name="simple_Resonator1")
+simres.set_wavelength(lam_mid)
+simres.add_on_axis(mir1)
+simres.propagate(dist_mir_pz)
+simres.add_on_axis(PockelsCell)
+simres.propagate(dist_pz_lambda)
+simres.add_on_axis(Lambda2)
+simres.propagate(dist_lambda_tfp)
+simres.add_on_axis(TFP1)
+simres.propagate(dist_tfp_fold1)
+simres.add_on_axis(fold1)
+simres.propagate(last)
+simres.add_on_axis(cm)
+
+simres.compute_eigenmode()
+# simres.draw()
+
+
+
+
+
+
+
+
+
+
+
+# Amplifier_I = Make_Amplifier_I()
+Amplifier_I = simres
+Amplifier_I.set_input_coupler_index(1, False)
 Amplifier_I.set_geom(PulsePicker.last_geom())
+
 
 
 # =============================================================================
@@ -380,10 +455,12 @@ Seed.draw()
 Stretcher.draw()
 PulsePicker.draw()
 Amplifier_I.draw()
-Pump.draw()
-#Amplifier_I.pos += (0,0,300)
-Amplifier_I.draw_dict["beam_model"] = "cone"
+# Pump.draw()
+# Amplifier_I.draw_dict["beam_model"] = "cone"
 Amplifier_I.draw()
+
+
+
 
 from LaserCAD.moduls.type_II_Amplifier import Make_Amplifier_Typ_II_Juergen
 from LaserCAD.basic_optics.beam import Gaussian_Beam
