@@ -21,31 +21,76 @@ class LinearResonator(Composition):
   """
   def __init__(self, **kwargs):
     super().__init__(**kwargs)
-    self._outputcoupler_index = 0
+    self._output_coupler_index = 0
+    self._input_coupler_index = 0
     self.wavelength = 1030e-6 #Yb in mm
 
-  def add_outputcoupler(self, item):
+  def add_output_coupler(self, item):
     if type(item) == type(Mirror()):
       self.add_on_axis(item)
-      self._outputcoupler_index = len(self._elements)-1
+      self._out_putcoupler_index = len(self._elements)-1
     else:
       print("Outputcoupler must be a mirror")
       return -1
 
-  def set_outputcoupler_index(self, index):
+  def set_output_coupler_index(self, index):
     if type(self._elements[index]) == type(Mirror()):
-      self._outputcoupler_index = index
+      self._output_coupler_index = index
     else:
       print("Outputcoupler must be a mirror")
       return -1
 
-    def set_wavelength(self, wavelength):
-      """
-      sets the own wavelength and thus the one of the lightsource and eigenmode
-      PARAMETER: wavelength in mm
-      """
-      self.wavelength = wavelength
-      self._lightsource.wavelength = wavelength
+  def set_input_coupler_index(self, index, forward=True):
+    """
+    sets the index for the input coupler if the resonator is used as an regen-
+    erative amplifier. 
+    (Should best be used after all elements have been inserted)
+    The optical Element[index] becomes the input coupler meaning that the next 
+    beams geom will be GEOM0 if forward is true. If not, than the beam before
+    will be the input beam with inverted geom.
+    All other elements will be turned accordingly and afterwards the geom of 
+    the whole resonator is reseted to GEOM0
+    
+
+    Parameters
+    ----------
+    index : integer in the range [0, len(self._elments)-1]
+      DESCRIPTION.
+    forward : bool, optional
+      DESCRIPTION. The default is True.
+
+    Returns
+    -------
+    None.
+
+    """
+    self._input_coupler_index = index
+    if forward:
+      direction = self._optical_axis[index].get_axes()
+    else:
+      helper = Gaussian_Beam()
+      helper.normal = - self._optical_axis[index].normal
+      direction = helper.get_axes()
+    rot_mat = np.linalg.inv(direction)
+    self.set_axes(rot_mat)
+    old_pos = self._elements[index].pos
+    self.pos += -old_pos
+    # reset to GEOM0
+    self._pos = np.zeros(3)
+    self._axes = np.eye(3)
+      
+  def output_beam(self):
+    self.compute_beams()
+    return self._beams[self._output_coupler_index-1]
+        
+
+  def set_wavelength(self, wavelength):
+    """
+    sets the own wavelength and thus the one of the lightsource and eigenmode
+    PARAMETER: wavelength in mm
+    """
+    self.wavelength = wavelength
+    self._lightsource.wavelength = wavelength
 
   def compute_eigenmode(self, start_index=0):
     """
@@ -80,7 +125,7 @@ class LinearResonator(Composition):
     gb00 = Gaussian_Beam(wavelength=self.wavelength) #der -1 strahl
     # gb00 = Beam(wavelength=self.wavelength, distribution="Gaussian") #der -1 strahl
     gb00.q_para = q_para
-    gb00.set_geom(self.get_geom())
+    gb00.set_geom(self._elements[0].get_geom())
     lsgb = self._elements[0].next_beam(gb00)
     self._lightsource = lsgb
     # set sequence for compute beams
