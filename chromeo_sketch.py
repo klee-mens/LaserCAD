@@ -23,6 +23,7 @@ from LaserCAD.basic_optics import Mirror, Beam, Composition, inch, Curved_Mirror
 from LaserCAD.basic_optics import Grating, Opt_Element
 import matplotlib.pyplot as plt
 from LaserCAD.freecad_models.utils import thisfolder, load_STL
+from LaserCAD.non_interactings import Faraday_Isolator, Pockels_Cell, Lambda_Plate
 
 if freecad_da:
   clear_doc()
@@ -37,7 +38,6 @@ distance_6_mm_faraday = 45
 distance_faraday_mirror = 100
 
 seed_laser = Component(name="IPG_Seed_Laser")
-# seed_laser.pos = start_point
 
 stl_file=thisfolder+"\mount_meshes\special mount\Laser_Head-Body.stl"
 seed_laser.draw_dict["stl_file"]=stl_file
@@ -45,21 +45,12 @@ color = (170/255, 170/255, 127/255)
 seed_laser.draw_dict["color"]=color
 seed_laser.freecad_model = load_STL
 
-faraday_isolator_6mm = Opt_Element(name="Faraday_Isolator")
-stl_file=thisfolder+"\mount_meshes\special mount\Faraday-Isolatoren-Body.stl"
-faraday_isolator_6mm.draw_dict["stl_file"]=stl_file
-color = (10/255, 20/255, 230/255)
-faraday_isolator_6mm.draw_dict["color"]=color
-faraday_isolator_6mm.freecad_model = load_STL
-
-faraday_isolator_6mm.pos = start_point + np.array((45,0,0))
-
-seed_beam = Beam(angle=0, radius=seed_beam_radius, pos=start_point)
+faraday_isolator_6mm = Faraday_Isolator()
 
 Seed = Composition(name="Seed")
 Seed.normal = (1,2,0)
 Seed.pos = start_point
-Seed.set_light_source(seed_beam)
+Seed.set_light_source(Beam(angle=0, radius=seed_beam_radius))
 Seed.add_on_axis(seed_laser)
 Seed.propagate(distance_6_mm_faraday)
 Seed.add_on_axis(faraday_isolator_6mm)
@@ -98,7 +89,7 @@ def Make_Stretcher_chromeo():
   delta_lamda = 200e-9*1e3 # full bandwith in mm
   number_of_rays = 20
   safety_to_stripe_mirror = 5 #distance first incomming ray to stripe_mirror in mm
-  periscope_height = 10
+  periscope_height = 15
   first_propagation = 20 # legnth of the first ray_bundle to flip mirror1 mm
   distance_flip_mirror1_grating = 300
   distance_roof_top_grating = 600
@@ -209,7 +200,7 @@ Stretcher.set_geom(seed_end_geom)
 # =============================================================================
 # The pulse picker
 # =============================================================================
-from LaserCAD.basic_optics.mirror import Lam_Plane
+# from LaserCAD.basic_optics.mirror import Lam_Plane
 
 tfp_angle = 65 #tfp angle of incidence in degree
 flip_mirror_push_down = 8 # distance to push the first mirror out ouf the seed beam
@@ -223,25 +214,17 @@ FlipMirror_pp = Mirror(phi=-90)
 PulsePicker.add_on_axis(FlipMirror_pp)
 FlipMirror_pp.pos += (0,0,flip_mirror_push_down)
 PulsePicker.propagate(200)
-Lambda2 = Lam_Plane()
+Lambda2 = Lambda_Plate()
 PulsePicker.add_on_axis(Lambda2)
 PulsePicker.propagate(310)
 Back_Mirror_PP = Mirror()
 PulsePicker.add_on_axis(Back_Mirror_PP)
 PulsePicker.propagate(30)
-Lambda4 = Lam_Plane()
+Lambda4 = Lambda_Plate()
 PulsePicker.add_on_axis(Lambda4)
 PulsePicker.propagate(30)
 
-PockelsCell = Opt_Element(name="PockelZellePulsPicker")
-# Pockels cell is pure cosmetics
-stl_file=thisfolder+"\mount_meshes\special mount\pockels_cell_easy_steal-Body.stl"
-PockelsCell.draw_dict["stl_file"]=stl_file
-color = (239/255, 239/255, 239/255)
-PockelsCell.draw_dict["color"]=color
-PockelsCell.freecad_model = load_STL
-
-PulsePicker.add_on_axis(PockelsCell)
+PulsePicker.add_on_axis( Pockels_Cell())
 
 PulsePicker.propagate(140)
 TFP_pp = Mirror(phi = -180+2*tfp_angle)
@@ -254,7 +237,7 @@ PulsePicker.propagate(250)
 FlipMirror2_pp = Mirror(phi=-90)
 PulsePicker.add_on_axis(FlipMirror2_pp)
 PulsePicker.propagate(200)
-Lambda2_2_pp = Lam_Plane()
+Lambda2_2_pp = Lambda_Plate()
 PulsePicker.add_on_axis(Lambda2_2_pp)
 PulsePicker.propagate(400)
 
@@ -297,16 +280,8 @@ def Make_Amplifier_I():
   TFP2.aperture = tfp_aperture
   mir4 = Mirror(phi=180)
   cm = Curved_Mirror(radius=focal*2, phi = 180 - angle_on_sphere)
-
-  PockelsCell = Opt_Element(name="PockelZellePulsPicker")
-  # Pockels cell is pure cosmetics
-  stl_file=thisfolder+"\mount_meshes\special mount\pockels_cell_easy_steal-Body.stl"
-  PockelsCell.draw_dict["stl_file"]=stl_file
-  color = (239/255, 239/255, 239/255)
-  PockelsCell.draw_dict["color"]=color
-  PockelsCell.freecad_model = load_STL
-
-  Lambda2 = Lam_Plane()
+  PockelsCell = Pockels_Cell()
+  Lambda2 = Lambda_Plate()
 
   amp1 = LinearResonator(name="foldedRes")
   amp1.set_wavelength(wavelength)
@@ -356,7 +331,7 @@ helper.normal = h
 # =============================================================================
 # calculus
 A_target = 4.908738521234052 #from gain simlutation
-focal = 2500 
+focal = 2500
 lam_mid = 2.4e-3
 A_natural = lam_mid * focal
 geometrie_factor = A_target / A_natural
@@ -379,14 +354,7 @@ TFP1.draw_dict["color"] = (1.0, 0.0, 2.0)
 TFP1.aperture = tfp_aperture
 
 cm = Curved_Mirror(radius=focal*2, phi = 180)
-PockelsCell = Opt_Element(name="PockelZelleRes1")
-# Pockels cell is pure cosmetics
-stl_file=thisfolder+"\mount_meshes\special mount\pockels_cell_easy_steal-Body.stl"
-PockelsCell.draw_dict["stl_file"]=stl_file
-color = (239/255, 239/255, 239/255)
-PockelsCell.draw_dict["color"]=color
-PockelsCell.freecad_model = load_STL
-Lambda2 = Lam_Plane()
+PockelsCell = Pockels_Cell(name="PockelZelleRes1")
 
 fold1 = Mirror(phi=90)
 
@@ -405,16 +373,6 @@ simres.propagate(last)
 simres.add_on_axis(cm)
 
 simres.compute_eigenmode()
-# simres.draw()
-
-
-
-
-
-
-
-
-
 
 
 # Amplifier_I = Make_Amplifier_I()
@@ -444,9 +402,6 @@ Pump.propagate(190)
 
 
 
-# out_beam = amp_beams[3]
-
-
 # =============================================================================
 # Draw Selection
 # =============================================================================
@@ -455,24 +410,10 @@ Seed.draw()
 Stretcher.draw()
 PulsePicker.draw()
 Amplifier_I.draw()
-# Pump.draw()
-# Amplifier_I.draw_dict["beam_model"] = "cone"
 Amplifier_I.draw()
 
 
 
-
-from LaserCAD.moduls.type_II_Amplifier import Make_Amplifier_Typ_II_Juergen
-from LaserCAD.basic_optics.beam import Gaussian_Beam
-
-#gb = Gaussian_Beam()
-#gb.draw()
-#gb.draw_dict["model"] = "cone"
-#gb.pos += (0,50, 0)
-#gb.draw()
-
-# amp2 = Make_Amplifier_Typ_II_Juergen()
-# amp2.draw()
 
 if freecad_da:
   setview()
