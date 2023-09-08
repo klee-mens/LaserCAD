@@ -19,10 +19,13 @@ if not pfad in sys.path:
 
 
 from LaserCAD.freecad_models import clear_doc, setview, freecad_da
-from LaserCAD.basic_optics import Mirror, Beam, Composition, inch, Curved_Mirror, Ray, Geom_Object
-from LaserCAD.basic_optics import Grating, Opt_Element
+from LaserCAD.basic_optics import Mirror, Beam, Composition, inch
+from LaserCAD.basic_optics import Curved_Mirror, Ray, Component
+from LaserCAD.basic_optics import LinearResonator, Lens
+from LaserCAD.basic_optics import Grating
 import matplotlib.pyplot as plt
 from LaserCAD.freecad_models.utils import thisfolder, load_STL
+from LaserCAD.non_interactings import Faraday_Isolator, Pockels_Cell, Lambda_Plate
 
 if freecad_da:
   clear_doc()
@@ -36,8 +39,7 @@ distance_seed_laser_stretcher = 400 #the complete distance
 distance_6_mm_faraday = 45
 distance_faraday_mirror = 100
 
-seed_laser = Geom_Object(name="IPG_Seed_Laser")
-# seed_laser.pos = start_point
+seed_laser = Component(name="IPG_Seed_Laser")
 
 stl_file=thisfolder+"\mount_meshes\special mount\Laser_Head-Body.stl"
 seed_laser.draw_dict["stl_file"]=stl_file
@@ -45,21 +47,12 @@ color = (170/255, 170/255, 127/255)
 seed_laser.draw_dict["color"]=color
 seed_laser.freecad_model = load_STL
 
-faraday_isolator_6mm = Opt_Element(name="Faraday_Isolator")
-stl_file=thisfolder+"\mount_meshes\special mount\Faraday-Isolatoren-Body.stl"
-faraday_isolator_6mm.draw_dict["stl_file"]=stl_file
-color = (10/255, 20/255, 230/255)
-faraday_isolator_6mm.draw_dict["color"]=color
-faraday_isolator_6mm.freecad_model = load_STL
-
-faraday_isolator_6mm.pos = start_point + np.array((45,0,0))
-
-seed_beam = Beam(angle=0, radius=seed_beam_radius, pos=start_point)
+faraday_isolator_6mm = Faraday_Isolator()
 
 Seed = Composition(name="Seed")
 Seed.normal = (1,2,0)
 Seed.pos = start_point
-Seed.set_light_source(seed_beam)
+Seed.set_light_source(Beam(angle=0, radius=seed_beam_radius))
 Seed.add_on_axis(seed_laser)
 Seed.propagate(distance_6_mm_faraday)
 Seed.add_on_axis(faraday_isolator_6mm)
@@ -98,7 +91,7 @@ def Make_Stretcher_chromeo():
   delta_lamda = 200e-9*1e3 # full bandwith in mm
   number_of_rays = 20
   safety_to_stripe_mirror = 5 #distance first incomming ray to stripe_mirror in mm
-  periscope_height = 10
+  periscope_height = 15
   first_propagation = 20 # legnth of the first ray_bundle to flip mirror1 mm
   distance_flip_mirror1_grating = 300
   distance_roof_top_grating = 600
@@ -209,7 +202,7 @@ Stretcher.set_geom(seed_end_geom)
 # =============================================================================
 # The pulse picker
 # =============================================================================
-from LaserCAD.basic_optics.mirror import Lam_Plane
+# from LaserCAD.basic_optics.mirror import Lam_Plane
 
 tfp_angle = 65 #tfp angle of incidence in degree
 flip_mirror_push_down = 8 # distance to push the first mirror out ouf the seed beam
@@ -223,25 +216,17 @@ FlipMirror_pp = Mirror(phi=-90)
 PulsePicker.add_on_axis(FlipMirror_pp)
 FlipMirror_pp.pos += (0,0,flip_mirror_push_down)
 PulsePicker.propagate(200)
-Lambda2 = Lam_Plane()
+Lambda2 = Lambda_Plate()
 PulsePicker.add_on_axis(Lambda2)
 PulsePicker.propagate(310)
 Back_Mirror_PP = Mirror()
 PulsePicker.add_on_axis(Back_Mirror_PP)
 PulsePicker.propagate(30)
-Lambda4 = Lam_Plane()
+Lambda4 = Lambda_Plate()
 PulsePicker.add_on_axis(Lambda4)
 PulsePicker.propagate(30)
 
-PockelsCell = Opt_Element(name="PockelZellePulsPicker")
-# Pockels cell is pure cosmetics
-stl_file=thisfolder+"\mount_meshes\special mount\pockels_cell_easy_steal-Body.stl"
-PockelsCell.draw_dict["stl_file"]=stl_file
-color = (239/255, 239/255, 239/255)
-PockelsCell.draw_dict["color"]=color
-PockelsCell.freecad_model = load_STL
-
-PulsePicker.add_on_axis(PockelsCell)
+PulsePicker.add_on_axis( Pockels_Cell())
 
 PulsePicker.propagate(140)
 TFP_pp = Mirror(phi = -180+2*tfp_angle)
@@ -254,7 +239,7 @@ PulsePicker.propagate(250)
 FlipMirror2_pp = Mirror(phi=-90)
 PulsePicker.add_on_axis(FlipMirror2_pp)
 PulsePicker.propagate(200)
-Lambda2_2_pp = Lam_Plane()
+Lambda2_2_pp = Lambda_Plate()
 PulsePicker.add_on_axis(Lambda2_2_pp)
 PulsePicker.propagate(400)
 
@@ -264,86 +249,140 @@ PulsePicker.set_geom(Stretcher.last_geom())
 # =============================================================================
 # Regen Amp1 Section
 # =============================================================================
-from LaserCAD.basic_optics import LinearResonator, Lens
+# from LaserCAD.basic_optics import LinearResonator, Lens
 
 
-def Make_Amplifier_I():
+# def Make_Amplifier_I():
 
-  tfp_angle = 65
-  tfp_aperture = 2*inch
-  angle_on_sphere = 10
-  alpha = -8
-  beta = -0.1
-  print("g1*g2 = ", alpha*beta)
-  focal = 250
-  dist1 = (1-alpha)*focal
-  dist2 = (1-beta)*focal
-  wavelength = 2400*1e-6
-  frac1 = 0.6
-  frac2 = 0.04
-  frac3 = 0.05
-  frac4 = 0.02
-  frac5 = 1 - frac1 - frac2 - frac3 - frac4
+#   tfp_angle = 65
+#   tfp_aperture = 2*inch
+#   angle_on_sphere = 10
+#   alpha = -0.8
+#   beta = -0.8
+#   print("g1*g2 = ", alpha*beta)
+#   focal = 500
+#   dist1 = (1-alpha)*focal
+#   dist2 = (1-beta)*focal
+#   wavelength = 2400*1e-6
 
-  mir1 = Mirror(phi=180)
-  TFP1 = Mirror(phi= 180 - 2*tfp_angle)
-  TFP1.draw_dict["color"] = (1.0, 0.0, 2.0)
-  TFP1.aperture = tfp_aperture
-  TFP2 = Mirror(phi= - 180 + 2*tfp_angle)
-  TFP2.draw_dict["color"] = (1.0, 0.0, 2.0)
-  TFP2.aperture = tfp_aperture
-  mir4 = Mirror(phi=180)
-  cm = Curved_Mirror(radius=focal*2, phi = 180 - angle_on_sphere)
+#   # geometric restrictions
+#   dist_tfp1_2 = 230
+#   dist_tfp1_pockels = 50
+#   dist_pockels_lambda = 115
+#   dist_tfp2_sphere = 400
+#   dist_m1_tfp1 = dist1 - dist_tfp1_2 - dist_tfp2_sphere
+#   dist_crystal_end = 15
 
-  PockelsCell = Opt_Element(name="PockelZellePulsPicker")
-  # Pockels cell is pure cosmetics
-  stl_file=thisfolder+"\mount_meshes\special mount\pockels_cell_easy_steal-Body.stl"
-  PockelsCell.draw_dict["stl_file"]=stl_file
-  color = (239/255, 239/255, 239/255)
-  PockelsCell.draw_dict["color"]=color
-  PockelsCell.freecad_model = load_STL
+#   mir1 = Mirror(phi=180)
+#   TFP1 = Mirror(phi= 180 - 2*tfp_angle, name="TFP1")
+#   TFP1.draw_dict["color"] = (1.0, 0.0, 2.0)
+#   TFP1.aperture = tfp_aperture
+#   TFP2 = Mirror(phi= - 180 + 2*tfp_angle, name="TFP2")
+#   TFP2.draw_dict["color"] = (1.0, 0.0, 2.0)
+#   TFP2.aperture = tfp_aperture
+#   mir4 = Mirror(phi=180)
+#   cm = Curved_Mirror(radius=focal*2, phi = 180 - angle_on_sphere)
+#   PockelsCell = Pockels_Cell()
+#   Lambda2 = Lambda_Plate()
 
-  Lambda2 = Lam_Plane()
-
-  amp1 = LinearResonator(name="foldedRes")
-  amp1.set_wavelength(wavelength)
-  amp1.add_on_axis(mir1)
-  amp1.propagate(dist1*frac1)
-  amp1.add_on_axis(TFP1)
-  amp1.propagate(dist1*frac2)
-  amp1.add_on_axis(PockelsCell)
-  amp1.propagate(dist1*frac3)
-  amp1.add_on_axis(Lambda2)
-  amp1.propagate(dist1*frac4)
-  amp1.add_on_axis(TFP2)
-  amp1.propagate(dist1*frac5)
-  amp1.add_on_axis(cm)
-  amp1.propagate(dist2*0.9)
+#   amp1 = LinearResonator(name="foldedRes")
+#   amp1.set_wavelength(wavelength)
+#   amp1.add_on_axis(mir1)
+#   amp1.propagate(dist_m1_tfp1)
+#   amp1.add_on_axis(TFP1)
+#   amp1.propagate(dist_tfp1_pockels)
+#   amp1.add_on_axis(PockelsCell)
+#   amp1.propagate(dist_pockels_lambda)
+#   amp1.add_on_axis(Lambda2)
+#   amp1.propagate(dist_tfp1_2-dist_tfp1_pockels-dist_pockels_lambda)
+#   amp1.add_on_axis(TFP2)
+#   amp1.propagate(dist_tfp2_sphere)
+#   amp1.add_on_axis(cm)
+#   amp1.propagate(dist2 - dist_crystal_end)
 
 
-  crystal = Beam(radius=3, angle=0)
-  crystal.draw_dict['color'] = (182/255, 109/255, 46/255)
-  crystal.set_length(10)
+#   crystal = Beam(radius=3, angle=0)
+#   crystal.draw_dict['color'] = (182/255, 109/255, 46/255)
+#   crystal.set_length(10)
 
-  amp1.add_on_axis(crystal)
-  amp1.propagate(dist2*0.1)
-  amp1.add_on_axis(mir4)
+#   amp1.add_on_axis(crystal)
+#   amp1.propagate(dist_crystal_end)
+#   amp1.add_on_axis(mir4)
 
-  amp1.compute_eigenmode()
-  return amp1
-
-
-pp_last_pos, pp_last_ax = PulsePicker.last_geom()
-helper = Beam()
-helper.set_geom(PulsePicker.last_geom())
-h = helper.normal
-h[2] = 0
-helper.normal = h
+#   amp1.compute_eigenmode()
+#   return amp1
 
 
-Amplifier_I = Make_Amplifier_I()
-Amplifier_I.set_input_coupler_index(3)
+# pp_last_pos, pp_last_ax = PulsePicker.last_geom()
+# helper = Beam()
+# helper.set_geom(PulsePicker.last_geom())
+# h = helper.normal
+# h[2] = 0
+# helper.normal = h
+
+
+
+
+
+
+
+
+
+# =============================================================================
+# simple Amp1
+# =============================================================================
+# calculus
+A_target = 4.908738521234052 #from gain simlutation area in mm^2
+focal = 2500
+lam_mid = 2.4e-3
+A_natural = lam_mid * focal
+geometrie_factor = A_target / A_natural
+total_length = focal * (1 - np.sqrt(1 - geometrie_factor**2))
+
+# design params
+dist_mir_pz = 20
+dist_pz_lambda = 115
+dist_lambda_tfp = 70
+dist_tfp_fold1 = 65
+last = total_length - dist_mir_pz - dist_pz_lambda - dist_lambda_tfp -dist_tfp_fold1
+tfp_aperture = 2*inch
+tfp_angle = 65
+
+# optics
+
+mir1 = Mirror(phi=180)
+TFP1 = Mirror(phi= 180 - 2*tfp_angle, name="TFP1")
+TFP1.draw_dict["color"] = (1.0, 0.0, 2.0)
+TFP1.aperture = tfp_aperture
+
+cm = Curved_Mirror(radius=focal*2, phi = 180)
+PockelsCell = Pockels_Cell(name="PockelZelleRes1")
+
+fold1 = Mirror(phi=90)
+
+simres = LinearResonator(name="simple_Resonator1")
+simres.set_wavelength(lam_mid)
+simres.add_on_axis(mir1)
+simres.propagate(dist_mir_pz)
+simres.add_on_axis(PockelsCell)
+simres.propagate(dist_pz_lambda)
+simres.add_on_axis(Lambda2)
+simres.propagate(dist_lambda_tfp)
+simres.add_on_axis(TFP1)
+simres.propagate(dist_tfp_fold1)
+simres.add_on_axis(fold1)
+simres.propagate(last)
+simres.add_on_axis(cm)
+
+simres.compute_eigenmode()
+
+
+# Amplifier_I = Make_Amplifier_I()
+Amplifier_I = simres
+Amplifier_I.set_input_coupler_index(1, False)
 Amplifier_I.set_geom(PulsePicker.last_geom())
+
+
 
 # =============================================================================
 # Pump Amp1
@@ -355,7 +394,7 @@ pump_light = Beam(radius=0.2, angle=0.03)
 pump_light.draw_dict["color"] = (1.0, 1.0, 0.0)
 Pump.set_light_source(pump_light)
 Pump.propagate(120)
-PumpMirror = Mirror(phi=-90)
+PumpMirror = Mirror(phi=90)
 Pump.add_on_axis(PumpMirror)
 Pump.propagate(90)
 PumpLens = Lens(f=120+90)
@@ -363,9 +402,6 @@ Pump.add_on_axis(PumpLens)
 Pump.propagate(190)
 
 
-
-
-# out_beam = amp_beams[3]
 
 
 # =============================================================================
@@ -376,7 +412,9 @@ Seed.draw()
 Stretcher.draw()
 PulsePicker.draw()
 Amplifier_I.draw()
-Pump.draw()
+
+
+
 
 if freecad_da:
   setview()

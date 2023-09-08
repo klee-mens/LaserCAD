@@ -388,6 +388,7 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
   container = post_part,obj,additional_mount
   add_to_composition(part, container)
   DOC.recompute()
+  print("post postiton=",np.array(POS)+xshift*np.array(NORMAL))
   return part
 
 def model_lamda_plane(name = "lamuda_plane",drawing_post=True,base_exists=False,

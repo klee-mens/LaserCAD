@@ -114,11 +114,11 @@ def grating_mount(name="grating_mount",height=50,thickness=8,base_exists=False,g
   newaxs = np.array(axes)
   newaxs[:,0] = new_normal
   geom = (new_pos, newaxs)
+  xshift = 0
   other_mount = mirror_mount(mount_name="mirror_mount",mount_type="default",base_exists=base_exists, geom=geom, dia=25.4)
   part = initialize_composition_old(name="Grating mount, post and base")
   container = mount1,mount2,mount3,other_mount
   add_to_composition(part, container)
-
   return part
 
 def draw_mount(name="KGM60_base",height=50,thickness=8,geom=None):

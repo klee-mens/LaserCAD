@@ -68,9 +68,11 @@ class Grating(Opt_Element):
   def draw_mount_fc(self):
     # helper_dict = dict(self.draw_dict)
     # obj = grating_mount(**helper_dict)
+    xshift=0
     obj = grating_mount(name=self.name,height=self.height,
                         thickness=self.thickness,#base_exists=self.draw_dict['base_exists'], 
                         geom=self.get_geom())
+    mount_pos=xshift*self.normal+self.pos
     return obj
   
   def draw_mount_text(self):

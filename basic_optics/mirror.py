@@ -202,7 +202,9 @@ class Mirror(Opt_Element):
     # the mirror_mount function manually, no, I don't
     helper_dict = dict(self.draw_dict)
     # helper_dict["geom"] = (self.pos, self.normal)
+    xshift=0
     obj = mirror_mount(**helper_dict)
+    post_pos = xshift*self.normal+self.pos
     return obj
 
   def draw_mount_text(self):
