@@ -148,7 +148,8 @@ def lens_mount(mount_name="lens_mount", mount_type="MLH05_M",
 
 def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
                  mount_type="default", geom=None, only_info=False, 
-                 drawing_post=True,base_exists=False, dia=25.4,thickness=30, **kwargs):
+                 drawing_post=True,base_exists=False, dia=25.4,
+                 thickness=30,Flip90=False, **kwargs):
   """
     Build the mirror mount, post, post holder and slotted bases of the mirror
 
@@ -377,7 +378,8 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
   else:
     update_geom_info(obj,[POS,NORMAL])
   obj.Label = mount_name
-  
+  if Flip90:
+    rotate(obj,Vector(NORMAL),90)
   if  drawing_post:
     post_part=draw_post_part(name="post_part",base_exists=base_exists,
                              height=height,xshift=xshift, geom=geom)

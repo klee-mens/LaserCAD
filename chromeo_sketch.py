@@ -183,7 +183,8 @@ def Make_Stretcher_chromeo():
   pure_cosmetic.draw_dict["mount_type"] = "rooftop_mirror_mount"
   pure_cosmetic.pos = (RoofTop1.pos + RoofTop2.pos ) / 2
   pure_cosmetic.normal = (RoofTop1.normal + RoofTop2.normal ) / 2
-  pure_cosmetic.draw = dont
+  pure_cosmetic.draw_dict["model_type"] = "Rooftop"
+  # pure_cosmetic.draw = dont
   Stretcher.add_fixed_elm(pure_cosmetic)
 
   # setting the final sequence and the last propagation for visualization
@@ -357,7 +358,7 @@ TFP1.aperture = tfp_aperture
 
 cm = Curved_Mirror(radius=focal*2, phi = 180)
 PockelsCell = Pockels_Cell(name="PockelZelleRes1")
-
+Lambda_Regen = Lambda_Plate()
 fold1 = Mirror(phi=90)
 
 simres = LinearResonator(name="simple_Resonator1")
@@ -366,7 +367,7 @@ simres.add_on_axis(mir1)
 simres.propagate(dist_mir_pz)
 simres.add_on_axis(PockelsCell)
 simres.propagate(dist_pz_lambda)
-simres.add_on_axis(Lambda2)
+simres.add_on_axis(Lambda_Regen)
 simres.propagate(dist_lambda_tfp)
 simres.add_on_axis(TFP1)
 simres.propagate(dist_tfp_fold1)

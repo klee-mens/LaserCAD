@@ -17,26 +17,28 @@ class Grating(Opt_Element):
   """
   Klasse für Gitter
   """
-  def __init__(self, grat_const=0.005, **kwargs):
+  def __init__(self, grat_const=0.005, order=1, **kwargs):
     super().__init__(**kwargs)
     self.grating_constant = grat_const
     #Konstanten zum zeichnen, für die sonstige Berechnung unwichtig
     self.width = 50
     self.height = 60
     self.thickness = 8
-    self.blazeangel = 32
+    self.diffraction_order = order
+    # self.blazeangel = 32
     # self.draw_dict['width'] = self.width
     # self.draw_dict['thickness'] = self.thickness
     # self.draw_dict['height'] = self.height
     # dims = (self.thickness, self.width, self.height)
     # print("dims:", dims)
-    
-  def next_ray(self, ray, order=1):
+
+  def next_ray(self, ray, order=None):
     """
-    Beugung entsprechend des Gittergesetzes g(sinA + sinB) = m*lam 
+    Beugung entsprechend des Gittergesetzes g(sinA + sinB) = m*lam
     m = order
     """
-    
+    if order == None:
+      order = self.diffraction_order
     norm, gratAx, sagit = self.get_coordinate_system() # Normale, Gitterachse, Sagitalvector
     norm *= -1 #selbe Konvention wie beim Spiegel, 1,0,0 heißt Reflektion von 1,0,0
     gratAx *= -1 #selbe Konvention wie beim Spiegel, 1,0,0 heißt Reflektion von 1,0,0
@@ -44,7 +46,7 @@ class Grating(Opt_Element):
     pos = ray.intersect_with(self)
     # print("Gitternorm, Raynorm", norm, r1)
     sagital_component = np.sum(r1 * sagit)
-    
+
     sinA = np.sum( sagit * np.cross(r1, norm) )
     # print("sinA:", sinA)
     sinB = order * ray.wavelength/ self.grating_constant - sinA
@@ -53,28 +55,29 @@ class Grating(Opt_Element):
     ray2.name = "next_" + ray.name
     ray2.pos = pos
     ray2.normal = (np.sqrt(1-sinB**2) * norm + sinB * gratAx) * np.sqrt(1-sagital_component**2) + sagital_component * sagit
-    
+
     k_prop = np.cross(norm,np.cross(ray.normal*2*np.pi/ray.wavelength,norm))
     k_p_out = k_prop+order*2*np.pi/self.grating_constant*gratAx
+    # print()
+    # print("SQRT: ", ((2*np.pi/ray.wavelength)**2-np.linalg.norm(k_p_out)**2))
+    # print()
     k_r = k_p_out + abs(np.sqrt((2*np.pi/ray.wavelength)**2-np.linalg.norm(k_p_out)**2))*norm
     n_r = k_r/np.linalg.norm(k_r)
     ray2.normal = n_r
     return ray2
-  
+
   def draw_fc(self):
     dims = (self.width, self.height, self.thickness)
     return model_grating(name=self.name, dimensions=dims, geom=self.get_geom())
-  
+
   def draw_mount_fc(self):
     # helper_dict = dict(self.draw_dict)
     # obj = grating_mount(**helper_dict)
-    xshift=0
     obj = grating_mount(name=self.name,height=self.height,
-                        thickness=self.thickness,#base_exists=self.draw_dict['base_exists'], 
+                        thickness=self.thickness,#base_exists=self.draw_dict['base_exists'],
                         geom=self.get_geom())
-    mount_pos=xshift*self.normal+self.pos
     return obj
-  
+
   def draw_mount_text(self):
     # if self.mount_type == "dont_draw":
     #   txt = self.name + "'s mount will not be drawn."
@@ -83,8 +86,8 @@ class Grating(Opt_Element):
     # else:
     #   txt = self.name + "'s mount is " + self.mount_type + "."
       return txt
-  
-  
+
+
 def grating_test1():
   grat = Grating()
   grat.pos += (10, 0, 0)
@@ -99,7 +102,7 @@ def grating_test2():
   grat.pos += (10, 0, 0)
   r1 = Ray()
   r2 = grat.next_ray(r1, order=1)
-  
+
   print()
   print("Theorie: beta=", np.arcsin(r1.wavelength/grat.grating_constant)*180/np.pi)
   print("Winkel von r2 zu Grat:", np.arccos(np.sum(r2.normal * -grat.normal))*180/np.pi)
@@ -116,8 +119,7 @@ def grating_test3():
   r1 = Ray()
   r1.wavelength = lam
   r1.normal = (np.sqrt(1-sinA**2), sinA, 0)
-  
+
   r2 = grat.next_ray(r1)
-  
+
   return grat, r1, r2
-  

@@ -25,7 +25,7 @@ MIN_RADIUS =0.5
 
 
 def model_beam(name="beam", dia=10, prop=200,  f=130, color=DEFAULT_COLOR_CRIMSON, 
-               geom_info=None):
+               geom_info=None, **kwargs):
   """creates a red beam with length <prop>, diameter <dia>,
   fokus <f> and name ~
   example :  beam1 = model_beam("laser1", 10, 200, 100)

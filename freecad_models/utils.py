@@ -48,7 +48,7 @@ def setview():
 
 def start_DOC(DOC):
   """Has to called to open the Document for the FreeCAD objects to show
-  
+
   """
   if DOC is None:
     FreeCAD.newDocument(DOC_NAME)
@@ -124,7 +124,7 @@ def update_pos_norm(obj, pos_norm=None, off0=0):
 
 def vec_phi_from_matrix(matrix):
   """
-  Computes the rotation vector <vec> and angle <phi> from a given rotation 
+  Computes the rotation vector <vec> and angle <phi> from a given rotation
   matrix. See "https://en.wikipedia.org/wiki/Rotation_matrix"
 
   Parameters
@@ -180,7 +180,7 @@ def rotation_to_axis_angle(R):
     # Compute the angle of rotation
     phi = (np.trace(R) - 1) / 2
     if phi>1:
-      phi = 1 
+      phi = 1
     if phi<-1:
       phi=-1
     phi = np.arccos(phi)
@@ -217,8 +217,8 @@ def rotation_to_axis_angle(R):
     else:
         vec = np.array([R[2, 1] - R[1, 2], R[0, 2] - R[2, 0], R[1, 0] - R[0, 1]])
         vec /= (2 * np.sin(phi))
-    
-    return vec, phi
+    return np.real(vec), phi
+
 
 def update_geom_info(obj, geom_info, off0=0):
   if geom_info != None:
@@ -240,7 +240,7 @@ def update_geom_info(obj, geom_info, off0=0):
       obj.Placement = Placement(pos, Rotation(rotvec,phi), Vector(0,0,0)).multiply(place0)
 
 
-def load_STL(stl_file, name="new_mesh", geom=None, off0=0, 
+def load_STL(stl_file, name="new_mesh", geom=None, off0=0,
              color=(0.90,0.90,0.90), **kwargs):
   DOC = get_DOC()
   obj = DOC.addObject("Mesh::Feature", name)
