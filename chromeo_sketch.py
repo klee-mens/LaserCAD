@@ -19,8 +19,10 @@ if not pfad in sys.path:
 
 
 from LaserCAD.freecad_models import clear_doc, setview, freecad_da
-from LaserCAD.basic_optics import Mirror, Beam, Composition, inch, Curved_Mirror, Ray, Geom_Object, Component
-from LaserCAD.basic_optics import Grating, Opt_Element
+from LaserCAD.basic_optics import Mirror, Beam, Composition, inch
+from LaserCAD.basic_optics import Curved_Mirror, Ray, Component
+from LaserCAD.basic_optics import LinearResonator, Lens
+from LaserCAD.basic_optics import Grating
 import matplotlib.pyplot as plt
 from LaserCAD.freecad_models.utils import thisfolder, load_STL
 from LaserCAD.non_interactings import Faraday_Isolator, Pockels_Cell, Lambda_Plate
@@ -247,76 +249,76 @@ PulsePicker.set_geom(Stretcher.last_geom())
 # =============================================================================
 # Regen Amp1 Section
 # =============================================================================
-from LaserCAD.basic_optics import LinearResonator, Lens
+# from LaserCAD.basic_optics import LinearResonator, Lens
 
 
-def Make_Amplifier_I():
+# def Make_Amplifier_I():
 
-  tfp_angle = 65
-  tfp_aperture = 2*inch
-  angle_on_sphere = 10
-  alpha = -0.8
-  beta = -0.8
-  print("g1*g2 = ", alpha*beta)
-  focal = 500
-  dist1 = (1-alpha)*focal
-  dist2 = (1-beta)*focal
-  wavelength = 2400*1e-6
+#   tfp_angle = 65
+#   tfp_aperture = 2*inch
+#   angle_on_sphere = 10
+#   alpha = -0.8
+#   beta = -0.8
+#   print("g1*g2 = ", alpha*beta)
+#   focal = 500
+#   dist1 = (1-alpha)*focal
+#   dist2 = (1-beta)*focal
+#   wavelength = 2400*1e-6
 
-  # geometric restrictions
-  dist_tfp1_2 = 230
-  dist_tfp1_pockels = 50
-  dist_pockels_lambda = 115
-  dist_tfp2_sphere = 400
-  dist_m1_tfp1 = dist1 - dist_tfp1_2 - dist_tfp2_sphere
-  dist_crystal_end = 15
+#   # geometric restrictions
+#   dist_tfp1_2 = 230
+#   dist_tfp1_pockels = 50
+#   dist_pockels_lambda = 115
+#   dist_tfp2_sphere = 400
+#   dist_m1_tfp1 = dist1 - dist_tfp1_2 - dist_tfp2_sphere
+#   dist_crystal_end = 15
 
-  mir1 = Mirror(phi=180)
-  TFP1 = Mirror(phi= 180 - 2*tfp_angle, name="TFP1")
-  TFP1.draw_dict["color"] = (1.0, 0.0, 2.0)
-  TFP1.aperture = tfp_aperture
-  TFP2 = Mirror(phi= - 180 + 2*tfp_angle, name="TFP2")
-  TFP2.draw_dict["color"] = (1.0, 0.0, 2.0)
-  TFP2.aperture = tfp_aperture
-  mir4 = Mirror(phi=180)
-  cm = Curved_Mirror(radius=focal*2, phi = 180 - angle_on_sphere)
-  PockelsCell = Pockels_Cell()
-  Lambda2 = Lambda_Plate()
+#   mir1 = Mirror(phi=180)
+#   TFP1 = Mirror(phi= 180 - 2*tfp_angle, name="TFP1")
+#   TFP1.draw_dict["color"] = (1.0, 0.0, 2.0)
+#   TFP1.aperture = tfp_aperture
+#   TFP2 = Mirror(phi= - 180 + 2*tfp_angle, name="TFP2")
+#   TFP2.draw_dict["color"] = (1.0, 0.0, 2.0)
+#   TFP2.aperture = tfp_aperture
+#   mir4 = Mirror(phi=180)
+#   cm = Curved_Mirror(radius=focal*2, phi = 180 - angle_on_sphere)
+#   PockelsCell = Pockels_Cell()
+#   Lambda2 = Lambda_Plate()
 
-  amp1 = LinearResonator(name="foldedRes")
-  amp1.set_wavelength(wavelength)
-  amp1.add_on_axis(mir1)
-  amp1.propagate(dist_m1_tfp1)
-  amp1.add_on_axis(TFP1)
-  amp1.propagate(dist_tfp1_pockels)
-  amp1.add_on_axis(PockelsCell)
-  amp1.propagate(dist_pockels_lambda)
-  amp1.add_on_axis(Lambda2)
-  amp1.propagate(dist_tfp1_2-dist_tfp1_pockels-dist_pockels_lambda)
-  amp1.add_on_axis(TFP2)
-  amp1.propagate(dist_tfp2_sphere)
-  amp1.add_on_axis(cm)
-  amp1.propagate(dist2 - dist_crystal_end)
-
-
-  crystal = Beam(radius=3, angle=0)
-  crystal.draw_dict['color'] = (182/255, 109/255, 46/255)
-  crystal.set_length(10)
-
-  amp1.add_on_axis(crystal)
-  amp1.propagate(dist_crystal_end)
-  amp1.add_on_axis(mir4)
-
-  amp1.compute_eigenmode()
-  return amp1
+#   amp1 = LinearResonator(name="foldedRes")
+#   amp1.set_wavelength(wavelength)
+#   amp1.add_on_axis(mir1)
+#   amp1.propagate(dist_m1_tfp1)
+#   amp1.add_on_axis(TFP1)
+#   amp1.propagate(dist_tfp1_pockels)
+#   amp1.add_on_axis(PockelsCell)
+#   amp1.propagate(dist_pockels_lambda)
+#   amp1.add_on_axis(Lambda2)
+#   amp1.propagate(dist_tfp1_2-dist_tfp1_pockels-dist_pockels_lambda)
+#   amp1.add_on_axis(TFP2)
+#   amp1.propagate(dist_tfp2_sphere)
+#   amp1.add_on_axis(cm)
+#   amp1.propagate(dist2 - dist_crystal_end)
 
 
-pp_last_pos, pp_last_ax = PulsePicker.last_geom()
-helper = Beam()
-helper.set_geom(PulsePicker.last_geom())
-h = helper.normal
-h[2] = 0
-helper.normal = h
+#   crystal = Beam(radius=3, angle=0)
+#   crystal.draw_dict['color'] = (182/255, 109/255, 46/255)
+#   crystal.set_length(10)
+
+#   amp1.add_on_axis(crystal)
+#   amp1.propagate(dist_crystal_end)
+#   amp1.add_on_axis(mir4)
+
+#   amp1.compute_eigenmode()
+#   return amp1
+
+
+# pp_last_pos, pp_last_ax = PulsePicker.last_geom()
+# helper = Beam()
+# helper.set_geom(PulsePicker.last_geom())
+# h = helper.normal
+# h[2] = 0
+# helper.normal = h
 
 
 
@@ -330,7 +332,7 @@ helper.normal = h
 # simple Amp1
 # =============================================================================
 # calculus
-A_target = 4.908738521234052 #from gain simlutation
+A_target = 4.908738521234052 #from gain simlutation area in mm^2
 focal = 2500
 lam_mid = 2.4e-3
 A_natural = lam_mid * focal
@@ -409,7 +411,6 @@ Pump.propagate(190)
 Seed.draw()
 Stretcher.draw()
 PulsePicker.draw()
-Amplifier_I.draw()
 Amplifier_I.draw()
 
 
