@@ -9,7 +9,7 @@ Created on Wed Aug 24 16:28:07 2022
 # from basic_optics.freecad_models import model_mirror, freecad_da
 from .geom_object import TOLERANCE, NORM0
 from .ray import Ray
-from ..freecad_models import model_mirror, mirror_mount, model_stripe_mirror, model_lamda_plane
+from ..freecad_models import model_mirror, mirror_mount, model_stripe_mirror, model_lambda_plate
 from .optical_element import Opt_Element
 import numpy as np
 from copy import deepcopy
@@ -461,11 +461,17 @@ class Lam_Plane(Mirror):
     ray2=deepcopy(ray)
     ray2.pos = ray.intersect_with(self)
     return ray2
-
+  
+  def draw_fc(self):
+    self.update_draw_dict()
+    self.draw_dict["dia"]=self.aperture
+    obj = model_mirror(**self.draw_dict)
+    return obj
+  
   def draw_mount_fc(self):
     self.update_draw_dict()
     helper_dict = dict(self.draw_dict)
-    obj = model_lamda_plane(**helper_dict)
+    obj = model_lambda_plate(**helper_dict)
     return obj
   
 class Cylindrical_Mirror1(Cylindrical_Mirror):

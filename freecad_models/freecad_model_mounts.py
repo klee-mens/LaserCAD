@@ -393,7 +393,7 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
   print("post postiton=",np.array(POS)+xshift*np.array(NORMAL))
   return part
 
-def model_lamda_plane(name = "lamuda_plane",drawing_post=True,base_exists=False,
+def model_lambda_plate(name = "lamuda_plane",drawing_post=True,base_exists=False,
                       geom = None, **kwargs):
   """
   To build the model for lamuda plane
