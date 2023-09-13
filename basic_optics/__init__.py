@@ -26,7 +26,6 @@ from .grating import Grating
 from .iris import Iris
 from .intersection_plane import Intersection_plane
 from .resonator import LinearResonator
-
 from .component import Component
 
 

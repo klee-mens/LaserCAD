@@ -1127,6 +1127,75 @@ def Make_Amplifier_Typ_II_Juergen():
   return AmpTyp2
 
 
+# =============================================================================
+# Regen Amp1 Section
+# =============================================================================
+from .. basic_optics import LinearResonator
+from .. non_interactings import Pockels_Cell, Lambda_Plate
+
+
+def Make_Amplifier_I():
+
+  tfp_angle = 65
+  tfp_aperture = 2*inch
+  angle_on_sphere = 10
+  alpha = -0.8
+  beta = -0.8
+  print("g1*g2 = ", alpha*beta)
+  focal = 500
+  dist1 = (1-alpha)*focal
+  dist2 = (1-beta)*focal
+  wavelength = 2400*1e-6
+
+  # geometric restrictions
+  dist_tfp1_2 = 230
+  dist_tfp1_pockels = 50
+  dist_pockels_lambda = 115
+  dist_tfp2_sphere = 400
+  dist_m1_tfp1 = dist1 - dist_tfp1_2 - dist_tfp2_sphere
+  dist_crystal_end = 15
+
+  mir1 = Mirror(phi=180)
+  TFP1 = Mirror(phi= 180 - 2*tfp_angle, name="TFP1")
+  TFP1.draw_dict["color"] = (1.0, 0.0, 2.0)
+  TFP1.aperture = tfp_aperture
+  TFP2 = Mirror(phi= - 180 + 2*tfp_angle, name="TFP2")
+  TFP2.draw_dict["color"] = (1.0, 0.0, 2.0)
+  TFP2.aperture = tfp_aperture
+  mir4 = Mirror(phi=180)
+  cm = Curved_Mirror(radius=focal*2, phi = 180 - angle_on_sphere)
+  PockelsCell = Pockels_Cell()
+  Lambda2 = Lambda_Plate()
+
+  amp1 = LinearResonator(name="foldedRes")
+  amp1.set_wavelength(wavelength)
+  amp1.add_on_axis(mir1)
+  amp1.propagate(dist_m1_tfp1)
+  amp1.add_on_axis(TFP1)
+  amp1.propagate(dist_tfp1_pockels)
+  amp1.add_on_axis(PockelsCell)
+  amp1.propagate(dist_pockels_lambda)
+  amp1.add_on_axis(Lambda2)
+  amp1.propagate(dist_tfp1_2-dist_tfp1_pockels-dist_pockels_lambda)
+  amp1.add_on_axis(TFP2)
+  amp1.propagate(dist_tfp2_sphere)
+  amp1.add_on_axis(cm)
+  amp1.propagate(dist2 - dist_crystal_end)
+
+
+  crystal = Beam(radius=3, angle=0)
+  crystal.draw_dict['color'] = (182/255, 109/255, 46/255)
+  crystal.set_length(10)
+
+  amp1.add_on_axis(crystal)
+  amp1.propagate(dist_crystal_end)
+  amp1.add_on_axis(mir4)
+
+  amp1.compute_eigenmode()
+  return amp1
+
+
+
 # def Teleskop_old(name="Teleskop", f1=100.0, f2=100.0, d0=100.0, lens1_aperture=25,
 #              lens2_aperture=inch):
 #   """

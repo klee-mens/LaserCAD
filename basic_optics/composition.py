@@ -38,8 +38,8 @@ class Composition(Geom_Object):
     self._lightsource.set_geom(self.get_geom())
     self._lightsource.name = self.name + "_Lighsource"
     self._beams = [self._lightsource]
-    group_ls = self._lightsource.get_all_rays()
-    counter = 0
+    # group_ls = self._lightsource.get_all_rays()
+    # counter = 0
     # for ray in group_ls:
     #   ray.name = self._lightsource.name + "_" + str(counter)
     #   counter += 1
@@ -61,7 +61,7 @@ class Composition(Geom_Object):
     """
     end_of_axis = self._optical_axis[-1]
     end_of_axis.length += x
-    self._last_prop = x #endet mit Propagation
+    self._last_prop = end_of_axis.length #endet mit Propagation
 
   def last_geom(self):
     end_of_axis = self._optical_axis[-1]
@@ -207,6 +207,9 @@ class Composition(Geom_Object):
     self.__init_parts()
     container = []
     for elm in self._elements:
+      obj = elm.draw_mount()
+      container.append(obj)
+    for elm in self.non_opticals:
       obj = elm.draw_mount()
       container.append(obj)
     return self.__container_to_part(self._mounts_part, container)

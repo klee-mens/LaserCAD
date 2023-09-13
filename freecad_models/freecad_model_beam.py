@@ -6,23 +6,20 @@ Created on Wed Aug 24 01:31:42 2022
 @author: mens
 """
 
-import sys
-# sys.path.append(u'/home/mens/Nextcloud/FreeCAD/opticslib2/basic_objects/freecad_models')
-# sys.path.append(u"C:/Users/mens/Nextcloud/FreeCAD/opticslib2/basic_objects/freecad_models")
-
-# from .utils import freecad_da, update_geom_info
 from .utils import freecad_da, update_geom_info, get_DOC
+from .freecad_model_composition import initialize_composition_old, add_to_composition
 import numpy as np
 if freecad_da:
   import FreeCAD
-  from FreeCAD import Vector
+  from FreeCAD import Vector, Placement, Rotation
   import Part
   import Sketcher
 
 DEFAULT_COLOR_CRIMSON = (0.86,0.08,0.24) #crimson
+MIN_RADIUS =0.5
 
 
-def model_beam(name="beam", dia=10, prop=200,  f=130, color=DEFAULT_COLOR_CRIMSON,
+def model_beam(name="beam", dia=10, prop=200,  f=130, color=DEFAULT_COLOR_CRIMSON, 
                geom_info=None, **kwargs):
   """creates a red beam with length <prop>, diameter <dia>,
   fokus <f> and name ~
@@ -70,6 +67,270 @@ def model_beam(name="beam", dia=10, prop=200,  f=130, color=DEFAULT_COLOR_CRIMSO
   DOC.recompute()
   return obj
 
+def model_asti_beam (name="beam", dia_l=10,dia_s=10, prop=200,  f_l=100,f_s=150,rot_angle=0, color=DEFAULT_COLOR_CRIMSON, 
+               geom_info=None):
+  """
+  creates a beam that take astigmatism account
+  Parameters
+  ----------
+  name : string, 
+    beams name. The default is "beam".
+  dia_l : float, 
+    diameter of one direction. The default is 10.
+  dia_s : float, optional
+    diameter of the other direction. The default is 10.
+  prop : float, optional
+    Propagation length. The default is 200.
+  f_l : float, optional
+    The first Focal length. The default is 100.
+  f_s : float, optional
+    The second focal length. The default is 150.
+  rot_angle : float, optional
+    rotation angle. The default is 0.
+  color : float, optional
+    The color of beam. The default is DEFAULT_COLOR_CRIMSON.
+  geom_info : float, optional
+    The default is None.
+
+  Returns
+  -------
+  part : TYPE
+    DESCRIPTION.
+  example: beam1=model_asti_beam(name="beam", dia_l=20,dia_s=10, prop=150,  f_l=-100,f_s=-100,rot_angle=0)
+  """
+  DOC = get_DOC()
+  obj = DOC.addObject('PartDesign::Body', name)
+  sketch = obj.newObject('Sketcher::SketchObject', name+'_sketch')
+  sketch.MapMode = 'FlatFace'
+  sketch.addGeometry(Part.Ellipse(Vector(dia_l,-0,0),Vector(0,dia_s,0),Vector(0,0,0)),False)
+  sketch.Placement=Placement(Vector(0,0,0), Rotation(Vector(0,0,1),rot_angle), Vector(0,0,0))
+  if f_l>0 and f_s>0:
+    if f_l!=f_s:
+      if prop <= min(f_l,f_s):
+        sketch_end = obj.newObject('Sketcher::SketchObject', name+'_sketch_end')
+        sketch_end.MapMode = 'FlatFace'
+        if abs(dia_l/f_l*(prop-f_l))>abs(dia_s/f_s*(f_s-prop)):
+          sketch_end.addGeometry(Part.Ellipse(Vector(max(abs(dia_l/f_l*(f_l-prop)),MIN_RADIUS),-0,0),Vector(0,max(abs(dia_s/f_s*(f_s-prop)),0),MIN_RADIUS),Vector(0,0,0)),False)
+        else:
+          sketch_end.addGeometry(Part.Ellipse(Vector(0,max(abs(dia_s/f_s*(f_s-prop)),MIN_RADIUS),0),Vector(max(abs(dia_l/f_l*(f_l-prop)),MIN_RADIUS),0,0),Vector(0,0,0)),False)
+        sketch_end.Placement=Placement(Vector(0,0,prop), Rotation(Vector(0,0,1),rot_angle), Vector(0,0,0))
+        addi=obj.newObject('PartDesign::AdditiveLoft','AdditiveLoft')
+        addi.Profile = sketch
+        addi.Sections = sketch_end
+        sketch.Visibility = False
+        sketch_end.Visibility = False
+        obj.ViewObject.ShapeColor = color
+        obj.ViewObject.Transparency = 50
+        update_geom_info(obj, geom_info)
+        obj1=obj2=None
+      else:
+        sketch_f1 = obj.newObject('Sketcher::SketchObject', name+'_sketch_f1')
+        sketch_f1.MapMode = 'FlatFace'
+        if f_l<f_s:
+          sketch_f1.addGeometry(Part.Ellipse(Vector(0.0,max(abs(dia_s/f_s*(f_s-f_l)),0),MIN_RADIUS),Vector(MIN_RADIUS,0,0),Vector(0,0,0)),False)
+          sketch_f1.Placement=Placement(Vector(0,0,f_l), Rotation(Vector(0,0,1),rot_angle), Vector(0,0,0))
+        else:
+          sketch_f1.addGeometry(Part.Ellipse(Vector(max(abs(dia_l/f_l*(f_l-f_s)),MIN_RADIUS),0,0),Vector(0,MIN_RADIUS,0),Vector(0,0,0)),False)
+          sketch_f1.Placement=Placement(Vector(0,0,f_s), Rotation(Vector(0,0,1),rot_angle), Vector(0,0,0))
+        addi=obj.newObject('PartDesign::AdditiveLoft','AdditiveLoft')
+        addi.Profile = sketch
+        addi.Sections = sketch_f1
+        sketch.Visibility = False
+        sketch_f1.Visibility = False
+        obj.ViewObject.ShapeColor = color
+        obj.ViewObject.Transparency = 50
+        update_geom_info(obj, geom_info)
+        obj1 = DOC.addObject('PartDesign::Body', name+'1')
+        if prop < max(f_s,f_l):
+          sketch_end = obj1.newObject('Sketcher::SketchObject', name+'_sketch_end')
+          sketch_end.MapMode = 'FlatFace'
+          if abs(dia_l/f_l*(prop-f_l))>abs(dia_s/f_s*(f_s-prop)):
+            sketch_end.addGeometry(Part.Ellipse(Vector(max(abs(dia_l/f_l*(prop-f_l)),MIN_RADIUS),-0,0),Vector(0,max(abs(dia_s/f_s*(f_s-prop)),MIN_RADIUS),0),Vector(0,0,0)),False)
+          else:
+            sketch_end.addGeometry(Part.Ellipse(Vector(0,max(abs(dia_s/f_s*(f_s-prop)),MIN_RADIUS),0),Vector(max(abs(dia_l/f_l*(prop-f_l)),MIN_RADIUS),0,0),Vector(0,0,0)),False)
+          sketch_end.Placement=Placement(Vector(0,0,prop), Rotation(Vector(0,0,1),rot_angle), Vector(0,0,0))
+          addi=obj1.newObject('PartDesign::AdditiveLoft','AdditiveLoft1')
+          addi.Profile = sketch_f1
+          addi.Sections = sketch_end
+          sketch_f1.Visibility = False
+          sketch_end.Visibility = False
+          obj.ViewObject.ShapeColor = color
+          obj.ViewObject.Transparency = 50
+          update_geom_info(obj, geom_info)
+          obj1.ViewObject.ShapeColor = color
+          obj1.ViewObject.Transparency = 50
+          update_geom_info(obj1, geom_info)
+          obj2=None
+        else:
+          sketch_f2 = obj1.newObject('Sketcher::SketchObject', name+'_sketch_f2')
+          sketch_f2.MapMode = 'FlatFace'
+          if f_l<f_s:  
+            sketch_f2.addGeometry(Part.Ellipse(Vector(max(abs(dia_l/f_l*(f_s-f_l)),MIN_RADIUS),-0,0),Vector(0,MIN_RADIUS,0),Vector(0,0,0)),False)
+            sketch_f2.Placement=Placement(Vector(0,0,f_s), Rotation(Vector(0,0,1),rot_angle), Vector(0,0,0))
+          else:
+            sketch_f2.addGeometry(Part.Ellipse(Vector(0,max(abs(dia_s/f_s*(f_l-f_s)),MIN_RADIUS),0),Vector(MIN_RADIUS,0,0),Vector(0,0,0)),False)
+            sketch_f2.Placement=Placement(Vector(0,0,f_l), Rotation(Vector(0,0,1),rot_angle), Vector(0,0,0))
+          addi=obj1.newObject('PartDesign::AdditiveLoft','AdditiveLoft1')
+          addi.Profile = sketch_f1
+          addi.Sections = sketch_f2
+          sketch_f1.Visibility = False
+          sketch_f2.Visibility = False
+          if prop == max(f_l,f_s):
+            obj2=None
+            obj.ViewObject.ShapeColor = color
+            obj.ViewObject.Transparency = 50
+            update_geom_info(obj, geom_info)
+            obj1.ViewObject.ShapeColor = color
+            obj1.ViewObject.Transparency = 50
+            update_geom_info(obj1, geom_info)
+          else:
+            obj2 = DOC.addObject('PartDesign::Body', name+'2')
+            sketch_end = obj2.newObject('Sketcher::SketchObject', name+'_sketch_end')
+            sketch_end.MapMode = 'FlatFace'
+            if abs(dia_l/f_l*(f_l-prop))>abs(dia_s/f_s*(f_s-prop)):
+              sketch_end.addGeometry(Part.Ellipse(Vector(max(abs(dia_l/f_l*(f_l-prop)),MIN_RADIUS),-0,0),Vector(0,max(abs(dia_s/f_s*(f_s-prop)),MIN_RADIUS),0),Vector(0,0,0)),False)
+            else:
+              sketch_end.addGeometry(Part.Ellipse(Vector(0,max(abs(dia_s/f_s*(f_s-prop)),MIN_RADIUS),0),Vector(max(abs(dia_l/f_l*(f_l-prop)),MIN_RADIUS),-0,0),Vector(0,0,0)),False)
+            sketch_end.Placement=Placement(Vector(0,0,prop), Rotation(Vector(0,0,1),rot_angle), Vector(0,0,0))
+            addi=obj2.newObject('PartDesign::AdditiveLoft','AdditiveLoft2')
+            addi.Profile = sketch_f2
+            addi.Sections = sketch_end
+            sketch_f2.Visibility = False
+            sketch_end.Visibility = False
+            obj.ViewObject.ShapeColor = color
+            obj.ViewObject.Transparency = 50
+            update_geom_info(obj, geom_info)
+            obj1.ViewObject.ShapeColor = color
+            obj1.ViewObject.Transparency = 50
+            update_geom_info(obj1, geom_info)
+            obj2.ViewObject.ShapeColor = color
+            obj2.ViewObject.Transparency = 50
+            update_geom_info(obj2, geom_info)
+    else:
+      if prop < f_l:
+        sketch_end = obj.newObject('Sketcher::SketchObject', name+'_sketch_end')
+        sketch_end.MapMode = 'FlatFace'
+        if dia_l/f_l*(f_l-prop)>dia_s/f_s*(f_s-prop):
+          sketch_end.addGeometry(Part.Ellipse(Vector(max(abs(dia_l/f_l*(f_l-prop)),MIN_RADIUS),-0,0),Vector(0,max(abs(dia_s/f_s*(f_s-prop)),MIN_RADIUS),0),Vector(0,0,0)),False)
+        else:
+          sketch_end.addGeometry(Part.Ellipse(Vector(0,max(abs(dia_s/f_s*(f_s-prop)),MIN_RADIUS),0),Vector(max(abs(dia_l/f_l*(f_l-prop)),MIN_RADIUS),0,0),Vector(0,0,0)),False)
+        sketch_end.Placement=Placement(Vector(0,0,prop), Rotation(Vector(0,0,1),rot_angle), Vector(0,0,0))
+        addi=obj.newObject('PartDesign::AdditiveLoft','AdditiveLoft')
+        addi.Profile = sketch
+        addi.Sections = sketch_end
+        sketch.Visibility = False
+        sketch_end.Visibility = False
+        obj.ViewObject.ShapeColor = color
+        obj.ViewObject.Transparency = 50
+        update_geom_info(obj, geom_info)
+        obj1=obj2=None
+      else:
+        sketch_f_l = obj.newObject('Sketcher::SketchObject', name+'_sketch_f_l')
+        sketch_f_l.MapMode = 'FlatFace'
+        sketch_f_l.addGeometry(Part.Ellipse(Vector(0.0,MIN_RADIUS,0),Vector(MIN_RADIUS,0,0),Vector(0,0,0)),False)
+        sketch_f_l.Placement=Placement(Vector(0,0,f_l), Rotation(Vector(0,0,1),rot_angle), Vector(0,0,0))
+        addi=obj.newObject('PartDesign::AdditiveLoft','AdditiveLoft')
+        addi.Profile = sketch
+        addi.Sections = sketch_f_l
+        sketch.Visibility = False
+        sketch_f_l.Visibility = False
+        obj1 = DOC.addObject('PartDesign::Body', name+'1')
+        sketch_end = obj1.newObject('Sketcher::SketchObject', name+'_sketch_end')
+        sketch_end.MapMode = 'FlatFace'
+        if dia_l/f_l*(f_l-prop)<dia_s/f_s*(f_s-prop):
+          sketch_end.addGeometry(Part.Ellipse(Vector(max(abs(dia_l/f_l*(f_l-prop)),MIN_RADIUS),-0,0),Vector(0,max(abs(dia_s/f_s*(f_s-prop)),MIN_RADIUS),0),Vector(0,0,0)),False)
+        else:
+          sketch_end.addGeometry(Part.Ellipse(Vector(0,max(abs(dia_s/f_s*(f_s-prop)),MIN_RADIUS),0),Vector(max(abs(dia_l/f_l*(f_l-prop)),MIN_RADIUS),0,0),Vector(0,0,0)),False)
+        sketch_end.Placement=Placement(Vector(0,0,prop), Rotation(Vector(0,0,1),rot_angle), Vector(0,0,0))
+        addi=obj1.newObject('PartDesign::AdditiveLoft','AdditiveLoft')
+        addi.Profile = sketch_f_l
+        addi.Sections = sketch_end
+        sketch_f_l.Visibility = False
+        sketch_end.Visibility = False
+        obj.ViewObject.ShapeColor = color
+        obj.ViewObject.Transparency = 50
+        update_geom_info(obj, geom_info)
+        obj1.ViewObject.ShapeColor = color
+        obj1.ViewObject.Transparency = 50
+        update_geom_info(obj1, geom_info)
+        obj2=None
+  elif f_s<0 and f_l<0:
+    sketch_end = obj.newObject('Sketcher::SketchObject', name+'_sketch_end')
+    sketch_end.MapMode = 'FlatFace'
+    if dia_l/f_l*(f_l-prop)>dia_s/f_s*(f_s-prop):
+      sketch_end.addGeometry(Part.Ellipse(Vector(max(abs(dia_l/f_l*(f_l-prop)),MIN_RADIUS),-0,0),Vector(0,max(abs(dia_s/f_s*(f_s-prop)),MIN_RADIUS),0),Vector(0,0,0)),False)
+    else:
+      sketch_end.addGeometry(Part.Ellipse(Vector(0,max(abs(dia_s/f_s*(f_s-prop)),MIN_RADIUS),0),Vector(max(abs(dia_l/f_l*(f_l-prop)),MIN_RADIUS),0,0),Vector(0,0,0)),False)
+    sketch_end.Placement=Placement(Vector(0,0,prop), Rotation(Vector(0,0,1),rot_angle), Vector(0,0,0))
+    addi=obj.newObject('PartDesign::AdditiveLoft','AdditiveLoft')
+    addi.Profile = sketch
+    addi.Sections = sketch_end
+    sketch.Visibility = False
+    sketch_end.Visibility = False
+    obj.ViewObject.ShapeColor = color
+    obj.ViewObject.Transparency = 50
+    update_geom_info(obj, geom_info)
+    obj1=obj2=None
+  else:
+    if max(f_l,f_s)>=prop:
+      sketch_end = obj.newObject('Sketcher::SketchObject', name+'_sketch_end')
+      sketch_end.MapMode = 'FlatFace'
+      if dia_l/f_l*(f_l-prop)>dia_s/f_s*(f_s-prop):
+        sketch_end.addGeometry(Part.Ellipse(Vector(max(abs(dia_l/f_l*(f_l-prop)),MIN_RADIUS),-0,0),Vector(0,max(abs(dia_s/f_s*(f_s-prop)),0),MIN_RADIUS),Vector(0,0,0)),False)
+      else:
+        sketch_end.addGeometry(Part.Ellipse(Vector(0,max(abs(dia_s/f_s*(f_s-prop)),MIN_RADIUS),0),Vector(max(abs(dia_l/f_l*(f_l-prop)),MIN_RADIUS),0,0),Vector(0,0,0)),False)
+      sketch_end.Placement=Placement(Vector(0,0,prop), Rotation(Vector(0,0,1),rot_angle), Vector(0,0,0))
+      addi=obj.newObject('PartDesign::AdditiveLoft','AdditiveLoft')
+      addi.Profile = sketch
+      addi.Sections = sketch_end
+      sketch.Visibility = False
+      sketch_end.Visibility = False
+      obj.ViewObject.ShapeColor = color
+      obj.ViewObject.Transparency = 50
+      update_geom_info(obj, geom_info)
+      obj1=obj2=None
+    else:
+      sketch_f =  obj.newObject('Sketcher::SketchObject', name+'_sketch_end')
+      sketch_f.MapMode = 'FlatFace'
+      if f_l<f_s:
+        sketch_f.addGeometry(Part.Ellipse(Vector(max(abs(dia_l/f_l*(f_s-f_l)),MIN_RADIUS),-0,0),Vector(0,MIN_RADIUS,0),Vector(0,0,0)),False)
+        sketch_f.Placement=Placement(Vector(0,0,f_s), Rotation(Vector(0,0,1),rot_angle), Vector(0,0,0))
+      else:
+        sketch_f.addGeometry(Part.Ellipse(Vector(0.0,max(abs(dia_s/f_s*(f_s-f_l)),MIN_RADIUS),0),Vector(MIN_RADIUS,0,0),Vector(0,0,0)),False)
+        sketch_f.Placement=Placement(Vector(0,0,f_l), Rotation(Vector(0,0,1),rot_angle), Vector(0,0,0))
+      addi=obj.newObject('PartDesign::AdditiveLoft','AdditiveLoft')
+      addi.Profile = sketch
+      addi.Sections = sketch_f
+      sketch.Visibility = False
+      sketch_f.Visibility = False
+      obj1 = DOC.addObject('PartDesign::Body', name+'1')
+      sketch_end = obj1.newObject('Sketcher::SketchObject', name+'_sketch_end')
+      sketch_end.MapMode = 'FlatFace'
+      if dia_l/f_l*(f_l-prop)>dia_s/f_s*(f_s-prop):
+        sketch_end.addGeometry(Part.Ellipse(Vector(max(abs(dia_l/f_l*(f_l-prop)),MIN_RADIUS),-0,0),Vector(0,max(abs(dia_s/f_s*(f_s-prop)),MIN_RADIUS),0),Vector(0,0,0)),False)
+      else:
+        sketch_end.addGeometry(Part.Ellipse(Vector(0,max(abs(dia_s/f_s*(f_s-prop)),MIN_RADIUS),0),Vector(max(abs(dia_l/f_l*(f_l-prop)),MIN_RADIUS),0,0),Vector(0,0,0)),False)
+      sketch_end.Placement=Placement(Vector(0,0,prop), Rotation(Vector(0,0,1),rot_angle), Vector(0,0,0))
+      addi=obj1.newObject('PartDesign::AdditiveLoft','AdditiveLoft')
+      addi.Profile = sketch_f
+      addi.Sections = sketch_end
+      sketch_f.Visibility = False
+      sketch_end.Visibility = False
+      obj.ViewObject.ShapeColor = color
+      obj.ViewObject.Transparency = 50
+      update_geom_info(obj, geom_info)
+      obj1.ViewObject.ShapeColor = color
+      obj1.ViewObject.Transparency = 50
+      update_geom_info(obj1, geom_info)
+      obj2=None
+      
+  part = initialize_composition_old(name="asti beam")
+  container = obj,obj1,obj2
+  add_to_composition(part, container)
+  part.Placement = FreeCAD.Placement(Vector(0,0,0), FreeCAD.Rotation(Vector(0,1,0),90), Vector(0,0,0))
+  DOC.recompute()
+  return part
+  
 def model_Gaussian_beam (name="Gaussian_beam",q_para=-100+200j,prop=200,wavelength=650E-6,
                           color=DEFAULT_COLOR_CRIMSON,beam_count=1, geom_info=None):
     """

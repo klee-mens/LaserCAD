@@ -148,7 +148,8 @@ def lens_mount(mount_name="lens_mount", mount_type="MLH05_M",
 
 def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
                  mount_type="default", geom=None, only_info=False, 
-                 drawing_post=True,base_exists=False, dia=25.4,thickness=30, **kwargs):
+                 drawing_post=True,base_exists=False, dia=25.4,
+                 thickness=30,Flip90=False, **kwargs):
   """
     Build the mirror mount, post, post holder and slotted bases of the mirror
 
@@ -215,7 +216,7 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
   POS = geom[0]
   AXES = geom[1]
   NORMAL = AXES[:,0]
-  print("Mirror normal=",NORMAL)  
+  # print("Mirror normal=",NORMAL)  
   DOC = get_DOC()
   if abs(NORMAL[2])<DEFALUT_MAX_ANGULAR_OFFSET/180*np.pi:
     NORMAL[2]=0
@@ -377,7 +378,8 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
   else:
     update_geom_info(obj,[POS,NORMAL])
   obj.Label = mount_name
-  
+  if Flip90:
+    rotate(obj,Vector(NORMAL),90)
   if  drawing_post:
     post_part=draw_post_part(name="post_part",base_exists=base_exists,
                              height=height,xshift=xshift, geom=geom)
@@ -388,6 +390,7 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
   container = post_part,obj,additional_mount
   add_to_composition(part, container)
   DOC.recompute()
+  print("post postiton=",np.array(POS)+xshift*np.array(NORMAL))
   return part
 
 def model_lamda_plane(name = "lamuda_plane",drawing_post=True,base_exists=False,
@@ -557,6 +560,7 @@ def draw_post(name="TR50_M", height=12,xshift=0, geom=None):
   offset=Vector(xshift,0,height)
   obj.Placement = Placement(offset, Rotation(90,0,90), Vector(0,0,0))
   update_geom_info(obj, geom, off0=offset)
+  # print(obj.Placement)
   return obj
 
 def draw_post_holder (name="PH50_M", height=0,xshift=0, geom=None):
@@ -638,7 +642,6 @@ def draw_post_holder (name="PH50_M", height=0,xshift=0, geom=None):
     offset=Vector(xshift-4.5,-5.5,height+31.25)
     obj.Placement = Placement(offset, Rotation(90,0,90), Vector(0,0,0))
     update_geom_info(obj, Geom_ground, off0=offset)
-
   return obj
 
 def draw_post_base(name="BA1L", height=0,xshift=0, geom=None):

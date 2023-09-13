@@ -9,3 +9,4 @@ from .iris import Iris
 from .lambda_plate import Lambda_Plate
 from .faraday import Faraday_Isolator
 from .pockels_cell import Pockels_Cell
+from .crystal import Crystal

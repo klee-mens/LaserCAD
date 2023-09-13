@@ -9,21 +9,22 @@ Created on Wed Aug 24 16:28:07 2022
 # from basic_optics.freecad_models import model_mirror, freecad_da
 from .geom_object import TOLERANCE, NORM0
 from .ray import Ray
-from ..freecad_models import model_mirror, mirror_mount, model_stripe_mirror, model_lamda_plane
+# from ..freecad_models import model_mirror, mirror_mount, model_stripe_mirror, model_lamda_plane
+from ..freecad_models import model_mirror, mirror_mount, model_lamda_plane
 from .optical_element import Opt_Element
 import numpy as np
 from copy import deepcopy
 
-try:
-  import FreeCAD
-  DOC = FreeCAD.activeDocument()
-  print(DOC)
-  from FreeCAD import Vector, Placement, Rotation
-except:
-  freecad_da = False
-  DOC = None
+# try:
+  # import FreeCAD
+  # DOC = FreeCAD.activeDocument()
+  # print(DOC)
+  # from FreeCAD import Vector, Placement, Rotation
+# except:
+  # freecad_da = False
+  # DOC = None
 
-from ..freecad_models.utils import freecad_da, update_geom_info, get_DOC, rotate, thisfolder
+# from ..freecad_models.utils import freecad_da, update_geom_info, get_DOC, rotate, thisfolder
 
 class Mirror(Opt_Element):
   """
@@ -201,7 +202,9 @@ class Mirror(Opt_Element):
     # the mirror_mount function manually, no, I don't
     helper_dict = dict(self.draw_dict)
     # helper_dict["geom"] = (self.pos, self.normal)
+    xshift=0
     obj = mirror_mount(**helper_dict)
+    post_pos = xshift*self.normal+self.pos
     return obj
 
   def draw_mount_text(self):
@@ -232,7 +235,7 @@ class Curved_Mirror(Mirror):
 
   def focal_length(self):
     return self.radius/2
-
+ 
   def next_ray(self, ray):
     # r1 = self.refraction(ray)
     # r2 = self.reflection(r1)

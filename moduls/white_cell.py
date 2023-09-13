@@ -29,7 +29,7 @@ def Make_White_Cell(name="White Cell", Radius=300, roundtrips4=1, aperture_small
   cm1_regarding_point = pos_cm2 - (0, seperation/2, 0)
   cm3_regarding_point = pos_cm2 + (0, seperation/2, 0)
 
-  whitecell = Composition(name=name, pos=pos0,base_exists=False, normal = pos_cm1 - pos0)
+  whitecell = Composition(name=name, pos=pos0,normal = pos_cm1 - pos0)
 
   ls = Beam(angle=0, pos=pos0)
   # ls.normal = pos_cm1 - pos0

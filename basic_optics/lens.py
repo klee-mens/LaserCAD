@@ -39,6 +39,8 @@ class Lens(Opt_Element):
     return model_lens(**self.draw_dict)
 
   def draw_mount_fc(self):
+    # obj = lens_mount(**self.draw_dict)
+    # post_pos = xshift*self.normal+self.pos
     return lens_mount(**self.draw_dict)
   
   def draw_mount_text(self):

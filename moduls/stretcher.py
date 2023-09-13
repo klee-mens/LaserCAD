@@ -140,7 +140,19 @@ def Make_Stretcher_chromeo():
   return Stretcher
 
 
-def Make_Stretcher():
+def Make_Stretcher(
+        Radius = 1000, #Radius des großen Konkavspiegels
+        Aperture_concav = 6 * inch,
+        h_StripeM = 10, #Höhe des Streifenspiegels
+        gamma = 5 /180 *np.pi, # Seperationswinkel zwischen einfallenden und Mittelpunktsstrahl; Alpha = Gamma + Beta
+        grat_const = 1/450, # Gitterkonstante in 1/mm
+        seperation = 100, # Differenz zwischen Gratingposition und Radius
+        lam_mid = 2400e-9 * 1e3, # Zentralwellenlänge in mm
+        delta_lamda = 250e-9*1e3, # Bandbreite in mm
+        number_of_rays = 20,
+        safety_to_StripeM = 5, #Abstand der eingehenden Strahlen zum Concav Spiegel in mm
+        periscope_distance = 8,
+        distance_rooftop_gratig = 600):
   """
   tja, versuchen wir mal einen Offner Strecker...
   Note: When drawing a rooftop mirror, we will draw apure_cosmetic mirror to
@@ -154,19 +166,18 @@ def Make_Stretcher():
 
   """
   # definierende Parameter
-  Radius = 1000 #Radius des großen Konkavspiegels
-  Aperture_concav = 6 * inch
-  h_StripeM = 10 #Höhe des Streifenspiegels
-  gamma = 5 /180 *np.pi # Seperationswinkel zwischen einfallenden und Mittelpunktsstrahl; Alpha = Gamma + Beta
-  grat_const = 1/450 # Gitterkonstante in 1/mm
-  seperation = 100 # Differenz zwischen Gratingposition und Radius
-  lam_mid = 2400e-9 * 1e3 # Zentralwellenlänge in mm
-  delta_lamda = 250e-9*1e3 # Bandbreite in mm
-  number_of_rays = 20
-  safety_to_StripeM = 5 #Abstand der eingehenden Strahlen zum Concav Spiegel in mm
-  periscope_distance = 8
-  distance_rooftop_gratig = 200 # in mm
-
+  # Radius = 1000 #Radius des großen Konkavspiegels
+  # Aperture_concav = 6 * inch
+  # h_StripeM = 10 #Höhe des Streifenspiegels
+  # gamma = 5 /180 *np.pi # Seperationswinkel zwischen einfallenden und Mittelpunktsstrahl; Alpha = Gamma + Beta
+  # grat_const = 1/450 # Gitterkonstante in 1/mm
+  # seperation = 100 # Differenz zwischen Gratingposition und Radius
+  # lam_mid = 2400e-9 * 1e3 # Zentralwellenlänge in mm
+  # delta_lamda = 250e-9*1e3 # Bandbreite in mm
+  # number_of_rays = 20
+  # safety_to_StripeM = 5 #Abstand der eingehenden Strahlen zum Concav Spiegel in mm
+  # periscope_distance = 8
+  
   # abgeleitete Parameter
   v = lam_mid/grat_const
   s = np.sin(gamma)
@@ -206,8 +217,6 @@ def Make_Stretcher():
   cmap = plt.cm.gist_rainbow
   for wavel in wavels:
     rn = Ray()
-    # rn.normal = vec
-    # rn.pos = pos0
     rn.wavelength = wavel
     x = (wavel - lam_mid + delta_lamda/2) / delta_lamda
     rn.draw_dict["color"] = cmap( x )
@@ -252,13 +261,6 @@ def Make_Stretcher():
   Stretcher.add_fixed_elm(flip_mirror2)
   Stretcher.add_fixed_elm(pure_cosmetic)
 
-  # for item in subperis._elements:
-  #   Stretcher.add_fixed_elm(item)
-
-
-  # seq = [0,1,2,1,0]
-  # seq = [0,1,2,1,0, 3]
-  # seq = [0,1,2,1,0, 3,4]
   seq = [0,1,2,1,0, 3,4, 0, 1, 2, 1, 0]
   Stretcher.set_sequence(seq)
   Stretcher.propagate(300)
