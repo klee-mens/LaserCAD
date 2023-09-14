@@ -14,4 +14,5 @@ class Faraday_Isolator(Component):
     stl_file=thisfolder+"\mount_meshes\special mount\Faraday-Isolatoren-Body.stl"
     self.draw_dict["stl_file"]=stl_file
     self.draw_dict["color"]=(10/255, 20/255, 230/255)
+    # self.draw_dict["color"]=(84/255, 84/255, 84/255)
     self.freecad_model = load_STL

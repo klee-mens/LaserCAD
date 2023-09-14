@@ -22,7 +22,7 @@ from LaserCAD.freecad_models import clear_doc, setview, freecad_da
 from LaserCAD.basic_optics import Mirror, Beam, Composition, inch
 from LaserCAD.basic_optics import Curved_Mirror, Ray, Component
 from LaserCAD.basic_optics import LinearResonator, Lens
-from LaserCAD.basic_optics import Grating
+from LaserCAD.basic_optics import Grating, Crystal
 import matplotlib.pyplot as plt
 from LaserCAD.freecad_models.utils import thisfolder, load_STL
 from LaserCAD.non_interactings import Faraday_Isolator, Pockels_Cell, Lambda_Plate, Crystal
@@ -50,7 +50,7 @@ seed_laser.freecad_model = load_STL
 faraday_isolator_6mm = Faraday_Isolator()
 
 Seed = Composition(name="Seed")
-Seed.normal = (1,2,0)
+# Seed.normal = (1,2,0)
 Seed.pos = start_point
 Seed.set_light_source(Beam(angle=0, radius=seed_beam_radius))
 Seed.add_on_axis(seed_laser)
@@ -307,7 +307,7 @@ simres.propagate(dist_fold1_fold2)
 simres.add_on_axis(fold2)
 simres.propagate(last-dist_crystal_end)
 
-laser_crys = Crystal()
+laser_crys = Crystal(width=6,height=6,thickness=10,n=2.45)
 
 simres.add_on_axis(laser_crys)
 simres.propagate(dist_crystal_end)
@@ -316,7 +316,7 @@ simres.add_on_axis(cm)
 
 simres.compute_eigenmode()
 
-PockelsCell.rotate(PockelsCell.normal, np.pi/2)
+# PockelsCell.rotate(PockelsCell.normal, np.pi/2)
 
 
 # Amplifier_I = Make_Amplifier_I()
@@ -332,8 +332,8 @@ Amplifier_I.set_geom(PulsePicker.last_geom())
 f1 = -100
 f2 = 300
 
-# pump_geom = Amplifier_I._elements[-1].get_geom()
-pump_geom = Amplifier_I.non_opticals[-1].get_geom()
+# pump_geom = Amplifier_I._elements[-2].get_geom()
+pump_geom = Amplifier_I._elements[-1].get_geom()
 Pump = Composition(name="Pump")
 Pump.set_geom(pump_geom)
 pump_light = Beam(radius=1.5, angle=0)
@@ -348,40 +348,14 @@ Pump.propagate(f1+f2*0.5)
 Pump.add_on_axis(Lens(f=f2))
 Pump.propagate(190)
 
-
-
-# =============================================================================
-# Amplifier2 Butterfly
-# =============================================================================
-bigcrys = Crystal(diameter=18, length=12)
-
-source = Beam(radius=5, angle=0)
-
-Butterfly = Composition(name="Butterlfy")
-Butterfly.set_light_source(source)
-Butterfly.propagate(300)
-Butterfly.add_on_axis(bigcrys)
-bigcrys.rotate((0,0,1), 6*np.pi/180)
-
-Butterfly.propagate(200)
-flip1 = Mirror(phi=90)
-Butterfly.add_on_axis(flip1)
-Butterfly.propagate(70)
-backmirror1 = Mirror()
-Butterfly.add_on_axis(backmirror1)
-backmirror1.set_normal_with_2_points(flip1.pos, bigcrys.pos)
-Butterfly.propagate(500)
-
-
-
 # =============================================================================
 # simple AMP2
 # =============================================================================
 
 
 focal = 300
-sep_angle = 6
-bigcrys = Crystal(diameter=18, length=12)
+sep_angle = 5
+bigcrys = Crystal(width=20,height=20,thickness=15,n=2.45)
 source = Beam(radius=1.4, angle=0)
 telesf1 = -75
 telesf2 = 270
@@ -396,7 +370,7 @@ teles_lens2 = Lens(f=telesf2)
 amp2.add_on_axis(teles_lens2)
 amp2.propagate(800)
 amp2.add_on_axis(bigcrys)
-amp2.propagate(15)
+amp2.propagate(20)
 active_mir = Mirror(phi=180-sep_angle)
 amp2.add_on_axis(active_mir)
 amp2.propagate(focal*2)
@@ -435,6 +409,7 @@ BigPump = Composition("Big_Pump")
 BigPump.set_light_source(big_pump_ls)
 BigPump.propagate(200)
 
+# BigPump.set_geom(amp2._elements[2].get_geom())
 BigPump.set_geom(amp2.non_opticals[-1].get_geom())
 
 
@@ -453,7 +428,29 @@ amp2.draw()
 BigPump.draw()
 
 
-
+# =============================================================================
+# breadboards
+# =============================================================================
+from LaserCAD.non_interactings import Breadboard
+StartPos = (-700, -450, 0)
+b1 = Breadboard()
+b1.pos += StartPos
+# b1.draw()
+b2= Breadboard()
+# b2.pos += b1.pos + (b2.Xdimension, 0, 0)
+# b2.draw()
+# b3= Breadboard()
+# b3.pos += b1.pos + (0, b2.Ydimension, 0)
+# b3.draw()
+b4= Breadboard()
+b4.pos += b1.pos + (b2.Xdimension, b2.Ydimension, 0)
+# b4.draw()
+# b5= Breadboard()
+# b5.pos += b1.pos + (0, -b2.Ydimension, 0)
+# b5.draw()
+# b6= Breadboard()
+# b6.pos += b1.pos + (b2.Xdimension, -b2.Ydimension, 0)
+# b6.draw()
 
 if freecad_da:
   setview()

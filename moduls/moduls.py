@@ -1195,6 +1195,31 @@ def Make_Amplifier_I():
   return amp1
 
 
+from .. non_interactings import Crystal
+def Make_Butterfly_Amplifier():
+  # =============================================================================
+  # Amplifier2 Butterfly
+  # =============================================================================
+  bigcrys = Crystal(width=18,height=18,thickness=15,n=2.45)
+
+  source = Beam(radius=5, angle=0)
+
+  Butterfly = Composition(name="Butterlfy")
+  Butterfly.set_light_source(source)
+  Butterfly.propagate(300)
+  Butterfly.add_on_axis(bigcrys)
+  bigcrys.rotate((0,0,1), 6*np.pi/180)
+
+  Butterfly.propagate(200)
+  flip1 = Mirror(phi=90)
+  Butterfly.add_on_axis(flip1)
+  Butterfly.propagate(70)
+  backmirror1 = Mirror()
+  Butterfly.add_on_axis(backmirror1)
+  backmirror1.set_normal_with_2_points(flip1.pos, bigcrys.pos)
+  Butterfly.propagate(500)
+  return Butterfly
+
 
 # def Teleskop_old(name="Teleskop", f1=100.0, f2=100.0, d0=100.0, lens1_aperture=25,
 #              lens2_aperture=inch):
