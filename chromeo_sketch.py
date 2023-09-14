@@ -411,15 +411,10 @@ Pump.propagate(190)
 # Draw Selection
 # =============================================================================
 
-# Seed.draw()
-# Stretcher.draw()
-# PulsePicker.draw()
-# Amplifier_I.draw()
-
-le = Lens()
-le.draw()
-le.draw_mount()
-
+Seed.draw()
+Stretcher.draw()
+PulsePicker.draw()
+Amplifier_I.draw()
 
 if freecad_da:
   setview()

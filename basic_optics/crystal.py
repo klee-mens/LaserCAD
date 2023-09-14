@@ -24,24 +24,9 @@ class Crystal(Opt_Element):
     self.draw_dict["thickness"]=self.thickness
     self.relative_refractive_index = n
 
-  # @property
-  # def focal_length(self):
-  #   return self.__f
-  # @focal_length.setter
-  # def focal_length(self, x):
-  #   self.__f = x
-  #   if x == 0:
-  #     self._matrix[1,0] = 0
-  #   else:
-      # self._matrix[1,0] = -1/x
-
   def next_ray(self, ray):
     ray2 = deepcopy(ray)
     ray2.pos = ray.intersect_with(self) #dadruch wird ray.length verändert(!)
-    
-    # print("ray2.pos =",ray2.pos)
-    # radial_vec = ray2.pos - self.pos
-    # ray2 = ray
     norm = ray2.normal
     ea = self.normal
     ref = 1/self.relative_refractive_index
@@ -69,11 +54,6 @@ class Crystal(Opt_Element):
   def draw_mount_fc(self):
     self.update_draw_dict()
     return model_crystal_mount(**self.draw_dict)
-
-  # def draw_mount_fc(self):
-  #   obj = lens_mount(**self.draw_dict)
-  #   # post_pos = xshift*self.normal+self.pos
-  #   return lens_mount(**self.draw_dict)
   
   # def draw_mount_text(self):
   #   if self.draw_dict["mount_type"] == "dont_draw":
@@ -91,13 +71,6 @@ class Crystal(Opt_Element):
     # txt = 'Lens(f=' + repr(self.focal_length)
     txt += ', ' + super().__repr__()[n+1::]
     return txt
-
-#   def __repr__(self):
-#     txt = 'Lens(f=' + repr(self.focal_length)
-#     txt += ', name="' + self.name
-#     txt += '", pos='+repr(self.pos)[6:-1]
-#     txt += ', norm='+repr(self.normal)[6:-1]+")"
-#     return txt
 
   # def to_dict(self):
   #   dc = super().to_dict()

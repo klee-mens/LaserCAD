@@ -27,7 +27,6 @@ if freecad_da:
   import ImportGui
   import Part
   import Sketcher
-  from math import pi
 
 
 def model_crystal(name="crystal",model="cube", width=50, height=10, thickness=25, color=DEFAULT_COLOR_CRYSTAL,Transparency=50, geom=None, **kwargs):
@@ -42,7 +41,6 @@ def model_crystal(name="crystal",model="cube", width=50, height=10, thickness=25
     return obj
   obj = DOC.addObject('PartDesign::Body', name)
   sketch = obj.newObject('Sketcher::SketchObject', name+'_sketch')
-  sketch.Support = (DOC.getObject('YZ_Plane'),[''])
   sketch.MapMode = 'FlatFace'
   
   geoList = []
@@ -75,6 +73,9 @@ def model_crystal(name="crystal",model="cube", width=50, height=10, thickness=25
   
   obj.ViewObject.ShapeColor = color
   obj.ViewObject.Transparency = Transparency
+  
+  obj.Placement=Placement(Vector(0,0,0), Rotation(90,0,90), Vector(0,0,0))
+  
   update_geom_info(obj, geom)
   DOC.recompute()
 
@@ -84,7 +85,6 @@ def model_crystal_mount(name="crystal_mount",model="cube", width=50, height=10, 
   DOC = get_DOC()
   obj = DOC.addObject('PartDesign::Body', name)
   sketch = obj.newObject('Sketcher::SketchObject', name+'_sketch')
-  sketch.Support = (DOC.getObject('YZ_Plane'),[''])
   sketch.MapMode = 'FlatFace'
   if model== "cube":
     geoList = []
@@ -130,7 +130,7 @@ def model_crystal_mount(name="crystal_mount",model="cube", width=50, height=10, 
     sketch.addConstraint(Sketcher.Constraint('DistanceY',-1,1,4,2,20))
     sketch.addConstraint(Sketcher.Constraint('DistanceX',-1,1,4,2,20)) 
   else:
-    sketch.addGeometry(Part.Circle(Vector(0.000000,0.000000,0),Vector(0,0,1),width/2),False)
+    sketch.addGeometry(Part.Circle(Vector(0,0,0),Vector(0,0,1),width/2),False)
     sketch.addConstraint(Sketcher.Constraint('Coincident',0,3,-1,1)) 
     sketch.addConstraint(Sketcher.Constraint('Diameter',0,width)) 
     geoList = []
@@ -158,16 +158,34 @@ def model_crystal_mount(name="crystal_mount",model="cube", width=50, height=10, 
   
   pad = obj.newObject('PartDesign::Pad','Pad')
   pad.Profile = sketch
-  pad.Length = thickness + 3
+  pad.Length = thickness + 2
   pad.ReferenceAxis = (sketch,['N_Axis'])
   sketch.Visibility = False
   
+  DOC.recompute()
+  sketch001 = obj.newObject('Sketcher::SketchObject', name+'_sketch001')
+  sketch001.Support = (pad,['Face3',])
+  sketch001.MapMode = 'FlatFace'
+  
+  sketch001.addGeometry(Part.Circle(Vector(0,(thickness + 2)/2,0),Vector(0,0,1),2),
+                        False)
+  sketch001.addConstraint(Sketcher.Constraint('PointOnObject',0,3,-2)) 
+  sketch001.addConstraint(Sketcher.Constraint('Diameter',0,2*2)) 
+  sketch001.addConstraint(Sketcher.Constraint('DistanceY',-1,1,0,3,(thickness + 2)/2)) 
+  
+  Pocket = obj.newObject('PartDesign::Pocket','Pocket')
+  Pocket.Profile = sketch001
+  Pocket.Length = 10
+  Pocket.ReferenceAxis = (sketch001,['N_Axis'])
+  sketch001.Visibility = False
+  
   obj.ViewObject.ShapeColor = DEFALUT_MOUNT_COLOR
   obj.ViewObject.Transparency = 0
+  obj.Placement=Placement(Vector(0,0,0), Rotation(90,0,90), Vector(0,0,0))
   update_geom_info(obj, geom)
   DOC.recompute()
   post_part=draw_post_part(name="post_part",
-                           height=20,xshift=(thickness + 3)/2, geom=geom)
+                           height=20,xshift=(thickness + 2)/2, geom=geom)
   part = initialize_composition_old(name="mount, post and base")
   container = post_part,obj
   add_to_composition(part, container)
