@@ -284,6 +284,7 @@ mir1 = Mirror(phi=180)
 TFP1 = Mirror(phi= 180 - 2*tfp_angle, name="TFP1")
 TFP1.draw_dict["color"] = (1.0, 0.0, 2.0)
 TFP1.aperture = tfp_aperture
+TFP1.draw_dict["Flip90"]=True
 
 cm = Curved_Mirror(radius=focal*2, phi = 180)
 PockelsCell = Pockels_Cell(name="PockelZelleRes1")
@@ -315,6 +316,7 @@ simres.add_on_axis(cm)
 
 simres.compute_eigenmode()
 
+PockelsCell.rotate(PockelsCell.normal, np.pi/2)
 
 
 # Amplifier_I = Make_Amplifier_I()
