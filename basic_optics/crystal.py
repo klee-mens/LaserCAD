@@ -8,22 +8,21 @@ Created on Sun Aug 21 20:28:02 2022
 
 # from basic_optics import Opt_Element
 # from .basic_optics.freecad_models import model_lens
-from ..freecad_models import model_lens, lens_mount, model_crystal
+from ..freecad_models import model_lens, lens_mount, model_crystal,model_crystal_mount
 from .optical_element import Opt_Element
 from copy import deepcopy
 import numpy as np
 
 class Crystal(Opt_Element):
-  def __init__(self, width=10,height=10,thickness=10,n=1.5, name="NewCrystal", **kwargs):
+  def __init__(self, width=10,model="cube",thickness=10,n=1.5, name="NewCrystal", **kwargs):
     super().__init__(name=name, **kwargs)
     self.draw_dict["width"]=width
-    self.draw_dict["height"]=height
+    self.draw_dict["height"]=width
+    self.draw_dict["model"]=model
     self._matrix[0,1] = thickness*(1/n-1)
     self.thickness=thickness
     self.draw_dict["thickness"]=self.thickness
     self.relative_refractive_index = n
-  #   self.focal_length = f
-  #   self.draw_dict["thickness"] = 3 #sieht schöner aus
 
   # @property
   # def focal_length(self):
@@ -66,6 +65,10 @@ class Crystal(Opt_Element):
   def draw_fc(self):
     self.update_draw_dict()
     return model_crystal(**self.draw_dict)
+
+  def draw_mount_fc(self):
+    self.update_draw_dict()
+    return model_crystal_mount(**self.draw_dict)
 
   # def draw_mount_fc(self):
   #   obj = lens_mount(**self.draw_dict)

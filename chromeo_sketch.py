@@ -61,7 +61,7 @@ Seed.propagate(distance_faraday_mirror)
 Seed.add_on_axis(Flip0)
 Seed.propagate(distance_seed_laser_stretcher-distance_6_mm_faraday-distance_faraday_mirror)
 seed_end_geom = Seed.last_geom()
-
+# print(faraday_isolator_6mm.pos)
 # =============================================================================
 # Create and draw the stretcher
 # =============================================================================
@@ -411,12 +411,14 @@ Pump.propagate(190)
 # Draw Selection
 # =============================================================================
 
-Seed.draw()
-Stretcher.draw()
-PulsePicker.draw()
-Amplifier_I.draw()
+# Seed.draw()
+# Stretcher.draw()
+# PulsePicker.draw()
+# Amplifier_I.draw()
 
-
+le = Lens()
+le.draw()
+le.draw_mount()
 
 
 if freecad_da:
