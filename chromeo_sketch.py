@@ -61,7 +61,7 @@ Seed.propagate(distance_faraday_mirror)
 Seed.add_on_axis(Flip0)
 Seed.propagate(distance_seed_laser_stretcher-distance_6_mm_faraday-distance_faraday_mirror)
 seed_end_geom = Seed.last_geom()
-
+# print(faraday_isolator_6mm.pos)
 # =============================================================================
 # Create and draw the stretcher
 # =============================================================================
@@ -307,7 +307,7 @@ simres.propagate(dist_fold1_fold2)
 simres.add_on_axis(fold2)
 simres.propagate(last-dist_crystal_end)
 
-laser_crys = Crystal(width=6,height=6,thickness=10,n=2.45)
+laser_crys = Crystal(width=6, thickness=10, n=2.45)
 
 simres.add_on_axis(laser_crys)
 simres.propagate(dist_crystal_end)
@@ -355,7 +355,7 @@ Pump.propagate(190)
 
 focal = 300
 sep_angle = 5
-bigcrys = Crystal(width=20,height=20,thickness=15,n=2.45)
+bigcrys = Crystal(width=20, thickness=15, n=2.45)
 source = Beam(radius=1.4, angle=0)
 telesf1 = -75
 telesf2 = 270
@@ -384,11 +384,11 @@ concave2 = Curved_Mirror(radius=focal*2, phi=180+sep_angle)
 amp2.add_on_axis(concave2)
 concave2.set_normal_with_2_points(end_concave.pos, active_mir.pos)
 # amp2.set_sequence([0,1,2,3,4,5,2])
-# amp2.set_sequence([0,1,2,3,4,5,2])
-# amp2.recompute_optical_axis()
-# amp2.propagate(650)
-# amp2.add_on_axis(Mirror(phi=90))
-# amp2.propagate(600)
+amp2.set_sequence([0,1,2,3,2,4,5,6,2,3,2])
+amp2.recompute_optical_axis()
+amp2.propagate(650)
+amp2.add_on_axis(Mirror(phi=90))
+amp2.propagate(600)
 # amp2.set_sequence([0,1,2,3,4,5,2,6])
 # amp2.set_sequence([0,1,2,3,2,4,5,6,5,4,2,3,7])
 
@@ -421,13 +421,13 @@ BigPump.set_geom(amp2._elements[2].get_geom())
 # Draw Selection
 # =============================================================================
 
-# Seed.draw()
-# Stretcher.draw()
-# PulsePicker.draw()
-# Amplifier_I.draw()
-# Pump.draw()
+Seed.draw()
+Stretcher.draw()
+PulsePicker.draw()
+Amplifier_I.draw()
+Pump.draw()
 amp2.draw()
-# BigPump.draw()
+BigPump.draw()
 
 
 # =============================================================================
