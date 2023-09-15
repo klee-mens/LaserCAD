@@ -14,6 +14,10 @@ from copy import deepcopy
 import numpy as np
 
 class Crystal(Opt_Element):
+  """
+  The class of crystal. For now it can only realize Refraction. Since there is 
+  no definiation of the intensity.
+  """
   def __init__(self, width=10,model="cube",thickness=10,n=1.5, name="NewCrystal", **kwargs):
     super().__init__(name=name, **kwargs)
     self.draw_dict["width"]=width
