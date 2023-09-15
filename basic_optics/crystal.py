@@ -26,25 +26,42 @@ class Crystal(Opt_Element):
 
   def next_ray(self, ray):
     ray2 = deepcopy(ray)
-    ray2.pos = ray.intersect_with(self) #dadruch wird ray.length verändert(!)
-    norm = ray2.normal
-    ea = self.normal
-    ref = 1/self.relative_refractive_index
-    muti = norm[0]*ea[0]+norm[1]*ea[1]+norm[2]*ea[2]
-    norm2 = ref * norm - ref*(muti)*ea + pow(1-ref**2*(1-muti**2),0.5)*ea
-    muti2 = norm2[0]*ea[0]+norm2[1]*ea[1]+norm2[2]*ea[2]
-    if muti2 < 0 :
-        norm2 = ref * norm - ref*(muti)*ea - pow(1-ref**2*(1-muti**2),0.5)*ea
-    ray2.normal = norm2
-    ray3 = deepcopy(ray2)
-    new_pos = self.pos+self.normal * self.thickness
-    delta_p = new_pos - ray2.pos
-    # print(delta_p)
-    s = np.sum(delta_p*self.normal) / np.sum(ray2.normal * self.normal)
-    ray2.length = s
-    ray3.pos = ray2.endpoint()
-    ray3.normal=ray.normal
-    # print(ray.length)
+    if np.sum(ray.normal*self.normal)>0:
+      ray2.pos = ray.intersect_with(self) #dadruch wird ray.length verändert(!)
+      norm = ray2.normal
+      ea = self.normal
+      ref = 1/self.relative_refractive_index
+      muti = norm[0]*ea[0]+norm[1]*ea[1]+norm[2]*ea[2]
+      norm2 = ref * norm - ref*(muti)*ea + pow(1-ref**2*(1-muti**2),0.5)*ea
+      muti2 = norm2[0]*ea[0]+norm2[1]*ea[1]+norm2[2]*ea[2]
+      if muti2 < 0 :
+          norm2 = ref * norm - ref*(muti)*ea - pow(1-ref**2*(1-muti**2),0.5)*ea
+      ray2.normal = norm2
+      ray3 = deepcopy(ray2)
+      new_pos = self.pos+self.normal * self.thickness
+      delta_p = new_pos - ray2.pos
+      s = np.sum(delta_p*self.normal) / np.sum(ray2.normal * self.normal)
+      ray2.length = s
+      ray3.pos = ray2.endpoint()
+      ray3.normal=ray.normal
+    else:
+      new_pos = self.pos+self.normal * self.thickness
+      delta_p = new_pos - ray.pos
+      s = np.sum(delta_p*self.normal) / np.sum(ray.normal * self.normal)
+      ray.length = s
+      ray2.pos = ray.endpoint()
+      norm = ray2.normal
+      ea = -self.normal
+      ref = 1/self.relative_refractive_index
+      muti = norm[0]*ea[0]+norm[1]*ea[1]+norm[2]*ea[2]
+      norm2 = ref * norm - ref*(muti)*ea + pow(1-ref**2*(1-muti**2),0.5)*ea
+      muti2 = norm2[0]*ea[0]+norm2[1]*ea[1]+norm2[2]*ea[2]
+      if muti2 < 0 :
+          norm2 = ref * norm - ref*(muti)*ea - pow(1-ref**2*(1-muti**2),0.5)*ea
+      ray2.normal = norm2
+      ray3 = deepcopy(ray2)
+      ray3.pos = ray2.intersect_with(self)
+      ray3.normal = ray.normal
     return ray3
 
   def draw_fc(self):
