@@ -44,6 +44,8 @@ class Crystal(Opt_Element):
       ray2.length = s
       ray3.pos = ray2.endpoint()
       ray3.normal=ray.normal
+      ray4=deepcopy(ray3)
+      ray4.pos = ray3.intersect_with(self)
     else:
       new_pos = self.pos+self.normal * self.thickness
       delta_p = new_pos - ray.pos
@@ -62,7 +64,12 @@ class Crystal(Opt_Element):
       ray3 = deepcopy(ray2)
       ray3.pos = ray2.intersect_with(self)
       ray3.normal = ray.normal
-    return ray3
+      ray4=deepcopy(ray3)
+      delta_p = new_pos - ray3.pos
+      s = np.sum(delta_p*self.normal) / np.sum(ray3.normal * self.normal)
+      ray3.length = s
+      ray4.pos = ray3.endpoint()
+    return ray4
 
   def draw_fc(self):
     self.update_draw_dict()
