@@ -25,7 +25,7 @@ from LaserCAD.basic_optics import LinearResonator, Lens
 from LaserCAD.basic_optics import Grating, Crystal
 import matplotlib.pyplot as plt
 from LaserCAD.freecad_models.utils import thisfolder, load_STL
-from LaserCAD.non_interactings import Faraday_Isolator, Pockels_Cell, Lambda_Plate, Crystal
+from LaserCAD.non_interactings import Faraday_Isolator, Pockels_Cell, Lambda_Plate
 
 if freecad_da:
   clear_doc()
@@ -383,12 +383,14 @@ amp2.propagate(2*focal)
 concave2 = Curved_Mirror(radius=focal*2, phi=180+sep_angle)
 amp2.add_on_axis(concave2)
 concave2.set_normal_with_2_points(end_concave.pos, active_mir.pos)
-amp2.set_sequence([0,1,2,3,4,5,2])
-amp2.recompute_optical_axis()
-amp2.propagate(650)
-amp2.add_on_axis(Mirror(phi=90))
-amp2.propagate(600)
-amp2.set_sequence([0,1,2,3,4,5,2,6])
+# amp2.set_sequence([0,1,2,3,4,5,2])
+# amp2.set_sequence([0,1,2,3,4,5,2])
+# amp2.recompute_optical_axis()
+# amp2.propagate(650)
+# amp2.add_on_axis(Mirror(phi=90))
+# amp2.propagate(600)
+# amp2.set_sequence([0,1,2,3,4,5,2,6])
+# amp2.set_sequence([0,1,2,3,2,4,5,6,5,4,2,3,7])
 
 
 
@@ -409,8 +411,8 @@ BigPump = Composition("Big_Pump")
 BigPump.set_light_source(big_pump_ls)
 BigPump.propagate(200)
 
-# BigPump.set_geom(amp2._elements[2].get_geom())
-BigPump.set_geom(amp2.non_opticals[-1].get_geom())
+BigPump.set_geom(amp2._elements[2].get_geom())
+# BigPump.set_geom(amp2.non_opticals[-1].get_geom())
 
 
 
@@ -419,13 +421,13 @@ BigPump.set_geom(amp2.non_opticals[-1].get_geom())
 # Draw Selection
 # =============================================================================
 
-Seed.draw()
-Stretcher.draw()
-PulsePicker.draw()
-Amplifier_I.draw()
-Pump.draw()
+# Seed.draw()
+# Stretcher.draw()
+# PulsePicker.draw()
+# Amplifier_I.draw()
+# Pump.draw()
 amp2.draw()
-BigPump.draw()
+# BigPump.draw()
 
 
 # =============================================================================
