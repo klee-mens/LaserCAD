@@ -212,7 +212,6 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
   mount_in_database = False
   mount_rotation = False
   additional_mount = None
-  
   POS = geom[0]
   AXES = geom[1]
   NORMAL = AXES[:,0]
