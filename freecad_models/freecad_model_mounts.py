@@ -20,15 +20,15 @@ if freecad_da:
   import Part
   from math import pi
  
-DEFALUT_MAX_ANGULAR_OFFSET = 10
+DEFAULT_MAX_ANGULAR_OFFSET = 10
 price = 0
-DEFALUT_MOUNT_COLOR = (0.75,0.75,0.75)
-DEFALUT_POST_COLOR = (0.8,0.8,0.8)
-DEFALUT_HOLDER_COLOR = (0.2,0.2,0.2)
+DEFAULT_MOUNT_COLOR = (0.75,0.75,0.75)
+DEFAULT_POST_COLOR = (0.8,0.8,0.8)
+DEFAULT_HOLDER_COLOR = (0.2,0.2,0.2)
 
 def lens_mount(mount_name="lens_mount", mount_type="MLH05_M",  
                  geom=None, only_info=False, drawing_post=True,
-                 base_exists=False, dia=25.4, **kwargs):
+                 base_exists=False, dia=25.4,color=DEFAULT_MOUNT_COLOR, **kwargs):
   """
     Build the lens mount, post, post holder and slotted bases of the lens
 
@@ -81,7 +81,7 @@ def lens_mount(mount_name="lens_mount", mount_type="MLH05_M",
   AXES = geom[1]
   NORMAL = AXES[:,0]
   
-  if abs(NORMAL[2])<DEFALUT_MAX_ANGULAR_OFFSET/180*pi:
+  if abs(NORMAL[2])<DEFAULT_MAX_ANGULAR_OFFSET/180*pi:
     NORMAL[2]=0
   else:
     print("this post should't be placed on the XY plane")
@@ -108,8 +108,8 @@ def lens_mount(mount_name="lens_mount", mount_type="MLH05_M",
     else:
       
       DOC.recompute()
-      return building_mount(Radius1=dia/2,height=height,geom=geom)
-    new_mount = building_mount(Radius1=dia/2,height=height,geom=geom)
+      return building_mount(Radius1=dia/2,height=height,color=color,geom=geom)
+    new_mount = building_mount(Radius1=dia/2,height=height,color=color,geom=geom)
 
     part = initialize_composition_old(name="mount, post and base")
     container = post_part,new_mount
@@ -127,7 +127,7 @@ def lens_mount(mount_name="lens_mount", mount_type="MLH05_M",
     datei = thisfolder + "mount_meshes\\lens\\" + mount_type
   if mesh:
     datei += ".stl"
-    obj = load_STL(datei,mount_name,color = DEFALUT_MOUNT_COLOR)
+    obj = load_STL(datei,mount_name,color = color)
   else:
     datei += ".step"
     obj = load_STEP(datei,mount_name)
@@ -149,7 +149,7 @@ def lens_mount(mount_name="lens_mount", mount_type="MLH05_M",
 def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
                  mount_type="default", geom=None, only_info=False, 
                  drawing_post=True,base_exists=False, dia=25.4,
-                 thickness=30,Flip90=False, **kwargs):
+                 thickness=30,Flip90=False,color=DEFAULT_MOUNT_COLOR, **kwargs):
   """
     Build the mirror mount, post, post holder and slotted bases of the mirror
 
@@ -217,19 +217,19 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
   NORMAL = AXES[:,0]
   # print("Mirror normal=",NORMAL)  
   DOC = get_DOC()
-  if abs(NORMAL[2])<DEFALUT_MAX_ANGULAR_OFFSET/180*np.pi:
+  if abs(NORMAL[2])<DEFAULT_MAX_ANGULAR_OFFSET/180*np.pi:
     NORMAL[2]=0
   else:
     if mount_type!="rooftop_mirror_mount":
       mount_rotation=True
       print("this post should't be placed on the XY plane")
-  # if abs(NORMAL[1])<DEFALUT_MAX_ANGULAR_OFFSET/180*np.pi:
+  # if abs(NORMAL[1])<DEFAULT_MAX_ANGULAR_OFFSET/180*np.pi:
   #   NORMAL[1]=0
-  # if abs(NORMAL[0])<DEFALUT_MAX_ANGULAR_OFFSET/180*np.pi:
+  # if abs(NORMAL[0])<DEFAULT_MAX_ANGULAR_OFFSET/180*np.pi:
   #   NORMAL[0]=0
     
   if model_type=="Stripe":
-    additional_mount = draw_stripe_mount(thickness=thickness,geom=geom)
+    additional_mount = draw_stripe_mount(thickness=thickness,color=color,geom=geom)
     xshift = thickness-7
     yshift = 104.3
     geom = (np.array((POS[0]+xshift*NORMAL[0]-yshift*NORMAL[1],
@@ -241,7 +241,7 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
     NORMAL = geom[1]
     dia =25.4*2
   if mount_type =="rooftop_mirror_mount":
-    additional_mount = draw_rooftop_mount(xxshift=dia/2,geom=geom)
+    additional_mount = draw_rooftop_mount(xxshift=dia/2,color=color,geom=geom)
     xshift=57+dia/2-17.2
     zshift=-5
     shiftvec=Vector(xshift,0,zshift)
@@ -267,7 +267,7 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
     dia =25.4*2
     POS = geom[0]
     NORMAL = geom[1]
-    if abs(NORMAL[2])<DEFALUT_MAX_ANGULAR_OFFSET/180*np.pi:
+    if abs(NORMAL[2])<DEFAULT_MAX_ANGULAR_OFFSET/180*np.pi:
       NORMAL[2]=0
   if "polarizer" in model_type:
     mt=float(model_type.replace("_polarizer", ""))
@@ -277,19 +277,19 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
       xshift=25
       yshift=22
       if dia >25.4 and dia<=25.4*2:
-        additional_mount = draw_Degree_Holder(dia=25.4*2,geom=geom)
+        additional_mount = draw_Degree_Holder(dia=25.4*2,color=color,geom=geom)
         mount_type = "POLARIS-K2"
         dia =25.4*2
       elif dia<=25.4:
-        additional_mount = draw_Degree_Holder(geom=geom)
+        additional_mount = draw_Degree_Holder(color=color,geom=geom)
         xshift=12.5
         yshift=11
     elif mt == 56:
-      additional_mount = draw_Degree_Holder(angle=56,geom=geom)
+      additional_mount = draw_Degree_Holder(angle=56,color=color,geom=geom)
       xshift=21
       yshift=26
     else:
-      additional_mount = draw_Degree_Holder(angle=65,geom=geom)
+      additional_mount = draw_Degree_Holder(angle=65,color=color,geom=geom)
       xshift=17
       yshift=27
     # shiftvec=Vector(xshift,yshift,0)
@@ -314,7 +314,7 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
     elif dia <=25.4*4:
       mount_type = "KS4"
     elif dia <=160:
-      return draw_large_mount(thickness=thickness,geom=geom)
+      return draw_large_mount(thickness=thickness,color=color,geom=geom)
     else:
       print("there is no suitable default mount in the database. Going back to construct a new mount.")
   mount_in_database,aperture,height,price,xshift,place,offset = load_mount_from_csv(mount_type = mount_type,model_type="mirror")
@@ -323,7 +323,7 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
       print("This mount type is not in the database. Going back to construct a new mount.")
     height=dia/2+10
     xshift=0
-    new_mount = building_mount(Radius1=dia/2,height=height,geom=geom)
+    new_mount = building_mount(Radius1=dia/2,height=height,color=color,geom=geom)
     if  drawing_post:
       post_part=draw_post_part(name="post_part",base_exists=base_exists,
                                height=height,xshift=xshift, geom=geom)
@@ -344,7 +344,7 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
     datei = thisfolder + "mount_meshes\\mirror\\" + mount_type
   if mesh:
     datei += ".stl"
-    obj = load_STL(datei,mount_name,color=DEFALUT_MOUNT_COLOR)
+    obj = load_STL(datei,mount_name,color=color)
   else:
     datei += ".step"
     obj = load_STEP(datei,mount_name)
@@ -393,7 +393,7 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
   return part
 
 def model_lambda_plate(name = "lamuda_plane",drawing_post=True,base_exists=False,
-                      geom = None, **kwargs):
+                      geom = None,color=DEFAULT_MOUNT_COLOR, **kwargs):
   """
   To build the model for lamuda plane
 
@@ -419,12 +419,12 @@ def model_lambda_plate(name = "lamuda_plane",drawing_post=True,base_exists=False
   AXES = geom[1]
   NORMAL = AXES[:,0]
   mesh =True
-  if abs(NORMAL[2])<DEFALUT_MAX_ANGULAR_OFFSET/180*np.pi:
+  if abs(NORMAL[2])<DEFAULT_MAX_ANGULAR_OFFSET/180*np.pi:
     NORMAL[2]=0
   datei = thisfolder + "mount_meshes\\adjusted mirror mount\\lamda_plane"
   if mesh:
     datei += ".stl"
-    obj = load_STL(datei, name = "lamda_plane", color=DEFALUT_MOUNT_COLOR)
+    obj = load_STL(datei, name = "lamda_plane", color=color)
   else:
     datei += ".step"
     obj = load_STEP(datei, name = "lamda_plane")
@@ -526,7 +526,7 @@ def draw_post_part(name="post_part", base_exists=False, height=12,xshift=0, geom
   add_to_composition(part, container)
   return part
 
-def draw_post(name="TR50_M", height=12,xshift=0, geom=None):
+def draw_post(name="TR50_M", height=12,xshift=0,color=DEFAULT_POST_COLOR, geom=None):
   """
   draw a post
   Normally, this function is not called separately.
@@ -553,7 +553,7 @@ def draw_post(name="TR50_M", height=12,xshift=0, geom=None):
   
   datei1 = thisfolder + "post\\" + name
   datei1 += ".stl"
-  obj = load_STL(datei1, name = name,color = DEFALUT_POST_COLOR)
+  obj = load_STL(datei1, name = name,color = color)
   post_length= int("".join(list(filter(str.isdigit,name))))
   height=-post_length-height
   offset=Vector(xshift,0,height)
@@ -562,7 +562,7 @@ def draw_post(name="TR50_M", height=12,xshift=0, geom=None):
   # print(obj.Placement)
   return obj
 
-def draw_post_holder (name="PH50_M", height=0,xshift=0, geom=None):
+def draw_post_holder (name="PH50_M", height=0,xshift=0,color=DEFAULT_HOLDER_COLOR, geom=None):
   """
   draw the post holder
   Normally, this function is not called separately.
@@ -594,7 +594,7 @@ def draw_post_holder (name="PH50_M", height=0,xshift=0, geom=None):
     NORMAL=AXES[:,0]
   datei1 = thisfolder + "post\\post_holder\\" + name
   datei1 += ".stl"
-  obj = load_STL(datei1, name=name,color=DEFALUT_HOLDER_COLOR)
+  obj = load_STL(datei1, name=name,color=color)
   Geom_ground = (np.array((POS[0],POS[1],0)), np.array((NORMAL)))
   if name =="PH100_M":
     offset=Vector(xshift+4.3,-1.5,height+54)
@@ -677,7 +677,7 @@ def draw_post_base(name="BA1L", height=0,xshift=0, geom=None):
   datei1 = thisfolder + "post\\base\\" + name
   DOC = get_DOC()
   datei1 += ".stl"
-  obj = load_STL(datei1, name=name,color=DEFALUT_HOLDER_COLOR)
+  obj = load_STL(datei1, name=name,color=DEFAULT_HOLDER_COLOR)
   Geom_ground = (np.array((POS[0],POS[1],0)), np.array((NORMAL)))
   if name == "BA1L":
     offset=Vector(xshift,0,height)
@@ -694,7 +694,7 @@ def draw_post_base(name="BA1L", height=0,xshift=0, geom=None):
   DOC.recompute()
   return obj
 
-def draw_post_special(name="TR50_M", height=12,xshift=0, geom=None):
+def draw_post_special(name="TR50_M", height=12,xshift=0,color=DEFAULT_POST_COLOR, geom=None):
   """
   draw the special post only for periscope
   Normally, this function is not called separately.
@@ -730,7 +730,7 @@ def draw_post_special(name="TR50_M", height=12,xshift=0, geom=None):
   ground = np.array((NORMAL[0],NORMAL[1],0))
   ground = ground/(pow(NORMAL[0]**2+NORMAL[1]**2,0.5))
   datei1 += ".stl"
-  obj = load_STL(datei1, name=name,color=DEFALUT_POST_COLOR)
+  obj = load_STL(datei1, name=name,color=color)
   if name =="TR50_M":
     offset=Vector(xshift,height,0)
     obj.Placement = Placement(offset, Rotation(90,-90,90), Vector(0,0,0))
@@ -748,7 +748,7 @@ def draw_post_special(name="TR50_M", height=12,xshift=0, geom=None):
   return obj
 
 def building_mount(name="mount",  Radius1=13, Hole_Radius=2, thickness=10, 
-                        height=20, geom=None, **kwargs):
+                        height=20, geom=None,color=DEFAULT_MOUNT_COLOR, **kwargs):
   """
   make a custom mount
   Normally, this function is not called separately.
@@ -836,7 +836,7 @@ def building_mount(name="mount",  Radius1=13, Hole_Radius=2, thickness=10,
   DOC.recompute()
   return obj
 
-def draw_large_mount(thickness=30,geom=None):
+def draw_large_mount(thickness=30,color=DEFAULT_MOUNT_COLOR,geom=None):
   """
   draw a large mount
   Normally, this function is not called separately.
@@ -867,7 +867,7 @@ def draw_large_mount(thickness=30,geom=None):
   DOC = get_DOC()
   if mesh:
     datei += ".stl"
-    obj = load_STL(datei, name="large mirror mount",color=DEFALUT_MOUNT_COLOR)
+    obj = load_STL(datei, name="large mirror mount",color=color)
   else:
     datei += ".step"
     # obj = ImportGui.insert(datei, "labor_116")
@@ -894,7 +894,7 @@ def draw_large_mount(thickness=30,geom=None):
   
   return obj
 
-def draw_stripe_mount(thickness=25,geom=None):
+def draw_stripe_mount(thickness=25,color=DEFAULT_MOUNT_COLOR,geom=None):
   """
   draw a stripe mount
   Normally, this function is not called separately.
@@ -916,7 +916,7 @@ def draw_stripe_mount(thickness=25,geom=None):
   datei = thisfolder + "mount_meshes\\special mount\\Stripe mirror mount"
   if mesh:
     datei += ".stl"
-    obj = load_STL(datei, name="Stripe mirror mount",color=DEFALUT_MOUNT_COLOR)
+    obj = load_STL(datei, name="Stripe mirror mount",color=color)
   else:
     datei += ".step"
     # obj = ImportGui.insert(datei, "labor_116")
@@ -926,7 +926,7 @@ def draw_stripe_mount(thickness=25,geom=None):
   update_geom_info(obj,geom,off0=offset)
   return obj
 
-def draw_rooftop_mount(xxshift=0,geom=None):
+def draw_rooftop_mount(xxshift=0,color=DEFAULT_MOUNT_COLOR,geom=None):
   """
   draw a rooftop mount
 
@@ -948,7 +948,7 @@ def draw_rooftop_mount(xxshift=0,geom=None):
   datei = thisfolder + "mount_meshes\\special mount\\rooftop mirror mount"
   if mesh:
     datei += ".stl"
-    obj = load_STL(datei, name="rooftop mirror mount",color=DEFALUT_MOUNT_COLOR)
+    obj = load_STL(datei, name="rooftop mirror mount",color=color)
   else:
     datei += ".step"
     obj = load_STEP(datei, name="rooftop mirror mount")
@@ -957,7 +957,7 @@ def draw_rooftop_mount(xxshift=0,geom=None):
   update_geom_info(obj,geom,off0=offset)
   return obj
 
-def draw_Degree_Holder(dia = 25.4,angle = 45, geom=None):
+def draw_Degree_Holder(dia = 25.4,angle = 45,color=DEFAULT_MOUNT_COLOR, geom=None):
   mesh = True
   if angle == 45:
     if dia == 25.4*2:
@@ -970,7 +970,7 @@ def draw_Degree_Holder(dia = 25.4,angle = 45, geom=None):
     datei = thisfolder + "mount_meshes\\special mount\\65_degree_mounts"
   if mesh:
     datei += ".stl"
-    obj = load_STL(datei, name="polarizer_mounts",color=DEFALUT_MOUNT_COLOR)
+    obj = load_STL(datei, name="polarizer_mounts",color=color)
   else:
     datei += ".step"
     obj = load_STEP(datei, name="polarizer_mounts")

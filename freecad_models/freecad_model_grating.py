@@ -8,7 +8,7 @@ Created on Mon Feb 27 12:14:01 2023
 
 from .utils import freecad_da, update_geom_info, get_DOC, GEOM0, thisfolder
 from .freecad_model_composition import initialize_composition_old, add_to_composition
-from .freecad_model_mounts import  mirror_mount,DEFALUT_MOUNT_COLOR
+from .freecad_model_mounts import  mirror_mount,DEFAULT_MOUNT_COLOR
 import numpy as np
 import math
 if freecad_da:
