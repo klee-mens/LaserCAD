@@ -5,7 +5,8 @@ Created on Thu Jun 22 10:56:05 2023
 @author: 12816
 """
 
-from .. basic_optics import Mirror, Lens, Beam, Composition, inch
+from .. basic_optics import Mirror, Lens, Beam, Composition, inch, Component
+from ..freecad_models import model_crystal
 
 
 
@@ -71,3 +72,43 @@ def Periscope2(name="Periskop", length=160,theta = 90, phi = 0, dist1=75, dist2=
   peris.propagate(dist2)
   
   return peris
+
+
+def RoofTop_Mirror(name="RoofTopMirror", height=20, direction=1):
+  """
+  direction=1 RofftopMirror goes down
+
+  Parameters
+  ----------
+  name : TYPE, optional
+    DESCRIPTION. The default is "RoofTopMirror".
+  height : TYPE, optional
+    DESCRIPTION. The default is 20.
+  direction : TYPE, optional
+    DESCRIPTION. The default is 1.
+
+  Returns
+  -------
+  None.
+
+  """
+  roof = Composition(name=name)
+  roof.height = height
+  m1 = Mirror(phi=0, theta=-90*direction)
+  m2 = Mirror(phi=0, theta=-90*direction)
+  roof.add_on_axis(m1)
+  roof.propagate(height)
+  roof.add_on_axis(m2)
+  #cosmetics
+  def dont_draw():
+    return None
+  m1.draw = dont_draw
+  m1.draw_dict["mount_type"] = "dont_draw"
+  m2.draw = dont_draw
+  m2.draw_dict["mount_type"] = "dont_draw"
+  rooftop_model = Component()
+  rooftop_model.freecad_model = model_crystal
+  rooftop_model.pos += (height/2, 0, -height/2)
+  roof.add_fixed_elm(rooftop_model)
+  
+  return roof

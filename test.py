@@ -31,26 +31,36 @@ if freecad_da:
 # iris.draw()
 # iris.draw_mount()
 
-res = LinearResonator(name="Compact")
-m1 = Mirror()
-m2 = Mirror()
-focus = 1500
-foc = Lens(f=focus)
-g1 = 0.5
-g2 = 0.1
-print(g1*g2)
-a = focus*(1-g1)
-b = focus*(1-g2)
+# res = LinearResonator(name="Compact")
+# m1 = Mirror()
+# m2 = Mirror()
+# focus = 1500
+# foc = Lens(f=focus)
+# g1 = 0.5
+# g2 = 0.1
+# print(g1*g2)
+# a = focus*(1-g1)
+# b = focus*(1-g2)
 
-res.set_wavelength(2400e-6)
-res.add_on_axis(m1)
-res.propagate(a)
-res.add_on_axis(foc)
-res.propagate(b)
-res.add_on_axis(m2)
+# res.set_wavelength(2400e-6)
+# res.add_on_axis(m1)
+# res.propagate(a)
+# res.add_on_axis(foc)
+# res.propagate(b)
+# res.add_on_axis(m2)
 
-res.draw()
+# res.draw()
 
+from LaserCAD.moduls.periscope import Make_Periscope, RoofTop_Mirror
+
+
+peris = RoofTop_Mirror(direction=1)
+
+comp = Composition("qlijfb")
+comp.propagate(200)
+comp.add_supcomposition_on_axis(peris)
+comp.propagate(100)
+comp.draw()
 # lam = Lambda_Plate()
 # lam.pos += (0,40,0)
 # lam.draw()

@@ -87,6 +87,7 @@ def Make_Periscope(name="Periskop", length=150, theta = 90, dist1=75, dist2=75):
   return peris
 
 
+
 def Periscope2(name="Periskop", length=160,theta = 90, phi = 0, dist1=75, dist2=75):
 # def Periscope(name="Periskop", length=120, theta=0, dist1=75, dist2=75):
   """
