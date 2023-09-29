@@ -162,7 +162,7 @@ def draw_mount(name="KGM60_base",height=50,thickness=8,geom=None):
     obj = DOC.addObject("Mesh::Feature", name)
     datei += ".stl"
     obj.Mesh = Mesh.Mesh(datei)
-    obj.ViewObject.ShapeColor = DEFALUT_MOUNT_COLOR
+    obj.ViewObject.ShapeColor = DEFAULT_MOUNT_COLOR
   else:
     datei += ".step"
     obj = ImportGui.insert(datei, "labor_116")

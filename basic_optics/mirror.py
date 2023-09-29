@@ -10,7 +10,12 @@ Created on Wed Aug 24 16:28:07 2022
 from .geom_object import TOLERANCE, NORM0
 from .ray import Ray
 from ..freecad_models import model_mirror, mirror_mount, model_stripe_mirror, model_lambda_plate
+from ..freecad_models.freecad_model_composition import initialize_composition_old, add_to_composition
 from .optical_element import Opt_Element
+# from ..non_interactings import Mount
+# from ..non_interactings import Post_and_holder
+from .mount import Mount
+from .post import Post_and_holder
 import numpy as np
 from copy import deepcopy
 
@@ -48,7 +53,13 @@ class Mirror(Opt_Element):
     self.update_normal()
     #Cosmetics
     self.draw_dict["Radius"] = 0
+    self.update_mount()
     
+  def _update_mount_dict(self):
+    super()._update_mount_dict()
+    self.mount_dict["elm_type"] = "mirror"
+    self.mount_dict["name"] = self.name + "_mount"
+    self.mount_dict["aperture"] = self.aperture
 
   def update_normal(self):
     """
@@ -203,10 +214,20 @@ class Mirror(Opt_Element):
     helper_dict = dict(self.draw_dict)
     # helper_dict["geom"] = (self.pos, self.normal)
     xshift=0
-    obj = mirror_mount(**helper_dict)
+    # obj = mirror_mount(**helper_dict)
+    M = Mount(aperture=self.aperture)
+    M.set_geom(self.get_geom())
+    P = Post_and_holder(xshift=M.xshift,height=-M.zshift)
+    P.set_geom(M.get_geom())
+    obj1=M.draw()
+    obj2=P.draw()
     post_pos = xshift*self.normal+self.pos
-    return obj
-
+    part = initialize_composition_old(name="New class for mount and post")
+    cc= obj1,obj2
+    add_to_composition(part, cc)
+    del obj1,obj2
+    return part
+  
   def draw_mount_text(self):
     if self.draw_dict["mount_type"] == "dont_draw":
       txt = "<" + self.name + ">'s mount will not be drawn."

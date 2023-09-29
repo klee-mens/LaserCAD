@@ -79,19 +79,30 @@ class Mount(Geom_Object):
     self.draw_dict["drawing_post"] = False
     self.draw_dict["Filp90"] = False
     self.docking_obj = Geom_Object(pos = self.pos+(1,0,3),normal=(0,0,1))
-    if model == "default":
-      if aperture<= 25.4/2:
-        model = "POLARIS-K05"
-      elif aperture <= 25.4:
-        model = "POLARIS-K1"
-      elif aperture <= 25.4*1.5:
-        model = "POLARIS-K15S4"
-      elif aperture <=25.4*2:
-        model = "POLARIS-K2"
-      elif aperture <=25.4*3:
-        model = "POLARIS-K3S5"
-      elif aperture <=25.4*4:
-        model = "KS4"
+    if elm_type == "lens":
+      if model == "default":
+        if aperture<= 25.4/2:
+          model = "MLH05_M"
+        elif aperture <= 25.4:
+          model = "LMR1_M"
+        elif aperture <= 25.4*1.5:
+          model = "LMR1.5_M"
+        elif aperture <=25.4*2:
+          model = "LMR2_M"
+    elif elm_type == "mirror":
+      if model == "default":
+        if aperture<= 25.4/2:
+          model = "POLARIS-K05"
+        elif aperture <= 25.4:
+          model = "POLARIS-K1"
+        elif aperture <= 25.4*1.5:
+          model = "POLARIS-K15S4"
+        elif aperture <=25.4*2:
+          model = "POLARIS-K2"
+        elif aperture <=25.4*3:
+          model = "POLARIS-K3S5"
+        elif aperture <=25.4*4:
+          model = "KS4"
     self.model = model
     if model in MIRROR_LIST:
       stl_file=thisfolder+"\\mount_meshes\\adjusted mirror mount\\" + model + ".stl"
@@ -103,6 +114,15 @@ class Mount(Geom_Object):
     self.mount_in_database = self.set_by_table()
     
   def set_by_table(self):
+    """
+    sets the docking object and the model by reading the "the file.csv"
+
+    Returns
+    -------
+    bool
+      DESCRIPTION.
+
+    """
     buf = []
     mount_in_database = False
     aperture =height = price = xshift = offset=0
@@ -139,14 +159,17 @@ class Mount(Geom_Object):
     docking_pos = np.array([xshift,0,-height])
     docking_normal = (0,0,1)
     a=(1,0,0)
+    # updates the docking geom for the first time
     if np.sum(np.cross(a,self.normal))!=0:
       rot_axis = np.cross(a,self.normal)/np.linalg.norm(np.cross(a,self.normal))
       rot_angle = np.arccos(np.sum(a*self.normal)/(np.linalg.norm(a)*np.linalg.norm(self.normal)))
       docking_pos = rotate_vector(docking_pos,rot_axis,rot_angle)
       docking_normal = rotate_vector(docking_normal,rot_axis,rot_angle)
     self.docking_obj = Geom_Object(pos = self.pos+docking_pos,normal=docking_normal)
-    if self.normal[2]<DEFAULT_MAX_ANGULAR_OFFSET:
-      self.normal[2]=0
+    if self.normal[2]<DEFAULT_MAX_ANGULAR_OFFSET/180*np.pi:
+      tempnormal = self.normal
+      tempnormal[2]=0
+      self.normal=tempnormal
       self.normal = self.normal/np.linalg.norm(self.normal)
       self.post_docking_direction = (0,0,1)
     else:

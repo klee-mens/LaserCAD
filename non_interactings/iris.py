@@ -6,7 +6,8 @@ Created on Sat Aug 19 13:12:01 2023
 """
 
 from ..freecad_models import model_iris_diaphragms,iris_post
-from ..basic_optics import Component
+# from ..basic_optics import Component
+from LaserCAD.basic_optics.component import Component
 
 
 class Iris(Component):

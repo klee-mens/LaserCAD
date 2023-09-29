@@ -17,6 +17,13 @@ class Lens(Opt_Element):
     self.focal_length = f
     self.draw_dict["thickness"] = 3 #sieht schöner aus
     self.draw_dict["Radius1"] = 300
+    self.update_mount()
+    
+  def _update_mount_dict(self):
+    super()._update_mount_dict()
+    self.mount_dict["elm_type"] = "mirror"
+    self.mount_dict["name"] = self.name + "_mount"
+    self.mount_dict["aperture"] = self.aperture
 
   @property
   def focal_length(self):

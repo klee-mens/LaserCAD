@@ -6,7 +6,8 @@ Created on Sat Aug 19 13:11:01 2023
 """
 
 from ..freecad_models import model_lambda_plate,model_mirror
-from ..basic_optics import Component
+# from ..basic_optics import Component
+from LaserCAD.basic_optics.component import Component
 
 class Lambda_Plate(Component):
 

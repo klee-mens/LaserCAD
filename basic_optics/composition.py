@@ -104,6 +104,15 @@ class Composition(Geom_Object):
     else:
       self.non_opticals.append(item)
 
+  def add_supcomposition_on_axis(self, subcomp):
+    subcomp.set_geom(self.last_geom())
+    self.add_supcomposition_fixed(subcomp)
+  
+  def add_supcomposition_fixed(self, subcomp):
+    for element in subcomp._elements:
+      self.add_fixed_elm(element)
+    for nonopt in subcomp.non_opticals:
+      self.add_fixed_elm(nonopt)
 
   def redefine_optical_axis(self, ray):
     # zB wenn die wavelength angepasst werden muss

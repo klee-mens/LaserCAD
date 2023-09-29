@@ -5,7 +5,8 @@ Created on Sat Aug 19 13:11:23 2023
 @author: mens
 """
 
-from ..basic_optics import Component
+# from ..basic_optics import Component
+from .component import Component
 from ..freecad_models.utils import thisfolder, load_STL
 
 class Pockels_Cell(Component):
