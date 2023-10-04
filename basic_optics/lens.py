@@ -10,6 +10,7 @@ Created on Sun Aug 21 20:28:02 2022
 # from .basic_optics.freecad_models import model_lens
 from ..freecad_models import model_lens, lens_mount
 from .optical_element import Opt_Element
+from .mount import Mount
 
 class Lens(Opt_Element):
   def __init__(self, f=100, name="NewLens", **kwargs):
@@ -17,11 +18,12 @@ class Lens(Opt_Element):
     self.focal_length = f
     self.draw_dict["thickness"] = 3 #sieht schöner aus
     self.draw_dict["Radius1"] = 300
-    self.update_mount()
+    self._update_mount_dict()
+    self.mount = Mount(**self.mount_dict)
     
   def _update_mount_dict(self):
     super()._update_mount_dict()
-    self.mount_dict["elm_type"] = "mirror"
+    self.mount_dict["elm_type"] = "lens"
     self.mount_dict["name"] = self.name + "_mount"
     self.mount_dict["aperture"] = self.aperture
 

@@ -13,11 +13,12 @@ import sys
 sys.path.append('C:\\ProgramData\\Anaconda3')
 # from LaserCAD.basic_optics import Component
 # from .component import Component
-from LaserCAD.freecad_models.utils import thisfolder,load_STL,freecad_da,clear_doc,rotate
+from LaserCAD.freecad_models.utils import thisfolder,load_STL,freecad_da,clear_doc,rotate,translate
 from LaserCAD.freecad_models.freecad_model_composition import initialize_composition_old,add_to_composition
 from LaserCAD.freecad_models.freecad_model_mounts import lens_mount,mirror_mount,DEFAULT_MOUNT_COLOR,DEFAULT_MAX_ANGULAR_OFFSET,draw_rooftop_mount
 from LaserCAD.freecad_models.freecad_model_grating import grating_mount
 from LaserCAD.basic_optics.geom_object import Geom_Object
+from LaserCAD.basic_optics.post import Post_and_holder
 from copy import deepcopy
 import csv
 import os
@@ -67,6 +68,35 @@ def rotate_vector(shiftvec=np.array((1.0,0,0)),vec=np.array((1.0,0,0)),angle=0):
   k=np.dot(shiftvec,np.cos(angle))+np.cross(vec,shiftvec)*np.sin(angle)+np.dot(vec,(np.sum(vec*shiftvec))*(1-np.cos(angle)))
   return k
 
+def get_model_by_aperture_and_element(elm_type, aperture):
+  if elm_type == "lens":
+    # if model == "default":
+      if aperture<= 25.4/2:
+        model = "MLH05_M"
+      elif aperture <= 25.4:
+        model = "LMR1_M"
+      elif aperture <= 25.4*1.5:
+        model = "LMR1.5_M"
+      elif aperture <=25.4*2:
+        model = "LMR2_M"
+  elif elm_type == "mirror":
+    # if model == "default":
+      if aperture<= 25.4/2:
+        model = "POLARIS-K05"
+      elif aperture <= 25.4:
+        model = "POLARIS-K1"
+      elif aperture <= 25.4*1.5:
+        model = "POLARIS-K15S4"
+      elif aperture <=25.4*2:
+        model = "POLARIS-K2"
+      elif aperture <=25.4*3:
+        model = "POLARIS-K3S5"
+      elif aperture <=25.4*4:
+        model = "KS4"
+  else:
+    model = "dont_draw"
+  return model
+
 class Mount(Geom_Object):
   def __init__(self, name="mount",model="default",aperture=25.4,elm_type="mirror", **kwargs):
     super().__init__(name, **kwargs)
@@ -79,39 +109,27 @@ class Mount(Geom_Object):
     self.draw_dict["drawing_post"] = False
     self.draw_dict["Filp90"] = False
     self.docking_obj = Geom_Object(pos = self.pos+(1,0,3),normal=(0,0,1))
-    if elm_type == "lens":
-      if model == "default":
-        if aperture<= 25.4/2:
-          model = "MLH05_M"
-        elif aperture <= 25.4:
-          model = "LMR1_M"
-        elif aperture <= 25.4*1.5:
-          model = "LMR1.5_M"
-        elif aperture <=25.4*2:
-          model = "LMR2_M"
-    elif elm_type == "mirror":
-      if model == "default":
-        if aperture<= 25.4/2:
-          model = "POLARIS-K05"
-        elif aperture <= 25.4:
-          model = "POLARIS-K1"
-        elif aperture <= 25.4*1.5:
-          model = "POLARIS-K15S4"
-        elif aperture <=25.4*2:
-          model = "POLARIS-K2"
-        elif aperture <=25.4*3:
-          model = "POLARIS-K3S5"
-        elif aperture <=25.4*4:
-          model = "KS4"
-    self.model = model
-    if model in MIRROR_LIST:
-      stl_file=thisfolder+"\\mount_meshes\\adjusted mirror mount\\" + model + ".stl"
-    elif model in LENS_LIST:
-      stl_file=thisfolder+"\\mount_meshes\\adjusted lens mount\\" + model + ".stl"
+    self.draw_dict["offset"] = np.zeros(3)
+    self.draw_dict["rotation"] = (np.array((0,0,1)), 0)
+    self.aperture = aperture
+    self.xshift = 0
+    self.zshift = 0
+    self.post = Geom_Object()
+    if model =="default":
+      self.model = get_model_by_aperture_and_element(self.elm_type, self.aperture)
     else:
-      stl_file=thisfolder+"\\mount_meshes\\special mount\\" + model + ".stl"
+      self.model = model
+    if self.model in MIRROR_LIST:
+      stl_file=thisfolder+"\\mount_meshes\\adjusted mirror mount\\" + self.model + ".stl"
+    elif self.model in LENS_LIST:
+      stl_file=thisfolder+"\\mount_meshes\\adjusted lens mount\\" + self.model + ".stl"
+    else:
+      stl_file=thisfolder+"\\mount_meshes\\special mount\\" + self.model + ".stl"
     self.draw_dict["stl_file"]=stl_file
     self.mount_in_database = self.set_by_table()
+    post = Post_and_holder(name=self.name + "post",elm_type=self.elm_type,xshift=self.xshift,height = -self.zshift)
+    post.set_geom(self.docking_obj.get_geom())
+    self.post = post
     
   def set_by_table(self):
     """
@@ -155,64 +173,114 @@ class Mount(Geom_Object):
     self.draw_dict["height"]=height
     self.yshift = 0
     self.offset_vector = offset
+    self.draw_dict["mount_type"] = self.model
     # self.post_docking_pos = self.pos+np.array([xshift,0,height])
     docking_pos = np.array([xshift,0,-height])
-    docking_normal = (0,0,1)
+    docking_normal = self.normal
     a=(1,0,0)
     # updates the docking geom for the first time
+    if self.normal[2]<DEFAULT_MAX_ANGULAR_OFFSET/180*np.pi:
+      tempnormal = self.normal
+      tempnormal[2]=0
+      self.normal=tempnormal
+      self.normal = self.normal/np.linalg.norm(self.normal)
+      # self.post_docking_direction = (0,0,1)
+    else:
+      print("this post should not be placed in the ground plate")
     if np.sum(np.cross(a,self.normal))!=0:
       rot_axis = np.cross(a,self.normal)/np.linalg.norm(np.cross(a,self.normal))
       rot_angle = np.arccos(np.sum(a*self.normal)/(np.linalg.norm(a)*np.linalg.norm(self.normal)))
       docking_pos = rotate_vector(docking_pos,rot_axis,rot_angle)
       docking_normal = rotate_vector(docking_normal,rot_axis,rot_angle)
     self.docking_obj = Geom_Object(pos = self.pos+docking_pos,normal=docking_normal)
-    if self.normal[2]<DEFAULT_MAX_ANGULAR_OFFSET/180*np.pi:
-      tempnormal = self.normal
-      tempnormal[2]=0
-      self.normal=tempnormal
-      self.normal = self.normal/np.linalg.norm(self.normal)
-      self.post_docking_direction = (0,0,1)
-    else:
-      print("this post should not be placed in the ground plate")
+    # print(self.docking_obj.get_geom())
     self.rotation = rotation
     return True
   
   def _pos_changed(self, old_pos, new_pos):
-    self._rearange_subobjects_pos( old_pos, new_pos, [self.docking_obj])
+    self._rearange_subobjects_pos( old_pos, new_pos, [self.docking_obj,self.post])
   
   def _axes_changed(self, old_axes, new_axes):
-    self._rearange_subobjects_axes( old_axes, new_axes, [self.docking_obj])
+    self._rearange_subobjects_axes( old_axes, new_axes, [self.docking_obj,self.post])
   
+  # def get_post(self):
+  #   post = Post_and_holder(name=self.name + "post",elm_type=self.elm_type,xshift=self.xshift,height = -self.zshift)
+  #   print(self.docking_obj.get_geom())
+  #   post.set_geom(self.docking_obj.get_geom())
+  #   return post
+
   def draw_fc(self):
     self.update_draw_dict()
-    if self.mount_in_database:
-      self.draw_dict["mount_type"] = self.model
-      if self.model in MIRROR_LIST:
-        # return mirror_mount(**self.draw_dict)
-        if self.draw_dict["Filp90"]:
-          a=load_STL(**self.draw_dict)
-          rotate(a,self.normal,90)
-          return a
-        return load_STL(**self.draw_dict)
-      else:
-        return load_STL(**self.draw_dict)
-    elif self.model in SPECIAL_LIST or self.model in MIRROR_LIST or self.model in LENS_LIST:
-      return load_STL(**self.draw_dict)
-    else:
-      self.draw_dict["stl_file"]=self.model
-      print("This mount is not in the correct folder")
-      return load_STL(**self.draw_dict)
+    if self.elm_type == "dont_draw":
+      return None
+    obj = load_STL(**self.draw_dict)
+    translate(obj, self.draw_dict["offset"])
+    # print("SDAFFFFFFFF", self.draw_dict["offset"])
+    # print("shigi", self.draw_dict["rotation"][0], self.draw_dict["rotation"][1])
+    rotate(obj, self.draw_dict["rotation"][0], self.draw_dict["rotation"][1]*180/np.pi)
+    obj1 = self.post.draw()
+    # print("self.post.pos",self.post.pos)
+    part = initialize_composition_old(name="mount, post and base")
+    container = obj,obj1
+    add_to_composition(part, container)
+    return part
+    # self.update_draw_dict()
+    # if self.mount_in_database:
+    #   # self.draw_dict["mount_type"] = self.model
+    #   if self.model in MIRROR_LIST:
+    #     # return mirror_mount(**self.draw_dict)
+    #     if self.draw_dict["Filp90"]:
+    #       a=load_STL(**self.draw_dict)
+    #       rotate(a,self.normal,90)
+    #       return a
+    #     return load_STL(**self.draw_dict)
+    #   else:
+    #     return load_STL(**self.draw_dict)
+    # elif self.model in SPECIAL_LIST or self.model in MIRROR_LIST or self.model in LENS_LIST:
+    #   return load_STL(**self.draw_dict)
+    # else:
+    #   self.draw_dict["stl_file"]=self.model
+    #   print("This mount is not in the correct folder")
+    #   return load_STL(**self.draw_dict)
+
+
+
 
 class Grating_mount(Mount):
   def __init__(self, name="grating_mounmt",model="grating_mount",height=50,thickness=8, **kwargs):
+    
     super().__init__(name, **kwargs)
     self.draw_dict["height"]=height
     self.draw_dict["thickness"]= thickness
     self.draw_dict["drawing_post"] = False
     self.draw_dict["geom"]=self.get_geom()
-    self.xshift = 17
+    self.xshift = 17 + 15
+    # a= (1,0,0)
+    docking_pos = np.array([self.xshift,0,-29])
+    # if np.sum(np.cross(a,self.normal))!=0:
+    #   rot_axis = np.cross(a,self.normal)/np.linalg.norm(np.cross(a,self.normal))
+    #   rot_angle = np.arccos(np.sum(a*self.normal)/(np.linalg.norm(a)*np.linalg.norm(self.normal)))
+    #   docking_pos = rotate_vector(docking_pos,rot_axis,rot_angle)
+      # docking_normal = rotate_vector(docking_normal,rot_axis,rot_angle)
+    # self.docking_obj = Geom_Object(pos = self.pos+docking_pos,normal=docking_normal)
+    self.docking_obj.pos += docking_pos
+    print("Grating_mount_geom=",self.get_geom())
+    self.post.set_geom(self.docking_obj.get_geom())
+    
   def draw_fc(self):
-    return grating_mount(**self.draw_dict)
+    self.update_draw_dict()
+    obj = grating_mount(**self.draw_dict)
+    obj1 = self.post.draw()
+    # print("self.post.pos",self.post.pos)
+    part = initialize_composition_old(name="mount, post and base")
+    container = obj,obj1
+    add_to_composition(part, container)
+    return part
+
+
+
+
+
 
 class Special_mount(Mount):
   def __init__(self, name="special_mounmt",model="special_mount",aperture=25.4,thickness=10,

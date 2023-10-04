@@ -405,8 +405,8 @@ Pump.propagate(190)
 
 Seed.draw()
 Stretcher.draw()
-PulsePicker.draw()
-Amplifier_I.draw()
+# PulsePicker.draw()
+# Amplifier_I.draw()
 
 if freecad_da:
   setview()

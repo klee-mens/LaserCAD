@@ -23,19 +23,25 @@ DEFALUT_POST_COLOR = (0.8,0.8,0.8)
 DEFALUT_HOLDER_COLOR = (0.2,0.2,0.2)
 
 class Post_and_holder(Geom_Object):
-  def __init__(self, name="post",xshift=0,height=12, **kwargs):
+  def __init__(self, name="post",elm_type="default",xshift=0,height=12, **kwargs):
     super().__init__(name, **kwargs)
     self.xshift=xshift
     self.height=height
     self.post_color = DEFALUT_POST_COLOR
     self.holder_color = DEFALUT_HOLDER_COLOR
-    
+    self.elm_type = elm_type
+  
+  def set_axes(self, new_axes):
+    self._axes = np.eye(3)
+  
   def draw_fc(self):
-    self.draw_dict["xshift"]=self.xshift
-    self.draw_dict["height"]=self.height
+    self.draw_dict["xshift"]=0
+    self.draw_dict["height"]=0
     self.draw_dict["geom"]=self.get_geom()
     self.draw_dict["post_color"] = self.post_color
     self.draw_dict["holder_color"] = self.holder_color
+    if self.elm_type == "dont_draw":
+      return None
     return draw_post_part(**self.draw_dict)
     
 

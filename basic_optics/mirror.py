@@ -15,7 +15,7 @@ from .optical_element import Opt_Element
 # from ..non_interactings import Mount
 # from ..non_interactings import Post_and_holder
 from .mount import Mount
-from .post import Post_and_holder
+# from .post import Post_and_holder
 import numpy as np
 from copy import deepcopy
 
@@ -53,7 +53,9 @@ class Mirror(Opt_Element):
     self.update_normal()
     #Cosmetics
     self.draw_dict["Radius"] = 0
-    self.update_mount()
+    self._update_mount_dict()
+    self.mount = Mount(**self.mount_dict)
+    # self.post = self.mount.get_post()
     
   def _update_mount_dict(self):
     super()._update_mount_dict()
@@ -204,29 +206,29 @@ class Mirror(Opt_Element):
     obj = model_mirror(**self.draw_dict)
     return obj
 
-  def draw_mount_fc(self):
-    self.update_draw_dict()
-    self.draw_dict["dia"]=self.aperture
+  # def draw_mount_fc(self):
+    # self.update_draw_dict()
+    # self.draw_dict["dia"]=self.aperture
     # obj = mirror_mount(**self.draw_dict)
     # now we will use the old geom definition with (pos, norm) in a dirty, 
     # hacky way, because I don't want to fix the 10.000 usages of geom in
     # the mirror_mount function manually, no, I don't
-    helper_dict = dict(self.draw_dict)
-    # helper_dict["geom"] = (self.pos, self.normal)
-    xshift=0
+    # helper_dict = dict(self.draw_dict)
+    # # helper_dict["geom"] = (self.pos, self.normal)
+    # xshift=0
     # obj = mirror_mount(**helper_dict)
-    M = Mount(aperture=self.aperture)
-    M.set_geom(self.get_geom())
-    P = Post_and_holder(xshift=M.xshift,height=-M.zshift)
-    P.set_geom(M.get_geom())
-    obj1=M.draw()
-    obj2=P.draw()
-    post_pos = xshift*self.normal+self.pos
-    part = initialize_composition_old(name="New class for mount and post")
-    cc= obj1,obj2
-    add_to_composition(part, cc)
-    del obj1,obj2
-    return part
+    # M = Mount(aperture=self.aperture)
+    # M.set_geom(self.get_geom())
+    # P = Post_and_holder(xshift=M.xshift,height=-M.zshift)
+    # P.set_geom(M.get_geom())
+    # obj1=M.draw()
+    # obj2=P.draw()
+    # post_pos = xshift*self.normal+self.pos
+    # part = initialize_composition_old(name="New class for mount and post")
+    # cc= obj1,obj2
+    # add_to_composition(part, cc)
+    # del obj1,obj2
+    # return part
   
   def draw_mount_text(self):
     if self.draw_dict["mount_type"] == "dont_draw":
