@@ -381,7 +381,7 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
   if Flip90:
     rotate(obj,Vector(NORMAL),90)
   if  drawing_post:
-    post_part=draw_post_part(name="post_part",base_exists=base_exists,
+    post_part=draw_post_part(name=mount_name+" post_part",base_exists=base_exists,
                              height=height,xshift=xshift, geom=geom)
   else:
     DOC.recompute()
@@ -390,7 +390,7 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
   container = post_part,obj,additional_mount
   add_to_composition(part, container)
   DOC.recompute()
-  print("post postiton=",np.array(POS)+xshift*np.array(NORMAL))
+  print(mount_name,"'s mount postiton=",np.array(POS)+xshift*np.array(NORMAL))
   return part
 
 def model_lambda_plate(name = "lamuda_plane",drawing_post=True,base_exists=False,
@@ -440,6 +440,7 @@ def model_lambda_plate(name = "lamuda_plane",drawing_post=True,base_exists=False
   part = initialize_composition_old(name="mount, post and base")
   container = post_part,obj
   add_to_composition(part, container)
+  print(name,"'s mount postiton=",np.array(POS)+xshift*np.array(NORMAL))
   return part
   
 def draw_post_part(name="post_part", base_exists=False, height=12,xshift=0, geom=None):
@@ -521,7 +522,7 @@ def draw_post_part(name="post_part", base_exists=False, height=12,xshift=0, geom
         post1 = draw_post_base(name="BA1L", height=0,xshift=xshift, geom=geom)
   else:
     post1 = None
-  
+  print(name,"'s height=",POS[2]-height)
   part = initialize_composition_old(name=name)
   container = post,post1,post2
   add_to_composition(part, container)
