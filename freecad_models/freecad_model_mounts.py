@@ -441,7 +441,7 @@ def model_lambda_plate(name = "lamuda_plane",drawing_post=True,base_exists=False
   add_to_composition(part, container)
   return part
   
-def draw_post_part(name="post_part", base_exists=False, height=12,xshift=0, geom=None):
+def draw_post_part(name="post_part", base_exists=False, height=0,xshift=0, geom=None):
   """
   Draw the post part, including post, post holder and base
   Assuming that all optics are placed in the plane of z = 0.
@@ -526,7 +526,7 @@ def draw_post_part(name="post_part", base_exists=False, height=12,xshift=0, geom
   add_to_composition(part, container)
   return part
 
-def draw_post(name="TR50_M", height=12,xshift=0,color=DEFAULT_POST_COLOR, geom=None):
+def draw_post(name="TR50_M", height=0,xshift=0,color=DEFAULT_POST_COLOR, geom=None):
   """
   draw a post
   Normally, this function is not called separately.

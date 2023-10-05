@@ -75,8 +75,8 @@ if freecad_da:
 # m.normal=(1,20,1)
 # m.draw()
 # m.draw_mount()
-M = Mirror()
-M.aperture = 25.4*5
+M = Rooftop_mirror()
+M.aperture = 15
 # M.pos = (50,0,100)
 # M.normal = (1,1,0)
 M.draw()

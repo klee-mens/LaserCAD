@@ -209,8 +209,8 @@ class Mirror(Opt_Element):
   def draw_mount(self):
     # self.update_mount()
     self._update_mount_dict()
-    if self.aperture >25.4*4:
-      self.mount = Mount(**self.mount_dict)
+    # if self.aperture >25.4*4:
+    self.mount = Mount(**self.mount_dict)
     # print(self.aperture)
     return (self.mount.draw())
   
@@ -272,6 +272,17 @@ class Rooftop_mirror(Mirror):
     obj = model_mirror(**self.draw_dict)
     return obj
   
+  def draw_mount(self):
+    # self.update_mount()
+    self._update_mount_dict()
+    self.mount = Composed_Mount()
+    self.mount.set_geom(self.get_geom())
+    mon1 = Special_mount(**self.mount_dict)
+    mon2 = Mount(aperture=25.4*2)
+    self.mount.add(mon1)
+    self.mount.add(mon2)
+    # print(self.aperture)
+    return (self.mount.draw())
 
 class Curved_Mirror(Mirror):
   def __init__(self, radius=200, **kwargs):

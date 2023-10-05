@@ -186,6 +186,7 @@ def Make_Stretcher_chromeo():
   pure_cosmetic.draw_dict["mount_type"] = "rooftop_mirror_mount"
   pure_cosmetic.pos = (RoofTop1.pos + RoofTop2.pos ) / 2
   pure_cosmetic.normal = (RoofTop1.normal + RoofTop2.normal ) / 2
+  pure_cosmetic.aperture = periscope_height
   pure_cosmetic.draw_dict["model_type"] = "Rooftop"
   # pure_cosmetic.draw = dont
   Stretcher.add_fixed_elm(pure_cosmetic)
@@ -352,7 +353,7 @@ mir1 = Mirror(phi=180)
 TFP1 = Mirror(phi= 180 - 2*tfp_angle, name="TFP1")
 TFP1.draw_dict["color"] = (1.0, 0.0, 2.0)
 TFP1.aperture = tfp_aperture
-TFP1.draw_dict["Flip90"]=True
+TFP1.mount_dict["Flip90"]=True
 
 cm = Curved_Mirror(radius=focal*2, phi = 180)
 PockelsCell = Pockels_Cell(name="PockelZelleRes1")
@@ -408,8 +409,8 @@ Pump.propagate(190)
 
 Seed.draw()
 Stretcher.draw()
-# PulsePicker.draw()
-# Amplifier_I.draw()
+PulsePicker.draw()
+Amplifier_I.draw()
 
 if freecad_da:
   setview()

@@ -23,29 +23,30 @@ DEFALUT_POST_COLOR = (0.8,0.8,0.8)
 DEFALUT_HOLDER_COLOR = (0.2,0.2,0.2)
 
 class Post_and_holder(Geom_Object):
-  def __init__(self, name="post",elm_type="default",xshift=0,height=12, **kwargs):
+  def __init__(self, name="post",elm_type="default",**kwargs):
     super().__init__(name, **kwargs)
-    self.xshift=xshift
-    self.height=height
+    # self.xshift=xshift
+    # self.height=height
     self.post_color = DEFALUT_POST_COLOR
     self.holder_color = DEFALUT_HOLDER_COLOR
     self.elm_type = elm_type
+    self.name = name
   
   def set_axes(self, new_axes):
     self._axes = np.eye(3)
   
   def draw_fc(self):
-    self.draw_dict["xshift"]=0
-    self.draw_dict["height"]=0
     self.draw_dict["geom"]=self.get_geom()
+    self.draw_dict["name"] = self.name 
     self.draw_dict["post_color"] = self.post_color
     self.draw_dict["holder_color"] = self.holder_color
     if self.elm_type == "dont_draw":
       return None
+    print(self.name,"'s position = ",self.pos)
     return draw_post_part(**self.draw_dict)
     
 
-def draw_post_part(name="post_part", base_exists=False, height=12,xshift=0,
+def draw_post_part(name="post_part", base_exists=False, 
                    post_color=DEFALUT_POST_COLOR,holder_color=DEFALUT_HOLDER_COLOR, geom=None):
   """
   Draw the post part, including post, post holder and base
@@ -71,62 +72,57 @@ def draw_post_part(name="post_part", base_exists=False, height=12,xshift=0,
 
   """
   POS = geom[0]
-  # AXES = geom[1]
-  # if np.shape(AXES)==(3,):
-  #   NORMAL=AXES
-  # else:
-  #   NORMAL=AXES[:,0]
-  if (POS[2]-height<34) or (POS[2]-height>190):
+  AXES = geom[1]
+  if np.shape(AXES)==(3,):
+    NORMAL=AXES
+  else:
+    NORMAL=AXES[:,0]
+  if (POS[2]<34) or (POS[2]>190):
     print("Warning, there is no suitable post holder and slotted base at this height")
     return None
   post_length=50
   if base_exists:
-      if POS[2]-height>110:
+      if POS[2]>110:
         post_length=100
-      elif POS[2]-height>90:
+      elif POS[2]>90:
         post_length=75
-      elif POS[2]-height>65:
+      elif POS[2]>65:
         post_length=50
-      elif POS[2]-height>55:
+      elif POS[2]>55:
         post_length=40
-      elif POS[2]-height>40:
+      elif POS[2]>40:
         post_length=30
       else:
         post_length=20
-        post2 = draw_post_holder(name="PH20E_M", height=0,xshift=xshift,
+        post2 = draw_post_holder(name="PH20E_M", 
                                  color=holder_color, geom=geom)
-      post = draw_post(name="TR"+str(post_length)+"_M", height=height,
-                       xshift=xshift,color=post_color,geom=geom)
+      post = draw_post(name="TR"+str(post_length)+"_M", color=post_color,geom=geom)
       if post_length>20:
-        post2 = draw_post_holder(name="PH"+str(post_length)+"_M", height=0,
-                                 xshift=xshift,color=holder_color, geom=geom)
+        post2 = draw_post_holder(name="PH"+str(post_length)+"_M", color=holder_color, geom=geom)
   else:
-      if POS[2]-height>105:
+      if POS[2]>105:
         post_length=100
-      elif POS[2]-height>85:
+      elif POS[2]>85:
         post_length=75
-      elif POS[2]-height>60:
+      elif POS[2]>60:
         post_length=50
-      elif POS[2]-height>50:
+      elif POS[2]>50:
         post_length=40
-      elif POS[2]-height>35:
+      elif POS[2]>35:
         post_length=30
       else:
         post_length=20
-        post2 = draw_post_holder(name="PH"+str(post_length)+"E_M", height=0,
-                                 xshift=xshift,color=holder_color, geom=geom)
-      post = draw_post(name="TR"+str(post_length)+"_M", height=height,
-                       xshift=xshift,color=post_color,geom=geom)
-      post2 = draw_post_holder(name="PH"+str(post_length)+"E_M", height=0,
-                               xshift=xshift,color=holder_color, geom=geom)
+        post2 = draw_post_holder(name="PH"+str(post_length)+"E_M", color=holder_color, geom=geom)
+      post = draw_post(name="TR"+str(post_length)+"_M", color=post_color,geom=geom)
+      post2 = draw_post_holder(name="PH"+str(post_length)+"E_M", color=holder_color, geom=geom)
   if base_exists:
     if post_length>90 or post_length<31:
-        post1 = draw_post_base(name="BA2_M", height=0,xshift=xshift, geom=geom)
+        post1 = draw_post_base(name="BA2_M", geom=geom)
     else:
-        post1 = draw_post_base(name="BA1L", height=0,xshift=xshift, geom=geom)
+        post1 = draw_post_base(name="BA1L",  geom=geom)
   else:
     post1 = None
-  
+  print(name,"'s height=",NORMAL[2]+post_length)
   part = initialize_composition_old(name=name)
   container = post,post1,post2
   add_to_composition(part, container)

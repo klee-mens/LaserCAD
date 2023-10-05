@@ -100,17 +100,18 @@ def get_model_by_aperture_and_element(elm_type, aperture):
   return model
 
 class Mount(Geom_Object):
-  def __init__(self, name="mount",model="default",aperture=25.4,thickness=5,elm_type="mirror", **kwargs):
-
+  def __init__(self, name="mount",model="default",aperture=25.4,thickness=5,elm_type="mirror",Flip90=False, **kwargs):
     super().__init__(name, **kwargs)
     self.draw_dict["color"]=DEFAULT_MOUNT_COLOR
     self.draw_dict["geom"]=self.get_geom()
     self.elm_type = elm_type
     self.draw_dict["drawing_post"] = False
-    self.draw_dict["Filp90"] = False
+    self.draw_dict["Filp90"] = Flip90
     self.docking_obj = Geom_Object(pos = self.pos+(1,0,3),normal=(0,0,1))
     self.draw_dict["offset"] = np.zeros(3)
     self.draw_dict["rotation"] = (np.array((0,0,1)), 0)
+    if Flip90:
+      self.draw_dict["rotation"] = (self.normal, np.pi/2)
     self.aperture = aperture
     self.thickness = thickness
     self.xshift = 0
@@ -128,7 +129,8 @@ class Mount(Geom_Object):
       stl_file=thisfolder+"\\mount_meshes\\special mount\\" + self.model + ".stl"
     self.draw_dict["stl_file"]=stl_file
     self.mount_in_database = self.set_by_table()
-    post = Post_and_holder(name=self.name + "post",elm_type=self.elm_type,xshift=self.xshift,height = -self.zshift)
+    # post = Post_and_holder(name=self.name + "post",elm_type=self.elm_type,xshift=self.xshift,height = -self.zshift)
+    post = Post_and_holder(name=self.name + "post",elm_type=self.elm_type)
     post.set_geom(self.docking_obj.get_geom())
     self.post = post
     
@@ -218,6 +220,9 @@ class Mount(Geom_Object):
       self.draw_dict["thickness"] = self.thickness
       self.draw_dict["dia"] = self.aperture
       return mirror_mount(**self.draw_dict)
+    if self._axes[2,2] <-0.9:
+      self.rotate(self.normal,np.pi)
+      self.draw_dict["geom"] = self.get_geom()
     obj = load_STL(**self.draw_dict)
     translate(obj, self.draw_dict["offset"])
     rotate(obj, self.draw_dict["rotation"][0], self.draw_dict["rotation"][1]*180/np.pi)
@@ -286,15 +291,18 @@ class Grating_mount(Mount):
 
 class Special_mount(Mount):
   def __init__(self, name="special_mounmt",model="special_mount",aperture=25.4,thickness=10,
-               docking_pos = (1,2,3),docking_normal=(0,0,1), **kwargs):
+               docking_pos = (1,2,3),docking_normal=(0,0,1),drawing_post=False, **kwargs):
     super().__init__(name, **kwargs)
     self.draw_dict["aperture"] = aperture
+    self.aperture = aperture
     self.draw_dict["thickness"] = thickness
     self.thickness = thickness
     self.draw_dict["geom"]=self.get_geom()
     self.model = model
+    self.drawing_post = drawing_post
     if model=="rooftop mirror mount":
       self.list_rooptop_mirror_mount(aperture)
+      self.post = None
       docking_pos = (38,0,-5)
       docking_normal = (1,0,0)
     if model == "Stripe mirror mount":
@@ -311,6 +319,10 @@ class Special_mount(Mount):
       docking_pos = rotate_vector(docking_pos,rot_axis,rot_angle)
       docking_normal = rotate_vector(docking_normal,rot_axis,rot_angle)
     self.docking_obj = Geom_Object(pos = self.pos+docking_pos,normal=docking_normal)
+    if drawing_post:
+      post = Post_and_holder(name=self.name + "post",elm_type=self.elm_type)
+      post.set_geom(self.docking_obj.get_geom())
+      self.post = post
     
   def list_rooptop_mirror_mount(self,aperture=25.4, **keywords):
     self.xshift=38#+aperture/2
@@ -319,7 +331,7 @@ class Special_mount(Mount):
     self.draw_dict["mount_type"] = "rooftop_mirror_mount"
   
   def set_geom(self, geom):
-    if np.shape(geom[1])==(3,):
+    if np.shape(geom[1])==(3,3):
       normal = geom[1][:,0]
     else:
       normal = geom[1]
@@ -391,9 +403,20 @@ class Special_mount(Mount):
       return load_STL(**self.draw_dict)
       # return mirror_mount(**self.draw_dict)
     else:
+      if self._axes[2,2] <-0.9:
+        self.rotate(self.normal,np.pi)
+        self.draw_dict["geom"] = self.get_geom()
       self.draw_dict["geom"]=self.get_geom()
       self.draw_dict["stl_file"]=thisfolder+"\\mount_meshes\\special mount\\" + self.model + ".stl"
-      return load_STL(**self.draw_dict)
+      obj = load_STL(**self.draw_dict)
+      if self.drawing_post:
+        obj1 = self.post.draw()
+        part = initialize_composition_old(name="mount, post and base")
+        container = obj,obj1
+        add_to_composition(part, container)
+        return part
+      else:
+        return obj
     
 class Composed_Mount(Mount):
   def __init__(self, **kwargs):
