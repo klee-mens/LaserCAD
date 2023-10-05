@@ -39,6 +39,7 @@ sys.path.append('C:\\ProgramData\\Anaconda3')
 from LaserCAD.freecad_models import clear_doc, setview, freecad_da
 from LaserCAD.basic_optics import Mirror, Beam, Composition, inch, Curved_Mirror, Ray, Geom_Object, LinearResonator, Lens
 from LaserCAD.freecad_models.utils import thisfolder, load_STL
+from LaserCAD.basic_optics.mirror import Stripe_mirror,Rooftop_mirror
 
 if freecad_da:
   clear_doc()
@@ -74,14 +75,12 @@ if freecad_da:
 # m.normal=(1,20,1)
 # m.draw()
 # m.draw_mount()
-teles = Composition()
-teles.propagate(100)
-teles.add_on_axis(Lens())
-teles.propagate(200)
-teles.add_on_axis(Lens())
-teles.propagate(100)
-
-teles.draw()
+M = Mirror()
+M.aperture = 25.4*5
+# M.pos = (50,0,100)
+# M.normal = (1,1,0)
+M.draw()
+M.draw_mount()
 # peris = RoofTop_Mirror(direction=1)
 
 # comp = Composition("qlijfb")

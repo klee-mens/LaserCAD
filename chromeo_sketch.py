@@ -25,6 +25,7 @@ from LaserCAD.basic_optics import LinearResonator, Lens
 from LaserCAD.basic_optics import Grating
 import matplotlib.pyplot as plt
 from LaserCAD.freecad_models.utils import thisfolder, load_STL
+from LaserCAD.basic_optics.mirror import Stripe_mirror,Rooftop_mirror
 from LaserCAD.non_interactings import Faraday_Isolator, Pockels_Cell, Lambda_Plate
 
 if freecad_da:
@@ -105,10 +106,10 @@ def Make_Stretcher_chromeo():
   sinB = a - b
   grating_normal = (np.sqrt(1-sinB**2), sinB, 0)
 
-  Concav = Curved_Mirror(radius=radius_concave, name="Concav_Mirror")
+  Concav = Curved_Mirror(radius=radius_concave,name="Concav_Mirror")
   Concav.aperture = aperture_concave
 
-  StripeM = Curved_Mirror(radius= -radius_concave/2, name="Stripe_Mirror")
+  StripeM = Stripe_mirror(radius= -radius_concave/2,thickness=25,  name="Stripe_Mirror")
   #Cosmetics
   StripeM.aperture = width_stripe_mirror
   StripeM.draw_dict["height"] = height_stripe_mirror
@@ -175,11 +176,13 @@ def Make_Stretcher_chromeo():
   Stretcher.add_on_axis(RoofTop2)
 
   RoofTop1.draw = dont
-  RoofTop1.draw_dict["mount_type"] = "dont_draw"
+  # RoofTop1.draw_dict["mount_type"] = "dont_draw"
+  RoofTop1.mount.elm_type = "dont_draw"
   RoofTop2.draw = dont
-  RoofTop2.draw_dict["mount_type"] = "dont_draw"
+  RoofTop2.mount.elm_type = "dont_draw"
+  # RoofTop2.draw_dict["mount_type"] = "dont_draw"
 
-  pure_cosmetic = Mirror(name="RoofTop_Mirror")
+  pure_cosmetic = Rooftop_mirror(name="RoofTop_Mirror")
   pure_cosmetic.draw_dict["mount_type"] = "rooftop_mirror_mount"
   pure_cosmetic.pos = (RoofTop1.pos + RoofTop2.pos ) / 2
   pure_cosmetic.normal = (RoofTop1.normal + RoofTop2.normal ) / 2

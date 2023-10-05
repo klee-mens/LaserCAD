@@ -14,7 +14,7 @@ from ..freecad_models.freecad_model_composition import initialize_composition_ol
 from .optical_element import Opt_Element
 # from ..non_interactings import Mount
 # from ..non_interactings import Post_and_holder
-from .mount import Mount
+from .mount import Mount,Composed_Mount,Special_mount
 # from .post import Post_and_holder
 import numpy as np
 from copy import deepcopy
@@ -62,7 +62,7 @@ class Mirror(Opt_Element):
     self.mount_dict["elm_type"] = "mirror"
     self.mount_dict["name"] = self.name + "_mount"
     self.mount_dict["aperture"] = self.aperture
-
+    
   def update_normal(self):
     """
     aktualisiert die Normale des Mirrors entsprechend der __incident_normal, 
@@ -205,7 +205,15 @@ class Mirror(Opt_Element):
     self.draw_dict["dia"]=self.aperture
     obj = model_mirror(**self.draw_dict)
     return obj
-
+  
+  def draw_mount(self):
+    # self.update_mount()
+    self._update_mount_dict()
+    if self.aperture >25.4*4:
+      self.mount = Mount(**self.mount_dict)
+    # print(self.aperture)
+    return (self.mount.draw())
+  
   # def draw_mount_fc(self):
     # self.update_draw_dict()
     # self.draw_dict["dia"]=self.aperture
@@ -238,6 +246,32 @@ class Mirror(Opt_Element):
     else:
       txt = "<" + self.name + ">'s mount is the " + self.draw_dict["mount_type"] + "."
     return txt
+
+class Rooftop_mirror(Mirror):
+  def __init__(self, aperture=10, **kwargs):
+    self.aperture = aperture
+    super().__init__(**kwargs)
+    self._update_mount_dict()
+    self.mount = Composed_Mount()
+    mon1 = Special_mount(**self.mount_dict)
+    mon2 = Mount(aperture=25.4*2)
+    self.mount.add(mon1)
+    self.mount.add(mon2)
+  
+  def _update_mount_dict(self):
+    super()._update_mount_dict()
+    self.mount_dict["model"] = "rooftop mirror mount"
+    self.mount_dict["name"] = self.name + "_mount"
+    self.mount_dict["aperture"] = self.aperture
+    # self.mount_dict["thickness"] = self.thickness
+  
+  def draw_fc(self):
+    self.update_draw_dict()
+    self.draw_dict["dia"]=self.aperture
+    self.draw_dict["model_type"] = "Rooftop"
+    obj = model_mirror(**self.draw_dict)
+    return obj
+  
 
 class Curved_Mirror(Mirror):
   def __init__(self, radius=200, **kwargs):
@@ -285,7 +319,6 @@ class Curved_Mirror(Mirror):
     return obj
   
   
-  
   def next_ray_trace(self, ray):
     """
     erzeugt den nächsten Ray auf Basis der analytischen Berechung von Schnitt-
@@ -322,6 +355,35 @@ class Curved_Mirror(Mirror):
     ray2.normal = ray.normal - 2*np.sum(ray.normal*surface_norm)*surface_norm
     ray2.pos = p0
     return ray2
+
+class Stripe_mirror(Curved_Mirror):
+  def __init__(self, thickness=10, **kwargs):
+    self.thickness = thickness
+    super().__init__(**kwargs)
+    self._update_mount_dict()
+    self.mount = Composed_Mount()
+    mon1 = Special_mount(**self.mount_dict)
+    mon2 = Mount(aperture=25.4*2)
+    self.mount.add(mon1)
+    self.mount.add(mon2)
+  
+  def _update_mount_dict(self):
+    super()._update_mount_dict()
+    self.mount_dict["model"] = "Stripe mirror mount"
+    self.mount_dict["name"] = self.name + "_mount"
+    # self.mount_dict["aperture"] = self.aperture
+    self.mount_dict["thickness"] = self.thickness
+  
+  def draw_fc(self):
+    self.update_draw_dict()
+    self.draw_dict["dia"]=self.aperture
+    # self.draw_dict["mount_type"] = "POLARIS-K1-Step"
+    self.draw_dict["Radius1"] = self.radius
+    self.draw_dict["thickness"] = self.thickness
+    self.draw_dict["model_type"] = "Stripe"
+    obj = model_mirror(**self.draw_dict)
+    return obj
+  
 
 class Cylindrical_Mirror(Mirror):
   """

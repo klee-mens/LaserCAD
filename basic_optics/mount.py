@@ -93,16 +93,16 @@ def get_model_by_aperture_and_element(elm_type, aperture):
         model = "POLARIS-K3S5"
       elif aperture <=25.4*4:
         model = "KS4"
+      else:
+        model = "large mirror mount"
   else:
     model = "dont_draw"
   return model
 
 class Mount(Geom_Object):
-  def __init__(self, name="mount",model="default",aperture=25.4,elm_type="mirror", **kwargs):
+  def __init__(self, name="mount",model="default",aperture=25.4,thickness=5,elm_type="mirror", **kwargs):
+
     super().__init__(name, **kwargs)
-
-
-    
     self.draw_dict["color"]=DEFAULT_MOUNT_COLOR
     self.draw_dict["geom"]=self.get_geom()
     self.elm_type = elm_type
@@ -112,6 +112,7 @@ class Mount(Geom_Object):
     self.draw_dict["offset"] = np.zeros(3)
     self.draw_dict["rotation"] = (np.array((0,0,1)), 0)
     self.aperture = aperture
+    self.thickness = thickness
     self.xshift = 0
     self.zshift = 0
     self.post = Geom_Object()
@@ -213,13 +214,14 @@ class Mount(Geom_Object):
     self.update_draw_dict()
     if self.elm_type == "dont_draw":
       return None
+    if self.model == "large mirror mount":
+      self.draw_dict["thickness"] = self.thickness
+      self.draw_dict["dia"] = self.aperture
+      return mirror_mount(**self.draw_dict)
     obj = load_STL(**self.draw_dict)
     translate(obj, self.draw_dict["offset"])
-    # print("SDAFFFFFFFF", self.draw_dict["offset"])
-    # print("shigi", self.draw_dict["rotation"][0], self.draw_dict["rotation"][1])
     rotate(obj, self.draw_dict["rotation"][0], self.draw_dict["rotation"][1]*180/np.pi)
     obj1 = self.post.draw()
-    # print("self.post.pos",self.post.pos)
     part = initialize_composition_old(name="mount, post and base")
     container = obj,obj1
     add_to_composition(part, container)
@@ -264,7 +266,7 @@ class Grating_mount(Mount):
       # docking_normal = rotate_vector(docking_normal,rot_axis,rot_angle)
     # self.docking_obj = Geom_Object(pos = self.pos+docking_pos,normal=docking_normal)
     self.docking_obj.pos += docking_pos
-    print("Grating_mount_geom=",self.get_geom())
+    # print("Grating_mount_geom=",self.get_geom())
     self.post.set_geom(self.docking_obj.get_geom())
     
   def draw_fc(self):
@@ -288,6 +290,7 @@ class Special_mount(Mount):
     super().__init__(name, **kwargs)
     self.draw_dict["aperture"] = aperture
     self.draw_dict["thickness"] = thickness
+    self.thickness = thickness
     self.draw_dict["geom"]=self.get_geom()
     self.model = model
     if model=="rooftop mirror mount":
@@ -295,7 +298,12 @@ class Special_mount(Mount):
       docking_pos = (38,0,-5)
       docking_normal = (1,0,0)
     if model == "Stripe mirror mount":
-      self.list_rooptop_mirror_mount(aperture)
+      # self.list_stripe_mirror_mount(thickness)
+      xshift = 24
+      yshift = 104.3
+      self.post = None
+      docking_pos = (xshift,yshift,0)
+      docking_normal = -self.normal
     a=(1,0,0)
     if np.sum(np.cross(a,self.normal))!=0:
       rot_axis = np.cross(a,self.normal)/np.linalg.norm(np.cross(a,self.normal))
@@ -309,12 +317,45 @@ class Special_mount(Mount):
     self.zshift=-5
     self.draw_dict["stl_file"]=thisfolder+"\\mount_meshes\\special mount\\rooftop mirror mount.stl"
     self.draw_dict["mount_type"] = "rooftop_mirror_mount"
-    
-  def list_stripe_mirror_mount(self,thickness=25.4, **keywords):
-    self.draw_dict["model_type"] = "Stripe"
-    self.xshift = thickness-7
-    self.yshift = 104.3
   
+  def set_geom(self, geom):
+    if np.shape(geom[1])==(3,):
+      normal = geom[1][:,0]
+    else:
+      normal = geom[1]
+    if self.model != "Stripe mirror mount" and self.model != "rooftop mirror mount":
+      self.pos = np.array(geom[0])
+      self.set_axes(geom[1])
+      return 1
+    if self.model =="Stripe mirror mount":
+      new_pos = np.array((self.thickness-25,0,0))
+    elif self.model == "rooftop mirror mount":
+      new_pos = np.array((self.aperture/2,0,0))
+    a = (1,0,0)
+    if np.sum(np.cross(a,normal))!=0:
+      rot_axis = np.cross(a,normal)/np.linalg.norm(np.cross(a,normal))
+      rot_angle = np.arccos(np.sum(a*normal)/(np.linalg.norm(a)*np.linalg.norm(normal)))
+      new_pos = rotate_vector(new_pos,rot_axis,rot_angle)
+    geom0 = np.array(geom[0] + new_pos)
+    self.pos = np.array(geom0)
+    self.set_axes(geom[1])
+      
+  
+  # def list_stripe_mirror_mount(self,thickness=25.4, **keywords):
+  #   # POS = self.pos
+  #   # NORMAL = self.normal
+  #   xshift = thickness-7
+  #   yshift = 104.3
+    
+  #   # docking_geom = (np.array((POS[0]+xshift*NORMAL[0]-yshift*NORMAL[1],
+  #   #                   POS[1]+yshift*NORMAL[0]+xshift*NORMAL[1],
+  #   #                   POS[2])),np.array((-NORMAL[0],-NORMAL[1],
+  #   #                   NORMAL[2])))
+  #   geom = self.get_geom()
+  #   self.set_geom(geom[0]+(thickness-25,0,0)+geom[1])
+  #   # self.docking_obj.set_geom(docking_geom)
+  #   self.post = None
+    
   @property
   def docking_pos(self):
     return np.array(self.docking_obj.pos) * 1.0
@@ -330,7 +371,19 @@ class Special_mount(Mount):
   def docking_normal(self, x):
     self.docking_normal = np.array(x) * 1.0
     self.docking_obj.normal = self.docking_normal
-    
+  
+  def _pos_changed(self, old_pos, new_pos):
+    if self.post != None:
+      self._rearange_subobjects_pos( old_pos, new_pos, [self.docking_obj,self.post])
+    else:
+      self._rearange_subobjects_pos( old_pos, new_pos, [self.docking_obj])
+  
+  def _axes_changed(self, old_axes, new_axes):
+    if self.post != None:
+      self._rearange_subobjects_axes( old_axes, new_axes, [self.docking_obj,self.post])
+    else:
+      self._rearange_subobjects_axes( old_axes, new_axes, [self.docking_obj])
+  
   def draw_fc(self):
     if self.model=="rooftop mirror mount" or self.model=="Stripe mirror mount":
       self.draw_dict["geom"]=self.get_geom()
@@ -355,15 +408,19 @@ class Composed_Mount(Mount):
     self.docking_obj.set_geom(mount.docking_obj.get_geom())
     
   def draw_fc(self):
+    part = initialize_composition_old(name="mount, post and base")
+    container = []
     for mount in self.mount_list:
-      mount.draw_fc()
+      container.append(mount.draw_fc())
+    add_to_composition(part, container)
+    return part
     
   def _pos_changed(self, old_pos, new_pos):
-    self._rearange_subobjects_pos( old_pos, new_pos, [self.docking_obj])
+    self._rearange_subobjects_pos( old_pos, new_pos, [self.docking_obj,self.post])
     self._rearange_subobjects_pos( old_pos, new_pos, self.mount_list)
   
   def _axes_changed(self, old_axes, new_axes):
-    self._rearange_subobjects_axes( old_axes, new_axes, [self.docking_obj])
+    self._rearange_subobjects_axes( old_axes, new_axes, [self.docking_obj,self.post])
     self._rearange_subobjects_axes( old_axes, new_axes, self.mount_list)
 
 # if freecad_da:
