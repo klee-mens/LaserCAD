@@ -313,7 +313,7 @@ class Special_mount(Mount):
       docking_pos = (xshift,yshift,0)
       docking_normal = -self.normal
     a=(1,0,0)
-    if np.sum(np.cross(a,self.normal))!=0:
+    if abs(np.sum(np.cross(a,self.normal)))>0:
       rot_axis = np.cross(a,self.normal)/np.linalg.norm(np.cross(a,self.normal))
       rot_angle = np.arccos(np.sum(a*self.normal)/(np.linalg.norm(a)*np.linalg.norm(self.normal)))
       docking_pos = rotate_vector(docking_pos,rot_axis,rot_angle)

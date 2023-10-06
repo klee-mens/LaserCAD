@@ -208,10 +208,9 @@ class Mirror(Opt_Element):
   
   def draw_mount(self):
     # self.update_mount()
-    self._update_mount_dict()
-    # if self.aperture >25.4*4:
-    self.mount = Mount(**self.mount_dict)
-    # print(self.aperture)
+    if self.mount.elm_type != "dont_draw":
+      self._update_mount_dict()
+      self.mount = Mount(**self.mount_dict)
     return (self.mount.draw())
   
   # def draw_mount_fc(self):
@@ -395,6 +394,19 @@ class Stripe_mirror(Curved_Mirror):
     obj = model_mirror(**self.draw_dict)
     return obj
   
+  def draw_mount(self):
+    # self.update_mount()
+    self._update_mount_dict()
+    self.mount = Composed_Mount()
+    self.mount.set_geom(self.get_geom())
+    mon1 = Special_mount(**self.mount_dict)
+    mon1.docking_obj.normal = -self.normal
+    mon2 = Mount(aperture=25.4*2)
+    self.mount.add(mon1)
+    print(mon1.docking_obj)
+    self.mount.add(mon2)
+    # print(self.aperture)
+    return (self.mount.draw())
 
 class Cylindrical_Mirror(Mirror):
   """
