@@ -389,7 +389,7 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
   container = post_part,obj,additional_mount
   add_to_composition(part, container)
   DOC.recompute()
-  print("post postiton=",np.array(POS)+xshift*np.array(NORMAL))
+  print(mount_name,"'s post postiton=",np.array(POS)+xshift*np.array(NORMAL))
   return part
 
 def model_lambda_plate(name = "lamuda_plane",drawing_post=True,base_exists=False,
@@ -884,6 +884,8 @@ def draw_large_mount(thickness=30,color=DEFAULT_MOUNT_COLOR,geom=None):
     offset1 = Vector(78.95+thickness-30,0,0)
     obj1.Placement = Placement(offset1, Rotation(0,0,0), Vector(0,0,0))
     update_geom_info(obj1, Geom_ground,off0=offset1)
+    print("large mount's post position =", POS+NORMAL*(48.95+thickness,0,0))
+    print("large mount's post height =", POS[2]-70)
     part = initialize_composition_old(name="mount and post")
     container = obj,obj1
     add_to_composition(part, container)

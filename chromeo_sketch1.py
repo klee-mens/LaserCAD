@@ -220,6 +220,7 @@ lightsource_pp = Beam(angle=0, radius=seed_beam_radius)
 PulsePicker.set_light_source(lightsource_pp)
 PulsePicker.propagate(distance_seed_laser_stretcher*0.2)
 FlipMirror_pp = Mirror(phi=90)
+FlipMirror_pp.mount_dict["Flip90"]=True
 PulsePicker.add_on_axis(FlipMirror_pp)
 FlipMirror_pp.pos += (0,0,flip_mirror_push_down)
 PulsePicker.propagate(100)
@@ -240,6 +241,7 @@ TFP_pp = Mirror(phi = -180+2*tfp_angle)
 TFP_pp.draw_dict["color"] = (1.0, 0.0, 2.0)
 TFP_pp.draw_dict["thickness"] = 4
 TFP_pp.aperture = 2*inch
+# TFP_pp.mount_dict["Flip90"]=True
 PulsePicker.add_on_axis(TFP_pp)
 TFP_pp.pos += -1 * TFP_pp.normal * tfp_push_forward
 PulsePicker.recompute_optical_axis()
@@ -286,7 +288,7 @@ mir1 = Mirror(phi=180)
 TFP1 = Mirror(phi= 180 - 2*tfp_angle, name="TFP1")
 TFP1.draw_dict["color"] = (1.0, 0.0, 2.0)
 TFP1.aperture = tfp_aperture
-TFP1.draw_dict["Flip90"]=True
+TFP1.mount_dict["Flip90"]=True
 
 cm = Curved_Mirror(radius=focal*2, phi = 180)
 PockelsCell = Pockels_Cell(name="PockelZelleRes1")

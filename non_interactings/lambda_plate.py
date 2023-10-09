@@ -33,7 +33,7 @@ class Lambda_Plate(Component):
     obj = model_mirror(**self.draw_dict)
     return obj
 
-  def draw_mount_fc(self):
-    self.update_draw_dict()
-    obj = model_lambda_plate(**self.draw_dict)
-    return obj
+  # def draw_mount_fc(self):
+  #   self.update_draw_dict()
+  #   obj = model_lambda_plate(**self.draw_dict)
+  #   return obj

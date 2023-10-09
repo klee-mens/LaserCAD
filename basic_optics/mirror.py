@@ -251,11 +251,11 @@ class Rooftop_mirror(Mirror):
     self.aperture = aperture
     super().__init__(**kwargs)
     self._update_mount_dict()
-    self.mount = Composed_Mount()
-    mon1 = Special_mount(**self.mount_dict)
-    mon2 = Mount(aperture=25.4*2)
-    self.mount.add(mon1)
-    self.mount.add(mon2)
+    # self.mount = Composed_Mount()
+    # mon1 = Special_mount(**self.mount_dict)
+    # mon2 = Mount(aperture=25.4*2)
+    # self.mount.add(mon1)
+    # self.mount.add(mon2)
   
   def _update_mount_dict(self):
     super()._update_mount_dict()
@@ -372,10 +372,10 @@ class Stripe_mirror(Curved_Mirror):
     super().__init__(**kwargs)
     self._update_mount_dict()
     self.mount = Composed_Mount()
-    mon1 = Special_mount(**self.mount_dict)
-    mon2 = Mount(aperture=25.4*2)
-    self.mount.add(mon1)
-    self.mount.add(mon2)
+    # mon1 = Special_mount(**self.mount_dict)
+    # mon2 = Mount(aperture=25.4*2)
+    # self.mount.add(mon1)
+    # self.mount.add(mon2)
   
   def _update_mount_dict(self):
     super()._update_mount_dict()
@@ -403,7 +403,6 @@ class Stripe_mirror(Curved_Mirror):
     mon1.docking_obj.normal = -self.normal
     mon2 = Mount(aperture=25.4*2)
     self.mount.add(mon1)
-    print(mon1.docking_obj)
     self.mount.add(mon2)
     # print(self.aperture)
     return (self.mount.draw())

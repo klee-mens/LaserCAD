@@ -9,17 +9,25 @@ Created on Sat Aug 19 14:40:56 2023
 # from ..freecad_models.utils import thisfolder, load_STL,freecad_da
 # from ..freecad_models.freecad_model_mounts import load_mount_from_csv,lens_mount,mirror_mount
 
-import sys
-sys.path.append('C:\\ProgramData\\Anaconda3')
+# import sys
+# sys.path.append('C:\\ProgramData\\Anaconda3')
 # from LaserCAD.basic_optics import Component
 # from .component import Component
-from LaserCAD.freecad_models.utils import thisfolder,load_STL,freecad_da,clear_doc,rotate,translate
-from LaserCAD.freecad_models.freecad_model_composition import initialize_composition_old,add_to_composition
-from LaserCAD.freecad_models.freecad_model_mounts import lens_mount,mirror_mount,DEFAULT_MOUNT_COLOR,DEFAULT_MAX_ANGULAR_OFFSET,draw_rooftop_mount
-from LaserCAD.freecad_models.freecad_model_grating import grating_mount
-from LaserCAD.basic_optics.geom_object import Geom_Object
-from LaserCAD.basic_optics.post import Post_and_holder
-from copy import deepcopy
+# from LaserCAD.freecad_models.utils import thisfolder,load_STL,freecad_da,clear_doc,rotate,translate
+# from LaserCAD.freecad_models.freecad_model_composition import initialize_composition_old,add_to_composition
+# from LaserCAD.freecad_models.freecad_model_mounts import lens_mount,mirror_mount,DEFAULT_MOUNT_COLOR,DEFAULT_MAX_ANGULAR_OFFSET,draw_rooftop_mount
+# from LaserCAD.freecad_models.freecad_model_grating import grating_mount
+# from LaserCAD.basic_optics.geom_object import Geom_Object
+# from LaserCAD.basic_optics.post import Post_and_holder
+
+from ..freecad_models.utils import thisfolder,load_STL,rotate,translate
+from ..freecad_models.freecad_model_composition import initialize_composition_old,add_to_composition
+from ..freecad_models.freecad_model_mounts import mirror_mount,DEFAULT_MOUNT_COLOR,DEFAULT_MAX_ANGULAR_OFFSET
+from ..freecad_models.freecad_model_grating import grating_mount
+from .geom_object import Geom_Object
+from .post import Post_and_holder
+
+# from copy import deepcopy
 import csv
 import os
 import numpy as np
@@ -129,7 +137,6 @@ class Mount(Geom_Object):
       stl_file=thisfolder+"\\mount_meshes\\special mount\\" + self.model + ".stl"
     self.draw_dict["stl_file"]=stl_file
     self.mount_in_database = self.set_by_table()
-    # post = Post_and_holder(name=self.name + "post",elm_type=self.elm_type,xshift=self.xshift,height = -self.zshift)
     post = Post_and_holder(name=self.name + "post",elm_type=self.elm_type)
     post.set_geom(self.docking_obj.get_geom())
     self.post = post
@@ -301,7 +308,7 @@ class Special_mount(Mount):
     self.model = model
     self.drawing_post = drawing_post
     if model=="rooftop mirror mount":
-      self.list_rooptop_mirror_mount(aperture)
+      # self.list_rooptop_mirror_mount(aperture)
       self.post = None
       docking_pos = (38,0,-5)
       docking_normal = (1,0,0)
@@ -324,13 +331,29 @@ class Special_mount(Mount):
       post.set_geom(self.docking_obj.get_geom())
       self.post = post
     
-  def list_rooptop_mirror_mount(self,aperture=25.4, **keywords):
-    self.xshift=38#+aperture/2
-    self.zshift=-5
-    self.draw_dict["stl_file"]=thisfolder+"\\mount_meshes\\special mount\\rooftop mirror mount.stl"
-    self.draw_dict["mount_type"] = "rooftop_mirror_mount"
+  # def list_rooptop_mirror_mount(self,aperture=25.4, **keywords):
+  #   self.xshift=38#+aperture/2
+  #   self.zshift=-5
+  #   self.draw_dict["stl_file"]=thisfolder+"\\mount_meshes\\special mount\\rooftop mirror mount.stl"
+  #   self.draw_dict["mount_type"] = "rooftop_mirror_mount"
   
   def set_geom(self, geom):
+    """
+    since the position of rooftop mirror and stripe mirror are related to the 
+    aperture and thickness of the mirror itself, the are some changes that must 
+    be made in the geom setting.
+
+    Parameters
+    ----------
+    geom : TYPE
+      DESCRIPTION.
+
+    Returns
+    -------
+    int
+      DESCRIPTION.
+
+    """
     if np.shape(geom[1])==(3,3):
       normal = geom[1][:,0]
     else:

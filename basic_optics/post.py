@@ -4,18 +4,21 @@ Created on Sat Aug 19 14:41:08 2023
 
 @author: mens
 """
-import sys
-sys.path.append('C:\\ProgramData\\Anaconda3')
+# import sys
+# sys.path.append('C:\\ProgramData\\Anaconda3')
 # from LaserCAD.basic_optics import Component
 # from .component import Component
-from LaserCAD.freecad_models.utils import thisfolder,load_STL,freecad_da,clear_doc
-from LaserCAD.freecad_models.freecad_model_composition import initialize_composition_old,add_to_composition
-from LaserCAD.freecad_models.freecad_model_mounts import draw_post,draw_post_holder,draw_post_base
-from LaserCAD.basic_optics.geom_object import Geom_Object
+# from LaserCAD.freecad_models.utils import thisfolder,load_STL,freecad_da,clear_doc
+# from LaserCAD.freecad_models.freecad_model_composition import initialize_composition_old,add_to_composition
+from ..freecad_models.freecad_model_composition import initialize_composition_old,add_to_composition
+from ..freecad_models.freecad_model_mounts import draw_post,draw_post_holder,draw_post_base
+# from LaserCAD.freecad_models.freecad_model_mounts import draw_post,draw_post_holder,draw_post_base
+from .geom_object import Geom_Object
+# from LaserCAD.basic_optics.geom_object import Geom_Object
 # from LaserCAD.non_interactings.mount import Mount,Special_mount
-from copy import deepcopy
-import csv
-import os
+# from copy import deepcopy
+# import csv
+# import os
 import numpy as np
 
 
