@@ -215,7 +215,6 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
   POS = geom[0]
   AXES = geom[1]
   NORMAL = AXES[:,0]
-  # print("Mirror normal=",NORMAL)  
   DOC = get_DOC()
   if abs(NORMAL[2])<DEFAULT_MAX_ANGULAR_OFFSET/180*np.pi:
     NORMAL[2]=0
@@ -559,7 +558,6 @@ def draw_post(name="TR50_M", height=0,xshift=0,color=DEFAULT_POST_COLOR, geom=No
   offset=Vector(xshift,0,height)
   obj.Placement = Placement(offset, Rotation(90,0,90), Vector(0,0,0))
   update_geom_info(obj, geom, off0=offset)
-  # print(obj.Placement)
   return obj
 
 def draw_post_holder (name="PH50_M", height=0,xshift=0,color=DEFAULT_HOLDER_COLOR, geom=None):
