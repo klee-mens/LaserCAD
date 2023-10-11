@@ -400,7 +400,8 @@ class Stripe_mirror(Curved_Mirror):
     self.mount = Composed_Mount()
     self.mount.set_geom(self.get_geom())
     mon1 = Special_mount(**self.mount_dict)
-    mon1.docking_obj.normal = -self.normal
+    # print(mon1.normal,mon1.docking_obj.normal,mon1.docking_normal)
+    # mon1.docking_obj.normal = -self.normal
     mon2 = Mount(aperture=25.4*2)
     self.mount.add(mon1)
     self.mount.add(mon2)

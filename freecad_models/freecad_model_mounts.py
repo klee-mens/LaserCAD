@@ -560,6 +560,34 @@ def draw_post(name="TR50_M", height=0,xshift=0,color=DEFAULT_POST_COLOR, geom=No
   update_geom_info(obj, geom, off0=offset)
   return obj
 
+def draw_1inch_post(name="TR50_M",h_diff=5,color=DEFAULT_POST_COLOR,
+                    geom=None):
+  DOC = get_DOC()
+  POS = geom[0]
+  AXES = geom[1]
+  if np.shape(AXES)==(3,):
+    NORMAL=AXES
+  else:
+    NORMAL=AXES[:,0]
+  datei1 = thisfolder + "post\\1inchPost\\" + name
+  datei1 += ".stl"
+  obj = load_STL(datei1, name = name,color = color)
+  Geom_ground = (np.array((POS[0],POS[1],0)), np.array((AXES)))
+  Geom_diff = (np.array((POS[0],POS[1],geom[0][2]-h_diff)), np.array((AXES)))
+  update_geom_info(obj, Geom_ground)
+  obj1 = DOC.addObject("Part::Cylinder","Cylinder")
+  obj1.Label = "Spacer"
+  obj1.Radius = 24.4/2
+  obj1.Height = h_diff
+  offset1 = Vector(0,0,0)
+  obj1.Placement = Placement(offset1, Rotation(0,0,0), Vector(0,0,0))
+  update_geom_info(obj1, Geom_diff)
+  print("Spacer height = ",h_diff)
+  part = initialize_composition_old(name="1 inch post")
+  container = obj,obj1
+  add_to_composition(part, container)
+  return part
+
 def draw_post_holder (name="PH50_M", height=0,xshift=0,color=DEFAULT_HOLDER_COLOR, geom=None):
   """
   draw the post holder

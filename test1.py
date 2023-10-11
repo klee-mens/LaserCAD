@@ -31,16 +31,19 @@ if freecad_da:
 # iris.draw()
 # iris.draw_mount()
 
-mir = Grating()
-mir.pos= (0,0,120)
-mir.normal=(1,1,0)
-mon = mir.mount
-print(mir.mount.docking_obj.get_geom())
+# mir = Grating()
+# mir.pos= (0,0,120)
+# mir.normal=(1,1,0)
+# mon = mir.mount
+# print(mir.mount.docking_obj.get_geom())
 # mon.draw_dict["offset"] = np.array((-5, 0, 0))
 # mon.draw_dict["rotation"] = np.array((1, 0, 0)), np.pi*90/180
-
+mir=Mirror()
+mir.aperture = 25.4
+mir.pos = (100,0,65)
 mir.draw()
 mir.draw_mount()
+# mir.draw_mount()
 
 # compo = Component()
 # compo.draw()

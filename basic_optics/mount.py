@@ -5,21 +5,6 @@ Created on Sat Aug 19 14:40:56 2023
 @author: mens
 """
 
-# from ..basic_optics import Component
-# from ..freecad_models.utils import thisfolder, load_STL,freecad_da
-# from ..freecad_models.freecad_model_mounts import load_mount_from_csv,lens_mount,mirror_mount
-
-# import sys
-# sys.path.append('C:\\ProgramData\\Anaconda3')
-# from LaserCAD.basic_optics import Component
-# from .component import Component
-# from LaserCAD.freecad_models.utils import thisfolder,load_STL,freecad_da,clear_doc,rotate,translate
-# from LaserCAD.freecad_models.freecad_model_composition import initialize_composition_old,add_to_composition
-# from LaserCAD.freecad_models.freecad_model_mounts import lens_mount,mirror_mount,DEFAULT_MOUNT_COLOR,DEFAULT_MAX_ANGULAR_OFFSET,draw_rooftop_mount
-# from LaserCAD.freecad_models.freecad_model_grating import grating_mount
-# from LaserCAD.basic_optics.geom_object import Geom_Object
-# from LaserCAD.basic_optics.post import Post_and_holder
-
 from ..freecad_models.utils import thisfolder,load_STL,rotate,translate
 from ..freecad_models.freecad_model_composition import initialize_composition_old,add_to_composition
 from ..freecad_models.freecad_model_mounts import mirror_mount,DEFAULT_MOUNT_COLOR,DEFAULT_MAX_ANGULAR_OFFSET
@@ -78,36 +63,42 @@ def rotate_vector(shiftvec=np.array((1.0,0,0)),vec=np.array((1.0,0,0)),angle=0):
 
 def get_model_by_aperture_and_element(elm_type, aperture):
   if elm_type == "lens":
-    # if model == "default":
-      if aperture<= 25.4/2:
-        model = "MLH05_M"
-      elif aperture <= 25.4:
-        model = "LMR1_M"
-      elif aperture <= 25.4*1.5:
-        model = "LMR1.5_M"
-      elif aperture <=25.4*2:
-        model = "LMR2_M"
+    if aperture<= 25.4/2:
+      model = "MLH05_M"
+    elif aperture <= 25.4:
+      model = "LMR1_M"
+    elif aperture <= 25.4*1.5:
+      model = "LMR1.5_M"
+    elif aperture <=25.4*2:
+      model = "LMR2_M"
   elif elm_type == "mirror":
-    # if model == "default":
-      if aperture<= 25.4/2:
-        model = "POLARIS-K05"
-      elif aperture <= 25.4:
-        model = "POLARIS-K1"
-      elif aperture <= 25.4*1.5:
-        model = "POLARIS-K15S4"
-      elif aperture <=25.4*2:
-        model = "POLARIS-K2"
-      elif aperture <=25.4*3:
-        model = "POLARIS-K3S5"
-      elif aperture <=25.4*4:
-        model = "KS4"
-      else:
-        model = "large mirror mount"
+    if aperture <= 4:
+      model = "KMSS"
+    elif aperture<= 25.4/2:
+      model = "POLARIS-K05"
+    elif aperture <= 25.4:
+      model = "POLARIS-K1"
+    elif aperture <= 25.4*1.5:
+      model = "POLARIS-K15S4"
+    elif aperture <=25.4*2:
+      model = "POLARIS-K2"
+    elif aperture <=25.4*3:
+      model = "POLARIS-K3S5"
+    elif aperture <=25.4*4:
+      model = "KS4"
+    else:
+      model = "large mirror mount"
   else:
     model = "dont_draw"
   return model
 
 class Mount(Geom_Object):
+  """
+  Mount class, erbit from <Geom_Object>
+  Application as follows:
+    Mon = Mount(elm_type="mirror")
+  Usually exists as part of the component
+  """
   def __init__(self, name="mount",model="default",aperture=25.4,thickness=5,elm_type="mirror",Flip90=False, **kwargs):
     super().__init__(name, **kwargs)
     self.draw_dict["color"]=DEFAULT_MOUNT_COLOR
@@ -144,12 +135,12 @@ class Mount(Geom_Object):
   def set_by_table(self):
     """
     sets the docking object and the model by reading the "the file.csv"
-
+    Used to determine if there is a default suitable mount in the database.
     Returns
     -------
     bool
-      DESCRIPTION.
-
+      True: this mount was in the csv file, which can be read directy
+      False: this mont was not in the csv file
     """
     buf = []
     mount_in_database = False
@@ -212,12 +203,6 @@ class Mount(Geom_Object):
   
   def _axes_changed(self, old_axes, new_axes):
     self._rearange_subobjects_axes( old_axes, new_axes, [self.docking_obj,self.post])
-  
-  # def get_post(self):
-  #   post = Post_and_holder(name=self.name + "post",elm_type=self.elm_type,xshift=self.xshift,height = -self.zshift)
-  #   print(self.docking_obj.get_geom())
-  #   post.set_geom(self.docking_obj.get_geom())
-  #   return post
 
   def draw_fc(self):
     self.update_draw_dict()
@@ -238,26 +223,6 @@ class Mount(Geom_Object):
     container = obj,obj1
     add_to_composition(part, container)
     return part
-    # self.update_draw_dict()
-    # if self.mount_in_database:
-    #   # self.draw_dict["mount_type"] = self.model
-    #   if self.model in MIRROR_LIST:
-    #     # return mirror_mount(**self.draw_dict)
-    #     if self.draw_dict["Filp90"]:
-    #       a=load_STL(**self.draw_dict)
-    #       rotate(a,self.normal,90)
-    #       return a
-    #     return load_STL(**self.draw_dict)
-    #   else:
-    #     return load_STL(**self.draw_dict)
-    # elif self.model in SPECIAL_LIST or self.model in MIRROR_LIST or self.model in LENS_LIST:
-    #   return load_STL(**self.draw_dict)
-    # else:
-    #   self.draw_dict["stl_file"]=self.model
-    #   print("This mount is not in the correct folder")
-    #   return load_STL(**self.draw_dict)
-
-
 
 
 class Grating_mount(Mount):
@@ -310,7 +275,9 @@ class Special_mount(Mount):
     if model=="rooftop mirror mount":
       # self.list_rooptop_mirror_mount(aperture)
       self.post = None
-      docking_pos = (38,0,-5)
+      xshift = 38
+      zshift = -5
+      docking_pos = (xshift,0,zshift)
       docking_normal = (1,0,0)
     if model == "Stripe mirror mount":
       # self.list_stripe_mirror_mount(thickness)
@@ -318,7 +285,8 @@ class Special_mount(Mount):
       yshift = 104.3
       self.post = None
       docking_pos = (xshift,yshift,0)
-      docking_normal = -self.normal
+      docking_normal = (-1,0,0)
+    # for the original geom update. Should have a better way to update the docking geom first.
     a=(1,0,0)
     if abs(np.sum(np.cross(a,self.normal)))>0:
       rot_axis = np.cross(a,self.normal)/np.linalg.norm(np.cross(a,self.normal))
@@ -326,32 +294,17 @@ class Special_mount(Mount):
       docking_pos = rotate_vector(docking_pos,rot_axis,rot_angle)
       docking_normal = rotate_vector(docking_normal,rot_axis,rot_angle)
     self.docking_obj = Geom_Object(pos = self.pos+docking_pos,normal=docking_normal)
+    
     if drawing_post:
       post = Post_and_holder(name=self.name + "post",elm_type=self.elm_type)
       post.set_geom(self.docking_obj.get_geom())
       self.post = post
-    
-  # def list_rooptop_mirror_mount(self,aperture=25.4, **keywords):
-  #   self.xshift=38#+aperture/2
-  #   self.zshift=-5
-  #   self.draw_dict["stl_file"]=thisfolder+"\\mount_meshes\\special mount\\rooftop mirror mount.stl"
-  #   self.draw_dict["mount_type"] = "rooftop_mirror_mount"
   
   def set_geom(self, geom):
     """
     since the position of rooftop mirror and stripe mirror are related to the 
     aperture and thickness of the mirror itself, the are some changes that must 
     be made in the geom setting.
-
-    Parameters
-    ----------
-    geom : TYPE
-      DESCRIPTION.
-
-    Returns
-    -------
-    int
-      DESCRIPTION.
 
     """
     if np.shape(geom[1])==(3,3):
@@ -374,22 +327,6 @@ class Special_mount(Mount):
     geom0 = np.array(geom[0] + new_pos)
     self.pos = np.array(geom0)
     self.set_axes(geom[1])
-      
-  
-  # def list_stripe_mirror_mount(self,thickness=25.4, **keywords):
-  #   # POS = self.pos
-  #   # NORMAL = self.normal
-  #   xshift = thickness-7
-  #   yshift = 104.3
-    
-  #   # docking_geom = (np.array((POS[0]+xshift*NORMAL[0]-yshift*NORMAL[1],
-  #   #                   POS[1]+yshift*NORMAL[0]+xshift*NORMAL[1],
-  #   #                   POS[2])),np.array((-NORMAL[0],-NORMAL[1],
-  #   #                   NORMAL[2])))
-  #   geom = self.get_geom()
-  #   self.set_geom(geom[0]+(thickness-25,0,0)+geom[1])
-  #   # self.docking_obj.set_geom(docking_geom)
-  #   self.post = None
     
   @property
   def docking_pos(self):
