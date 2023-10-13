@@ -38,12 +38,17 @@ if freecad_da:
 # print(mir.mount.docking_obj.get_geom())
 # mon.draw_dict["offset"] = np.array((-5, 0, 0))
 # mon.draw_dict["rotation"] = np.array((1, 0, 0)), np.pi*90/180
-mir=Mirror()
-mir.aperture = 25.4
-mir.pos = (100,0,65)
-mir.draw()
-mir.draw_mount()
+# mir=Mirror()
+# mir.aperture = 25.4
+# mir.pos = (100,0,200)
+# mir.draw()
 # mir.draw_mount()
+# mir.draw_mount()
+
+from LaserCAD.non_interactings.table import Table
+t = Table()
+t.pos = (-1000,-500,0)
+t.draw()
 
 # compo = Component()
 # compo.draw()

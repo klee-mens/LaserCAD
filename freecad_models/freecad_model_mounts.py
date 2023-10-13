@@ -582,7 +582,7 @@ def draw_1inch_post(name="TR50_M",h_diff=5,color=DEFAULT_POST_COLOR,
   offset1 = Vector(0,0,0)
   obj1.Placement = Placement(offset1, Rotation(0,0,0), Vector(0,0,0))
   update_geom_info(obj1, Geom_diff)
-  print("Spacer height = ",h_diff)
+  print(name+"'s Spacer height = ",h_diff)
   part = initialize_composition_old(name="1 inch post")
   container = obj,obj1
   add_to_composition(part, container)
@@ -1082,10 +1082,22 @@ def load_mount_from_csv(mount_type = "default",model_type="lens"):
   place = Placement(offset, rotation, Vector(0,0,0))
   return mount_in_database,aperture,height,price,xshift,place,offset
 
-def model_table():
-  datei1 = thisfolder + "post\\optical breadboard.stl" 
+# def model_table():
+#   datei1 = thisfolder + "post\\optical breadboard.stl" 
+#   DOC = get_DOC()
+#   obj = load_STL(datei1, name="optical breadboard")
+#   obj.Placement =Placement(Vector(-750,-400,0),Rotation(0,0,0), Vector(0,0,0))
+#   DOC.recompute()
+#   return obj
+
+def model_table(name="table",geom= None):
   DOC = get_DOC()
-  obj = load_STL(datei1, name="optical breadboard")
-  obj.Placement =Placement(Vector(-750,-400,0),Rotation(0,0,0), Vector(0,0,0))
+  obj = DOC.addObject("Part::Box",name)
+  obj.Label = name
+  obj.Length = 4000
+  obj.Width = 1500
+  obj.Height = 10
+  obj.Placement = Placement(Vector(0,0,-10), Rotation(0,0,0), Vector(0,0,0))
+  update_geom_info(obj, geom)
   DOC.recompute()
   return obj

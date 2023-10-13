@@ -161,9 +161,9 @@ class Mount(Geom_Object):
         offset = (float(mount_loop["offsetX"]),
                         float(mount_loop["offsetY"]),
                         float(mount_loop["offsetZ"]))
-        rotation = (float(mount_loop["rot_angleZ"]),
-                            float(mount_loop["rot_angleY"]),
-                            float(mount_loop["rot_angleX"]))
+        # rotation = (float(mount_loop["rot_angleZ"]),
+        #                     float(mount_loop["rot_angleY"]),
+        #                     float(mount_loop["rot_angleX"]))
     if not mount_in_database:
       return False
     self.aperture = aperture
@@ -175,27 +175,24 @@ class Mount(Geom_Object):
     self.yshift = 0
     self.offset_vector = offset
     self.draw_dict["mount_type"] = self.model
-    # self.post_docking_pos = self.pos+np.array([xshift,0,height])
     docking_pos = np.array([xshift,0,-height])
     docking_normal = self.normal
-    a=(1,0,0)
     # updates the docking geom for the first time
     if self.normal[2]<DEFAULT_MAX_ANGULAR_OFFSET/180*np.pi:
       tempnormal = self.normal
       tempnormal[2]=0
       self.normal=tempnormal
       self.normal = self.normal/np.linalg.norm(self.normal)
-      # self.post_docking_direction = (0,0,1)
-    else:
-      print("this post should not be placed in the ground plate")
-    if np.sum(np.cross(a,self.normal))!=0:
-      rot_axis = np.cross(a,self.normal)/np.linalg.norm(np.cross(a,self.normal))
-      rot_angle = np.arccos(np.sum(a*self.normal)/(np.linalg.norm(a)*np.linalg.norm(self.normal)))
-      docking_pos = rotate_vector(docking_pos,rot_axis,rot_angle)
-      docking_normal = rotate_vector(docking_normal,rot_axis,rot_angle)
-    self.docking_obj = Geom_Object(pos = self.pos+docking_pos,normal=docking_normal)
-    # print(self.docking_obj.get_geom())
-    self.rotation = rotation
+    else: print("this post should not be placed in the ground plate")
+    # a=(1,0,0)
+    # if np.sum(np.cross(a,self.normal))!=0:
+    #   rot_axis = np.cross(a,self.normal)/np.linalg.norm(np.cross(a,self.normal))
+    #   rot_angle = np.arccos(np.sum(a*self.normal)/(np.linalg.norm(a)*np.linalg.norm(self.normal)))
+    #   docking_pos = rotate_vector(docking_pos,rot_axis,rot_angle)
+    #   docking_normal = rotate_vector(docking_normal,rot_axis,rot_angle)
+    # self.docking_obj = Geom_Object(pos = self.pos+docking_pos,normal=docking_normal)
+    self.docking_obj = Geom_Object(pos = self.pos+xshift*self._axes[:,0]-height*self._axes[:,2],normal=docking_normal)
+    # self.rotation = rotation
     return True
   
   def _pos_changed(self, old_pos, new_pos):
@@ -206,8 +203,13 @@ class Mount(Geom_Object):
 
   def draw_fc(self):
     self.update_draw_dict()
-    if self.elm_type == "dont_draw":
-      return None
+    if self.normal[2]<DEFAULT_MAX_ANGULAR_OFFSET/180*np.pi:
+      tempnormal = self.normal
+      tempnormal[2]=0
+      self.normal=tempnormal
+      self.normal = self.normal/np.linalg.norm(self.normal)
+    else: print("this post should not be placed in the ground plate")
+    if self.elm_type == "dont_draw": return None
     if self.model == "large mirror mount":
       self.draw_dict["thickness"] = self.thickness
       self.draw_dict["dia"] = self.aperture
@@ -224,7 +226,6 @@ class Mount(Geom_Object):
     add_to_composition(part, container)
     return part
 
-
 class Grating_mount(Mount):
   def __init__(self, name="grating_mounmt",model="grating_mount",height=50,thickness=8, **kwargs):
     
@@ -234,32 +235,18 @@ class Grating_mount(Mount):
     self.draw_dict["drawing_post"] = False
     self.draw_dict["geom"]=self.get_geom()
     self.xshift = 17 + 15
-    # a= (1,0,0)
     docking_pos = np.array([self.xshift,0,-29])
-    # if np.sum(np.cross(a,self.normal))!=0:
-    #   rot_axis = np.cross(a,self.normal)/np.linalg.norm(np.cross(a,self.normal))
-    #   rot_angle = np.arccos(np.sum(a*self.normal)/(np.linalg.norm(a)*np.linalg.norm(self.normal)))
-    #   docking_pos = rotate_vector(docking_pos,rot_axis,rot_angle)
-      # docking_normal = rotate_vector(docking_normal,rot_axis,rot_angle)
-    # self.docking_obj = Geom_Object(pos = self.pos+docking_pos,normal=docking_normal)
-    self.docking_obj.pos += docking_pos
-    # print("Grating_mount_geom=",self.get_geom())
+    self.docking_obj.pos = self.docking_obj.pos+docking_pos[0]*self._axes[:,0]+docking_pos[2]*self._axes[:,2] 
     self.post.set_geom(self.docking_obj.get_geom())
     
   def draw_fc(self):
     self.update_draw_dict()
     obj = grating_mount(**self.draw_dict)
     obj1 = self.post.draw()
-    # print("self.post.pos",self.post.pos)
     part = initialize_composition_old(name="mount, post and base")
     container = obj,obj1
     add_to_composition(part, container)
     return part
-
-
-
-
-
 
 class Special_mount(Mount):
   def __init__(self, name="special_mounmt",model="special_mount",aperture=25.4,thickness=10,
@@ -273,27 +260,19 @@ class Special_mount(Mount):
     self.model = model
     self.drawing_post = drawing_post
     if model=="rooftop mirror mount":
-      # self.list_rooptop_mirror_mount(aperture)
       self.post = None
       xshift = 38
       zshift = -5
       docking_pos = (xshift,0,zshift)
-      docking_normal = (1,0,0)
+      docking_normal = self.normal
     if model == "Stripe mirror mount":
-      # self.list_stripe_mirror_mount(thickness)
       xshift = 24
       yshift = 104.3
       self.post = None
       docking_pos = (xshift,yshift,0)
-      docking_normal = (-1,0,0)
-    # for the original geom update. Should have a better way to update the docking geom first.
-    a=(1,0,0)
-    if abs(np.sum(np.cross(a,self.normal)))>0:
-      rot_axis = np.cross(a,self.normal)/np.linalg.norm(np.cross(a,self.normal))
-      rot_angle = np.arccos(np.sum(a*self.normal)/(np.linalg.norm(a)*np.linalg.norm(self.normal)))
-      docking_pos = rotate_vector(docking_pos,rot_axis,rot_angle)
-      docking_normal = rotate_vector(docking_normal,rot_axis,rot_angle)
-    self.docking_obj = Geom_Object(pos = self.pos+docking_pos,normal=docking_normal)
+      docking_normal = -self.normal
+    self.docking_obj = Geom_Object(pos = self.pos+docking_pos[0]*self._axes[:,0]+docking_pos[1]*self._axes[:,1]+docking_pos[2]*self._axes[:,2],
+                                   normal=docking_normal)
     
     if drawing_post:
       post = Post_and_holder(name=self.name + "post",elm_type=self.elm_type)

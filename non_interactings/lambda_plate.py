@@ -24,7 +24,7 @@ class Lambda_Plate(Component):
     self.mount_dict["elm_type"] = "mirror"
     self.mount_dict["name"] = self.name + "_mount"
     self.mount_dict["model"] = "lamuda_mirror_mount"
-    self.mount_dict["docking_pos"] = (3,0,-33.35)
+    self.mount_dict["docking_pos"] = (6,0,-33.35)
     self.mount_dict["drawing_post"] = True
 
   def draw_fc(self):

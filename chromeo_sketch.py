@@ -27,6 +27,7 @@ import matplotlib.pyplot as plt
 from LaserCAD.freecad_models.utils import thisfolder, load_STL
 from LaserCAD.basic_optics.mirror import Stripe_mirror,Rooftop_mirror
 from LaserCAD.non_interactings import Faraday_Isolator, Pockels_Cell, Lambda_Plate
+from LaserCAD.non_interactings.table import Table
 
 if freecad_da:
   clear_doc()
@@ -407,10 +408,11 @@ Pump.propagate(190)
 # Draw Selection
 # =============================================================================
 
-# Seed.draw()
+Seed.draw()
 Stretcher.draw()
-# PulsePicker.draw()
-# Amplifier_I.draw()
-
+PulsePicker.draw()
+Amplifier_I.draw()
+t=Table()
+t.draw()
 if freecad_da:
   setview()
