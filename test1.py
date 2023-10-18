@@ -54,7 +54,10 @@ t.draw()
 # compo.draw()
 # compo.draw_mount()
 
-from LaserCAD.basic_optics.post import Post_and_holder
+M = Mirror(phi=90)
+M.draw()
+
+# from LaserCAD.basic_optics.post import Post_and_holder
 
 # post = Post_and_holder()
 # post.draw()

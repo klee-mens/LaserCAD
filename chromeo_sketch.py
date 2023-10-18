@@ -52,7 +52,7 @@ seed_laser.freecad_model = load_STL
 faraday_isolator_6mm = Faraday_Isolator()
 
 Seed = Composition(name="Seed")
-Seed.normal = (1,2,0)
+# Seed.normal = (1,2,0)
 Seed.pos = start_point
 Seed.set_light_source(Beam(angle=0, radius=seed_beam_radius))
 Seed.add_on_axis(seed_laser)

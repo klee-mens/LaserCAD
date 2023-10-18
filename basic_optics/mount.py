@@ -105,12 +105,14 @@ class Mount(Geom_Object):
     self.draw_dict["geom"]=self.get_geom()
     self.elm_type = elm_type
     self.draw_dict["drawing_post"] = False
-    self.draw_dict["Filp90"] = Flip90
-    self.docking_obj = Geom_Object(pos = self.pos+(1,0,3),normal=(0,0,1))
+    self.Flip90 = Flip90
+    self.draw_dict["Flip90"] = Flip90
+    # self.docking_obj = Geom_Object(pos = self.pos+(1,0,3),normal=(0,0,1))
+    self.docking_obj = Geom_Object()
     self.draw_dict["offset"] = np.zeros(3)
     self.draw_dict["rotation"] = (np.array((0,0,1)), 0)
-    if Flip90:
-      self.draw_dict["rotation"] = (self.normal, np.pi/2)
+    # if Flip90:
+    #   self.draw_dict["rotation"] = (self.normal, np.pi/2)
     self.aperture = aperture
     self.thickness = thickness
     self.xshift = 0
@@ -191,7 +193,9 @@ class Mount(Geom_Object):
     #   docking_pos = rotate_vector(docking_pos,rot_axis,rot_angle)
     #   docking_normal = rotate_vector(docking_normal,rot_axis,rot_angle)
     # self.docking_obj = Geom_Object(pos = self.pos+docking_pos,normal=docking_normal)
-    self.docking_obj = Geom_Object(pos = self.pos+xshift*self._axes[:,0]-height*self._axes[:,2],normal=docking_normal)
+    self.docking_obj = Geom_Object()
+    self.docking_obj.pos = self.pos+xshift*self._axes[:,0]-height*self._axes[:,2]
+    self.docking_obj.normal = docking_normal
     # self.rotation = rotation
     return True
   
@@ -210,6 +214,8 @@ class Mount(Geom_Object):
       self.normal = self.normal/np.linalg.norm(self.normal)
     else: print("this post should not be placed in the ground plate")
     if self.elm_type == "dont_draw": return None
+    if self.draw_dict["Flip90"]==True:
+      self.draw_dict["rotation"] = (self.normal, np.pi/2)
     if self.model == "large mirror mount":
       self.draw_dict["thickness"] = self.thickness
       self.draw_dict["dia"] = self.aperture
@@ -271,9 +277,9 @@ class Special_mount(Mount):
       self.post = None
       docking_pos = (xshift,yshift,0)
       docking_normal = -self.normal
-    self.docking_obj = Geom_Object(pos = self.pos+docking_pos[0]*self._axes[:,0]+docking_pos[1]*self._axes[:,1]+docking_pos[2]*self._axes[:,2],
-                                   normal=docking_normal)
-    
+    self.docking_obj = Geom_Object()
+    self.docking_obj.pos = self.pos+docking_pos[0]*self._axes[:,0]+docking_pos[1]*self._axes[:,1]+docking_pos[2]*self._axes[:,2]
+    self.docking_obj.normal=docking_normal
     if drawing_post:
       post = Post_and_holder(name=self.name + "post",elm_type=self.elm_type)
       post.set_geom(self.docking_obj.get_geom())

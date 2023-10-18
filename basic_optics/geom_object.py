@@ -89,14 +89,15 @@ class Geom_Object(object):
 
   siehe tests()
   """
-  def __init__(self, name=NAME0, pos=POS0, normal=NORM0):
+  def __init__(self, name=NAME0):
     self.name = name
-    self._pos = pos
+    self._pos = POS0
     self._axes = np.eye(3)
     # das eigene Kordinatensystem, die erste Spalte ist immer die Normale
-    self._axes = self._updated_axes(normal, NORM0)
+    # self._axes = self._updated_axes(normal, NORM0)
     # the raw_dict contains all important parameters for the FreeCAD models
     self.draw_dict = {"name": self.name, "geom":self.get_geom()}
+
 
 
   @property

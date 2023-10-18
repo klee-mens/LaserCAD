@@ -55,10 +55,12 @@ class Mirror(Opt_Element):
     self.draw_dict["Radius"] = 0
     self._update_mount_dict()
     self.mount = Mount(**self.mount_dict)
+    self.mount.pos = self.pos
+    self.mount.normal = self.normal
     # self.post = self.mount.get_post()
     
   def _update_mount_dict(self):
-    super()._update_mount_dict()
+    # super()._update_mount_dict()
     self.mount_dict["elm_type"] = "mirror"
     self.mount_dict["name"] = self.name + "_mount"
     self.mount_dict["aperture"] = self.aperture
@@ -152,7 +154,8 @@ class Mirror(Opt_Element):
     berechnet die Winkel neu aus <__incident_normal> und <normal>
     """
     vec1 = self.__incident_normal
-    dummy = Ray(normal=vec1)
+    dummy = Ray()
+    dummy.normal=vec1
     #nur um next_ray und reflectino zu nutzen
     reflected_dummy = self.next_ray(dummy)
     vec2 = reflected_dummy.normal
@@ -203,6 +206,7 @@ class Mirror(Opt_Element):
   def draw_fc(self):
     self.update_draw_dict()
     self.draw_dict["dia"]=self.aperture
+
     obj = model_mirror(**self.draw_dict)
     return obj
   
@@ -211,6 +215,8 @@ class Mirror(Opt_Element):
     if self.mount.elm_type != "dont_draw":
       self._update_mount_dict()
       self.mount = Mount(**self.mount_dict)
+      self.mount.pos = self.pos
+      self.mount.normal = self.normal
     return (self.mount.draw())
   
   # def draw_mount_fc(self):

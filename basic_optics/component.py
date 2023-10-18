@@ -20,9 +20,11 @@ class Component(Geom_Object):
   def __init__(self, name="Component", **kwargs):
     super().__init__(name, **kwargs)
     self.mount_dict = dict()
-    self.mount_dict["pos"] = self.pos
-    self.mount_dict["normal"] = self.normal
+    # self.mount_dict["pos"] = self.pos
+    # self.mount_dict["normal"] = self.normal
     self.mount = Mount(name=name+"_mount", elm_type="dont_draw")
+    self.mount.pos = self.pos
+    self.mount.normal = self.normal
     # self.post = Post_and_holder(name=name+"post",elm_type="dont_draw")
     
   # def update_mount(self):
@@ -30,8 +32,11 @@ class Component(Geom_Object):
   #   self.mount = Mount(**self.mount_dict)
 
   def _update_mount_dict(self):
-    self.mount_dict["pos"] = self.pos
-    self.mount_dict["normal"] = self.normal
+    # self.mount_dict["pos"] = self.pos
+    # self.mount_dict["normal"] = self.normal
+    self.mount.pos = self.pos
+    self.mount.normal = self.normal
+    pass
 
   def draw_mount(self):
     # self.update_mount()

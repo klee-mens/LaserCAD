@@ -9,11 +9,12 @@ from ..basic_optics import Geom_Object
 from ..freecad_models.freecad_model_mounts import model_table
 
 class Table(Geom_Object):
-  def __init__(self, name="BreadBoard", pos=(0,0,0), **kwargs):
-    super().__init__(name, pos, **kwargs)
+  def __init__(self, name="BreadBoard", **kwargs):
+    super().__init__(name, **kwargs)
     # stl_file=thisfolder+"\post\optical_breadboard.stl"
     # self.draw_dict["stl_file"]=stl_file
     # self.freecad_model = load_STL
+    self.pos = (-1500,-800,0)
     # self.Xdimension = 1500
     # self.Ydimension = 800
     
