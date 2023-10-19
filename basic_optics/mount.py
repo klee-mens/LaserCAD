@@ -309,7 +309,10 @@ class Special_mount(Mount):
       rot_axis = np.cross(a,normal)/np.linalg.norm(np.cross(a,normal))
       rot_angle = np.arccos(np.sum(a*normal)/(np.linalg.norm(a)*np.linalg.norm(normal)))
       new_pos = rotate_vector(new_pos,rot_axis,rot_angle)
-    geom0 = np.array(geom[0] + new_pos)
+    if np.sum(np.cross(a,normal))==0 and normal[0]<-0.999:
+      geom0 = np.array(geom[0] - new_pos)
+    else:
+      geom0 = np.array(geom[0] + new_pos)
     self.pos = np.array(geom0)
     self.set_axes(geom[1])
     
