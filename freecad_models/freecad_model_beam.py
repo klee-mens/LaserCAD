@@ -88,7 +88,7 @@ def model_beam_new(name="beam", radius=5, length=200,  angle=0.02,
       obj.Height = length
       obj.Radius1 = radius
       obj.Radius2 = radius2
-    elif length < f or f < 0:
+    elif length <= f or f < 0:
       radius2 = radius * (f-length)/f
       obj = DOC.addObject("Part::Cone", name)
       obj.Height = length
@@ -100,7 +100,7 @@ def model_beam_new(name="beam", radius=5, length=200,  angle=0.02,
       obj1.Height = f
       obj1.Radius1 = radius
       obj1.Radius2 = radius2
-      radius3 =  radius * (f-length)/f
+      radius3 =  radius * (length-f)/f
       obj2 = DOC.addObject("Part::Cone", name+"_2")
       obj2.Height = length - f
       obj2.Radius1 = radius2

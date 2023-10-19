@@ -12,6 +12,7 @@ from . ray import Ray
 # import Ray, Geom_Object, TOLERANCE
 # from basic_optics.freecad_models import model_beam,model_ray_1D,model_Gaussian_beam
 from .. freecad_models import model_beam,model_ray_1D,model_Gaussian_beam
+from .. freecad_models.freecad_model_beam import model_beam_new
 from .. freecad_models.freecad_model_composition import initialize_composition_old, add_to_composition
 # from .optical_element import Opt_Element
 
@@ -276,11 +277,13 @@ class Beam(Geom_Object):
                                  prop=self.get_all_rays()[0].length,
                                  geom_info=self.get_geom())
     elif self.draw_dict["model"] == "cone":
-      radius, _ = self.radius_angle()
+      radius, angle = self.radius_angle()
       # return model_beam(name=self.name, dia=2*radius, prop=self.length(),
            # f=self.focal_length(), geom_info=self.get_geom(), **self.draw_dict)
-      return model_beam(dia=2*radius, prop=self.length(), f=self.focal_length(),
-                        geom_info=self.get_geom(), **self.draw_dict)
+      # return model_beam(dia=2*radius, prop=self.length(), f=self.focal_length(),
+      #                   geom_info=self.get_geom(), **self.draw_dict)
+      return model_beam_new(radius=radius, length=self.length(),  angle=angle,
+                            geom_info=self.get_geom(),**self.draw_dict)
       # return model_Gaussian_beam(name=self.name, dia=2*radius, prop=self.length(),
       #      f=self.focal_length(), geom_info=self.get_geom())
     else:

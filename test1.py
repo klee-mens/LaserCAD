@@ -45,17 +45,20 @@ if freecad_da:
 # mir.draw_mount()
 # mir.draw_mount()
 
-from LaserCAD.non_interactings.table import Table
-t = Table()
-t.pos = (-1000,-500,0)
-t.draw()
+# from LaserCAD.non_interactings.table import Table
+# t = Table()
+# t.pos = (-1000,-500,0)
+# t.draw()
 
-# compo = Component()
-# compo.draw()
-# compo.draw_mount()
+# # compo = Component()
+# # compo.draw()
+# # compo.draw_mount()
 
-M = Mirror(phi=90)
-M.draw()
+# M = Mirror(phi=90)
+# M.draw()
+
+ls = Beam(radius=2, angle=-0.01)
+ls.draw()
 
 # from LaserCAD.basic_optics.post import Post_and_holder
 
