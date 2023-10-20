@@ -87,6 +87,7 @@ StripeM.draw_dict["thickness"] = 25 # arbitrary
 StripeM.draw_dict["model_type"] = "Stripe"
 
 Grat = Grating(grat_const=grating_const, name="Gitter", order=-1)
+
 Grat.normal = grating_normal
 
 helper = Composition()

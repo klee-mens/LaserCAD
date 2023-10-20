@@ -73,7 +73,7 @@ def get_model_by_aperture_and_element(elm_type, aperture):
       model = "LMR2_M"
   elif elm_type == "mirror":
     if aperture <= 4:
-      model = "KMSS"
+      model = "KMSS_M"
     elif aperture<= 25.4/2:
       model = "POLARIS-K05"
     elif aperture <= 25.4:

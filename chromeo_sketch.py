@@ -29,6 +29,8 @@ from LaserCAD.basic_optics.mirror import Stripe_mirror,Rooftop_mirror
 from LaserCAD.non_interactings import Faraday_Isolator, Pockels_Cell, Lambda_Plate
 from LaserCAD.non_interactings.table import Table
 
+c0 = 299792458*1000 #mm/s
+
 if freecad_da:
   clear_doc()
 
@@ -58,7 +60,7 @@ Seed.set_light_source(Beam(angle=0, radius=seed_beam_radius))
 Seed.add_on_axis(seed_laser)
 Seed.propagate(distance_6_mm_faraday)
 Seed.add_on_axis(faraday_isolator_6mm)
-Flip0 = Mirror(phi=90)
+Flip0 = Mirror(phi=-90)
 Seed.propagate(distance_faraday_mirror)
 Seed.add_on_axis(Flip0)
 Seed.propagate(distance_seed_laser_stretcher-distance_6_mm_faraday-distance_faraday_mirror)
@@ -197,6 +199,39 @@ def Make_Stretcher_chromeo():
   Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0])
   Stretcher.recompute_optical_axis()
   Stretcher.propagate(100)
+  Stretcher.draw()
+  pathlength = {}
+  for ii in range(Stretcher._beams[0]._ray_count):
+    wavelength = Stretcher._beams[0].get_all_rays()[ii].wavelength
+    pathlength[wavelength] = 0
+  for jj in range(len(Stretcher._beams)-1):
+    for ii in Stretcher._beams[jj].get_all_rays():
+      a=pathlength[ii.wavelength]
+      pathlength[ii.wavelength] = a +ii.length
+  ray_lam = [ray.wavelength for ray in Stretcher._beams[0].get_all_rays()]
+  path = [pathlength[ii] for ii in ray_lam]
+  path_diff = [ii-path[int(len(path)/2)] for ii in path]
+  fai = [path_diff[ii]/ray_lam[ii]*2*np.pi for ii in range(len(path))]
+  omega = [c0/ii*2*np.pi for ii in ray_lam]
+  para = np.polyfit(omega, fai, 5)
+  fai2 = [20*para[0]*ii**3+12*para[1]*ii**2+6*para[2]*ii+2*para[3] for ii in omega]
+  # fai2 = [para[0]*ii**5+para[1]*ii**4+para[2]*ii**3+para[3]*ii**2+para[4]*ii+para[5] for ii in omega]
+  delay_mid = path[int(len(path)/2)]/c0
+  delay = [(pa/c0-delay_mid)*1E9 for pa in path]
+  plt.figure()
+  ax1=plt.subplot(1,2,1)
+  plt.plot(ray_lam,path)
+  plt.ylabel("pathlength (mm)")
+  plt.xlabel("wavelength (mm)")
+  plt.title("Pathlength at different wavelength")
+  plt.axhline(path[int(len(path)/2)], color = 'black', linewidth = 1)
+  ax2=plt.subplot(1,2,2)
+  plt.plot(ray_lam,delay)
+  plt.ylabel("delay (ns)")
+  plt.xlabel("wavelength (mm)")
+  plt.title("Delay at different wavelength")
+  plt.axhline(0, color = 'black', linewidth = 1)
+  plt.show()
 
   return Stretcher
 
@@ -408,10 +443,10 @@ Pump.propagate(190)
 # Draw Selection
 # =============================================================================
 
-Seed.draw()
+# Seed.draw()
 Stretcher.draw()
-PulsePicker.draw()
-Amplifier_I.draw()
+# PulsePicker.draw()
+# Amplifier_I.draw()
 t=Table()
 t.draw()
 if freecad_da:
