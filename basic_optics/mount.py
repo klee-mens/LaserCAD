@@ -72,9 +72,7 @@ def get_model_by_aperture_and_element(elm_type, aperture):
     elif aperture <=25.4*2:
       model = "LMR2_M"
   elif elm_type == "mirror":
-    if aperture <= 4:
-      model = "KMSS_M"
-    elif aperture<= 25.4/2:
+    if aperture<= 25.4/2:
       model = "POLARIS-K05"
     elif aperture <= 25.4:
       model = "POLARIS-K1"
@@ -99,7 +97,8 @@ class Mount(Geom_Object):
     Mon = Mount(elm_type="mirror")
   Usually exists as part of the component
   """
-  def __init__(self, name="mount",model="default",aperture=25.4,thickness=5,elm_type="mirror",Flip90=False, **kwargs):
+  def __init__(self, name="mount",model="default",aperture=25.4,thickness=5,
+               elm_type="mirror",Flip90=False, post_type="1inch_post", **kwargs):
     super().__init__(name, **kwargs)
     self.draw_dict["color"]=DEFAULT_MOUNT_COLOR
     self.draw_dict["geom"]=self.get_geom()
@@ -118,6 +117,7 @@ class Mount(Geom_Object):
     self.xshift = 0
     self.zshift = 0
     self.post = Geom_Object()
+    self.post_type = post_type
     if model =="default":
       self.model = get_model_by_aperture_and_element(self.elm_type, self.aperture)
     else:
@@ -130,9 +130,9 @@ class Mount(Geom_Object):
       stl_file=thisfolder+"\\mount_meshes\\special mount\\" + self.model + ".stl"
     self.draw_dict["stl_file"]=stl_file
     self.mount_in_database = self.set_by_table()
-    post = Post_and_holder(name=self.name + "post",elm_type=self.elm_type)
+    post = Post_and_holder(name=self.name + "post",elm_type=self.elm_type,post_type=post_type)
     post.set_geom(self.docking_obj.get_geom())
-    self.post = post
+    # self.post = post
     
   def set_by_table(self):
     """
@@ -176,7 +176,7 @@ class Mount(Geom_Object):
     self.draw_dict["height"]=height
     self.yshift = 0
     self.offset_vector = offset
-    self.draw_dict["mount_type"] = self.model
+    # self.draw_dict["mount_type"] = self.model
     docking_pos = np.array([xshift,0,-height])
     docking_normal = self.normal
     # updates the docking geom for the first time
@@ -216,16 +216,31 @@ class Mount(Geom_Object):
     if self.elm_type == "dont_draw": return None
     if self.draw_dict["Flip90"]==True:
       self.draw_dict["rotation"] = (self.normal, np.pi/2)
+    if self._axes[2,2] <-0.99:
+      self.rotate(self.normal,np.pi)
+      self.draw_dict["geom"] = self.get_geom()
+    if self.model =="default":
+      self.model = get_model_by_aperture_and_element(self.elm_type, self.aperture)
+
+    if self.model in MIRROR_LIST:
+      stl_file=thisfolder+"\\mount_meshes\\adjusted mirror mount\\" + self.model + ".stl"
+    elif self.model in LENS_LIST:
+      stl_file=thisfolder+"\\mount_meshes\\adjusted lens mount\\" + self.model + ".stl"
+    else:
+      stl_file=thisfolder+"\\mount_meshes\\special mount\\" + self.model + ".stl"
+    self.draw_dict["stl_file"]=stl_file
+    self.mount_in_database = self.set_by_table()
     if self.model == "large mirror mount":
       self.draw_dict["thickness"] = self.thickness
       self.draw_dict["dia"] = self.aperture
       return mirror_mount(**self.draw_dict)
-    if self._axes[2,2] <-0.9:
-      self.rotate(self.normal,np.pi)
-      self.draw_dict["geom"] = self.get_geom()
+    post = Post_and_holder(name=self.name + "post",elm_type=self.elm_type,post_type=self.post_type)
+    post.set_geom(self.docking_obj.get_geom())
+    self.post = post
     obj = load_STL(**self.draw_dict)
     translate(obj, self.draw_dict["offset"])
     rotate(obj, self.draw_dict["rotation"][0], self.draw_dict["rotation"][1]*180/np.pi)
+    self.post.post_type = self.post_type
     obj1 = self.post.draw()
     part = initialize_composition_old(name="mount, post and base")
     container = obj,obj1
@@ -248,6 +263,9 @@ class Grating_mount(Mount):
   def draw_fc(self):
     self.update_draw_dict()
     obj = grating_mount(**self.draw_dict)
+    post = Post_and_holder(name=self.name + "post",elm_type=self.elm_type,post_type=self.post_type)
+    post.set_geom(self.docking_obj.get_geom())
+    self.post = post
     obj1 = self.post.draw()
     part = initialize_composition_old(name="mount, post and base")
     container = obj,obj1

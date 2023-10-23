@@ -11,7 +11,7 @@ Created on Sat Aug 19 14:41:08 2023
 # from LaserCAD.freecad_models.utils import thisfolder,load_STL,freecad_da,clear_doc
 # from LaserCAD.freecad_models.freecad_model_composition import initialize_composition_old,add_to_composition
 from ..freecad_models.freecad_model_composition import initialize_composition_old,add_to_composition
-from ..freecad_models.freecad_model_mounts import draw_post,draw_post_holder,draw_post_base,draw_1inch_post
+from ..freecad_models.freecad_model_mounts import draw_post,draw_post_holder,draw_post_base,draw_1inch_post,draw_large_post
 # from LaserCAD.freecad_models.freecad_model_mounts import draw_post,draw_post_holder,draw_post_base
 from .geom_object import Geom_Object
 # from LaserCAD.basic_optics.geom_object import Geom_Object
@@ -24,6 +24,7 @@ import numpy as np
 
 DEFALUT_POST_COLOR = (0.8,0.8,0.8)
 DEFALUT_HOLDER_COLOR = (0.2,0.2,0.2)
+POST_LIST = ["1inch_post","0.5inch_post","big_post"]
 
 class Post_and_holder(Geom_Object):
   def __init__(self, name="post",elm_type="default",post_type = "1inch_post",**kwargs):
@@ -67,8 +68,10 @@ class Post_and_holder(Geom_Object):
     # return draw_post_part(**self.draw_dict)
     if self.post_type == "1inch_post":
       return self.find_1inch_post()
-    else:
+    elif self.post_type == "0.5inch_post":
       return draw_post_part(**self.draw_dict)
+    else:
+      return draw_large_post(height=self.pos[2],geom=self.get_geom())
 
 
 def draw_post_part(name="post_part", base_exists=False, 

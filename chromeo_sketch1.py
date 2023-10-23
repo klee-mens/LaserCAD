@@ -27,6 +27,7 @@ import matplotlib.pyplot as plt
 from LaserCAD.freecad_models.utils import thisfolder, load_STL
 from LaserCAD.non_interactings import Faraday_Isolator, Pockels_Cell, Lambda_Plate
 from LaserCAD.basic_optics.mirror import Rooftop_mirror,Stripe_mirror
+from LaserCAD.basic_optics.mount import Mount,Composed_Mount,Special_mount
 
 if freecad_da:
   clear_doc()
@@ -158,6 +159,15 @@ def Make_Stretcher_chromeo():
 
   Stretcher.propagate(first_propagation)
   FlipMirror_In_Out = Mirror(phi=90, name="FlipMirrorInOut")
+  
+  mount=Composed_Mount()
+  Mount1=Special_mount(model="MH25",drawing_post=False)
+  Mount1.docking_obj.pos = Mount1.pos+(6.3,0,0)
+  Mount1.docking_obj.normal = Mount1.normal
+  Mount2=Mount(model="KMSS")
+  mount.add(Mount1)
+  mount.add(Mount2)
+  FlipMirror_In_Out.mount = mount
   Stretcher.add_on_axis(FlipMirror_In_Out)
   FlipMirror_In_Out.pos += (0,0,-periscope_height/2)
   Stretcher.propagate(distance_flip_mirror1_grating)
@@ -220,7 +230,15 @@ lightsource_pp = Beam(angle=0, radius=seed_beam_radius)
 PulsePicker.set_light_source(lightsource_pp)
 PulsePicker.propagate(distance_seed_laser_stretcher*0.2)
 FlipMirror_pp = Mirror(phi=90)
-FlipMirror_pp.mount_dict["Flip90"]=False
+FlipMirror_pp_mount=Composed_Mount()
+FlipMirror_pp_mount_Mount1=Special_mount(model="MH25",drawing_post=False)
+FlipMirror_pp_mount_Mount1.docking_obj.pos = FlipMirror_pp_mount_Mount1.pos+(6.3,0,0)
+FlipMirror_pp_mount_Mount1.docking_obj.normal = FlipMirror_pp_mount_Mount1.normal
+FlipMirror_pp_mount_Mount2=Mount(model="KMSS")
+FlipMirror_pp_mount.add(FlipMirror_pp_mount_Mount1)
+FlipMirror_pp_mount.add(FlipMirror_pp_mount_Mount2)
+FlipMirror_pp.mount = FlipMirror_pp_mount
+# FlipMirror_pp.mount_dict["Flip90"]=False
 PulsePicker.add_on_axis(FlipMirror_pp)
 FlipMirror_pp.pos += (0,0,flip_mirror_push_down)
 PulsePicker.propagate(100)
@@ -233,11 +251,11 @@ PulsePicker.propagate(30)
 Lambda4 = Lambda_Plate()
 PulsePicker.add_on_axis(Lambda4)
 PulsePicker.propagate(30)
-
-PulsePicker.add_on_axis( Pockels_Cell())
-
+pockelscell =Pockels_Cell()
+PulsePicker.add_on_axis( pockelscell)
+pockelscell.rotate(vec=pockelscell.normal,phi=np.pi)
 PulsePicker.propagate(210)
-TFP_pp = Mirror(phi = -180+2*tfp_angle)
+TFP_pp = Mirror(phi = 180-2*tfp_angle)
 TFP_pp.draw_dict["color"] = (1.0, 0.0, 2.0)
 TFP_pp.draw_dict["thickness"] = 4
 TFP_pp.aperture = 2*inch
@@ -246,7 +264,7 @@ PulsePicker.add_on_axis(TFP_pp)
 TFP_pp.pos += -1 * TFP_pp.normal * tfp_push_forward
 PulsePicker.recompute_optical_axis()
 PulsePicker.propagate(250)
-FlipMirror2_pp = Mirror(phi=-90)
+FlipMirror2_pp = Mirror(phi=90)
 PulsePicker.add_on_axis(FlipMirror2_pp)
 PulsePicker.propagate(100)
 FaradPP = Faraday_Isolator()

@@ -918,8 +918,22 @@ def draw_large_mount(thickness=30,color=DEFAULT_MOUNT_COLOR,geom=None):
     return part
   else:
     print("this mirror shouldn't be placed at this height.")
-  
-  
+  return obj
+
+def draw_large_post(height=50,geom=None):
+  POS = geom[0]
+  AXES = geom[1]
+  if np.shape(AXES)==(3,):
+    NORMAL=AXES
+  else:
+    NORMAL=AXES[:,0]
+  DOC =get_DOC()
+  Geom_ground = (np.array((POS[0],POS[1],0)), np.array((NORMAL)))
+  obj = DOC.addObject("Part::Cylinder","Cylinder")
+  obj.Label = "Post"
+  obj.Radius = 38 #35.05
+  obj.Height = height
+  update_geom_info(obj,Geom_ground)
   return obj
 
 def draw_stripe_mount(thickness=25,color=DEFAULT_MOUNT_COLOR,geom=None):
