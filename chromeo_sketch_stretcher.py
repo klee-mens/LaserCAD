@@ -205,6 +205,7 @@ Stretcher.add_fixed_elm(pure_cosmetic1)
 # setting the final sequence and the last propagation for visualization
 # note that pure cosmetic (pos6) is not in the sequence
 Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0,6,7,8,9,7,6,10])
+# Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0])
 Stretcher.recompute_optical_axis()
 
 Stretcher.draw()
