@@ -66,6 +66,7 @@ class Mirror(Opt_Element):
     self.mount_dict["aperture"] = self.aperture
     self.mount_dict["post_type"] = "1inch_post"
     self.mount_dict["model"] = "default"
+    self.mount_dict["Flip90"] = False
     
     # self.mount_dict["post_type"] = self.post_type
     
@@ -218,11 +219,11 @@ class Mirror(Opt_Element):
     # self.update_mount()
     if self.mount.elm_type != "dont_draw":
       # self._update_mount_dict()
-      # self.mount = Mount(**self.mount_dict)
       self.mount.elm_type = "mirror"
       self.mount.pos = self.pos
       self.mount.normal = self.normal
       self.mount.aperture = self.aperture
+      self.mount.Flip90 = self.mount_dict["Flip90"]
       # self._update_mount_dict()
       self.mount.model = self.mount_dict['model']
       self.mount.post_type = self.mount_dict["post_type"]

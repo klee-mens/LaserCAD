@@ -214,7 +214,7 @@ class Mount(Geom_Object):
       self.normal = self.normal/np.linalg.norm(self.normal)
     else: print("this post should not be placed in the ground plate")
     if self.elm_type == "dont_draw": return None
-    if self.draw_dict["Flip90"]==True:
+    if self.Flip90==True:
       self.draw_dict["rotation"] = (self.normal, np.pi/2)
     if self._axes[2,2] <-0.99:
       self.rotate(self.normal,np.pi)
