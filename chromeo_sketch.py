@@ -532,13 +532,13 @@ BigPump.set_geom(amp2._elements[2].get_geom())
 # Draw Selection
 # =============================================================================
 
-# Seed.draw()
+Seed.draw()
 Stretcher.draw()
 PulsePicker.draw()
-# Amplifier_I.draw()
-# Pump.draw()
-# amp2.draw()
-# BigPump.draw()
+Amplifier_I.draw()
+Pump.draw()
+amp2.draw()
+BigPump.draw()
 
 
 # =============================================================================
