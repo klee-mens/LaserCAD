@@ -56,7 +56,7 @@ width_stripe_mirror = 75 # in mm
 seperation_angle = 10 /180 *np.pi # sep between in and outgoing middle ray
 # incident_angle = seperation_angle + reflection_angle
 grating_const = 1/450 # in 1/mm
-seperation = 50 # difference grating position und radius_concave
+seperation = 100 # difference grating position und radius_concave
 lambda_mid = 2400e-9 * 1e3 # central wave length in mm
 delta_lamda = 200e-9*1e3 # full bandwith in mm
 number_of_rays = 20
@@ -83,7 +83,8 @@ StripeM = Stripe_mirror(radius= -radius_concave/2, name="Stripe_Mirror")
 #Cosmetics
 StripeM.aperture = width_stripe_mirror
 StripeM.draw_dict["height"] = height_stripe_mirror
-StripeM.draw_dict["thickness"] = 25 # arbitrary
+# StripeM.draw_dict["thickness"] = 25 # arbitrary
+StripeM.thickness = 25
 StripeM.draw_dict["model_type"] = "Stripe"
 
 Grat = Grating(grat_const=grating_const, name="Gitter", order=-1)
@@ -169,7 +170,7 @@ Grat1.pos -=(500,0,periscope_height)
 Grat1.normal = grating_normal
 Grat1.normal = -Grat1.normal
 Grat2 = Grating(grat_const=grating_const, order=-1)
-propagation_length = 100
+propagation_length = 200
 Grat2.pos -= (500-propagation_length*CosS,SinS*propagation_length,periscope_height)
 Grat2.normal = grating_normal
 

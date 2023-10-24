@@ -28,7 +28,7 @@ from LaserCAD.freecad_models.utils import thisfolder, load_STL
 from LaserCAD.non_interactings import Faraday_Isolator, Pockels_Cell, Lambda_Plate
 from LaserCAD.basic_optics.mirror import Rooftop_mirror,Stripe_mirror
 from LaserCAD.basic_optics.mount import Mount,Composed_Mount,Special_mount
-
+from LaserCAD.non_interactings.table import Table
 if freecad_da:
   clear_doc()
 
@@ -119,6 +119,7 @@ def Make_Stretcher_chromeo():
   StripeM.aperture = width_stripe_mirror
   StripeM.draw_dict["height"] = height_stripe_mirror
   StripeM.draw_dict["thickness"] = 25 # arbitrary
+  # StripeM.thickness = 25
   StripeM.draw_dict["model_type"] = "Stripe"
 
   Grat = Grating(grat_const=grating_const, name="Gitter", order=-1)
@@ -450,7 +451,8 @@ Amplifier_I.draw()
 Pump.draw()
 amp2.draw()
 # BigPump.draw()
-
+t=Table()
+t.draw()
 
 # =============================================================================
 # breadboards

@@ -406,6 +406,7 @@ class Stripe_mirror(Curved_Mirror):
     # self.draw_dict["mount_type"] = "POLARIS-K1-Step"
     self.draw_dict["Radius1"] = self.radius
     self.draw_dict["thickness"] = self.thickness
+    print(self.draw_dict["thickness"] )
     self.draw_dict["model_type"] = "Stripe"
     obj = model_mirror(**self.draw_dict)
     return obj
