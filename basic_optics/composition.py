@@ -26,7 +26,9 @@ class Composition(Geom_Object):
   """
   def __init__(self, name="NewComposition", **kwargs):
     super().__init__(name=name,**kwargs)
-    oA = Ray(name=self.name+"__oA_0", pos=self.pos, normal=self.normal)
+    oA = Ray(name=self.name+"__oA_0")
+    oA.pos = self.pos
+    oA.normal = self.normal
     oA.length = 0
     self._optical_axis = [oA]
     self._elements = []
@@ -113,8 +115,6 @@ class Composition(Geom_Object):
       self.add_fixed_elm(element)
     for nonopt in subcomp.non_opticals:
       self.add_fixed_elm(nonopt)
-    
-    
 
   def redefine_optical_axis(self, ray):
     # zB wenn die wavelength angepasst werden muss

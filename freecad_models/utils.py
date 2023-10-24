@@ -224,7 +224,8 @@ def update_geom_info(obj, geom_info, off0=0):
   if geom_info != None:
     pos = Vector(geom_info[0])
     axes = geom_info[1]
-    if off0!=0 or np.shape(axes)==(3,):
+    if type(off0) != int or np.shape(axes)==(3,):
+      # for backwards compatibility with old axes=normal definition
       if np.shape(axes)==(3,):
         normal=axes
       else:

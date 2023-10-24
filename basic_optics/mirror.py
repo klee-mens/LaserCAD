@@ -10,7 +10,12 @@ Created on Wed Aug 24 16:28:07 2022
 from .geom_object import TOLERANCE, NORM0
 from .ray import Ray
 from ..freecad_models import model_mirror, mirror_mount
+from ..freecad_models.freecad_model_composition import initialize_composition_old, add_to_composition
 from .optical_element import Opt_Element
+# from ..non_interactings import Mount
+# from ..non_interactings import Post_and_holder
+from .mount import Mount,Composed_Mount,Special_mount
+# from .post import Post_and_holder
 import numpy as np
 from copy import deepcopy
 
@@ -48,8 +53,23 @@ class Mirror(Opt_Element):
     self.update_normal()
     #Cosmetics
     self.draw_dict["Radius"] = 0
+    self._update_mount_dict()
+    self.mount = Mount(**self.mount_dict)
+    self.mount.pos = self.pos
+    self.mount.normal = self.normal
+    # self.post = self.mount.get_post()
     
-
+  def _update_mount_dict(self):
+    super()._update_mount_dict()
+    self.mount_dict["elm_type"] = "mirror"
+    self.mount_dict["name"] = self.name + "_mount"
+    self.mount_dict["aperture"] = self.aperture
+    self.mount_dict["post_type"] = "1inch_post"
+    self.mount_dict["model"] = "default"
+    self.mount_dict["Flip90"] = False
+    
+    # self.mount_dict["post_type"] = self.post_type
+    
   def update_normal(self):
     """
     aktualisiert die Normale des Mirrors entsprechend der __incident_normal, 
@@ -139,7 +159,8 @@ class Mirror(Opt_Element):
     berechnet die Winkel neu aus <__incident_normal> und <normal>
     """
     vec1 = self.__incident_normal
-    dummy = Ray(normal=vec1)
+    dummy = Ray()
+    dummy.normal=vec1
     #nur um next_ray und reflectino zu nutzen
     reflected_dummy = self.next_ray(dummy)
     vec2 = reflected_dummy.normal
@@ -190,22 +211,47 @@ class Mirror(Opt_Element):
   def draw_fc(self):
     self.update_draw_dict()
     self.draw_dict["dia"]=self.aperture
+
     obj = model_mirror(**self.draw_dict)
     return obj
-
-  def draw_mount_fc(self):
-    self.update_draw_dict()
-    self.draw_dict["dia"]=self.aperture
+  
+  def draw_mount(self):
+    # self.update_mount()
+    if self.mount.elm_type != "dont_draw":
+      # self._update_mount_dict()
+      self.mount.elm_type = "mirror"
+      self.mount.pos = self.pos
+      self.mount.normal = self.normal
+      self.mount.aperture = self.aperture
+      self.mount.Flip90 = self.mount_dict["Flip90"]
+      # self._update_mount_dict()
+      self.mount.model = self.mount_dict['model']
+      self.mount.post_type = self.mount_dict["post_type"]
+    return (self.mount.draw())
+  
+  # def draw_mount_fc(self):
+    # self.update_draw_dict()
+    # self.draw_dict["dia"]=self.aperture
     # now we will use the old geom definition with (pos, norm) in a dirty, 
     # hacky way, because I don't want to fix the 10.000 usages of geom in
     # the mirror_mount function manually, no, I don't
-    helper_dict = dict(self.draw_dict)
-    # helper_dict["geom"] = (self.pos, self.normal)
-    xshift=0
-    obj = mirror_mount(**helper_dict)
-    post_pos = xshift*self.normal+self.pos
-    return obj
-
+    # helper_dict = dict(self.draw_dict)
+    # # helper_dict["geom"] = (self.pos, self.normal)
+    # xshift=0
+    # obj = mirror_mount(**helper_dict)
+    # M = Mount(aperture=self.aperture)
+    # M.set_geom(self.get_geom())
+    # P = Post_and_holder(xshift=M.xshift,height=-M.zshift)
+    # P.set_geom(M.get_geom())
+    # obj1=M.draw()
+    # obj2=P.draw()
+    # post_pos = xshift*self.normal+self.pos
+    # part = initialize_composition_old(name="New class for mount and post")
+    # cc= obj1,obj2
+    # add_to_composition(part, cc)
+    # del obj1,obj2
+    # return part
+  
   def draw_mount_text(self):
     if self.draw_dict["mount_type"] == "dont_draw":
       txt = "<" + self.name + ">'s mount will not be drawn."
@@ -214,6 +260,43 @@ class Mirror(Opt_Element):
     else:
       txt = "<" + self.name + ">'s mount is the " + self.draw_dict["mount_type"] + "."
     return txt
+
+class Rooftop_mirror(Mirror):
+  def __init__(self, aperture=10, **kwargs):
+    self.aperture = aperture
+    super().__init__(**kwargs)
+    self._update_mount_dict()
+    # self.mount = Composed_Mount()
+    # mon1 = Special_mount(**self.mount_dict)
+    # mon2 = Mount(aperture=25.4*2)
+    # self.mount.add(mon1)
+    # self.mount.add(mon2)
+  
+  def _update_mount_dict(self):
+    super()._update_mount_dict()
+    self.mount_dict["model"] = "rooftop mirror mount"
+    self.mount_dict["name"] = self.name + "_mount"
+    self.mount_dict["aperture"] = self.aperture
+    # self.mount_dict["thickness"] = self.thickness
+  
+  def draw_fc(self):
+    self.update_draw_dict()
+    self.draw_dict["dia"]=self.aperture
+    self.draw_dict["model_type"] = "Rooftop"
+    obj = model_mirror(**self.draw_dict)
+    return obj
+  
+  def draw_mount(self):
+    # self.update_mount()
+    self._update_mount_dict()
+    self.mount = Composed_Mount()
+    self.mount.set_geom(self.get_geom())
+    mon1 = Special_mount(**self.mount_dict)
+    mon2 = Mount(aperture=25.4*2)
+    self.mount.add(mon1)
+    self.mount.add(mon2)
+    # print(self.aperture)
+    return (self.mount.draw())
 
 class Curved_Mirror(Mirror):
   def __init__(self, radius=200, **kwargs):
@@ -261,7 +344,6 @@ class Curved_Mirror(Mirror):
     return obj
   
   
-  
   def next_ray_trace(self, ray):
     """
     erzeugt den nächsten Ray auf Basis der analytischen Berechung von Schnitt-
@@ -298,6 +380,49 @@ class Curved_Mirror(Mirror):
     ray2.normal = ray.normal - 2*np.sum(ray.normal*surface_norm)*surface_norm
     ray2.pos = p0
     return ray2
+
+class Stripe_mirror(Curved_Mirror):
+  def __init__(self, thickness=10, **kwargs):
+    self.thickness = thickness
+    super().__init__(**kwargs)
+    self._update_mount_dict()
+    self.mount = Composed_Mount()
+    # mon1 = Special_mount(**self.mount_dict)
+    # mon2 = Mount(aperture=25.4*2)
+    # self.mount.add(mon1)
+    # self.mount.add(mon2)
+  
+  def _update_mount_dict(self):
+    super()._update_mount_dict()
+    self.mount_dict["model"] = "Stripe mirror mount"
+    self.mount_dict["name"] = self.name + "_mount"
+    # self.mount_dict["aperture"] = self.aperture
+    self.mount_dict["thickness"] = self.thickness
+  
+  def draw_fc(self):
+    self.update_draw_dict()
+    self.draw_dict["dia"]=self.aperture
+    # self.draw_dict["mount_type"] = "POLARIS-K1-Step"
+    self.draw_dict["Radius1"] = self.radius
+    self.draw_dict["thickness"] = self.thickness
+    print(self.draw_dict["thickness"] )
+    self.draw_dict["model_type"] = "Stripe"
+    obj = model_mirror(**self.draw_dict)
+    return obj
+  
+  def draw_mount(self):
+    # self.update_mount()
+    self._update_mount_dict()
+    self.mount = Composed_Mount()
+    self.mount.set_geom(self.get_geom())
+    mon1 = Special_mount(**self.mount_dict)
+    # print(mon1.normal,mon1.docking_obj.normal,mon1.docking_normal)
+    # mon1.docking_obj.normal = -self.normal
+    mon2 = Mount(aperture=25.4*2)
+    self.mount.add(mon1)
+    self.mount.add(mon2)
+    # print(self.aperture)
+    return (self.mount.draw())
 
 class Cylindrical_Mirror(Mirror):
   """

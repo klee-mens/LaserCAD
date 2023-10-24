@@ -5,10 +5,12 @@ Created on Sat Aug 19 13:13:11 2023
 @author: mens
 """
 
-from ..basic_optics import Component
+# from ..basic_optics import Component
+# from .component import Component
 from ..freecad_models.utils import thisfolder, load_STL, freecad_da, update_geom_info, get_DOC
 from ..freecad_models.freecad_model_composition import initialize_composition_old, add_to_composition
 from ..freecad_models import model_crystal
+from LaserCAD.basic_optics.component import Component
 import numpy as np
 
 import csv

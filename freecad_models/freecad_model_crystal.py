@@ -32,7 +32,35 @@ if freecad_da:
 
 
 def model_crystal(name="crystal",model="cube", width=50, height=10, thickness=25, color=DEFAULT_COLOR_CRYSTAL,Transparency=50, geom=None, **kwargs):
+  """
+  Parameters
+  ----------
+  name : string, optional
+    crystal name. The default is "crystal".
+  model : string, optional
+    The model of crystal. It can be "cube" or "round" for cubic crystal and 
+    circular crystal. The default is "cube".
+  width : float, optional
+    The width or radius of the crystal. The default is 50.
+  height : float, optional
+    The height of the crystal (cube only). The default is 10.
+  thickness : float, optional
+    The thickness of the crystal. The default is 25.
+  color : TYPE, optional
+    The color of the crystal. The default is DEFAULT_COLOR_CRYSTAL.
+  Transparency : float, optional
+    The Transparency of the crystal. The default is 50.
+  geom : TYPE, optional
+    DESCRIPTION. The default is None.
+  **kwargs : TYPE
+    DESCRIPTION.
 
+  Returns
+  -------
+  obj : TYPE
+    DESCRIPTION.
+
+  """
   DOC = get_DOC()
   if model== "round":
     obj = model_lens(name, dia=width, Radius1=0, Radius2=0, thickness=thickness)
@@ -83,6 +111,31 @@ def model_crystal(name="crystal",model="cube", width=50, height=10, thickness=25
   return obj
 
 def model_crystal_mount(name="crystal_mount",model="cube", width=50, height=10, thickness=25, geom=None, **kwargs):
+  """
+  Parameters
+  ----------
+  name : string, optional
+    crystal name. The default is "crystal".
+  model : string, optional
+    The model of crystal. It can be "cube" or "round" for cubic crystal and 
+    circular crystal. The default is "cube".
+  width : float, optional
+    The width or radius of the crystal. The default is 50.
+  height : float, optional
+    The height of the crystal (cube only). The default is 10.
+  thickness : float, optional
+    The thickness of the crystal. The default is 25.
+  geom : TYPE, optional
+    DESCRIPTION. The default is None.
+  **kwargs : TYPE
+    DESCRIPTION.
+
+  Returns
+  -------
+  obj : TYPE
+    DESCRIPTION.
+
+  """
   DOC = get_DOC()
   obj = DOC.addObject('PartDesign::Body', name)
   sketch = obj.newObject('Sketcher::SketchObject', name+'_sketch')

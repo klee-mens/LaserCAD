@@ -25,12 +25,10 @@ from LaserCAD.basic_optics import LinearResonator, Lens
 from LaserCAD.basic_optics import Grating, Crystal
 import matplotlib.pyplot as plt
 from LaserCAD.freecad_models.utils import thisfolder, load_STL
-from LaserCAD.basic_optics.mirror import Stripe_mirror,Rooftop_mirror
 from LaserCAD.non_interactings import Faraday_Isolator, Pockels_Cell, Lambda_Plate
+from LaserCAD.basic_optics.mirror import Rooftop_mirror,Stripe_mirror
+from LaserCAD.basic_optics.mount import Mount,Composed_Mount,Special_mount
 from LaserCAD.non_interactings.table import Table
-
-c0 = 299792458*1000 #mm/s
-
 if freecad_da:
   clear_doc()
 
@@ -113,7 +111,7 @@ def Make_Stretcher_chromeo():
   sinB = a - b
   grating_normal = (np.sqrt(1-sinB**2), sinB, 0)
 
-  Concav = Curved_Mirror(radius=radius_concave,name="Concav_Mirror")
+  Concav = Curved_Mirror(radius=radius_concave, name="Concav_Mirror")
   Concav.aperture = aperture_concave
 
   StripeM = Stripe_mirror(radius= -radius_concave/2,thickness=25,  name="Stripe_Mirror")
@@ -121,6 +119,7 @@ def Make_Stretcher_chromeo():
   StripeM.aperture = width_stripe_mirror
   StripeM.draw_dict["height"] = height_stripe_mirror
   StripeM.draw_dict["thickness"] = 25 # arbitrary
+  # StripeM.thickness = 25
   StripeM.draw_dict["model_type"] = "Stripe"
 
   Grat = Grating(grat_const=grating_const, name="Gitter", order=-1)
@@ -160,7 +159,16 @@ def Make_Stretcher_chromeo():
   Stretcher.redefine_optical_axis(helper_light_source.inner_ray())
 
   Stretcher.propagate(first_propagation)
-  FlipMirror_In_Out = Mirror(phi=-90, name="FlipMirrorInOut")
+  FlipMirror_In_Out = Mirror(phi=90, name="FlipMirrorInOut")
+  
+  mount=Composed_Mount()
+  Mount1=Special_mount(model="MH25",drawing_post=False)
+  Mount1.docking_obj.pos = Mount1.pos+(6.3,0,0)
+  Mount1.docking_obj.normal = Mount1.normal
+  Mount2=Mount(model="KMSS")
+  mount.add(Mount1)
+  mount.add(Mount2)
+  FlipMirror_In_Out.mount = mount
   Stretcher.add_on_axis(FlipMirror_In_Out)
   FlipMirror_In_Out.pos += (0,0,-periscope_height/2)
   Stretcher.propagate(distance_flip_mirror1_grating)
@@ -183,11 +191,9 @@ def Make_Stretcher_chromeo():
   Stretcher.add_on_axis(RoofTop2)
 
   RoofTop1.draw = dont
-  # RoofTop1.draw_dict["mount_type"] = "dont_draw"
   RoofTop1.mount.elm_type = "dont_draw"
   RoofTop2.draw = dont
   RoofTop2.mount.elm_type = "dont_draw"
-  # RoofTop2.draw_dict["mount_type"] = "dont_draw"
 
   pure_cosmetic = Rooftop_mirror(name="RoofTop_Mirror")
   pure_cosmetic.draw_dict["mount_type"] = "rooftop_mirror_mount"
@@ -195,6 +201,7 @@ def Make_Stretcher_chromeo():
   pure_cosmetic.normal = (RoofTop1.normal + RoofTop2.normal ) / 2
   pure_cosmetic.aperture = periscope_height
   pure_cosmetic.draw_dict["model_type"] = "Rooftop"
+  # pure_cosmetic.draw = dont
   Stretcher.add_fixed_elm(pure_cosmetic)
 
   # setting the final sequence and the last propagation for visualization
@@ -202,39 +209,6 @@ def Make_Stretcher_chromeo():
   Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0])
   Stretcher.recompute_optical_axis()
   Stretcher.propagate(100)
-  # Stretcher.draw()
-  pathlength = {}
-  for ii in range(Stretcher._beams[0]._ray_count):
-    wavelength = Stretcher._beams[0].get_all_rays()[ii].wavelength
-    pathlength[wavelength] = 0
-  for jj in range(len(Stretcher._beams)-1):
-    for ii in Stretcher._beams[jj].get_all_rays():
-      a=pathlength[ii.wavelength]
-      pathlength[ii.wavelength] = a +ii.length
-  ray_lam = [ray.wavelength for ray in Stretcher._beams[0].get_all_rays()]
-  path = [pathlength[ii] for ii in ray_lam]
-  path_diff = [ii-path[int(len(path)/2)] for ii in path]
-  fai = [path_diff[ii]/ray_lam[ii]*2*np.pi for ii in range(len(path))]
-  omega = [c0/ii*2*np.pi for ii in ray_lam]
-  para = np.polyfit(omega, fai, 5)
-  fai2 = [20*para[0]*ii**3+12*para[1]*ii**2+6*para[2]*ii+2*para[3] for ii in omega]
-  # fai2 = [para[0]*ii**5+para[1]*ii**4+para[2]*ii**3+para[3]*ii**2+para[4]*ii+para[5] for ii in omega]
-  delay_mid = path[int(len(path)/2)]/c0
-  delay = [(pa/c0-delay_mid)*1E9 for pa in path]
-  plt.figure()
-  ax1=plt.subplot(1,2,1)
-  plt.plot(ray_lam,path)
-  plt.ylabel("pathlength (mm)")
-  plt.xlabel("wavelength (mm)")
-  plt.title("Pathlength at different wavelength")
-  plt.axhline(path[int(len(path)/2)], color = 'black', linewidth = 1)
-  ax2=plt.subplot(1,2,2)
-  plt.plot(ray_lam,delay)
-  plt.ylabel("delay (ns)")
-  plt.xlabel("wavelength (mm)")
-  plt.title("Delay at different wavelength")
-  plt.axhline(0, color = 'black', linewidth = 1)
-  plt.show()
 
   return Stretcher
 
@@ -257,6 +231,15 @@ lightsource_pp = Beam(angle=0, radius=seed_beam_radius)
 PulsePicker.set_light_source(lightsource_pp)
 PulsePicker.propagate(distance_seed_laser_stretcher*0.2)
 FlipMirror_pp = Mirror(phi=90)
+FlipMirror_pp_mount=Composed_Mount()
+FlipMirror_pp_mount_Mount1=Special_mount(model="MH25",drawing_post=False)
+FlipMirror_pp_mount_Mount1.docking_obj.pos = FlipMirror_pp_mount_Mount1.pos+(6.3,0,0)
+FlipMirror_pp_mount_Mount1.docking_obj.normal = FlipMirror_pp_mount_Mount1.normal
+FlipMirror_pp_mount_Mount2=Mount(model="KMSS")
+FlipMirror_pp_mount.add(FlipMirror_pp_mount_Mount1)
+FlipMirror_pp_mount.add(FlipMirror_pp_mount_Mount2)
+FlipMirror_pp.mount = FlipMirror_pp_mount
+# FlipMirror_pp.mount_dict["Flip90"]=False
 PulsePicker.add_on_axis(FlipMirror_pp)
 FlipMirror_pp.pos += (0,0,flip_mirror_push_down)
 PulsePicker.propagate(100)
@@ -269,19 +252,20 @@ PulsePicker.propagate(30)
 Lambda4 = Lambda_Plate()
 PulsePicker.add_on_axis(Lambda4)
 PulsePicker.propagate(30)
-
-PulsePicker.add_on_axis( Pockels_Cell())
-
+pockelscell =Pockels_Cell()
+PulsePicker.add_on_axis( pockelscell)
+pockelscell.rotate(vec=pockelscell.normal,phi=np.pi)
 PulsePicker.propagate(210)
-TFP_pp = Mirror(phi = -180+2*tfp_angle)
+TFP_pp = Mirror(phi = 180-2*tfp_angle)
 TFP_pp.draw_dict["color"] = (1.0, 0.0, 2.0)
 TFP_pp.draw_dict["thickness"] = 4
 TFP_pp.aperture = 2*inch
+# TFP_pp.mount_dict["Flip90"]=True
 PulsePicker.add_on_axis(TFP_pp)
 TFP_pp.pos += -1 * TFP_pp.normal * tfp_push_forward
 PulsePicker.recompute_optical_axis()
 PulsePicker.propagate(250)
-FlipMirror2_pp = Mirror(phi=-90)
+FlipMirror2_pp = Mirror(phi=90)
 PulsePicker.add_on_axis(FlipMirror2_pp)
 PulsePicker.propagate(100)
 FaradPP = Faraday_Isolator()
@@ -293,80 +277,6 @@ PulsePicker.propagate(200)
 
 PulsePicker.set_geom(Stretcher.last_geom())
 
-
-# =============================================================================
-# Regen Amp1 Section
-# =============================================================================
-# from LaserCAD.basic_optics import LinearResonator, Lens
-
-
-# def Make_Amplifier_I():
-
-#   tfp_angle = 65
-#   tfp_aperture = 2*inch
-#   angle_on_sphere = 10
-#   alpha = -0.8
-#   beta = -0.8
-#   print("g1*g2 = ", alpha*beta)
-#   focal = 500
-#   dist1 = (1-alpha)*focal
-#   dist2 = (1-beta)*focal
-#   wavelength = 2400*1e-6
-
-#   # geometric restrictions
-#   dist_tfp1_2 = 230
-#   dist_tfp1_pockels = 50
-#   dist_pockels_lambda = 115
-#   dist_tfp2_sphere = 400
-#   dist_m1_tfp1 = dist1 - dist_tfp1_2 - dist_tfp2_sphere
-#   dist_crystal_end = 15
-
-#   mir1 = Mirror(phi=180)
-#   TFP1 = Mirror(phi= 180 - 2*tfp_angle, name="TFP1")
-#   TFP1.draw_dict["color"] = (1.0, 0.0, 2.0)
-#   TFP1.aperture = tfp_aperture
-#   TFP2 = Mirror(phi= - 180 + 2*tfp_angle, name="TFP2")
-#   TFP2.draw_dict["color"] = (1.0, 0.0, 2.0)
-#   TFP2.aperture = tfp_aperture
-#   mir4 = Mirror(phi=180)
-#   cm = Curved_Mirror(radius=focal*2, phi = 180 - angle_on_sphere)
-#   PockelsCell = Pockels_Cell()
-#   Lambda2 = Lambda_Plate()
-
-#   amp1 = LinearResonator(name="foldedRes")
-#   amp1.set_wavelength(wavelength)
-#   amp1.add_on_axis(mir1)
-#   amp1.propagate(dist_m1_tfp1)
-#   amp1.add_on_axis(TFP1)
-#   amp1.propagate(dist_tfp1_pockels)
-#   amp1.add_on_axis(PockelsCell)
-#   amp1.propagate(dist_pockels_lambda)
-#   amp1.add_on_axis(Lambda2)
-#   amp1.propagate(dist_tfp1_2-dist_tfp1_pockels-dist_pockels_lambda)
-#   amp1.add_on_axis(TFP2)
-#   amp1.propagate(dist_tfp2_sphere)
-#   amp1.add_on_axis(cm)
-#   amp1.propagate(dist2 - dist_crystal_end)
-
-
-#   crystal = Beam(radius=3, angle=0)
-#   crystal.draw_dict['color'] = (182/255, 109/255, 46/255)
-#   crystal.set_length(10)
-
-#   amp1.add_on_axis(crystal)
-#   amp1.propagate(dist_crystal_end)
-#   amp1.add_on_axis(mir4)
-
-#   amp1.compute_eigenmode()
-#   return amp1
-
-
-# pp_last_pos, pp_last_ax = PulsePicker.last_geom()
-# helper = Beam()
-# helper.set_geom(PulsePicker.last_geom())
-# h = helper.normal
-# h[2] = 0
-# helper.normal = h
 
 
 # =============================================================================
@@ -528,18 +438,21 @@ BigPump.set_geom(amp2._elements[2].get_geom())
 # BigPump.set_geom(amp2.non_opticals[-1].get_geom())
 
 
+
+
 # =============================================================================
 # Draw Selection
 # =============================================================================
 
-# Seed.draw()
+Seed.draw()
 Stretcher.draw()
 PulsePicker.draw()
-# Amplifier_I.draw()
-# Pump.draw()
-# amp2.draw()
+Amplifier_I.draw()
+Pump.draw()
+amp2.draw()
 # BigPump.draw()
-
+t=Table()
+t.draw()
 
 # =============================================================================
 # breadboards
@@ -565,9 +478,5 @@ from LaserCAD.non_interactings import Breadboard
 # b6.pos += b1.pos + (b2.Xdimension, -b2.Ydimension, 0)
 # b6.draw()
 
-# PulsePicker.draw()
-# Amplifier_I.draw()
-t=Table()
-t.draw()
 if freecad_da:
   setview()

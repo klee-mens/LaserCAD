@@ -42,8 +42,9 @@ class Opt_Element(Component):
     self.draw_dict.update({"dia":self.aperture,
                            "thickness":5,
                            "model_type":"DEFAULT",
-                           "mount_type": "default",
-                           "mount_name": self.name+"_mount"})
+                           # "mount_type": "default",
+                           # "mount_name": self.name+"_mount"
+                           })
 
   def matrix(self):
     return np.array(self._matrix)

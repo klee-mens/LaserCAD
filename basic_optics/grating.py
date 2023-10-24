@@ -11,7 +11,8 @@ from copy import deepcopy
 from .optical_element import Opt_Element
 from .ray import Ray
 from ..freecad_models import model_grating
-from ..freecad_models import grating_mount
+# from ..freecad_models import grating_mount
+from .mount import Grating_mount
 
 class Grating(Opt_Element):
   """
@@ -25,6 +26,10 @@ class Grating(Opt_Element):
     self.height = 60
     self.thickness = 8
     self.diffraction_order = order
+    self.mount_dict["elm_type"] = "grating"
+    self.mount_dict["height"] = self.height
+    self.mount_dict["thickness"] = self.thickness
+    self.mount = Grating_mount(**self.mount_dict)
     # self.blazeangel = 32
     # self.draw_dict['width'] = self.width
     # self.draw_dict['thickness'] = self.thickness

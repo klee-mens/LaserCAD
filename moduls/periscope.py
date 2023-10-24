@@ -5,7 +5,9 @@ Created on Thu Jun 22 10:56:05 2023
 @author: 12816
 """
 
-from .. basic_optics import Mirror, Lens, Beam, Composition, inch, Component
+from .. basic_optics import Mirror, Beam, Composition, Component
+from ..non_interactings.mount import Special_mount,Mount,Composed_Mount
+from ..non_interactings.post import Post_and_holder
 from ..freecad_models import model_crystal
 
 
@@ -74,6 +76,7 @@ def Periscope2(name="Periskop", length=160,theta = 90, phi = 0, dist1=75, dist2=
   return peris
 
 
+
 def RoofTop_Mirror(name="RoofTopMirror", height=20, direction=1):
   """
   direction=1 RofftopMirror goes down
@@ -111,4 +114,14 @@ def RoofTop_Mirror(name="RoofTopMirror", height=20, direction=1):
   rooftop_model.pos += (height/2, 0, -height/2)
   roof.add_fixed_elm(rooftop_model)
   
+  rooftop_M1 = Special_mount(model="rooftop mirror mount")
+  M2 = Mount(model="POLARIS-K2")
+  rooftop_model = Composed_Mount()
+  rooftop_model.add(rooftop_M1)
+  rooftop_model.add(M2)
+  rooftop_model.pos += (height/2, 0, -height/2)
+  post_part = Post_and_holder(xshift=M2.xshift,height=-M2.zshift)
+  post_part.set_geom(M2.get_geom())
+  roof.add_fixed_elm(rooftop_model)
+  roof.add_fixed_elm(post_part)
   return roof

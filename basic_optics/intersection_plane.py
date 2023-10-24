@@ -92,7 +92,15 @@ class Intersection_plane(Opt_Element):
     point_y_middle = point_y[int(len(rays)/2)]
     diff_x = [x-point_x_middle for x in point_x]
     diff_y = [y-point_y_middle for y in point_y]
-    # ray_lam = [ray.wavelength for ray in rays]
+    ray_lam = [ray.wavelength for ray in rays]
+    for ray in rays:
+      if ray.normal[1]>1 or ray_middle.normal[1]>1:
+        print(ray.normal,ray_middle.normal)
+        print("whyyyyyyyyyyyyyyyyyyy")
+    if ray_middle.normal[1]>1:
+      ray_middle.normal[1]=1
+    # for ray in rays:
+    #   ray.normal = np.linalg.norm(ray.normal)
     tilt_x = [np.arcsin(ray.normal[1])-np.arcsin(ray_middle.normal[1]) for ray in rays]
     tilt_y = [np.arcsin(ray.normal[2])-np.arcsin(ray_middle.normal[2]) for ray in rays]
     if aberration_analysis:

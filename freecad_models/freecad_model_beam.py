@@ -67,6 +67,54 @@ def model_beam(name="beam", dia=10, prop=200,  f=130, color=DEFAULT_COLOR_CRIMSO
   DOC.recompute()
   return obj
 
+def model_beam_new(name="beam", radius=5, length=200,  angle=0.02,
+                   color=DEFAULT_COLOR_CRIMSON,geom_info=None, **kwargs):
+  DOC = get_DOC()
+  
+  if abs(angle) < 1E-9:
+    obj = DOC.addObject("Part::Cylinder", name)
+    obj.Height = length
+    obj.Radius = radius
+  else:
+    f = - radius/np.tan(angle)
+    if f == 0:
+      radius2 = length * np.tan(angle)
+      obj = DOC.addObject("Part::Cone", name)
+      obj.Height = length
+      obj.Radius1 = radius
+      obj.Radius2 = radius2
+    elif length <= f or f < 0:
+      radius2 = radius * (f-length)/f
+      obj = DOC.addObject("Part::Cone", name)
+      obj.Height = length
+      obj.Radius1 = radius
+      obj.Radius2 = radius2
+    else:
+      radius2 = 0
+      obj1 = DOC.addObject("Part::Cone", name+"_1")
+      obj1.Height = f
+      obj1.Radius1 = radius
+      obj1.Radius2 = radius2
+      radius3 =  radius * (length-f)/f
+      obj2 = DOC.addObject("Part::Cone", name+"_2")
+      obj2.Height = length - f
+      obj2.Radius1 = radius2
+      obj2.Radius2 = radius3
+      obj2.Placement = FreeCAD.Placement(Vector(0,0,f), FreeCAD.Rotation(Vector(0,1,0),0), Vector(0,0,0))
+      obj = DOC.addObject("Part::Fuse", name)
+      obj.Base = obj1
+      obj.Tool = obj2
+      obj.Refine = True
+      DOC.recompute()
+  obj.Placement = FreeCAD.Placement(Vector(0,0,0), FreeCAD.Rotation(Vector(0,1,0),90), Vector(0,0,0))
+  obj.ViewObject.ShapeColor = color
+  obj.ViewObject.Transparency = 50
+  obj.Label = name
+  update_geom_info(obj, geom_info)
+
+  DOC.recompute()
+  return obj
+
 def model_asti_beam (name="beam", dia_l=10,dia_s=10, prop=200,  f_l=100,f_s=150,rot_angle=0, color=DEFAULT_COLOR_CRIMSON, 
                geom_info=None):
   """

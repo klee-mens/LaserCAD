@@ -8,7 +8,7 @@ Created on Mon Feb 27 12:14:01 2023
 
 from .utils import freecad_da, update_geom_info, get_DOC, GEOM0, thisfolder
 from .freecad_model_composition import initialize_composition_old, add_to_composition
-from .freecad_model_mounts import  mirror_mount
+from .freecad_model_mounts import  mirror_mount,DEFAULT_MOUNT_COLOR
 import numpy as np
 import math
 if freecad_da:
@@ -19,6 +19,7 @@ if freecad_da:
   
 DEFUALT_DIM = (50, 50, 8)
 DEFUALT_COLOR = (170/255, 170/255, 1.0)  
+# DEFALUT_MOUNT_COLOR = (0.75,0.75,0.75)
 
 def model_grating(name="grating", dimensions=DEFUALT_DIM, geom=GEOM0, 
                   color=DEFUALT_COLOR):
@@ -56,7 +57,7 @@ def model_grating(name="grating", dimensions=DEFUALT_DIM, geom=GEOM0,
   DOC.recompute()
   return obj
 
-def grating_mount(name="grating_mount",height=50,thickness=8,base_exists=False,geom=None, **kwargs):
+def grating_mount(name="grating_mount",height=50,thickness=8,drawing_post=True,base_exists=False,geom=None, **kwargs):
   """
     Build the mount of the grating.
 
@@ -115,8 +116,11 @@ def grating_mount(name="grating_mount",height=50,thickness=8,base_exists=False,g
   newaxs[:,0] = new_normal
   geom = (new_pos, newaxs)
   xshift = 0
-  other_mount = mirror_mount(mount_name="mirror_mount",mount_type="default",base_exists=base_exists, geom=geom, dia=25.4)
-  part = initialize_composition_old(name="Grating mount, post and base")
+  other_mount = mirror_mount(mount_name="mirror_mount",mount_type="default",drawing_post=drawing_post,base_exists=base_exists, geom=geom, dia=25.4)
+  if drawing_post:
+    part = initialize_composition_old(name="Grating mount, post and base")
+  else:
+    part = initialize_composition_old(name="Grating mount")
   container = mount1,mount2,mount3,other_mount
   add_to_composition(part, container)
   return part
@@ -158,6 +162,7 @@ def draw_mount(name="KGM60_base",height=50,thickness=8,geom=None):
     obj = DOC.addObject("Mesh::Feature", name)
     datei += ".stl"
     obj.Mesh = Mesh.Mesh(datei)
+    obj.ViewObject.ShapeColor = DEFAULT_MOUNT_COLOR
   else:
     datei += ".step"
     obj = ImportGui.insert(datei, "labor_116")
