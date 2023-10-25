@@ -10,10 +10,9 @@ import sys
 
 pfad = __file__
 pfad = pfad.replace("\\","/") #folder conventions windows linux stuff
-ind = pfad.rfind("/")
+pfad = pfad.lower()
+ind = pfad.rfind("lasercad")
 pfad = pfad[0:ind-1]
-ind = pfad.rfind("/")
-pfad = pfad[0:ind]
 if not pfad in sys.path:
   sys.path.append(pfad)
 
@@ -45,7 +44,7 @@ distance_faraday_mirror = 100
 
 seed_laser = Component(name="IPG_Seed_Laser")
 
-stl_file=thisfolder+"\mount_meshes\special mount\Laser_Head-Body.stl"
+stl_file=thisfolder+"/mount_meshes/special mount/Laser_Head-Body.stl"
 seed_laser.draw_dict["stl_file"]=stl_file
 color = (170/255, 170/255, 127/255)
 seed_laser.draw_dict["color"]=color

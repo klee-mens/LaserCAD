@@ -18,9 +18,9 @@ import os
 import numpy as np
 
 DEFALUT_CAV_PATH = thisfolder
-DEFALUT_MIRROR_PATH = thisfolder + "mount_meshes\\mirror"
-DEFALUT_LENS_PATH = thisfolder + "mount_meshes\\lens"
-DEFALUT_SPEIAL_MOUNT_PATH = thisfolder + "mount_meshes\\special mount"
+DEFALUT_MIRROR_PATH = thisfolder + "mount_meshes/mirror"
+DEFALUT_LENS_PATH = thisfolder + "mount_meshes/lens"
+DEFALUT_SPEIAL_MOUNT_PATH = thisfolder + "mount_meshes/special mount"
 MIRROR_LIST1 = os.listdir(DEFALUT_MIRROR_PATH)
 MIRROR_LIST = []
 for i in MIRROR_LIST1:
@@ -123,11 +123,11 @@ class Mount(Geom_Object):
     else:
       self.model = model
     if self.model in MIRROR_LIST:
-      stl_file=thisfolder+"\\mount_meshes\\adjusted mirror mount\\" + self.model + ".stl"
+      stl_file=thisfolder+"/mount_meshes/adjusted mirror mount/" + self.model + ".stl"
     elif self.model in LENS_LIST:
-      stl_file=thisfolder+"\\mount_meshes\\adjusted lens mount\\" + self.model + ".stl"
+      stl_file=thisfolder+"/mount_meshes/adjusted lens mount/" + self.model + ".stl"
     else:
-      stl_file=thisfolder+"\\mount_meshes\\special mount\\" + self.model + ".stl"
+      stl_file=thisfolder+"/mount_meshes/special mount/" + self.model + ".stl"
     self.draw_dict["stl_file"]=stl_file
     self.mount_in_database = self.set_by_table()
     post = Post_and_holder(name=self.name + "post",elm_type=self.elm_type,post_type=post_type)
@@ -223,11 +223,11 @@ class Mount(Geom_Object):
       self.model = get_model_by_aperture_and_element(self.elm_type, self.aperture)
 
     if self.model in MIRROR_LIST:
-      stl_file=thisfolder+"\\mount_meshes\\adjusted mirror mount\\" + self.model + ".stl"
+      stl_file=thisfolder+"/mount_meshes/adjusted mirror mount/" + self.model + ".stl"
     elif self.model in LENS_LIST:
-      stl_file=thisfolder+"\\mount_meshes\\adjusted lens mount\\" + self.model + ".stl"
+      stl_file=thisfolder+"/mount_meshes/adjusted lens mount/" + self.model + ".stl"
     else:
-      stl_file=thisfolder+"\\mount_meshes\\special mount\\" + self.model + ".stl"
+      stl_file=thisfolder+"/mount_meshes/special mount/" + self.model + ".stl"
     self.draw_dict["stl_file"]=stl_file
     self.mount_in_database = self.set_by_table()
     if self.model == "large mirror mount":
@@ -365,7 +365,7 @@ class Special_mount(Mount):
   def draw_fc(self):
     if self.model=="rooftop mirror mount" or self.model=="Stripe mirror mount":
       self.draw_dict["geom"]=self.get_geom()
-      self.draw_dict["stl_file"]=thisfolder+"\\mount_meshes\\special mount\\" + self.model + ".stl"
+      self.draw_dict["stl_file"]=thisfolder+"/mount_meshes/special mount/" + self.model + ".stl"
       return load_STL(**self.draw_dict)
       # return mirror_mount(**self.draw_dict)
     else:
@@ -373,7 +373,7 @@ class Special_mount(Mount):
         self.rotate(self.normal,np.pi)
         self.draw_dict["geom"] = self.get_geom()
       self.draw_dict["geom"]=self.get_geom()
-      self.draw_dict["stl_file"]=thisfolder+"\\mount_meshes\\special mount\\" + self.model + ".stl"
+      self.draw_dict["stl_file"]=thisfolder+"/mount_meshes/special mount/" + self.model + ".stl"
       obj = load_STL(**self.draw_dict)
       if self.drawing_post:
         obj1 = self.post.draw()

@@ -8,13 +8,17 @@ Created on Tue Jul 11 13:15:19 2023
 #!/usr/bin/python
 
 import sys
-import os
-    
-sys.path.append('C:\\ProgramData\\Anaconda3')
+pfad = __file__
+pfad = pfad.replace("\\","/") #folder conventions windows linux stuff
+pfad = pfad.lower()
+ind = pfad.rfind("lasercad")
+pfad = pfad[0:ind-1]
+if not pfad in sys.path:
+  sys.path.append(pfad)
 
 from LaserCAD import basic_optics
 
-from LaserCAD.basic_optics import Mirror,Beam,Cylindrical_Mirror,Intersection_plane,Cylindrical_Mirror1,Curved_Mirror,Ray, Composition, Grating, Lam_Plane
+from LaserCAD.basic_optics import Mirror,Beam,Cylindrical_Mirror,Intersection_plane,Cylindrical_Mirror1,Curved_Mirror,Ray, Composition, Grating
 
 from LaserCAD.freecad_models import clear_doc, setview, freecad_da,add_to_composition
 from LaserCAD.moduls import Make_Periscope

@@ -156,7 +156,7 @@ def draw_mount(name="KGM60_base",height=50,thickness=8,geom=None):
     zshift = (height-30)/2
   elif "20" in name:
     zshift = (height-10)/2
-  datei = thisfolder + "mount_meshes\\Grating\\" + name
+  datei = thisfolder + "mount_meshes/Grating/" + name
   if mesh:
     DOC = get_DOC()
     obj = DOC.addObject("Mesh::Feature", name)

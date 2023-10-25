@@ -5,21 +5,34 @@ Created on Tue Jan 24 19:46:37 2023
 @author: mens
 """
 
-from .lens import Lens
-from .mirror import Mirror, Curved_Mirror,Cylindrical_Mirror
-from .beam import Beam
-from .moduls import Make_Telescope
+import sys
+pfad = __file__
+pfad = pfad.replace("\\","/") #folder conventions windows linux stuff
+pfad = pfad.lower()
+ind = pfad.rfind("lasercad")
+pfad = pfad[0:ind-1]
+if not pfad in sys.path:
+  sys.path.append(pfad)
+  
+from LaserCAD.basic_optics import Lens, Mirror, Curved_Mirror, Cylindrical_Mirror
+from LaserCAD.basic_optics import Beam, Ray, Composition, Grating
+from LaserCAD.basic_optics import Intersection_plane, LinearResonator
+from LaserCAD.non_interactings import Iris
+# from LaserCAD.moduls import Make_Telescope
+# from .mirror import Mirror, Curved_Mirror,Cylindrical_Mirror
+# from .beam import Beam
+# from .moduls import Make_Telescope
 # from .propagation import Propagation
-from .ray import Ray
-from .composition import Composition
-from .grating import Grating
+# from .ray import Ray
+# from .composition import Composition
+# from .grating import Grating
 import numpy as np
 import matplotlib.pyplot as plt
 
-from .iris import Iris
-from .intersection_plane import Intersection_plane
+# from .iris import Iris
+# from .intersection_plane import Intersection_plane
 
-from .resonator import LinearResonator
+# from .resonator import LinearResonator
 
 # from iris import Iris
 # from intersection_plane import Intersection_plane

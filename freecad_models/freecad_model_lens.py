@@ -158,7 +158,7 @@ def lens_mount(mount_name="mirror_mount", dia=inch,  geom=None,
     place = Placement(offset, Rotation(-90,2.22639e-14,90), Vector(0,0,0))
     
   # if kind == "LMR2_M":
-  datei = thisfolder + "mount_meshes\\lens\\" + kind
+  datei = thisfolder + "mount_meshes/lens/" + kind
   if mesh:
     DOC = get_DOC()
     obj = DOC.addObject("Mesh::Feature", mount_name)

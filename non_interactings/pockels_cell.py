@@ -12,7 +12,7 @@ from ..freecad_models.utils import thisfolder, load_STL
 class Pockels_Cell(Component):
   def __init__(self, name="Pockels_Cell", **kwargs):
     super().__init__(name, **kwargs)
-    stl_file=thisfolder+"\mount_meshes\special mount\pockels_cell_easy_steal-Body.stl"
+    stl_file=thisfolder+"/mount_meshes/special mount/pockels_cell_easy_steal-Body.stl"
     self.draw_dict["stl_file"]=stl_file
     self.draw_dict["color"]=(239/255, 239/255, 239/255)
     # self.draw_dict["color"]=(100/255, 100/255, 100/255)

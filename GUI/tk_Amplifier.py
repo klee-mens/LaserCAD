@@ -10,9 +10,9 @@ Created on Tue Jul 11 13:15:19 2023
 import sys
 import os
     
-sys.path.append('C:\\ProgramData\\Anaconda3')
+sys.path.append('C:/ProgramData/Anaconda3')
 # pfad = __file__
-# pfad = pfad.replace("\\", "/") #just in case
+# pfad = pfad.replace("/", "/") #just in case
 # ind = pfad.rfind("/")
 # pfad = pfad[0:ind]
 # ind = pfad.rfind("/")
@@ -26,7 +26,7 @@ sys.path.append('C:\\ProgramData\\Anaconda3')
 
 from LaserCAD import basic_optics
 
-from LaserCAD.basic_optics import Mirror,Beam,Cylindrical_Mirror,Intersection_plane,Cylindrical_Mirror1,Curved_Mirror,Ray, Composition, Grating, Lam_Plane
+from LaserCAD.basic_optics import Mirror,Beam,Cylindrical_Mirror,Intersection_plane,Cylindrical_Mirror1,Curved_Mirror,Ray, Composition, Grating
 
 from LaserCAD.freecad_models import clear_doc, setview, freecad_da,add_to_composition
 from LaserCAD.moduls import Make_Amplifier_Typ_I_simple,Make_Amplifier_Typ_I_Mirror,Make_Amplifier_Typ_II_simple

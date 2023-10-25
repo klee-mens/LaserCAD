@@ -5,7 +5,7 @@ Created on Sat Aug 19 14:41:08 2023
 @author: mens
 """
 # import sys
-# sys.path.append('C:\\ProgramData\\Anaconda3')
+# sys.path.append('C:/ProgramData/Anaconda3')
 # from LaserCAD.basic_optics import Component
 # from .component import Component
 # from LaserCAD.freecad_models.utils import thisfolder,load_STL,freecad_da,clear_doc

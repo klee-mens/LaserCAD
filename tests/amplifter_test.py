@@ -5,10 +5,18 @@ Created on Thu Jun 22 10:53:52 2023
 @author: 12816
 """
 
-from moduls import Make_Amplifier_Typ_I_simple,Make_Amplifier_Typ_I_Mirror
-from moduls import Make_Amplifier_Typ_II_simple,Make_Amplifier_Typ_II_Mirror
-from moduls import Make_Amplifier_Typ_II_UpDown,Make_Amplifier_Typ_II_Juergen
-from moduls import Make_Amplifier_Typ_II_with_theta,Make_Amplifier_Typ_II_plane
+import sys
+pfad = __file__
+pfad = pfad.replace("\\","/") #folder conventions windows linux stuff
+pfad = pfad.lower()
+ind = pfad.rfind("lasercad")
+pfad = pfad[0:ind-1]
+if not pfad in sys.path:
+  sys.path.append(pfad)
+from LaserCAD.moduls import Make_Amplifier_Typ_I_simple,Make_Amplifier_Typ_I_Mirror
+from LaserCAD.moduls import Make_Amplifier_Typ_II_simple,Make_Amplifier_Typ_II_Mirror
+from LaserCAD.moduls import Make_Amplifier_Typ_II_UpDown,Make_Amplifier_Typ_II_Juergen
+from LaserCAD.moduls import Make_Amplifier_Typ_II_with_theta,Make_Amplifier_Typ_II_plane
 
 def Amplifter_Typ_I_test():  
   Ampli1 = Make_Amplifier_Typ_I_simple()
@@ -40,4 +48,5 @@ def Amplifter_Typ_II_test():
   Ampli6.draw()
   return Ampli1,Ampli2,Ampli3,Ampli4,Ampli5,Ampli6
 
-Amplifter_Typ_I_test()
+if __name__ == "__main__":
+  Amplifter_Typ_I_test()

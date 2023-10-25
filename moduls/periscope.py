@@ -6,8 +6,7 @@ Created on Thu Jun 22 10:56:05 2023
 """
 
 from .. basic_optics import Mirror, Beam, Composition, Component
-from ..non_interactings.mount import Special_mount,Mount,Composed_Mount
-from ..non_interactings.post import Post_and_holder
+from .. basic_optics import Special_mount, Mount, Composed_Mount, Post_and_holder
 from ..freecad_models import model_crystal
 
 

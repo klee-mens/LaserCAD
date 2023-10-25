@@ -251,7 +251,9 @@ def Make_Stretcher(
 
   pure_cosmetic.draw = useless
 
-  Stretcher = Composition(name="Strecker", pos=pos0, normal=vec)
+  Stretcher = Composition(name="Strecker")
+  Stretcher.pos=pos0
+  Stretcher.normal=vec
 
   Stretcher.set_light_source(lightsource)
   Stretcher.add_fixed_elm(Grat)

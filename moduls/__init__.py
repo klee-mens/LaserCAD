@@ -6,7 +6,7 @@ Created on Thu Jun 22 10:58:57 2023
 """
 
 from .telescope import Make_Telescope
-from .periscope import Make_Periscope
+from .periscope import Make_Periscope, Periscope2, RoofTop_Mirror
 from .stretcher import Make_Stretcher,Make_Stretcher_chromeo
 from .type_I_Amplifier import Make_Amplifier_Typ_I_Mirror,Make_Amplifier_Typ_I_simple
 from .type_II_Amplifier import Make_Amplifier_Typ_II_simple,Make_Amplifier_Typ_II_Mirror,Make_Amplifier_Typ_II_Juergen

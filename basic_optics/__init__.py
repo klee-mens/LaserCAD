@@ -22,11 +22,13 @@ from .mirror import Mirror, Curved_Mirror, Cylindrical_Mirror, Cylindrical_Mirro
 from .composition import Composition
 from .constants import inch
 from .grating import Grating
-from .iris import Iris
+# from .iris import Iris
 from .intersection_plane import Intersection_plane
 from .resonator import LinearResonator
-from .thick_lens import Thick_Lens
+# from .thick_lens import Thick_Lens
 from .crystal import Crystal
 from .component import Component
+from .mount import Mount, Grating_mount, Special_mount, Composed_Mount
+from .post import Post_and_holder
 
 
