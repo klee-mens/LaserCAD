@@ -5,7 +5,7 @@ Created on Mon Mar 27 11:33:37 2023
 @author: He
 """
 
-import sys
+# import sys
 # sys.path.append(u'/home/mens/Nextcloud/FreeCAD/opticslib2/basic_objects/freecad_models')
 # sys.path.append(u"C:/Users/mens/Nextcloud/FreeCAD/opticslib2/basic_objects/freecad_models")
 

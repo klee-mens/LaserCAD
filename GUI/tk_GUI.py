@@ -10,7 +10,7 @@ Created on Tue Jul 11 13:15:19 2023
 import sys
 import os
     
-sys.path.append('C:\\ProgramData\\Anaconda3')
+sys.path.append('E:\Programme\Spyder\pkgs')
 
 from LaserCAD import basic_optics
 
@@ -22,6 +22,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from copy import deepcopy
 import tkinter as tk
+from tkinter.filedialog import asksaveasfile 
 
 def GUI(path=""):
   global comp, element_list,ls
@@ -576,9 +577,14 @@ def GUI(path=""):
   )
   
   L1 = tk.Label(window,text="This is the FreeCAD user interface. Please set up the light source first, and then add the optical elements you want",font=(font_name,font_size))
+  
   def coading():
-    fp = open(path+'\\samples.py', 'w+')
-    fp.truncate(0)
+    # fp = open(path+'\\samples.py', 'w+')
+    # fp.truncate(0)
+    files = [('All Files', '*.*'),  
+             ('Python Files', '*.py'), 
+             ('Text Document', '*.txt')] 
+    fp = asksaveasfile(filetypes = files, defaultextension = files) 
     myself = open(__file__,"r")
     line = myself.readlines()
     for i in range(23):
@@ -597,8 +603,9 @@ def GUI(path=""):
     for ele in range(len(element_list)):
       fp.write("comp.add_fixed_elm(a"+str(ele)+")\n")
     fp.write("comp.draw()")
-    L1.config(text = "code generated. Saved as 'sample.py'.")
+    L1.config(text = "Code generated.")
     fp.close()
+
   btn_coading = tk.Button(
       master=window,
       text="Generate Code",
@@ -617,4 +624,4 @@ def GUI(path=""):
   window.columnconfigure([0],weight=1, minsize=300)
   window.mainloop()
 
-# GUI()
+GUI()

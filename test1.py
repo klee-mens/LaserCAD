@@ -18,10 +18,12 @@ if not pfad in sys.path:
   sys.path.append(pfad)
 
 
-from LaserCAD.non_interactings import Iris, Lambda_Plate
+# from LaserCAD.non_interactings import Iris
+# from LaserCAD.non_interactings import Lambda_Plate
 
 from LaserCAD.freecad_models import clear_doc, setview, freecad_da
-from LaserCAD.basic_optics import Mirror, Beam,Grating, Composition, inch, Curved_Mirror, Ray, Geom_Object, LinearResonator, Lens, Component
+from LaserCAD.basic_optics import Mirror
+from LaserCAD.basic_optics import Beam,Grating, Composition, inch, Curved_Mirror, Ray, Geom_Object, LinearResonator, Lens, Component
 from LaserCAD.freecad_models.utils import thisfolder, load_STL
 from LaserCAD.basic_optics.mount import Mount,Composed_Mount,Special_mount
 
