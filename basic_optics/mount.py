@@ -90,12 +90,16 @@ def get_model_by_aperture_and_element(elm_type, aperture):
     model = "dont_draw"
   return model
 
+
 class Mount(Geom_Object):
   """
-  Mount class, erbit from <Geom_Object>
+  Mount class, inherit from <Geom_Object>
   Application as follows:
     Mon = Mount(elm_type="mirror")
   Usually exists as part of the component
+  Gets a post as an member object in the __init__
+  Most values are set and corrected when the draw() funtion is called
+  draw_fc() also draws the post
   """
   def __init__(self, name="mount",model="default",aperture=25.4,thickness=5,
                elm_type="mirror",Flip90=False, post_type="1inch_post", **kwargs):
@@ -106,12 +110,9 @@ class Mount(Geom_Object):
     self.draw_dict["drawing_post"] = False
     self.Flip90 = Flip90
     self.draw_dict["Flip90"] = Flip90
-    # self.docking_obj = Geom_Object(pos = self.pos+(1,0,3),normal=(0,0,1))
     self.docking_obj = Geom_Object()
     self.draw_dict["offset"] = np.zeros(3)
     self.draw_dict["rotation"] = (np.array((0,0,1)), 0)
-    # if Flip90:
-    #   self.draw_dict["rotation"] = (self.normal, np.pi/2)
     self.aperture = aperture
     self.thickness = thickness
     self.xshift = 0
@@ -132,7 +133,6 @@ class Mount(Geom_Object):
     self.mount_in_database = self.set_by_table()
     post = Post_and_holder(name=self.name + "post",elm_type=self.elm_type,post_type=post_type)
     post.set_geom(self.docking_obj.get_geom())
-    # self.post = post
     
   def set_by_table(self):
     """
@@ -163,9 +163,6 @@ class Mount(Geom_Object):
         offset = (float(mount_loop["offsetX"]),
                         float(mount_loop["offsetY"]),
                         float(mount_loop["offsetZ"]))
-        # rotation = (float(mount_loop["rot_angleZ"]),
-        #                     float(mount_loop["rot_angleY"]),
-        #                     float(mount_loop["rot_angleX"]))
     if not mount_in_database:
       return False
     self.aperture = aperture
@@ -176,7 +173,6 @@ class Mount(Geom_Object):
     self.draw_dict["height"]=height
     self.yshift = 0
     self.offset_vector = offset
-    # self.draw_dict["mount_type"] = self.model
     docking_pos = np.array([xshift,0,-height])
     docking_normal = self.normal
     # updates the docking geom for the first time
@@ -186,17 +182,9 @@ class Mount(Geom_Object):
       self.normal=tempnormal
       self.normal = self.normal/np.linalg.norm(self.normal)
     else: print("this post should not be placed in the ground plate")
-    # a=(1,0,0)
-    # if np.sum(np.cross(a,self.normal))!=0:
-    #   rot_axis = np.cross(a,self.normal)/np.linalg.norm(np.cross(a,self.normal))
-    #   rot_angle = np.arccos(np.sum(a*self.normal)/(np.linalg.norm(a)*np.linalg.norm(self.normal)))
-    #   docking_pos = rotate_vector(docking_pos,rot_axis,rot_angle)
-    #   docking_normal = rotate_vector(docking_normal,rot_axis,rot_angle)
-    # self.docking_obj = Geom_Object(pos = self.pos+docking_pos,normal=docking_normal)
     self.docking_obj = Geom_Object()
     self.docking_obj.pos = self.pos+xshift*self._axes[:,0]-height*self._axes[:,2]
     self.docking_obj.normal = docking_normal
-    # self.rotation = rotation
     return True
   
   def _pos_changed(self, old_pos, new_pos):
@@ -205,7 +193,7 @@ class Mount(Geom_Object):
   def _axes_changed(self, old_axes, new_axes):
     self._rearange_subobjects_axes( old_axes, new_axes, [self.docking_obj,self.post])
 
-  def draw_fc(self):
+  def draw(self):
     self.update_draw_dict()
     if self.normal[2]<DEFAULT_MAX_ANGULAR_OFFSET/180*np.pi:
       tempnormal = self.normal
@@ -233,10 +221,14 @@ class Mount(Geom_Object):
     if self.model == "large mirror mount":
       self.draw_dict["thickness"] = self.thickness
       self.draw_dict["dia"] = self.aperture
-      return mirror_mount(**self.draw_dict)
     post = Post_and_holder(name=self.name + "post",elm_type=self.elm_type,post_type=self.post_type)
     post.set_geom(self.docking_obj.get_geom())
     self.post = post
+    return super().draw()
+    
+  def draw_fc(self):
+    if self.model == "large mirror mount":
+      return mirror_mount(**self.draw_dict)
     obj = load_STL(**self.draw_dict)
     translate(obj, self.draw_dict["offset"])
     rotate(obj, self.draw_dict["rotation"][0], self.draw_dict["rotation"][1]*180/np.pi)
@@ -247,7 +239,13 @@ class Mount(Geom_Object):
     add_to_composition(part, container)
     return part
 
+
+
 class Grating_mount(Mount):
+  """
+  Like mounts, but only for gratings. In fact nothing new, just a few special
+  freecad operations
+  """
   def __init__(self, name="grating_mounmt",model="grating_mount",height=50,thickness=8, **kwargs):
     
     super().__init__(name, **kwargs)
@@ -272,7 +270,13 @@ class Grating_mount(Mount):
     add_to_composition(part, container)
     return part
 
+
+
 class Special_mount(Mount):
+  """
+  in fact only for rooftop mirrors and stripe mirrors
+  maybe deleted in the next version or more generalized
+  """
   def __init__(self, name="special_mounmt",model="special_mount",aperture=25.4,thickness=10,
                docking_pos = (1,2,3),docking_normal=(0,0,1),drawing_post=False, **kwargs):
     super().__init__(name, **kwargs)
@@ -383,8 +387,15 @@ class Special_mount(Mount):
         return part
       else:
         return obj
-    
+
+
+
 class Composed_Mount(Mount):
+  """
+  This one is for compositions of mulitple mounts stacked togehter
+  The add function drags every new mount to the docking position of the old one
+  and as usual all are moved correctly when the Composed_Mount is moved
+  """
   def __init__(self, **kwargs):
     self.mount_list = []
     super().__init__(**kwargs)
@@ -400,7 +411,8 @@ class Composed_Mount(Mount):
     part = initialize_composition_old(name="mount, post and base")
     container = []
     for mount in self.mount_list:
-      container.append(mount.draw_fc())
+      # container.append(mount.draw_fc())
+      container.append(mount.draw())
     add_to_composition(part, container)
     return part
     
