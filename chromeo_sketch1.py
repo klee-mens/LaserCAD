@@ -118,8 +118,8 @@ def Make_Stretcher_chromeo():
   #Cosmetics
   StripeM.aperture = width_stripe_mirror
   StripeM.draw_dict["height"] = height_stripe_mirror
-  StripeM.draw_dict["thickness"] = 25 # arbitrary
-  # StripeM.thickness = 25
+  # StripeM.draw_dict["thickness"] = 25 # arbitrary
+  StripeM.thickness = 25
   StripeM.draw_dict["model_type"] = "Stripe"
 
   Grat = Grating(grat_const=grating_const, name="Gitter", order=-1)
