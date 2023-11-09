@@ -41,17 +41,42 @@ if freecad_da:
 # print(mir.mount.docking_obj.get_geom())
 # mon.draw_dict["offset"] = np.array((-5, 0, 0))
 # mon.draw_dict["rotation"] = np.array((1, 0, 0)), np.pi*90/180
-A=Lens()
-A.pos += (100,0,0)
-B=Mirror(phi=54)
-B.pos += (200,0,0)
-C=Beam()
-D=Composition()
-D.set_light_source(C)
-D.add_fixed_elm(A)
-D.add_fixed_elm(B)
-D.propagate(50)
-D.draw()
+mir=Mirror(phi=90)
+mir.mount_dict['model']= 'KS1'
+mir.draw()
+mir.draw_mount()
+
+mir1=Mirror(phi=-90)
+mir1.pos = (100,0,80)
+mir1.mount_dict["post_type"] = "0.5inch_post"
+mir1.draw()
+mir1.draw_mount()
+
+mir2=Mirror(phi=90)
+mir2.pos = (200,0,80)
+mir2.aperture = 25.4*2
+mir2.draw()
+mir2.draw_mount()
+
+mir3 = Mirror()
+mir3.pos = (400,0,80)
+mir3.mount_dict["post_type"] = "large_post"
+mir3.draw()
+mir3.draw_mount()
+
+M=Composed_Mount()
+M1=Special_mount(model="MH25",drawing_post=False)
+M1.docking_obj.pos = M1.pos+(6.3,0,0)
+M1.docking_obj.normal = M1.normal
+M2=Mount(model="KMSS")
+M.add(M1)
+M.add(M2)
+mir4 = Mirror(phi=90)
+mir4.pos = (600,0,80)
+mir4.mount = M
+mir4.draw()
+mir4.draw_mount()
+
 # from LaserCAD.non_interactings.table import Table
 # t = Table()
 # t.pos = (-1000,-500,0)

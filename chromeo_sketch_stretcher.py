@@ -163,14 +163,14 @@ pure_cosmetic.draw_dict["model_type"] = "Rooftop"
 ip_s = Intersection_plane()
 ip_s.pos -=(0,0,periscope_height) 
 
-SinS = np.sin(10/180*np.pi)
-CosS = np.cos(10/180*np.pi)
+SinS = np.sin(10.0001/180*np.pi)
+CosS = np.cos(10.0001/180*np.pi)
 Grat1 = Grating(grat_const=grating_const, order=-1)
 Grat1.pos -=(500,0,periscope_height)
 Grat1.normal = grating_normal
 Grat1.normal = -Grat1.normal
 Grat2 = Grating(grat_const=grating_const, order=-1)
-propagation_length = 200
+propagation_length = 199.993
 Grat2.pos -= (500-propagation_length*CosS,SinS*propagation_length,periscope_height)
 Grat2.normal = grating_normal
 

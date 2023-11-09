@@ -10,19 +10,19 @@ Created on Tue Jul 11 13:15:19 2023
 import sys
 import os
     
-sys.path.append('C:\\ProgramData\\Anaconda3')
-# pfad = __file__
-# pfad = pfad.replace("\\", "/") #just in case
-# ind = pfad.rfind("/")
-# pfad = pfad[0:ind]
-# ind = pfad.rfind("/")
-# pfad = pfad[0:ind+1]
-# path_added = False
-# for path in sys.path:
-#   if path ==pfad:
-#     path_added = True
-# if not path_added:
-#   sys.path.append(pfad)
+# sys.path.append('C:\\ProgramData\\Anaconda3')
+pfad = __file__
+pfad = pfad.replace("\\", "/") #just in case
+ind = pfad.rfind("/")
+pfad = pfad[0:ind]
+ind = pfad.rfind("/")
+pfad = pfad[0:ind+1]
+path_added = False
+for path in sys.path:
+  if path ==pfad:
+    path_added = True
+if not path_added:
+  sys.path.append(pfad)
 
 from LaserCAD import basic_optics
 
