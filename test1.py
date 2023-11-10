@@ -22,7 +22,8 @@ if not pfad in sys.path:
 # from LaserCAD.non_interactings import Lambda_Plate
 
 from LaserCAD.freecad_models import clear_doc, setview, freecad_da
-from LaserCAD.basic_optics import Mirror
+from LaserCAD.basic_optics import Mirror,Crystal
+from LaserCAD.non_interactings import Pockels_Cell,Lambda_Plate
 from LaserCAD.basic_optics import Beam,Grating, Composition, inch, Curved_Mirror, Ray, Geom_Object, LinearResonator, Lens, Component
 from LaserCAD.freecad_models.utils import thisfolder, load_STL
 from LaserCAD.basic_optics.mount import Mount,Composed_Mount,Special_mount
@@ -41,22 +42,43 @@ if freecad_da:
 # print(mir.mount.docking_obj.get_geom())
 # mon.draw_dict["offset"] = np.array((-5, 0, 0))
 # mon.draw_dict["rotation"] = np.array((1, 0, 0)), np.pi*90/180
-A=Lens()
-A.pos += (100,0,0)
-B=Mirror(phi=54)
-B.pos += (200,0,0)
-C=Beam()
-D=Composition()
-D.set_light_source(C)
-D.add_fixed_elm(A)
-D.add_fixed_elm(B)
-D.propagate(50)
-D.draw()
+# A_target = 4.908738521234052 #from gain simlutation area in mm^2
+# focal = 2500
+# lam_mid = 2.4e-3
+# A_natural = lam_mid * focal
+# geometrie_factor = A_target / A_natural
+# total_length = focal * (1 - np.sqrt(1 - geometrie_factor**2))
+
+# # design params
+# dist1 = 570
+# dist_crystal_end = 20
+# last = total_length - dist1
+# # optics
+# mir1 = Mirror(phi=180)
+# cm = Curved_Mirror(radius=focal*2, phi = 180)
+
+# simres = LinearResonator(name="simple_Resonator1")
+# simres.set_wavelength(lam_mid)
+# simres.add_on_axis(mir1)
+# simres.propagate(dist1)
+# simres.propagate(last-dist_crystal_end)
+# laser_crys = Crystal(width=6, thickness=10, n=2.45)
+
+# simres.add_on_axis(laser_crys)
+# simres.propagate(dist_crystal_end)
+
+# simres.add_on_axis(cm)
+
+# simres.compute_eigenmode()
+# simres.draw()
 # from LaserCAD.non_interactings.table import Table
 # t = Table()
 # t.pos = (-1000,-500,0)
 # t.draw()
-
+a = Mirror()
+a.pos = (0,0,0)
+a.draw()
+a.draw_mount()
 # # compo = Component()
 # # compo.draw()
 # # compo.draw_mount()

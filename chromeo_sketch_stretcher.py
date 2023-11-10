@@ -18,15 +18,15 @@ if not pfad in sys.path:
   sys.path.append(pfad)
 
 
-from LaserCAD.freecad_models import clear_doc, setview, freecad_da
+from LaserCAD.freecad_models import clear_doc, freecad_da
 from LaserCAD.basic_optics import Mirror, Beam, Composition, inch
-from LaserCAD.basic_optics import Curved_Mirror, Ray, Component
+from LaserCAD.basic_optics import Curved_Mirror, Ray
 from LaserCAD.basic_optics.mirror import Rooftop_mirror,Stripe_mirror
-from LaserCAD.basic_optics import LinearResonator, Lens
-from LaserCAD.basic_optics import Grating, Crystal, Intersection_plane
+# from LaserCAD.basic_optics import LinearResonator, Lens
+from LaserCAD.basic_optics import Grating, Intersection_plane
 import matplotlib.pyplot as plt
-from LaserCAD.freecad_models.utils import thisfolder, load_STL
-from LaserCAD.non_interactings import Faraday_Isolator, Pockels_Cell, Lambda_Plate
+# from LaserCAD.freecad_models.utils import thisfolder, load_STL
+# from LaserCAD.non_interactings import Faraday_Isolator, Pockels_Cell, Lambda_Plate
 
 if freecad_da:
   clear_doc()
@@ -117,8 +117,8 @@ for wavel in wavels:
   rn.draw_dict["color"] = cmap( x )
   rays.append(rn)
 lightsource.override_rays(rays)
-lightsource.draw_dict['model'] = "ray_group"
-
+# lightsource.draw_dict['model'] = "ray_group"
+# lightsource = Beam(radius=1,angle=0,wavelength=2300*10E-6)
 # starting the real stretcher
 Stretcher = Composition(name="DerStrecker")
 Stretcher.set_light_source(lightsource)
@@ -163,14 +163,15 @@ pure_cosmetic.draw_dict["model_type"] = "Rooftop"
 ip_s = Intersection_plane()
 ip_s.pos -=(0,0,periscope_height) 
 
-SinS = np.sin(10.0001/180*np.pi)
-CosS = np.cos(10.0001/180*np.pi)
+angle = 9.9998
+SinS = np.sin(angle/180*np.pi)
+CosS = np.cos(angle/180*np.pi)
 Grat1 = Grating(grat_const=grating_const, order=-1)
 Grat1.pos -=(500,0,periscope_height)
 Grat1.normal = grating_normal
 Grat1.normal = -Grat1.normal
 Grat2 = Grating(grat_const=grating_const, order=-1)
-propagation_length = 199.993
+propagation_length = 199.9922
 Grat2.pos -= (500-propagation_length*CosS,SinS*propagation_length,periscope_height)
 Grat2.normal = grating_normal
 
@@ -210,7 +211,7 @@ Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0,6,7,8,9,7,6,10])
 Stretcher.recompute_optical_axis()
 
 Stretcher.draw()
-ip_s.spot_diagram(Stretcher._beams[-1])
+# ip_s.spot_diagram(Stretcher._beams[-1])
 pathlength = {}
 for ii in range(Stretcher._beams[0]._ray_count):
   wavelength = Stretcher._beams[0].get_all_rays()[ii].wavelength

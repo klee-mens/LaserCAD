@@ -38,7 +38,7 @@ if freecad_da:
 start_point = (0,0,104) #see CLPF-2400-10-60-0_8 sn2111348_Manual
 seed_beam_radius = 2.5/2 #see CLPF-2400-10-60-0_8 sn2111348_Manual
 distance_seed_laser_stretcher = 400 #the complete distance
-distance_6_mm_faraday = 45
+distance_6_mm_faraday = 103
 distance_faraday_mirror = 100
 
 seed_laser = Component(name="IPG_Seed_Laser")
@@ -152,14 +152,14 @@ def Make_Stretcher_chromeo():
     rays.append(rn)
   lightsource.override_rays(rays)
   lightsource.draw_dict['model'] = "ray_group"
-
+  lightsource = Beam(radius=1,angle=0,wavelength=2300e-9 * 1e3) #LIGHT SOURCE TEST
   # starting the real stretcher
   Stretcher = Composition(name="DerStrecker")
   Stretcher.set_light_source(lightsource)
   Stretcher.redefine_optical_axis(helper_light_source.inner_ray())
 
   Stretcher.propagate(first_propagation)
-  FlipMirror_In_Out = Mirror(phi=90, name="FlipMirrorInOut")
+  FlipMirror_In_Out = Mirror(phi=100, name="FlipMirrorInOut")
   
   mount=Composed_Mount()
   Mount1=Special_mount(model="MH25",drawing_post=False)
@@ -446,13 +446,13 @@ BigPump.set_geom(amp2._elements[2].get_geom())
 
 Seed.draw()
 Stretcher.draw()
-PulsePicker.draw()
-Amplifier_I.draw()
-Pump.draw()
-amp2.draw()
+# PulsePicker.draw()
+# Amplifier_I.draw()
+# Pump.draw()
+# amp2.draw()
 # BigPump.draw()
-t=Table()
-t.draw()
+# t=Table()
+# t.draw()
 
 # =============================================================================
 # breadboards

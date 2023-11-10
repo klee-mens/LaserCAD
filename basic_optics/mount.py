@@ -146,7 +146,7 @@ class Mount(Geom_Object):
     """
     buf = []
     mount_in_database = False
-    aperture =height = price = xshift = offset=0
+    aperture =height = price = xshift =0
     if self.model in MIRROR_LIST:model_type ="mirror" 
     else:model_type="lens"
     with open(thisfolder+model_type+"mounts.csv") as csvfile: 
@@ -160,9 +160,9 @@ class Mount(Geom_Object):
         height = float(mount_loop["height"])
         price = float(mount_loop["price"])
         xshift = float(mount_loop["xshift"])
-        offset = (float(mount_loop["offsetX"]),
-                        float(mount_loop["offsetY"]),
-                        float(mount_loop["offsetZ"]))
+        # offset = (float(mount_loop["offsetX"]),
+        #                 float(mount_loop["offsetY"]),
+        #                 float(mount_loop["offsetZ"]))
         # rotation = (float(mount_loop["rot_angleZ"]),
         #                     float(mount_loop["rot_angleY"]),
         #                     float(mount_loop["rot_angleX"]))
@@ -175,9 +175,9 @@ class Mount(Geom_Object):
     self.draw_dict["xshift"]=xshift
     self.draw_dict["height"]=height
     self.yshift = 0
-    self.offset_vector = offset
+    # self.offset_vector = offset
     # self.draw_dict["mount_type"] = self.model
-    docking_pos = np.array([xshift,0,-height])
+    # docking_pos = np.array([xshift,0,-height])
     docking_normal = self.normal
     # updates the docking geom for the first time
     if self.normal[2]<DEFAULT_MAX_ANGULAR_OFFSET/180*np.pi:

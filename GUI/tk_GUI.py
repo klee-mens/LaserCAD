@@ -182,8 +182,8 @@ def GUI(path=""):
     btn_convert = tk.Button(
         master=lsWindow,
         text="complete setting",
-        command=complete_ls_setting
-        ,font=(font_name,font_size)
+        command=complete_ls_setting,
+        font=(font_name,font_size)
     )
     title.grid(row=1, column=0, padx=10)
     radius_entry.grid(row=2, column=0, padx=10)
