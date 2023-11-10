@@ -221,7 +221,6 @@ class Mount(Geom_Object):
       self.draw_dict["geom"] = self.get_geom()
     if self.model =="default":
       self.model = get_model_by_aperture_and_element(self.elm_type, self.aperture)
-
     if self.model in MIRROR_LIST:
       stl_file=thisfolder+"\\mount_meshes\\adjusted mirror mount\\" + self.model + ".stl"
     elif self.model in LENS_LIST:
