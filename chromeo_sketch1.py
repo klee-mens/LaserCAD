@@ -454,6 +454,19 @@ Stretcher.draw()
 # t=Table()
 # t.draw()
 
+Alignment = Composition()
+Alignment.pos = Stretcher._elements[2].pos+(1500,10,15)
+Alignment.normal = (-1,0,0)
+ls= Beam()
+ls.draw_dict["color"] = (0/255,255/255,0/255)
+Alignment.set_light_source(ls)
+Alignment.add_fixed_elm(Stretcher._elements[2])
+Alignment.add_fixed_elm(Stretcher._elements[3])
+Alignment.set_sequence([0,1,0])
+Alignment.recompute_optical_axis()
+Alignment.propagate(1500)
+Alignment.draw()
+
 # =============================================================================
 # breadboards
 # =============================================================================

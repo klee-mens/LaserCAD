@@ -3,7 +3,7 @@ LaserCAD User Guide
 LaserCAD is a software for optical tracking and 3D modeling based on Python and FreeCAD. This article tries to give a brief introduction to how to use this software.
 
 1 Introduction to basic objects
-  In LaserCAD, all objects must contain one basic piece of information: geometric information. Geometric information has two components, the set position (pos) and the axes matrix (_axes), and for some simple objects, the direction of the object can represent the axes. Thus as for the most general case, we would recommend using normal direction (normal) to show the object's rotation. 
+  In LaserCAD, all objects must contain one basic piece of information: geometric information. Geometric information has two components, the set position (pos) and the axes matrix (_axes), and for some simple objects, the direction of the object can represent the axes. Thus as for the most general case, we recommend using normal direction (normal) to show the object's rotation. 
 
   Example:
   A=Mirror() #Mirror is a basic optical element. In LaserCAD we define Mirror as a class to handle the function easily.
@@ -66,7 +66,7 @@ LaserCAD is a software for optical tracking and 3D modeling based on Python and 
   A.draw()
   B.draw()
 
-  From the Curved_Mirror example, we can find out that in order to get the result of the interaction between the beam and the optics, you have to define a new beam and get the next beam using the next_beam function. This creates a lot of inconvenience in complex optical modeling. Thus, we define a new class named Composition to classify all the beams, optical elements, and mounts.
+  From the Curved_Mirror example, we can find out that in order to get the result of the interaction between the beam and the optics, you have to define a new beam and get the next beam using the next_beam function. This creates a lot of inconvenience in complex optical modeling. Thus, we define a new Composition class to classify all the beams, optical elements, and mounts.
   
   Example:
   A=Lens()
@@ -81,7 +81,7 @@ LaserCAD is a software for optical tracking and 3D modeling based on Python and 
   D.porpagate(80)
   D.draw()
 
-  In the code, the add_on_axis function is used to add the optics to the correct position on the axis. We can also add the optics to a certain position.
+  In the code, the add_on_axis function adds the optics to the correct position on the axis. We can also add the optics to a certain position.
   
   Example:
   A=Lens()
