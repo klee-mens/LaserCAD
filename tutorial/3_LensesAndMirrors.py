@@ -21,7 +21,7 @@ from LaserCAD.basic_optics import Mirror, Curved_Mirror, Lens, Beam, Ray
 from LaserCAD.freecad_models import freecad_da, clear_doc, setview
 
 # =============================================================================
-# about lenses, curved mirrors and spot diagrams
+# about lenses and mirrors
 # =============================================================================
 
 """

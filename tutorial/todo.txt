@@ -1,0 +1,5 @@
+Grating
+SpotDiagram
+CurvedMirror MultiRay
+Mount Post
+Cylindric_Mirror MulitRay

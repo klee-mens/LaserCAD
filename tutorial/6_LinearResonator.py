@@ -24,53 +24,47 @@ from LaserCAD.basic_optics import LinearResonator, Lens
 from LaserCAD.basic_optics import Crystal
 from LaserCAD.non_interactings import Faraday_Isolator, Pockels_Cell, Lambda_Plate
 
-from LaserCAD.freecad_models.utils import load_STL
 
 if freecad_da:
   clear_doc()
 
-# c1 = Component()
-# c1.freecad_model = load_STL
-# c1.draw_dict["stl_file"] = "C:\\Users\\mens\\AppData\\Local\\Programs\\Spyder\\pkgs\\LaserCAD\\freecad_models\\/mount_meshes/adjusted mirror mount/POLARIS-K1.stl"
-# c1.draw()
-
-
-
-
+# create a resonator, set position and wavelength
 reso = LinearResonator()
 reso.pos += (0,0,30)
 reso.set_wavelength(1e-3)
 
+# add the end mirror with certain aperture, propagate
 mir1 = Mirror()
 mir1.aperture = 2*inch
-# mir1.draw()
-# mir1.draw_mount()
-
 reso.add_on_axis(mir1)
-
 reso.propagate(100)
 
+
+# add a Lambda Plate (no influence, polarisation is not included), propagate
 reso.add_on_axis(Lambda_Plate())
-
 reso.propagate(100)
 
+# add a flip mirror, propagate
 reso.add_on_axis(Mirror(phi=90))
-
-
-
 reso.propagate(450)
 
-reso.add_on_axis(Mirror(phi=90))
 
+# add a flip mirror, propagate
+reso.add_on_axis(Mirror(phi=90))
 reso.propagate(150)
 
-reso.add_on_axis(Pockels_Cell())
-
+# add a Pockels Cell (no influence, polarisation is not included), propagate
+# reso.add_on_axis(Pockels_Cell())
+pc = Pockels_Cell()
+pc.draw_dict["color"] = (0.1, 0.1, 0.1)
+reso.add_on_axis(pc)
 reso.propagate(250)
 
-
+# Add a Curved End Mirror
 reso.add_on_axis(Curved_Mirror(radius=2000))
 
+# Draw ALL components and their mounts, compute the eigenmode (TEM00)
+# and draws it aus gaussian beam (this may take some seconds)
 reso.draw()
 
 

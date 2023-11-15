@@ -21,11 +21,12 @@ from LaserCAD.basic_optics import Mirror, Lens, Beam, Composition
 from LaserCAD.freecad_models import freecad_da, clear_doc, setview
 
 # =============================================================================
-# like the other but with Compositions
+# like LensesAndMirrors but with Compositions
 # =============================================================================
 
 """
-Quick intro to compositions. Output is exactly the same but syntax is easier
+Quick intro to compositions. Output is exactly the same but as in 
+LensesAndMirrors positioning is easier
 
 
 You create the composition and add alternating propagations and element. All
