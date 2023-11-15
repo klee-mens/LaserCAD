@@ -1,4 +1,6 @@
 # LaserCAD
+Authors: Clemens Anschütz clemens.anschuetz@uni-jena.de
+He Zhuang he.zhuang@uni-jena.de
 Procrastination next level
 
 
