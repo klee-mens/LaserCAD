@@ -49,7 +49,7 @@ All objects could be easily added to a composition
 mir1 = Mirror()
 mir1.draw()
 print()
-print(mir1.draw_dict)
+# print(mir1.draw_dict)
 
 
 mir2 = Mirror()
@@ -67,7 +67,6 @@ mir3 = Mirror()
 mir3.pos += (180, -170, 10)
 mir3.normal = (1,2,0)
 print()
-print(mir3.mount_dict)
 # mir3.mount_dict["model"] = thisfolder + "\mount_meshes\special mount\spartan.stl"
 mir3.mount_dict["model"] = "\spartan"
 
@@ -78,7 +77,6 @@ mir3.mount.docking_obj.pos += (-19, -46, -15)
 
 mir3.draw()
 mir3.draw_mount()
-
 from LaserCAD.freecad_models.utils import load_STL, thisfolder
 seed_laser = Component()
 stl_file=thisfolder+"\mount_meshes\special mount\Laser_Head-Body.stl"

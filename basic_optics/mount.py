@@ -133,6 +133,7 @@ class Mount(Geom_Object):
     self.mount_in_database = self.set_by_table()
     post = Post_and_holder(name=self.name + "post",elm_type=self.elm_type,post_type=post_type)
     post.set_geom(self.docking_obj.get_geom())
+    self.post = post
     
   def set_by_table(self):
     """
@@ -221,9 +222,9 @@ class Mount(Geom_Object):
     if self.model == "large mirror mount":
       self.draw_dict["thickness"] = self.thickness
       self.draw_dict["dia"] = self.aperture
-    post = Post_and_holder(name=self.name + "post",elm_type=self.elm_type,post_type=self.post_type)
-    post.set_geom(self.docking_obj.get_geom())
-    self.post = post
+    # post = Post_and_holder(name=self.name + "post",elm_type=self.elm_type,post_type=self.post_type)
+    # post.set_geom(self.docking_obj.get_geom())
+    # self.post = post
     return super().draw()
     
   def draw_fc(self):
@@ -254,7 +255,7 @@ class Grating_mount(Mount):
     self.draw_dict["drawing_post"] = False
     self.draw_dict["geom"]=self.get_geom()
     self.xshift = 17 + 15
-    docking_pos = np.array([self.xshift,0,-29])
+    docking_pos = np.array([self.xshift,0,-25.5])
     self.docking_obj.pos = self.docking_obj.pos+docking_pos[0]*self._axes[:,0]+docking_pos[2]*self._axes[:,2] 
     self.post.set_geom(self.docking_obj.get_geom())
     

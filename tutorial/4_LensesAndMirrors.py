@@ -17,7 +17,7 @@ pfad = pfad[0:ind-1]
 if not pfad in sys.path:
   sys.path.append(pfad)
 
-from LaserCAD.basic_optics import Mirror, Curved_Mirror, Lens, Beam, Ray
+from LaserCAD.basic_optics import Mirror, Curved_Mirror, Lens, Beam, Ray,Intersection_plane
 from LaserCAD.freecad_models import freecad_da, clear_doc, setview
 
 # =============================================================================
@@ -25,6 +25,7 @@ from LaserCAD.freecad_models import freecad_da, clear_doc, setview
 # =============================================================================
 
 """
+
 Here you see some interaction of optical elements with Beams
 
 Standard Beams (=cone distributet bemas with 2 rays, one inner and one outer)
@@ -38,8 +39,12 @@ deflection in the xy Plane, theta the tilt in z-Direction. So a normal Flip-
 Mirror would have phi = +- 90, theta=0. Phi=180 is the default and means total
 back reflection. You can use the formular phi = 180 - 2*AOI where AOI is the
 anlge of incidence. All angles are in degrees. The combinatino phi=0, theta=0 
-raises an error (grazing incidence).
-
+raises an error (grazing incidence). The Curved mirror is a special mirror, 
+which has all mirrors value. Besdies, the curverd mirror has some different 
+values like raduis, which describes the curvature of the mirror. Here are some 
+examples of how curved mirrors can focus beams. Another class called 
+'Intersection_plane' can set up a plane and is primarily used to show a spot 
+diagram of the beam on that plane.
 
 """
 
@@ -83,9 +88,44 @@ b21.draw()
 print()
 print()
 
+b12 = Beam(radius=2,angle=0)
+b12.pos += (0,200,0)
+
+mir2 = Curved_Mirror(radius=400,phi=90)
+mir2.pos += (50,200,0)
+b22 = mir2.next_beam(b12)
+
+mir2.draw()
+b12.draw()
+b22.draw()
+
+print()
+print()
+
+b13 = Beam(radius=2,angle=0,distribution="square")
+b13.pos += (0,300,0)
+
+mir3 = Curved_Mirror(radius=400,phi=90)
+mir3.pos += (100,300,0)
+b23 = mir3.next_beam(b13)
+
+ip = Intersection_plane()
+ip.pos = mir3.pos + (0,200,0)
+ip.normal = (0,-1,0)
+b33 = ip.next_beam(b23)
+
+mir3.draw()
+b13.draw()
+b23.draw()
+b33.draw()
+ip.draw()
+ip.spot_diagram(b33)
+
+print()
+print()
 
 # =============================================================================
-# ToDo: Curved Mirror -> He
+# ToDo: Curved Mirror aND sPOT dIAGRAMS -> He 
 # =============================================================================
 
 if freecad_da:
