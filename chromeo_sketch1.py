@@ -152,7 +152,7 @@ def Make_Stretcher_chromeo():
     rays.append(rn)
   lightsource.override_rays(rays)
   lightsource.draw_dict['model'] = "ray_group"
-  lightsource = Beam(radius=1,angle=0,wavelength=2300e-9 * 1e3) #LIGHT SOURCE TEST
+  # lightsource = Beam(radius=1,angle=0,wavelength=2300e-9 * 1e3) #LIGHT SOURCE TEST
   # starting the real stretcher
   Stretcher = Composition(name="DerStrecker")
   Stretcher.set_light_source(lightsource)
@@ -176,11 +176,13 @@ def Make_Stretcher_chromeo():
   #adding the helper
   helper.set_geom(Stretcher.last_geom())
   helper.pos += (0,0, height_stripe_mirror/2 + safety_to_stripe_mirror)
+  print(helper.last_geom())
   for element in helper._elements:
     Stretcher.add_fixed_elm(element)
 
   Stretcher.set_sequence([0,1,2,3,2,1])
   Stretcher.recompute_optical_axis()
+  print(Stretcher.last_geom())
 
   # adding the rooftop mirror and it's cosmetics
   Stretcher.propagate(distance_roof_top_grating)
@@ -189,7 +191,7 @@ def Make_Stretcher_chromeo():
   Stretcher.propagate(periscope_height)
   RoofTop2 = Mirror(phi=0, theta=90)
   Stretcher.add_on_axis(RoofTop2)
-
+  
   RoofTop1.draw = dont
   RoofTop1.mount.elm_type = "dont_draw"
   RoofTop2.draw = dont
@@ -208,14 +210,15 @@ def Make_Stretcher_chromeo():
   # note that pure cosmetic (pos6) is not in the sequence
   Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0])
   Stretcher.recompute_optical_axis()
+  print(RoofTop1.normal," ",RoofTop2.normal)
   Stretcher.propagate(100)
-
+  print(Stretcher.last_geom())
   return Stretcher
 
 Stretcher = Make_Stretcher_chromeo()
 Stretcher.set_geom(seed_end_geom)
-
-
+# convex = Stretcher._elements[3]
+# convex.pos += convex.normal * 50
 
 # =============================================================================
 # The pulse picker
@@ -444,8 +447,9 @@ BigPump.set_geom(amp2._elements[2].get_geom())
 # Draw Selection
 # =============================================================================
 
-Seed.draw()
-Stretcher.draw()
+# Seed.draw()
+# Stretcher.draw()
+
 # PulsePicker.draw()
 # Amplifier_I.draw()
 # Pump.draw()
@@ -465,7 +469,7 @@ Alignment.add_fixed_elm(Stretcher._elements[3])
 Alignment.set_sequence([0,1,0])
 Alignment.recompute_optical_axis()
 Alignment.propagate(1500)
-Alignment.draw()
+# Alignment.draw()
 
 # =============================================================================
 # breadboards

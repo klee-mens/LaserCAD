@@ -164,6 +164,7 @@ def Make_Stretcher_chromeo():
   #adding the helper
   helper.set_geom(Stretcher.last_geom())
   helper.pos += (0,0, height_stripe_mirror/2 + safety_to_stripe_mirror)
+  StripeM.pos += StripeM.normal * 10
   for element in helper._elements:
     Stretcher.add_fixed_elm(element)
 

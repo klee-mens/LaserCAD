@@ -188,7 +188,7 @@ def Make_Stretcher(
   Concav.normal = (-1,0,0)
   
   StripeM = Curved_Mirror(radius= -Radius/2, name="Stripe_Mirror")
-  StripeM.pos = (Radius/2, 0, 0)
+  StripeM.pos = (Radius/2-5, 0, 0)
   #Cosmetics
   StripeM.aperture=75
   StripeM.draw_dict["height"]=10

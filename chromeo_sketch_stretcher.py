@@ -117,8 +117,8 @@ for wavel in wavels:
   rn.draw_dict["color"] = cmap( x )
   rays.append(rn)
 lightsource.override_rays(rays)
-# lightsource.draw_dict['model'] = "ray_group"
-# lightsource = Beam(radius=1,angle=0,wavelength=2300*10E-6)
+lightsource.draw_dict['model'] = "ray_group"
+
 # starting the real stretcher
 Stretcher = Composition(name="DerStrecker")
 Stretcher.set_light_source(lightsource)
@@ -133,6 +133,7 @@ Stretcher.propagate(distance_flip_mirror1_grating)
 #adding the helper
 helper.set_geom(Stretcher.last_geom())
 helper.pos += (0,0, height_stripe_mirror/2 + safety_to_stripe_mirror)
+StripeM.pos += StripeM.normal * -10
 for element in helper._elements:
   Stretcher.add_fixed_elm(element)
 
@@ -193,57 +194,61 @@ pure_cosmetic1.normal = (C_RoofTop1.normal + C_RoofTop2.normal ) / 2
 pure_cosmetic1.draw_dict["model_type"] = "Rooftop"
 pure_cosmetic1.aperture = periscope_height
 
-# ip = Intersection_plane()
-# ip.pos -= (100,0,0)
-Stretcher.add_fixed_elm(Grat1)
-Stretcher.add_fixed_elm(Grat2)
-Stretcher.add_fixed_elm(C_RoofTop1)
-Stretcher.add_fixed_elm(C_RoofTop2)
+ip = Intersection_plane()
+ip.pos -= (100,0,0)
+# Stretcher.add_fixed_elm(Grat1)
+# Stretcher.add_fixed_elm(Grat2)
+# Stretcher.add_fixed_elm(C_RoofTop1)
+# Stretcher.add_fixed_elm(C_RoofTop2)
 
-Stretcher.add_fixed_elm(ip_s)
+# Stretcher.add_fixed_elm(ip_s)
 Stretcher.add_fixed_elm(pure_cosmetic)
-Stretcher.add_fixed_elm(pure_cosmetic1)
+# Stretcher.add_fixed_elm(pure_cosmetic1)
 
 # setting the final sequence and the last propagation for visualization
 # note that pure cosmetic (pos6) is not in the sequence
-Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0,6,7,8,9,7,6,10])
-# Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0])
+# Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0,6,7,8,9,7,6,10])
+Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0])
 Stretcher.recompute_optical_axis()
-
+ip=Intersection_plane()
+ip.set_geom(Stretcher.last_geom())
+# ip.spot_diagram(Stretcher._beams[-1],aberration_analysis=True)
+ip.draw()
 Stretcher.draw()
+ip.spot_diagram(Stretcher._beams[-1],aberration_analysis=True)
 # ip_s.spot_diagram(Stretcher._beams[-1])
-pathlength = {}
-for ii in range(Stretcher._beams[0]._ray_count):
-  wavelength = Stretcher._beams[0].get_all_rays()[ii].wavelength
-  pathlength[wavelength] = 0
-for jj in range(len(Stretcher._beams)-1):
-  for ii in Stretcher._beams[jj].get_all_rays():
-    a=pathlength[ii.wavelength]
-    pathlength[ii.wavelength] = a +ii.length
-ray_lam = [ray.wavelength for ray in Stretcher._beams[0].get_all_rays()]
-path = [pathlength[ii] for ii in ray_lam]
-path_diff = [ii-path[int(len(path)/2)] for ii in path]
-fai = [path_diff[ii]/ray_lam[ii]*2*np.pi for ii in range(len(path))]
-omega = [c0/ii*2*np.pi for ii in ray_lam]
-para = np.polyfit(omega, fai, 5)
-fai2 = [20*para[0]*ii**3+12*para[1]*ii**2+6*para[2]*ii+2*para[3] for ii in omega]
-# fai2 = [para[0]*ii**5+para[1]*ii**4+para[2]*ii**3+para[3]*ii**2+para[4]*ii+para[5] for ii in omega]
-delay_mid = path[int(len(path)/2)]/c0
-delay = [(pa/c0-delay_mid)*1E9 for pa in path]
-plt.figure()
-ax1=plt.subplot(1,2,1)
-plt.plot(ray_lam,path)
-plt.ylabel("pathlength (mm)")
-plt.xlabel("wavelength (mm)")
-plt.title("Pathlength at different wavelength")
-plt.axhline(path[int(len(path)/2)], color = 'black', linewidth = 1)
-ax2=plt.subplot(1,2,2)
-plt.plot(ray_lam,delay)
-plt.ylabel("delay (ns)")
-plt.xlabel("wavelength (mm)")
-plt.title("Delay at different wavelength")
-plt.axhline(0, color = 'black', linewidth = 1)
-plt.show()
+# pathlength = {}
+# for ii in range(Stretcher._beams[0]._ray_count):
+#   wavelength = Stretcher._beams[0].get_all_rays()[ii].wavelength
+#   pathlength[wavelength] = 0
+# for jj in range(len(Stretcher._beams)-1):
+#   for ii in Stretcher._beams[jj].get_all_rays():
+#     a=pathlength[ii.wavelength]
+#     pathlength[ii.wavelength] = a +ii.length
+# ray_lam = [ray.wavelength for ray in Stretcher._beams[0].get_all_rays()]
+# path = [pathlength[ii] for ii in ray_lam]
+# path_diff = [ii-path[int(len(path)/2)] for ii in path]
+# fai = [path_diff[ii]/ray_lam[ii]*2*np.pi for ii in range(len(path))]
+# omega = [c0/ii*2*np.pi for ii in ray_lam]
+# para = np.polyfit(omega, fai, 5)
+# fai2 = [20*para[0]*ii**3+12*para[1]*ii**2+6*para[2]*ii+2*para[3] for ii in omega]
+# # fai2 = [para[0]*ii**5+para[1]*ii**4+para[2]*ii**3+para[3]*ii**2+para[4]*ii+para[5] for ii in omega]
+# delay_mid = path[int(len(path)/2)]/c0
+# delay = [(pa/c0-delay_mid)*1E9 for pa in path]
+# plt.figure()
+# ax1=plt.subplot(1,2,1)
+# plt.plot(ray_lam,path)
+# plt.ylabel("pathlength (mm)")
+# plt.xlabel("wavelength (mm)")
+# plt.title("Pathlength at different wavelength")
+# plt.axhline(path[int(len(path)/2)], color = 'black', linewidth = 1)
+# ax2=plt.subplot(1,2,2)
+# plt.plot(ray_lam,delay)
+# plt.ylabel("delay (ns)")
+# plt.xlabel("wavelength (mm)")
+# plt.title("Delay at different wavelength")
+# plt.axhline(0, color = 'black', linewidth = 1)
+# plt.show()
 
 # SinS = np.sin(10/180*np.pi)
 # CosS = np.cos(10/180*np.pi)
