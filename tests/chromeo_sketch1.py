@@ -108,6 +108,7 @@ def Make_Stretcher_chromeo():
   a = v/2
   b = np.sqrt(a**2 - (v**2 - s**2)/(2*(1+c)))
   sinB = a - b
+  print(sinB)
   grating_normal = (np.sqrt(1-sinB**2), sinB, 0)
 
   Concav = Curved_Mirror(radius=radius_concave, name="Concav_Mirror")
