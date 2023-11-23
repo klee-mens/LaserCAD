@@ -176,22 +176,28 @@ def Make_Stretcher_chromeo():
   #adding the helper
   helper.set_geom(Stretcher.last_geom())
   helper.pos += (0,0, height_stripe_mirror/2 + safety_to_stripe_mirror)
-  print(helper.last_geom())
   for element in helper._elements:
     Stretcher.add_fixed_elm(element)
 
   Stretcher.set_sequence([0,1,2,3,2,1])
   Stretcher.recompute_optical_axis()
-  print(Stretcher.last_geom())
+  
 
   # adding the rooftop mirror and it's cosmetics
-  Stretcher.propagate(distance_roof_top_grating)
+  Stretcher.propagate(distance_roof_top_grating)#
+  print("oA normal1",Stretcher._optical_axis[-1].normal)
   RoofTop1 = Mirror(phi=0, theta=90)
   Stretcher.add_on_axis(RoofTop1)
   Stretcher.propagate(periscope_height)
-  RoofTop2 = Mirror(phi=0, theta=90)
-  Stretcher.add_on_axis(RoofTop2)
+  # print(Stretcher.last_geom())
   
+  RoofTop2 = Mirror(phi=0)
+  rt1n = RoofTop1.normal
+  Stretcher.add_on_axis(RoofTop2)
+  RoofTop2.normal = (rt1n[0], rt1n[1], -rt1n[2])
+  print(RoofTop1.normal," The Normals ",RoofTop2.normal)
+  # print(RoofTop1.pos,RoofTop2.pos)
+
   RoofTop1.draw = dont
   RoofTop1.mount.elm_type = "dont_draw"
   RoofTop2.draw = dont
@@ -210,9 +216,10 @@ def Make_Stretcher_chromeo():
   # note that pure cosmetic (pos6) is not in the sequence
   Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0])
   Stretcher.recompute_optical_axis()
-  print(RoofTop1.normal," ",RoofTop2.normal)
-  Stretcher.propagate(100)
-  print(Stretcher.last_geom())
+  Stretcher.propagate(200)
+  Stretcher.add_on_axis(Mirror(phi=-90))
+  Stretcher.propagate(2000)
+  # print(Stretcher.last_geom())
   return Stretcher
 
 Stretcher = Make_Stretcher_chromeo()
@@ -448,7 +455,7 @@ BigPump.set_geom(amp2._elements[2].get_geom())
 # =============================================================================
 
 # Seed.draw()
-# Stretcher.draw()
+Stretcher.draw()
 
 # PulsePicker.draw()
 # Amplifier_I.draw()

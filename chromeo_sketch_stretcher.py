@@ -17,6 +17,8 @@ pfad = pfad[0:ind]
 if not pfad in sys.path:
   sys.path.append(pfad)
 
+from scipy.interpolate import interp1d
+from scipy.misc import derivative
 
 from LaserCAD.freecad_models import clear_doc, freecad_da
 from LaserCAD.basic_optics import Mirror, Beam, Composition, inch
@@ -56,7 +58,7 @@ width_stripe_mirror = 75 # in mm
 seperation_angle = 10 /180 *np.pi # sep between in and outgoing middle ray
 # incident_angle = seperation_angle + reflection_angle
 grating_const = 1/450 # in 1/mm
-seperation = 100 # difference grating position und radius_concave
+seperation = 50 # difference grating position und radius_concave
 lambda_mid = 2400e-9 * 1e3 # central wave length in mm
 delta_lamda = 200e-9*1e3 # full bandwith in mm
 number_of_rays = 20
@@ -133,7 +135,6 @@ Stretcher.propagate(distance_flip_mirror1_grating)
 #adding the helper
 helper.set_geom(Stretcher.last_geom())
 helper.pos += (0,0, height_stripe_mirror/2 + safety_to_stripe_mirror)
-StripeM.pos += StripeM.normal * -10
 for element in helper._elements:
   Stretcher.add_fixed_elm(element)
 
@@ -162,9 +163,11 @@ pure_cosmetic.normal = (RoofTop1.normal + RoofTop2.normal ) / 2
 pure_cosmetic.aperture = periscope_height
 pure_cosmetic.draw_dict["model_type"] = "Rooftop"
 ip_s = Intersection_plane()
-ip_s.pos -=(0,0,periscope_height) 
+# ip_s.pos -=(0,0,periscope_height) #two gratings
+ip_s.pos -=(1000,0,periscope_height) #four gratings
 
-angle = 9.9998
+angle = 10.001
+# angle = 10
 SinS = np.sin(angle/180*np.pi)
 CosS = np.cos(angle/180*np.pi)
 Grat1 = Grating(grat_const=grating_const, order=-1)
@@ -172,10 +175,18 @@ Grat1.pos -=(500,0,periscope_height)
 Grat1.normal = grating_normal
 Grat1.normal = -Grat1.normal
 Grat2 = Grating(grat_const=grating_const, order=-1)
-propagation_length = 199.9922
+propagation_length = 99.9995
+# propagation_length = 100
 Grat2.pos -= (500-propagation_length*CosS,SinS*propagation_length,periscope_height)
 Grat2.normal = grating_normal
 
+shift_direction = np.cross((0,0,1),Grat1.normal)
+Grat1.pos += shift_direction * -17
+Grat2.pos += shift_direction * 17
+"""
+# =============================================================================
+# Two Gratings Compressor
+# =============================================================================
 C_RoofTop1 = Mirror()
 C_RoofTop1.pos -= (700,SinS*propagation_length,periscope_height)
 C_RoofTop1.normal = (-1,0,-1)
@@ -193,48 +204,70 @@ pure_cosmetic1.pos = (C_RoofTop1.pos + C_RoofTop2.pos ) / 2
 pure_cosmetic1.normal = (C_RoofTop1.normal + C_RoofTop2.normal ) / 2
 pure_cosmetic1.draw_dict["model_type"] = "Rooftop"
 pure_cosmetic1.aperture = periscope_height
+"""
+# =============================================================================
+# Four Gratings Compressor
+# =============================================================================
+Grat3 =Grating(grat_const=grating_const,order=1)
+Grat3.pos = (Grat1.pos[0]-300,Grat2.pos[1],Grat2.pos[2])
+Grat3.normal = (Grat1.normal[0],-Grat1.normal[1],Grat1.normal[2])
+Grat4 =Grating(grat_const=grating_const,order=1)
+Grat4.pos = (Grat2.pos[0]-300,Grat1.pos[1],Grat2.pos[2])
+Grat4.normal = (Grat2.normal[0],-Grat2.normal[1],Grat2.normal[2])
 
 ip = Intersection_plane()
 ip.pos -= (100,0,0)
-# Stretcher.add_fixed_elm(Grat1)
-# Stretcher.add_fixed_elm(Grat2)
-# Stretcher.add_fixed_elm(C_RoofTop1)
-# Stretcher.add_fixed_elm(C_RoofTop2)
-
-# Stretcher.add_fixed_elm(ip_s)
+Stretcher.add_fixed_elm(Grat1)
+Stretcher.add_fixed_elm(Grat2)
+Stretcher.add_fixed_elm(Grat3)
+Stretcher.add_fixed_elm(Grat4)
+"""
+Stretcher.add_fixed_elm(C_RoofTop1)
+Stretcher.add_fixed_elm(C_RoofTop2)
+"""
+Stretcher.add_fixed_elm(ip_s)
 Stretcher.add_fixed_elm(pure_cosmetic)
 # Stretcher.add_fixed_elm(pure_cosmetic1)
 
 # setting the final sequence and the last propagation for visualization
 # note that pure cosmetic (pos6) is not in the sequence
-# Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0,6,7,8,9,7,6,10])
-Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0])
+# Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0,6,7,8,9,7,6,10]) #two Gratings Compressor
+Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0,6,7,8,9,10]) #four Gratings Compressor
+# Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0])
 Stretcher.recompute_optical_axis()
-ip=Intersection_plane()
-ip.set_geom(Stretcher.last_geom())
+# ip=Intersection_plane()
+# ip.set_geom(Stretcher.last_geom())
 # ip.spot_diagram(Stretcher._beams[-1],aberration_analysis=True)
-ip.draw()
+# ip.draw()
 Stretcher.draw()
-ip.spot_diagram(Stretcher._beams[-1],aberration_analysis=True)
+# ip.spot_diagram(Stretcher._beams[-1],aberration_analysis=True)
+
 # ip_s.spot_diagram(Stretcher._beams[-1])
-# pathlength = {}
-# for ii in range(Stretcher._beams[0]._ray_count):
-#   wavelength = Stretcher._beams[0].get_all_rays()[ii].wavelength
-#   pathlength[wavelength] = 0
-# for jj in range(len(Stretcher._beams)-1):
-#   for ii in Stretcher._beams[jj].get_all_rays():
-#     a=pathlength[ii.wavelength]
-#     pathlength[ii.wavelength] = a +ii.length
-# ray_lam = [ray.wavelength for ray in Stretcher._beams[0].get_all_rays()]
-# path = [pathlength[ii] for ii in ray_lam]
-# path_diff = [ii-path[int(len(path)/2)] for ii in path]
-# fai = [path_diff[ii]/ray_lam[ii]*2*np.pi for ii in range(len(path))]
-# omega = [c0/ii*2*np.pi for ii in ray_lam]
-# para = np.polyfit(omega, fai, 5)
-# fai2 = [20*para[0]*ii**3+12*para[1]*ii**2+6*para[2]*ii+2*para[3] for ii in omega]
-# # fai2 = [para[0]*ii**5+para[1]*ii**4+para[2]*ii**3+para[3]*ii**2+para[4]*ii+para[5] for ii in omega]
-# delay_mid = path[int(len(path)/2)]/c0
-# delay = [(pa/c0-delay_mid)*1E9 for pa in path]
+pathlength = {}
+for ii in range(Stretcher._beams[0]._ray_count):
+  wavelength = Stretcher._beams[0].get_all_rays()[ii].wavelength
+  pathlength[wavelength] = 0
+for jj in range(len(Stretcher._beams)-1):
+  for ii in Stretcher._beams[jj].get_all_rays():
+    a=pathlength[ii.wavelength]
+    pathlength[ii.wavelength] = a +ii.length
+ray_lam = [ray.wavelength for ray in Stretcher._beams[0].get_all_rays()]
+path = [pathlength[ii] for ii in ray_lam]
+path_diff = [ii-path[int(len(path)/2)] for ii in path]
+fai = [path_diff[ii]/ray_lam[ii]*2*np.pi for ii in range(len(path))]
+omega = [c0/ii*2*np.pi for ii in ray_lam]
+omega = [ii - c0/lambda_mid*2*np.pi for ii in omega]
+para = np.polyfit(omega, fai, 6)
+fai2 = [30*para[0]*ii**4 + 20*para[1]*ii**3 + 12*para[2]*ii**2 + 6*para[3]*ii + para[4] for ii in omega] # Taylor Expantion
+fai3 = [120*para[0]*ii**3 + 60*para[1]*ii**2 + 24*para[2]*ii + 6*para[3] for ii in omega]
+fai_function = interp1d(omega, fai)
+fai_new = fai_function(omega)
+
+# fai2_new=[derivative(fai_function, omega[ii],dx=1,n=2,order=5) for ii in range(1,len(omega)-1)]
+# fai3_new=[derivative(fai_function, omega[ii],dx=1,n=3,order=5) for ii in range(1,len(omega)-1)]
+
+delay_mid = path[int(len(path)/2)]/c0
+delay = [(pa/c0-delay_mid)*1E9 for pa in path]
 # plt.figure()
 # ax1=plt.subplot(1,2,1)
 # plt.plot(ray_lam,path)
@@ -249,6 +282,33 @@ ip.spot_diagram(Stretcher._beams[-1],aberration_analysis=True)
 # plt.title("Delay at different wavelength")
 # plt.axhline(0, color = 'black', linewidth = 1)
 # plt.show()
+
+plt.figure()
+ax1=plt.subplot(1,3,1)
+plt.scatter(omega,fai,label="φ(ω)")
+plt.plot(omega,fai_new,label="φ(ω)")
+plt.title("Relationship of phase with angular frequency φ(ω)")
+plt.xlabel("angular frequency ω (rad/s)")
+plt.ylabel("wave phase φ (rad)")
+plt.axhline(fai[int(len(fai)/2)], color = 'black', linewidth = 1)
+ax2=plt.subplot(1,3,2)
+plt.plot(omega,fai2)
+# omega_d = omega
+# del omega_d[0]
+# del omega_d[-1]
+# plt.plot(omega_d,fai2_new)
+plt.title("Group delay dispersion")
+plt.xlabel("angular frequency ω (rad/s)")
+plt.ylabel("The second order derivative of φ(ω)")
+plt.axhline(fai2[int(len(fai2)/2)], color = 'black', linewidth = 1)
+
+ax3=plt.subplot(1,3,3)
+plt.plot(omega,fai3)
+# plt.plot(omega_d,fai3_new)
+plt.title("Third order dispersion")
+plt.xlabel("angular frequency ω (rad/s)")
+plt.ylabel("The third order derivative of φ(ω)")
+plt.axhline(fai3[int(len(fai3)/2)], color = 'black', linewidth = 1)
 
 # SinS = np.sin(10/180*np.pi)
 # CosS = np.cos(10/180*np.pi)
