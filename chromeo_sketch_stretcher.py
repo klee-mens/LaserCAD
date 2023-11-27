@@ -167,7 +167,7 @@ ip_s = Intersection_plane()
 ip_s.pos -=(1000,0,periscope_height) #four gratings
 
 angle = 10.001
-# angle = 10
+angle = 10
 SinS = np.sin(angle/180*np.pi)
 CosS = np.cos(angle/180*np.pi)
 Grat1 = Grating(grat_const=grating_const, order=-1)
@@ -176,7 +176,7 @@ Grat1.normal = grating_normal
 Grat1.normal = -Grat1.normal
 Grat2 = Grating(grat_const=grating_const, order=-1)
 propagation_length = 99.9995
-# propagation_length = 100
+propagation_length = 100
 Grat2.pos -= (500-propagation_length*CosS,SinS*propagation_length,periscope_height)
 Grat2.normal = grating_normal
 
@@ -215,25 +215,25 @@ Grat4 =Grating(grat_const=grating_const,order=1)
 Grat4.pos = (Grat2.pos[0]-300,Grat1.pos[1],Grat2.pos[2])
 Grat4.normal = (Grat2.normal[0],-Grat2.normal[1],Grat2.normal[2])
 
-ip = Intersection_plane()
-ip.pos -= (100,0,0)
-Stretcher.add_fixed_elm(Grat1)
-Stretcher.add_fixed_elm(Grat2)
-Stretcher.add_fixed_elm(Grat3)
-Stretcher.add_fixed_elm(Grat4)
-"""
-Stretcher.add_fixed_elm(C_RoofTop1)
-Stretcher.add_fixed_elm(C_RoofTop2)
-"""
-Stretcher.add_fixed_elm(ip_s)
+# ip = Intersection_plane()
+# ip.pos -= (100,0,0)
+# Stretcher.add_fixed_elm(Grat1)
+# Stretcher.add_fixed_elm(Grat2)
+# Stretcher.add_fixed_elm(Grat3)
+# Stretcher.add_fixed_elm(Grat4)
+# """
+# Stretcher.add_fixed_elm(C_RoofTop1)
+# Stretcher.add_fixed_elm(C_RoofTop2)
+# """
+# Stretcher.add_fixed_elm(ip_s)
 Stretcher.add_fixed_elm(pure_cosmetic)
 # Stretcher.add_fixed_elm(pure_cosmetic1)
 
 # setting the final sequence and the last propagation for visualization
 # note that pure cosmetic (pos6) is not in the sequence
 # Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0,6,7,8,9,7,6,10]) #two Gratings Compressor
-Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0,6,7,8,9,10]) #four Gratings Compressor
-# Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0])
+# Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0,6,7,8,9,10]) #four Gratings Compressor
+Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0])
 Stretcher.recompute_optical_axis()
 # ip=Intersection_plane()
 # ip.set_geom(Stretcher.last_geom())
@@ -258,8 +258,13 @@ fai = [path_diff[ii]/ray_lam[ii]*2*np.pi for ii in range(len(path))]
 omega = [c0/ii*2*np.pi for ii in ray_lam]
 omega = [ii - c0/lambda_mid*2*np.pi for ii in omega]
 para = np.polyfit(omega, fai, 6)
-fai2 = [30*para[0]*ii**4 + 20*para[1]*ii**3 + 12*para[2]*ii**2 + 6*para[3]*ii + para[4] for ii in omega] # Taylor Expantion
+fai2 = [30*para[0]*ii**4 + 20*para[1]*ii**3 + 12*para[2]*ii**2 + 6*para[3]*ii + 2*para[4] for ii in omega] # Taylor Expantion
 fai3 = [120*para[0]*ii**3 + 60*para[1]*ii**2 + 24*para[2]*ii + 6*para[3] for ii in omega]
+
+# para = np.polyfit(omega, fai, 5)
+# fai2 = [20*para[0]*ii**3 + 12*para[1]*ii**2 + 6*para[2]*ii + 2*para[3] for ii in omega] # Taylor Expantion
+# fai3 = [60*para[0]*ii**2 + 24*para[1]*ii + 6*para[2] for ii in omega]
+
 fai_function = interp1d(omega, fai)
 fai_new = fai_function(omega)
 

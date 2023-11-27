@@ -254,8 +254,8 @@ class Grating_mount(Mount):
     self.draw_dict["thickness"]= thickness
     self.draw_dict["drawing_post"] = False
     self.draw_dict["geom"]=self.get_geom()
-    self.xshift = 17 + 15
-    docking_pos = np.array([self.xshift,0,-29])
+    self.xshift = 17 + 15 
+    docking_pos = np.array([self.xshift,0,-29+3.8])
     self.docking_obj.pos = self.docking_obj.pos+docking_pos[0]*self._axes[:,0]+docking_pos[2]*self._axes[:,2] 
     self.post.set_geom(self.docking_obj.get_geom())
     

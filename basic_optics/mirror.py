@@ -406,7 +406,7 @@ class Stripe_mirror(Curved_Mirror):
     # self.draw_dict["mount_type"] = "POLARIS-K1-Step"
     self.draw_dict["Radius1"] = self.radius
     self.draw_dict["thickness"] = self.thickness
-    print(self.draw_dict["thickness"] )
+    # print(self.draw_dict["thickness"] )
     self.draw_dict["model_type"] = "Stripe"
     obj = model_mirror(**self.draw_dict)
     return obj
@@ -425,7 +425,7 @@ class Stripe_mirror(Curved_Mirror):
     # print(self.aperture)
     return (self.mount.draw())
 
-class Cylindrical_Mirror(Mirror):
+class Cylindrical_Mirror(Stripe_mirror):
   """
   The class of Cylindrical mirror.
   Cylindrical mirror have those parameters:
@@ -441,7 +441,16 @@ class Cylindrical_Mirror(Mirror):
     self.draw_dict["Radius"] = radius
     self.draw_dict["height"]=height
     self.draw_dict["thickness"]=thickness
-    self.draw_dict["model_type"]="Stripe"
+    self._update_mount_dict()
+    self.mount = Composed_Mount()
+    # self.draw_dict["model_type"]="Stripe"
+
+  def _update_mount_dict(self):
+    super()._update_mount_dict()
+    self.mount_dict["model"] = "Stripe mirror mount"
+    self.mount_dict["name"] = self.name + "_mount"
+    # self.mount_dict["aperture"] = self.aperture
+    self.mount_dict["thickness"] = self.thickness
 
   @property
   def radius(self):
@@ -486,6 +495,8 @@ class Cylindrical_Mirror(Mirror):
     self.draw_dict["dia"]=self.aperture
     # self.draw_dict["mount_type"] = "POLARIS-K1-Step"
     self.draw_dict["Radius1"] = self.radius
+    self.draw_dict["thickness"] = self.thickness
+    self.draw_dict["model_type"] = "Stripe"
     obj = model_mirror(**self.draw_dict)
     # default = Vector(0,0,1)
     # xx,yy,zz = self.get_coordinate_system()

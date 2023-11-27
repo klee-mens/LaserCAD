@@ -26,6 +26,8 @@ class Lens(Opt_Element):
     self.mount_dict["elm_type"] = "lens"
     self.mount_dict["name"] = self.name + "_mount"
     self.mount_dict["aperture"] = self.aperture
+    self.mount_dict["post_type"] = "1inch_post"
+    self.mount_dict["model"] = "default"
 
   @property
   def focal_length(self):
@@ -47,10 +49,24 @@ class Lens(Opt_Element):
     # model_lens(self.name, dia=self.aperture, geom_info=self.get_geom())
     return model_lens(**self.draw_dict)
 
-  def draw_mount_fc(self):
-    # obj = lens_mount(**self.draw_dict)
-    # post_pos = xshift*self.normal+self.pos
-    return lens_mount(**self.draw_dict)
+  def draw_mount(self):
+    # self.update_mount()
+    if self.mount.elm_type != "dont_draw":
+      # self._update_mount_dict()
+      self.mount.elm_type = "lens"
+      self.mount.pos = self.pos
+      self.mount.normal = self.normal
+      self.mount.aperture = self.aperture
+      # print("123546564654546654654",self.mount.aperture)
+      # self._update_mount_dict()
+      self.mount.model = self.mount_dict['model']
+      self.mount.post_type = self.mount_dict["post_type"]
+    return (self.mount.draw())
+
+  # def draw_mount_fc(self):
+  #   # obj = lens_mount(**self.draw_dict)
+  #   # post_pos = xshift*self.normal+self.pos
+  #   return lens_mount(**self.draw_dict)
   
   def draw_mount_text(self):
     if self.draw_dict["mount_type"] == "dont_draw":
