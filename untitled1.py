@@ -185,7 +185,8 @@ Stretcher.add_fixed_elm(pure_cosmetic)
   # seq = [0,1,2,1,0]
   # seq = [0,1,2,1,0, 3]
   # seq = [0,1,2,1,0, 3,4]
-seq = [0,1,2,1,0, 3,4, 0, 1, 2, 1, 0]
+seq = [0,1, 2, 1, 0, 3, 4, 0, 1, 2, 1, 0]
 Stretcher.set_sequence(seq)
 Stretcher.propagate(300)
+Stretcher.pos += (0,0,80)
 Stretcher.draw()

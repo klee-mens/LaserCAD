@@ -22,7 +22,7 @@ from scipy.misc import derivative
 
 from LaserCAD.freecad_models import clear_doc, freecad_da
 from LaserCAD.basic_optics import Mirror, Beam, Composition, inch
-from LaserCAD.basic_optics import Curved_Mirror, Ray
+from LaserCAD.basic_optics import Curved_Mirror, Ray, Lens
 from LaserCAD.basic_optics.mirror import Rooftop_mirror,Stripe_mirror
 # from LaserCAD.basic_optics import LinearResonator, Lens
 from LaserCAD.basic_optics import Grating, Intersection_plane
@@ -55,7 +55,7 @@ radius_concave = 1000 #radius of the big concave sphere
 aperture_concave = 6 * inch
 height_stripe_mirror = 10 #height of the stripe mirror in mm
 width_stripe_mirror = 75 # in mm
-seperation_angle = 10 /180 *np.pi # sep between in and outgoing middle ray
+seperation_angle = 20 /180 *np.pi # sep between in and outgoing middle ray
 # incident_angle = seperation_angle + reflection_angle
 grating_const = 1/450 # in 1/mm
 seperation = 50 # difference grating position und radius_concave
@@ -111,13 +111,17 @@ wavels = np.linspace(lambda_mid-delta_lamda/2, lambda_mid+delta_lamda/2, number_
 rays = []
 cmap = plt.cm.gist_rainbow
 for wavel in wavels:
-  rn = Ray()
-  # rn.normal = vec
-  # rn.pos = pos0
-  rn.wavelength = wavel
-  x = 1-(wavel - lambda_mid + delta_lamda/2) / delta_lamda
-  rn.draw_dict["color"] = cmap( x )
-  rays.append(rn)
+    B_test = Beam(radius=1.25)
+    B_test.make_cone_distribution(ray_count=9)
+    ray_group =B_test.get_all_rays()
+    for rn in ray_group:
+      # rn = Ray()
+      # rn.normal = vec
+      # rn.pos = pos0
+      rn.wavelength = wavel
+      x = 1-(wavel - lambda_mid + delta_lamda/2) / delta_lamda
+      rn.draw_dict["color"] = cmap( x )
+      rays.append(rn)
 lightsource.override_rays(rays)
 lightsource.draw_dict['model'] = "ray_group"
 
@@ -162,27 +166,44 @@ pure_cosmetic.normal = (RoofTop1.normal + RoofTop2.normal ) / 2
 # pure_cosmetic.draw = dont
 pure_cosmetic.aperture = periscope_height
 pure_cosmetic.draw_dict["model_type"] = "Rooftop"
+
+le1 = Lens(f=-75)
+le1.pos -= (0,0,periscope_height)
+le2 = Lens(f=270)
+le2.pos -= (195,0,periscope_height)
+Stretcher.add_fixed_elm(le1)
+Stretcher.add_fixed_elm(le2)
+
 ip_s = Intersection_plane()
 # ip_s.pos -=(0,0,periscope_height) #two gratings
 ip_s.pos -=(1000,0,periscope_height) #four gratings
 
-angle = 10.001
-angle = 10
+# angle = 10.00134
+# angle = 10.001
+angle = 20
 SinS = np.sin(angle/180*np.pi)
 CosS = np.cos(angle/180*np.pi)
+
+v = lambda_mid/grating_const
+a = v/2
+B = np.sqrt(a**2 - (v**2 - SinS**2)/(2*(1+CosS)))
+sinB_new = a - B
+Grating_normal = (np.sqrt(1-sinB_new**2), sinB_new, 0)
+
 Grat1 = Grating(grat_const=grating_const, order=-1)
 Grat1.pos -=(500,0,periscope_height)
-Grat1.normal = grating_normal
+Grat1.normal = Grating_normal
 Grat1.normal = -Grat1.normal
 Grat2 = Grating(grat_const=grating_const, order=-1)
-propagation_length = 99.9995
+# propagation_length = 99.9995
 propagation_length = 100
+# propagation_length = 99.9949
 Grat2.pos -= (500-propagation_length*CosS,SinS*propagation_length,periscope_height)
-Grat2.normal = grating_normal
+Grat2.normal = Grating_normal
 
 shift_direction = np.cross((0,0,1),Grat1.normal)
-Grat1.pos += shift_direction * -17
-Grat2.pos += shift_direction * 17
+Grat1.pos += shift_direction * -15
+Grat2.pos += shift_direction * 10
 """
 # =============================================================================
 # Two Gratings Compressor
@@ -215,25 +236,25 @@ Grat4 =Grating(grat_const=grating_const,order=1)
 Grat4.pos = (Grat2.pos[0]-300,Grat1.pos[1],Grat2.pos[2])
 Grat4.normal = (Grat2.normal[0],-Grat2.normal[1],Grat2.normal[2])
 
-# ip = Intersection_plane()
-# ip.pos -= (100,0,0)
-# Stretcher.add_fixed_elm(Grat1)
-# Stretcher.add_fixed_elm(Grat2)
-# Stretcher.add_fixed_elm(Grat3)
-# Stretcher.add_fixed_elm(Grat4)
-# """
-# Stretcher.add_fixed_elm(C_RoofTop1)
-# Stretcher.add_fixed_elm(C_RoofTop2)
-# """
-# Stretcher.add_fixed_elm(ip_s)
+ip = Intersection_plane()
+ip.pos -= (100,0,0)
+Stretcher.add_fixed_elm(Grat1)
+Stretcher.add_fixed_elm(Grat2)
+Stretcher.add_fixed_elm(Grat3)
+Stretcher.add_fixed_elm(Grat4)
+"""
+Stretcher.add_fixed_elm(C_RoofTop1)
+Stretcher.add_fixed_elm(C_RoofTop2)
+"""
+Stretcher.add_fixed_elm(ip_s)
 Stretcher.add_fixed_elm(pure_cosmetic)
 # Stretcher.add_fixed_elm(pure_cosmetic1)
 
 # setting the final sequence and the last propagation for visualization
 # note that pure cosmetic (pos6) is not in the sequence
 # Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0,6,7,8,9,7,6,10]) #two Gratings Compressor
-# Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0,6,7,8,9,10]) #four Gratings Compressor
-Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0])
+Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0,6,7,8,9,10,11,12]) #four Gratings Compressor
+# Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0])
 Stretcher.recompute_optical_axis()
 # ip=Intersection_plane()
 # ip.set_geom(Stretcher.last_geom())
@@ -242,7 +263,7 @@ Stretcher.recompute_optical_axis()
 Stretcher.draw()
 # ip.spot_diagram(Stretcher._beams[-1],aberration_analysis=True)
 
-# ip_s.spot_diagram(Stretcher._beams[-1])
+ip_s.spot_diagram(Stretcher._beams[-1])
 pathlength = {}
 for ii in range(Stretcher._beams[0]._ray_count):
   wavelength = Stretcher._beams[0].get_all_rays()[ii].wavelength
