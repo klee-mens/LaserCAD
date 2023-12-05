@@ -68,9 +68,10 @@ class Intersection_plane(Opt_Element):
       intersection_point = point_i.intersection(self)
       # print(intersection_point)
       lamuda = point_i.wavelength
+      
       ray_lam.append(lamuda)
-      if lamuda>=400e-6 and lamuda<=780e-6:
-        c = cmap(1-(lamuda-400e-6)/380e-6)
+      if lamuda>=400e-6 and lamuda<=700e-6:
+        c = cmap(1-(lamuda-400e-6)/300e-6)
       elif 'color' in point_i.draw_dict:
         c = point_i.draw_dict["color"]
       else:
@@ -101,43 +102,51 @@ class Intersection_plane(Opt_Element):
       ray_middle.normal[1]=1
     # for ray in rays:
     #   ray.normal = np.linalg.norm(ray.normal)
-    tilt_x = [np.arcsin(ray.normal[1])-np.arcsin(ray_middle.normal[1]) for ray in rays]
+    tilt_x = [-np.arcsin(ray.normal[1])+np.arcsin(ray_middle.normal[1]) for ray in rays]
     tilt_y = [np.arcsin(ray.normal[2])-np.arcsin(ray_middle.normal[2]) for ray in rays]
+    font1 = {'size':24}
+    font2 = {'size':11}
     if aberration_analysis:
-      plt.figure()
+      plt.figure(figsize=(16,9))
       ax1=plt.subplot(2,2,1)
       plt.plot(ray_lam, diff_x)
-      plt.ylabel("x-shift (mm)")
-      plt.xlabel("wavelength (mm)")
-      plt.title("The displacement in the x direction at " + self.name)
+      plt.tick_params(labelsize=11)
+      plt.ylabel("x-shift (mm)",font2)
+      plt.xlabel("wavelength (mm)",font2)
+      plt.title("The displacement in the x direction at " + self.name,font2)
       plt.axhline(0, color = 'black', linewidth = 1)
       ax2=plt.subplot(2,2,2)
       plt.plot(ray_lam, diff_y)
-      plt.ylabel("y-shift (mm)")
-      plt.xlabel("wavelength (mm)")
-      plt.title("The displacement in the y direction at " + self.name)
+      plt.tick_params(labelsize=11)
+      plt.ylabel("y-shift (mm)",font2)
+      plt.xlabel("wavelength (mm)",font2)
+      plt.title("The displacement in the y direction at " + self.name,font2)
       plt.axhline(0, color = 'black', linewidth = 1)
       ax3=plt.subplot(2,2,3)
       plt.plot(ray_lam, tilt_x)
-      plt.ylabel("x-tilt (rad)")
-      plt.xlabel("wavelength (mm)")
-      plt.title("The tilt in the x direction at " + self.name)
+      plt.tick_params(labelsize=11)
+      plt.ylabel("x-tilt (rad)",font2)
+      plt.xlabel("wavelength (mm)",font2)
+      plt.title("The tilt in the x direction at " + self.name,font2)
       plt.axhline(0, color = 'black', linewidth = 1)
       ax4=plt.subplot(2,2,4)
       plt.plot(ray_lam, tilt_y)
-      plt.ylabel("y-tilt (rad)")
-      plt.xlabel("wavelength (mm)")
-      plt.title("The tilt in the y direction at " + self.name)
+      plt.tick_params(labelsize=11)
+      plt.ylabel("y-tilt (rad)",font2)
+      plt.xlabel("wavelength (mm)",font2)
+      plt.title("The tilt in the y direction at " + self.name,font2)
       plt.axhline(0, color = 'black', linewidth = 1)
-    plt.figure()
+    plt.figure(figsize=(16,11))
     # area = (20 * np.random.rand(37))**2
     # c = np.sqrt(area)
     plt.scatter(point_x,point_y,s=10,c=point_c)
+    plt.tick_params(labelsize=24)
     # plt.xlim(-0.0015,0.0015)
     # plt.ylim(-0.0015,0.0015)
-    plt.xlabel("x-axis (mm)")
-    plt.ylabel("y-axis (mm)")
-    plt.title("The spot diagram at " + self.name)
+    plt.xlabel("x-axis (mm)",font1,labelpad=20)
+    plt.ylabel("y-axis (mm)",font1)
+    plt.title("The spot diagram at " + self.name,font1)
+    plt.savefig("The spot diagram at " + self.name+'.pdf')
     # plt.axhline(0, color = 'black', linewidth = 1,linestyle = '--')
     # plt.axvline(0, color = 'black', linewidth = 1,linestyle = '--')
     # plt.axis('equal')

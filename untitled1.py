@@ -16,7 +16,8 @@ ind = pfad.rfind("/")
 pfad = pfad[0:ind]
 if not pfad in sys.path:
   sys.path.append(pfad)
-
+from scipy.interpolate import interp1d
+from scipy.misc import derivative
 
 from LaserCAD.freecad_models import clear_doc, setview, freecad_da
 from LaserCAD.basic_optics import Mirror, Beam, Composition, inch
@@ -43,6 +44,7 @@ delta_lamda = 200e-9*1e3 # Bandbreite in mm
 number_of_rays = 20
 safety_to_StripeM = 5 #Abstand der eingehenden Strahlen zum Concav Spiegel in mm
 periscope_distance = 15
+c0 = 299792458*1000
 """
 tja, versuchen wir mal einen Offner Strecker...
 Note: When drawing a rooftop mirror, we will draw apure_cosmetic mirror to 
@@ -190,3 +192,83 @@ Stretcher.set_sequence(seq)
 Stretcher.propagate(300)
 Stretcher.pos += (0,0,80)
 Stretcher.draw()
+pathlength = {}
+for ii in range(Stretcher._beams[0]._ray_count):
+  wavelength = Stretcher._beams[0].get_all_rays()[ii].wavelength
+  pathlength[wavelength] = 0
+Crystal_length = 10
+for ii in range(Stretcher._beams[0]._ray_count):
+    w1 = Stretcher._beams[0].get_all_rays()[ii].wavelength
+    w = w1*1000
+    n = np.sqrt(8.393 + 0.14383/(w**2-0.2421**2) + 4430.99/(w**2-36.71**2)) #ZnS
+    # print(n)
+    # n = np.sqrt(2.2864 + 1.1280*(w**2)/(w**2 - 0.0562) - 0.0188*(w**2)) # RTP
+    pathlength[w1] += n * Crystal_length
+    
+plt.figure()
+ray_lam = [ray.wavelength for ray in Stretcher._beams[0].get_all_rays()]
+path = [pathlength[ii] for ii in ray_lam]
+path_diff = [ii-path[int(len(path)/2)] for ii in path]
+fai = [path_diff[ii]/ray_lam[ii]*2*np.pi for ii in range(len(path))]
+omega = [c0/ii*2*np.pi for ii in ray_lam]
+omega = [ii - c0/lam_mid*2*np.pi for ii in omega]
+para = np.polyfit(omega, fai, 6)
+fai = [para[0]*ii**6 + para[1]*ii**5 + para[2]*ii**4 + para[3]*ii**3 + para[4]*ii**2 for ii in omega]
+fai2 = [30*para[0]*ii**4 + 20*para[1]*ii**3 + 12*para[2]*ii**2 + 6*para[3]*ii + 2*para[4] for ii in omega] # Taylor Expantion
+fai3 = [120*para[0]*ii**3 + 60*para[1]*ii**2 + 24*para[2]*ii + 6*para[3] for ii in omega]
+
+# para = np.polyfit(omega, fai, 5)
+# fai2 = [20*para[0]*ii**3 + 12*para[1]*ii**2 + 6*para[2]*ii + 2*para[3] for ii in omega] # Taylor Expantion
+# fai3 = [60*para[0]*ii**2 + 24*para[1]*ii + 6*para[2] for ii in omega]
+
+fai_function = interp1d(omega, fai)
+fai_new = fai_function(omega)
+# 
+# fai2_new=[derivative(fai_function, omega[ii],dx=1,n=2,order=5) for ii in range(1,len(omega)-1)]
+# fai3_new=[derivative(fai_function, omega[ii],dx=1,n=3,order=5) for ii in range(1,len(omega)-1)]
+
+delay_mid = path[int(len(path)/2)]/c0
+delay = [(pa/c0-delay_mid)*1E9 for pa in path]
+# plt.figure()
+# ax1=plt.subplot(1,2,1)
+# plt.plot(ray_lam,path)
+# plt.ylabel("pathlength (mm)")
+# plt.xlabel("wavelength (mm)")
+# plt.title("Pathlength at different wavelength")
+# plt.axhline(path[int(len(path)/2)], color = 'black', linewidth = 1)
+# ax2=plt.subplot(1,2,2)
+# plt.plot(ray_lam,delay)
+# plt.ylabel("delay (ns)")
+# plt.xlabel("wavelength (mm)")
+# plt.title("Delay at different wavelength")
+# plt.axhline(0, color = 'black', linewidth = 1)
+# plt.show()
+
+plt.figure()
+ax1=plt.subplot(1,3,1)
+plt.scatter(omega,fai,label="φ(ω)")
+plt.plot(omega,fai_new,label="φ(ω)")
+plt.title("Relationship of phase with angular frequency φ(ω)")
+plt.xlabel("angular frequency ω (rad/s)")
+plt.ylabel("wave phase φ (rad)")
+plt.axhline(fai[int(len(fai)/2)], color = 'black', linewidth = 1)
+ax2=plt.subplot(1,3,2)
+plt.plot(omega,fai2)
+# omega_d = omega
+# del omega_d[0]
+# del omega_d[-1]
+# plt.plot(omega_d,fai2_new)
+plt.title("Group delay dispersion")
+plt.xlabel("angular frequency ω (rad/s)")
+plt.ylabel("The second order derivative of φ(ω)")
+plt.axhline(fai2[int(len(fai2)/2)], color = 'black', linewidth = 1)
+print("Group delay dispersion at the center wavelength:",fai2[int(len(fai2)/2)])
+
+ax3=plt.subplot(1,3,3)
+plt.plot(omega,fai3)
+# plt.plot(omega_d,fai3_new)
+plt.title("Third order dispersion")
+plt.xlabel("angular frequency ω (rad/s)")
+plt.ylabel("The third order derivative of φ(ω)")
+plt.axhline(fai3[int(len(fai3)/2)], color = 'black', linewidth = 1)
+print("3rd order dispersion at the center wavelength:",fai3[int(len(fai3)/2)])

@@ -55,10 +55,10 @@ radius_concave = 1000 #radius of the big concave sphere
 aperture_concave = 6 * inch
 height_stripe_mirror = 10 #height of the stripe mirror in mm
 width_stripe_mirror = 75 # in mm
-seperation_angle = 20 /180 *np.pi # sep between in and outgoing middle ray
+seperation_angle = 10 /180 *np.pi # sep between in and outgoing middle ray
 # incident_angle = seperation_angle + reflection_angle
 grating_const = 1/450 # in 1/mm
-seperation = 50 # difference grating position und radius_concave
+seperation = 100 # difference grating position und radius_concave
 lambda_mid = 2400e-9 * 1e3 # central wave length in mm
 delta_lamda = 200e-9*1e3 # full bandwith in mm
 number_of_rays = 20
@@ -111,11 +111,11 @@ wavels = np.linspace(lambda_mid-delta_lamda/2, lambda_mid+delta_lamda/2, number_
 rays = []
 cmap = plt.cm.gist_rainbow
 for wavel in wavels:
-    B_test = Beam(radius=1.25)
-    B_test.make_cone_distribution(ray_count=9)
-    ray_group =B_test.get_all_rays()
-    for rn in ray_group:
-      # rn = Ray()
+    # B_test = Beam(radius=1.25)
+    # B_test.make_cone_distribution(ray_count=9)
+    # ray_group =B_test.get_all_rays()
+    # for rn in ray_group:
+      rn = Ray()
       # rn.normal = vec
       # rn.pos = pos0
       rn.wavelength = wavel
@@ -180,7 +180,7 @@ ip_s.pos -=(1000,0,periscope_height) #four gratings
 
 # angle = 10.00134
 # angle = 10.001
-angle = 20
+angle = 10
 SinS = np.sin(angle/180*np.pi)
 CosS = np.cos(angle/180*np.pi)
 
@@ -196,14 +196,16 @@ Grat1.normal = Grating_normal
 Grat1.normal = -Grat1.normal
 Grat2 = Grating(grat_const=grating_const, order=-1)
 # propagation_length = 99.9995
-propagation_length = 100
+# propagation_length = seperation*2-0.0078
+propagation_length = seperation*2-0.008
+
 # propagation_length = 99.9949
 Grat2.pos -= (500-propagation_length*CosS,SinS*propagation_length,periscope_height)
 Grat2.normal = Grating_normal
 
 shift_direction = np.cross((0,0,1),Grat1.normal)
 Grat1.pos += shift_direction * -15
-Grat2.pos += shift_direction * 10
+Grat2.pos += shift_direction * 0
 """
 # =============================================================================
 # Two Gratings Compressor
@@ -230,10 +232,10 @@ pure_cosmetic1.aperture = periscope_height
 # Four Gratings Compressor
 # =============================================================================
 Grat3 =Grating(grat_const=grating_const,order=1)
-Grat3.pos = (Grat1.pos[0]-300,Grat2.pos[1],Grat2.pos[2])
+Grat3.pos = (Grat1.pos[0]-400,Grat2.pos[1],Grat2.pos[2])
 Grat3.normal = (Grat1.normal[0],-Grat1.normal[1],Grat1.normal[2])
 Grat4 =Grating(grat_const=grating_const,order=1)
-Grat4.pos = (Grat2.pos[0]-300,Grat1.pos[1],Grat2.pos[2])
+Grat4.pos = (Grat2.pos[0]-400,Grat1.pos[1],Grat2.pos[2])
 Grat4.normal = (Grat2.normal[0],-Grat2.normal[1],Grat2.normal[2])
 
 ip = Intersection_plane()
@@ -263,7 +265,7 @@ Stretcher.recompute_optical_axis()
 Stretcher.draw()
 # ip.spot_diagram(Stretcher._beams[-1],aberration_analysis=True)
 
-ip_s.spot_diagram(Stretcher._beams[-1])
+# ip_s.spot_diagram(Stretcher._beams[-1])
 pathlength = {}
 for ii in range(Stretcher._beams[0]._ray_count):
   wavelength = Stretcher._beams[0].get_all_rays()[ii].wavelength
@@ -272,6 +274,19 @@ for jj in range(len(Stretcher._beams)-1):
   for ii in Stretcher._beams[jj].get_all_rays():
     a=pathlength[ii.wavelength]
     pathlength[ii.wavelength] = a +ii.length
+    
+"""
+add the optical path length in crystal
+"""
+Crystal_length = 10
+for ii in range(Stretcher._beams[0]._ray_count):
+    w1 = Stretcher._beams[0].get_all_rays()[ii].wavelength
+    w = w1*1000
+    n = np.sqrt(8.393 + 0.14383/(w**2-0.2421**2) + 4430.99/(w**2-36.71**2)) #ZnS
+    # print(n)
+    n = np.sqrt(2.2864 + 1.1280*(w**2)/(w**2 - 0.0562) - 0.0188*(w**2)) # RTP
+    pathlength[w1] += n * Crystal_length
+# -----------------------------------------------------------------------------
 ray_lam = [ray.wavelength for ray in Stretcher._beams[0].get_all_rays()]
 path = [pathlength[ii] for ii in ray_lam]
 path_diff = [ii-path[int(len(path)/2)] for ii in path]
@@ -279,6 +294,7 @@ fai = [path_diff[ii]/ray_lam[ii]*2*np.pi for ii in range(len(path))]
 omega = [c0/ii*2*np.pi for ii in ray_lam]
 omega = [ii - c0/lambda_mid*2*np.pi for ii in omega]
 para = np.polyfit(omega, fai, 6)
+fai = [para[0]*ii**6 + para[1]*ii**5 + para[2]*ii**4 + para[3]*ii**3 + para[4]*ii**2 for ii in omega]
 fai2 = [30*para[0]*ii**4 + 20*para[1]*ii**3 + 12*para[2]*ii**2 + 6*para[3]*ii + 2*para[4] for ii in omega] # Taylor Expantion
 fai3 = [120*para[0]*ii**3 + 60*para[1]*ii**2 + 24*para[2]*ii + 6*para[3] for ii in omega]
 
@@ -327,6 +343,7 @@ plt.title("Group delay dispersion")
 plt.xlabel("angular frequency ω (rad/s)")
 plt.ylabel("The second order derivative of φ(ω)")
 plt.axhline(fai2[int(len(fai2)/2)], color = 'black', linewidth = 1)
+print("Group delay dispersion at the center wavelength:",fai2[int(len(fai2)/2)])
 
 ax3=plt.subplot(1,3,3)
 plt.plot(omega,fai3)
@@ -335,7 +352,7 @@ plt.title("Third order dispersion")
 plt.xlabel("angular frequency ω (rad/s)")
 plt.ylabel("The third order derivative of φ(ω)")
 plt.axhline(fai3[int(len(fai3)/2)], color = 'black', linewidth = 1)
-
+print("3rd order dispersion at the center wavelength:",fai3[int(len(fai3)/2)])
 # SinS = np.sin(10/180*np.pi)
 # CosS = np.cos(10/180*np.pi)
 # Grat1 = Grating(grat_const=grating_const, order=-1)
