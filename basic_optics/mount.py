@@ -160,12 +160,6 @@ class Mount(Geom_Object):
         height = float(mount_loop["height"])
         price = float(mount_loop["price"])
         xshift = float(mount_loop["xshift"])
-        # offset = (float(mount_loop["offsetX"]),
-        #                 float(mount_loop["offsetY"]),
-        #                 float(mount_loop["offsetZ"]))
-        # rotation = (float(mount_loop["rot_angleZ"]),
-        #                     float(mount_loop["rot_angleY"]),
-        #                     float(mount_loop["rot_angleX"]))
     if not mount_in_database:
       return False
     self.aperture = aperture
@@ -175,17 +169,15 @@ class Mount(Geom_Object):
     self.draw_dict["xshift"]=xshift
     self.draw_dict["height"]=height
     self.yshift = 0
-    # self.offset_vector = offset
-    # self.draw_dict["mount_type"] = self.model
-    # docking_pos = np.array([xshift,0,-height])
     docking_normal = self.normal
     # updates the docking geom for the first time
-    if self.normal[2]<DEFAULT_MAX_ANGULAR_OFFSET/180*np.pi:
-      tempnormal = self.normal
-      tempnormal[2]=0
-      self.normal=tempnormal
-      self.normal = self.normal/np.linalg.norm(self.normal)
-    else: print("this post should not be placed in the ground plate")
+    # if self.normal[2]<DEFAULT_MAX_ANGULAR_OFFSET/180*np.pi:
+    #   tempnormal = self.normal
+    #   tempnormal[2]=0
+    #   self.normal=tempnormal
+    #   self.normal = self.normal/np.linalg.norm(self.normal)
+    # else: print("this post should not be placed in the ground plate")
+    
     # a=(1,0,0)
     # if np.sum(np.cross(a,self.normal))!=0:
     #   rot_axis = np.cross(a,self.normal)/np.linalg.norm(np.cross(a,self.normal))
@@ -196,7 +188,6 @@ class Mount(Geom_Object):
     self.docking_obj = Geom_Object()
     self.docking_obj.pos = self.pos+xshift*self._axes[:,0]-height*self._axes[:,2]
     self.docking_obj.normal = docking_normal
-    # self.rotation = rotation
     return True
   
   def _pos_changed(self, old_pos, new_pos):
@@ -207,13 +198,13 @@ class Mount(Geom_Object):
 
   def draw_fc(self):
     self.update_draw_dict()
+    if self.elm_type == "dont_draw": return None
     if self.normal[2]<DEFAULT_MAX_ANGULAR_OFFSET/180*np.pi:
       tempnormal = self.normal
       tempnormal[2]=0
       self.normal=tempnormal
       self.normal = self.normal/np.linalg.norm(self.normal)
     else: print("this post should not be placed in the ground plate")
-    if self.elm_type == "dont_draw": return None
     if self.Flip90==True:
       self.draw_dict["rotation"] = (self.normal, np.pi/2)
     if self._axes[2,2] <-0.99:

@@ -18,7 +18,7 @@ from .ray import Ray
 from .beam import Beam,Gaussian_Beam
 from .optical_element import Opt_Element
 from .lens import Lens
-from .mirror import Mirror, Curved_Mirror, Cylindrical_Mirror, Lam_Plane, Cylindrical_Mirror1
+from .mirror import Mirror, Curved_Mirror, Cylindrical_Mirror, Cylindrical_Mirror1
 from .composition import Composition
 # from .moduls import Make_Telescope,Make_Periscope, Make_White_Cell,Make_Amplifier_Typ_I_simpler, Make_Amplifier_Typ_I_simple, Make_Amplifier_Typ_II_simple, Make_Stretcher, Make_Amplifier_Typ_II_simpler
 from .constants import inch

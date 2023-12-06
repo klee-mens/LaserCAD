@@ -219,9 +219,9 @@ class Mirror(Opt_Element):
     # self.update_mount()
     if self.mount.elm_type != "dont_draw":
       # self._update_mount_dict()
-      self.mount.elm_type = "mirror"
-      self.mount.pos = self.pos
-      self.mount.normal = self.normal
+      # self.mount.elm_type = "mirror"
+      # self.mount.pos = self.pos
+      # self.mount.normal = self.normal
       self.mount.aperture = self.aperture
       self.mount.Flip90 = self.mount_dict["Flip90"]
       # self._update_mount_dict()
@@ -289,7 +289,7 @@ class Rooftop_mirror(Mirror):
   
   def draw_mount(self):
     # self.update_mount()
-    self._update_mount_dict()
+    # self._update_mount_dict()
     self.mount = Composed_Mount()
     self.mount.set_geom(self.get_geom())
     mon1 = Special_mount(**self.mount_dict)
@@ -413,7 +413,7 @@ class Stripe_mirror(Curved_Mirror):
   
   def draw_mount(self):
     # self.update_mount()
-    self._update_mount_dict()
+    # self._update_mount_dict()
     self.mount = Composed_Mount()
     self.mount.set_geom(self.get_geom())
     mon1 = Special_mount(**self.mount_dict)
@@ -586,29 +586,29 @@ class Cylindrical_Mirror(Stripe_mirror):
     ray.length=np.sqrt(dist[0]**2+dist[1]**2+dist[2]**2)
     return ray2
 
-class Lam_Plane(Mirror):
+# class Lam_Plane(Mirror):
   
-  def __init__(self,thickness=1, **kwargs):
-    super().__init__(**kwargs)
-    self.aperture = 25.4/2
-    self.draw_dict["thickness"]=thickness
+#   def __init__(self,thickness=1, **kwargs):
+#     super().__init__(**kwargs)
+#     self.aperture = 25.4/2
+#     self.draw_dict["thickness"]=thickness
 
-  def next_ray(self, ray):
-    ray2=deepcopy(ray)
-    ray2.pos = ray.intersect_with(self)
-    return ray2
+#   def next_ray(self, ray):
+#     ray2=deepcopy(ray)
+#     ray2.pos = ray.intersect_with(self)
+#     return ray2
   
-  def draw_fc(self):
-    self.update_draw_dict()
-    self.draw_dict["dia"]=self.aperture
-    obj = model_mirror(**self.draw_dict)
-    return obj
+#   def draw_fc(self):
+#     self.update_draw_dict()
+#     self.draw_dict["dia"]=self.aperture
+#     obj = model_mirror(**self.draw_dict)
+#     return obj
   
-  def draw_mount_fc(self):
-    self.update_draw_dict()
-    helper_dict = dict(self.draw_dict)
-    obj = model_lambda_plate(**helper_dict)
-    return obj
+#   def draw_mount_fc(self):
+#     self.update_draw_dict()
+#     helper_dict = dict(self.draw_dict)
+#     obj = model_lambda_plate(**helper_dict)
+#     return obj
   
 class Cylindrical_Mirror1(Cylindrical_Mirror):
   @property
