@@ -26,10 +26,11 @@ class Grating(Opt_Element):
     self.height = 60
     self.thickness = 8
     self.diffraction_order = order
-    self.mount_dict["elm_type"] = "grating"
-    self.mount_dict["height"] = self.height
-    self.mount_dict["thickness"] = self.thickness
-    self.mount = Grating_mount(**self.mount_dict)
+    # self.mount_dict["elm_type"] = "grating"
+    # self.mount_dict["height"] = self.height
+    # self.mount_dict["thickness"] = self.thickness
+    self.mount = Grating_mount(elm_type="grating",height=self.height,
+                               thickness=self.thickness)
     # self.blazeangel = 32
     # self.draw_dict['width'] = self.width
     # self.draw_dict['thickness'] = self.thickness

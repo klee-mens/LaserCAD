@@ -18,16 +18,18 @@ class Lens(Opt_Element):
     self.focal_length = f
     self.draw_dict["thickness"] = 3 #sieht schöner aus
     self.draw_dict["Radius1"] = 300
-    self._update_mount_dict()
-    self.mount = Mount(**self.mount_dict)
+    # self._update_mount_dict()
+    # self.mount = Mount(**self.mount_dict)
+    self.mount = Mount(elm_type="lens",name=self.name + "_mount",
+                       aperture=self.aperture)
     
-  def _update_mount_dict(self):
-    super()._update_mount_dict()
-    self.mount_dict["elm_type"] = "lens"
-    self.mount_dict["name"] = self.name + "_mount"
-    self.mount_dict["aperture"] = self.aperture
-    self.mount_dict["post_type"] = "1inch_post"
-    self.mount_dict["model"] = "default"
+  # def _update_mount_dict(self):
+  #   super()._update_mount_dict()
+  #   self.mount_dict["elm_type"] = "lens"
+  #   self.mount_dict["name"] = self.name + "_mount"
+  #   self.mount_dict["aperture"] = self.aperture
+  #   self.mount_dict["post_type"] = "1inch_post"
+  #   self.mount_dict["model"] = "default"
 
   @property
   def focal_length(self):
@@ -59,8 +61,8 @@ class Lens(Opt_Element):
       self.mount.aperture = self.aperture
       # print("123546564654546654654",self.mount.aperture)
       # self._update_mount_dict()
-      self.mount.model = self.mount_dict['model']
-      self.mount.post_type = self.mount_dict["post_type"]
+      # self.mount.model = self.mount_dict['model']
+      # self.mount.post_type = self.mount_dict["post_type"]
     return (self.mount.draw())
 
   # def draw_mount_fc(self):

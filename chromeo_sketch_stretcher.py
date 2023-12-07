@@ -61,7 +61,7 @@ grating_const = 1/450 # in 1/mm
 seperation = 100 # difference grating position und radius_concave
 lambda_mid = 2400e-9 * 1e3 # central wave length in mm
 delta_lamda = 200e-9*1e3 # full bandwith in mm
-number_of_rays = 20
+number_of_rays = 10
 safety_to_stripe_mirror = 5 #distance first incomming ray to stripe_mirror in mm
 periscope_height = 15
 first_propagation = 20 # legnth of the first ray_bundle to flip mirror1 mm
@@ -80,6 +80,7 @@ grating_normal = (np.sqrt(1-sinB**2), sinB, 0)
 
 Concav = Curved_Mirror(radius=radius_concave, name="Concav_Mirror")
 Concav.aperture = aperture_concave
+Concav.mount.model = "default"
 
 StripeM = Stripe_mirror(radius= -radius_concave/2, name="Stripe_Mirror")
 #Cosmetics
@@ -111,11 +112,11 @@ wavels = np.linspace(lambda_mid-delta_lamda/2, lambda_mid+delta_lamda/2, number_
 rays = []
 cmap = plt.cm.gist_rainbow
 for wavel in wavels:
-    # B_test = Beam(radius=1.25)
-    # B_test.make_cone_distribution(ray_count=9)
-    # ray_group =B_test.get_all_rays()
-    # for rn in ray_group:
-      rn = Ray()
+    B_test = Beam(radius=1.25*1.6,angle=0.001/1.6)
+    B_test.make_cone_distribution(ray_count=9)
+    ray_group =B_test.get_all_rays()
+    for rn in ray_group:
+      # rn = Ray()
       # rn.normal = vec
       # rn.pos = pos0
       rn.wavelength = wavel
@@ -174,7 +175,7 @@ le2.pos -= (195,0,periscope_height)
 Stretcher.add_fixed_elm(le1)
 Stretcher.add_fixed_elm(le2)
 
-ip_s = Intersection_plane()
+ip_s = Intersection_plane(name="the end of the Stretcher")
 # ip_s.pos -=(0,0,periscope_height) #two gratings
 ip_s.pos -=(1000,0,periscope_height) #four gratings
 
@@ -248,15 +249,15 @@ Stretcher.add_fixed_elm(Grat4)
 Stretcher.add_fixed_elm(C_RoofTop1)
 Stretcher.add_fixed_elm(C_RoofTop2)
 """
-Stretcher.add_fixed_elm(ip_s)
+# Stretcher.add_fixed_elm(ip_s)
 Stretcher.add_fixed_elm(pure_cosmetic)
 # Stretcher.add_fixed_elm(pure_cosmetic1)
 
 # setting the final sequence and the last propagation for visualization
 # note that pure cosmetic (pos6) is not in the sequence
 # Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0,6,7,8,9,7,6,10]) #two Gratings Compressor
-Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0,6,7,8,9,10,11,12]) #four Gratings Compressor
-# Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0])
+# Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0,6,7,8,9,10,11,12]) #four Gratings Compressor
+Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0])
 Stretcher.recompute_optical_axis()
 # ip=Intersection_plane()
 # ip.set_geom(Stretcher.last_geom())
@@ -265,7 +266,10 @@ Stretcher.recompute_optical_axis()
 Stretcher.draw()
 # ip.spot_diagram(Stretcher._beams[-1],aberration_analysis=True)
 
-# ip_s.spot_diagram(Stretcher._beams[-1])
+ip_s.spot_diagram(Stretcher._beams[-1])
+ip= Intersection_plane(name="the start of the Stretcher")
+ip.set_geom(Stretcher.get_geom())
+ip.spot_diagram(Stretcher._beams[0])
 pathlength = {}
 for ii in range(Stretcher._beams[0]._ray_count):
   wavelength = Stretcher._beams[0].get_all_rays()[ii].wavelength
@@ -278,14 +282,14 @@ for jj in range(len(Stretcher._beams)-1):
 """
 add the optical path length in crystal
 """
-Crystal_length = 10
-for ii in range(Stretcher._beams[0]._ray_count):
-    w1 = Stretcher._beams[0].get_all_rays()[ii].wavelength
-    w = w1*1000
-    n = np.sqrt(8.393 + 0.14383/(w**2-0.2421**2) + 4430.99/(w**2-36.71**2)) #ZnS
-    # print(n)
-    n = np.sqrt(2.2864 + 1.1280*(w**2)/(w**2 - 0.0562) - 0.0188*(w**2)) # RTP
-    pathlength[w1] += n * Crystal_length
+# Crystal_length = 10
+# for ii in range(Stretcher._beams[0]._ray_count):
+#     w1 = Stretcher._beams[0].get_all_rays()[ii].wavelength
+#     w = w1*1000
+#     n = np.sqrt(8.393 + 0.14383/(w**2-0.2421**2) + 4430.99/(w**2-36.71**2)) #ZnS
+#     # print(n)
+#     n = np.sqrt(2.2864 + 1.1280*(w**2)/(w**2 - 0.0562) - 0.0188*(w**2)) # RTP
+#     pathlength[w1] += n * Crystal_length
 # -----------------------------------------------------------------------------
 ray_lam = [ray.wavelength for ray in Stretcher._beams[0].get_all_rays()]
 path = [pathlength[ii] for ii in ray_lam]

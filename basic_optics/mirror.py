@@ -53,20 +53,21 @@ class Mirror(Opt_Element):
     self.update_normal()
     #Cosmetics
     self.draw_dict["Radius"] = 0
-    self._update_mount_dict()
-    self.mount = Mount(**self.mount_dict)
+    # self._update_mount_dict()
+    self.mount = Mount(elm_type="mirror",name=self.name + "_mount",
+                       aperture=self.aperture)
     self.mount.pos = self.pos
     self.mount.normal = self.normal
     # self.post = self.mount.get_post()
     
-  def _update_mount_dict(self):
-    super()._update_mount_dict()
-    self.mount_dict["elm_type"] = "mirror"
-    self.mount_dict["name"] = self.name + "_mount"
-    self.mount_dict["aperture"] = self.aperture
-    self.mount_dict["post_type"] = "1inch_post"
-    self.mount_dict["model"] = "default"
-    self.mount_dict["Flip90"] = False
+  # def _update_mount_dict(self):
+  #   super()._update_mount_dict()
+  #   self.mount_dict["elm_type"] = "mirror"
+  #   self.mount_dict["name"] = self.name + "_mount"
+  #   self.mount_dict["aperture"] = self.aperture
+  #   self.mount_dict["post_type"] = "1inch_post"
+  #   self.mount_dict["model"] = "default"
+  #   self.mount_dict["Flip90"] = False
     
     # self.mount_dict["post_type"] = self.post_type
     
@@ -223,10 +224,9 @@ class Mirror(Opt_Element):
       # self.mount.pos = self.pos
       # self.mount.normal = self.normal
       self.mount.aperture = self.aperture
-      self.mount.Flip90 = self.mount_dict["Flip90"]
-      # self._update_mount_dict()
-      self.mount.model = self.mount_dict['model']
-      self.mount.post_type = self.mount_dict["post_type"]
+      # self.mount.Flip90 = self.mount_dict["Flip90"]
+      # self.mount.model = self.mount_dict['model']
+      # self.mount.post_type = self.mount_dict["post_type"]
     return (self.mount.draw())
   
   # def draw_mount_fc(self):
@@ -266,18 +266,26 @@ class Rooftop_mirror(Mirror):
   def __init__(self, aperture=10, **kwargs):
     self.aperture = aperture
     super().__init__(**kwargs)
-    self._update_mount_dict()
+    # self._update_mount_dict()
     # self.mount = Composed_Mount()
     # mon1 = Special_mount(**self.mount_dict)
     # mon2 = Mount(aperture=25.4*2)
     # self.mount.add(mon1)
     # self.mount.add(mon2)
+    self.mount = Composed_Mount()
+    self.mount.set_geom(self.get_geom())
+    # mon1 = Special_mount(**self.mount_dict)
+    mon1 = Special_mount(model="rooftop mirror mount",
+                         name=self.name + "_mount",aperture= self.aperture)
+    mon2 = Mount(aperture=25.4*2)
+    self.mount.add(mon1)
+    self.mount.add(mon2)
   
-  def _update_mount_dict(self):
-    super()._update_mount_dict()
-    self.mount_dict["model"] = "rooftop mirror mount"
-    self.mount_dict["name"] = self.name + "_mount"
-    self.mount_dict["aperture"] = self.aperture
+  # def _update_mount_dict(self):
+  #   super()._update_mount_dict()
+  #   self.mount_dict["model"] = "rooftop mirror mount"
+  #   self.mount_dict["name"] = self.name + "_mount"
+  #   self.mount_dict["aperture"] = self.aperture
     # self.mount_dict["thickness"] = self.thickness
   
   def draw_fc(self):
@@ -288,14 +296,26 @@ class Rooftop_mirror(Mirror):
     return obj
   
   def draw_mount(self):
-    # self.update_mount()
     # self._update_mount_dict()
-    self.mount = Composed_Mount()
-    self.mount.set_geom(self.get_geom())
-    mon1 = Special_mount(**self.mount_dict)
-    mon2 = Mount(aperture=25.4*2)
-    self.mount.add(mon1)
-    self.mount.add(mon2)
+    if self.mount.elm_type != "dont_draw":
+      # self._update_mount_dict()
+      # self.mount.elm_type = "mirror"
+      # self.mount.pos = self.pos
+      # self.mount.normal = self.normal
+      self.mount.aperture = self.aperture
+      # -----------------------------------------------------------------------
+      self.mount = Composed_Mount()
+      self.mount.set_geom(self.get_geom())
+      # mon1 = Special_mount(**self.mount_dict)
+      mon1 = Special_mount(model="rooftop mirror mount",
+                           name=self.name + "_mount",aperture= self.aperture)
+      mon2 = Mount(aperture=25.4*2)
+      self.mount.add(mon1)
+      self.mount.add(mon2)
+      # -----------------------------------------------------------------------
+      # self.mount.Flip90 = self.mount_dict["Flip90"]
+      # self.mount.model = self.mount_dict['model']
+      # self.mount.post_type = self.mount_dict["post_type"]
     # print(self.aperture)
     return (self.mount.draw())
 
@@ -386,19 +406,27 @@ class Stripe_mirror(Curved_Mirror):
   def __init__(self, thickness=10, **kwargs):
     self.thickness = thickness
     super().__init__(**kwargs)
-    self._update_mount_dict()
+    # self._update_mount_dict()
     self.mount = Composed_Mount()
+    self.mount.set_geom(self.get_geom())
+    # mon1 = Special_mount(**self.mount_dict)
+    mon1 = Special_mount(model="Stripe mirror mount",name=self.name +"_mount",
+                         thickness=self.thickness)
+    # mon1.docking_obj.normal = -self.normal
+    mon2 = Mount(aperture=25.4*2)
+    self.mount.add(mon1)
+    self.mount.add(mon2)
     # mon1 = Special_mount(**self.mount_dict)
     # mon2 = Mount(aperture=25.4*2)
     # self.mount.add(mon1)
     # self.mount.add(mon2)
   
-  def _update_mount_dict(self):
-    super()._update_mount_dict()
-    self.mount_dict["model"] = "Stripe mirror mount"
-    self.mount_dict["name"] = self.name + "_mount"
-    # self.mount_dict["aperture"] = self.aperture
-    self.mount_dict["thickness"] = self.thickness
+  # def _update_mount_dict(self):
+  #   super()._update_mount_dict()
+  #   self.mount_dict["model"] = "Stripe mirror mount"
+  #   self.mount_dict["name"] = self.name + "_mount"
+  #   # self.mount_dict["aperture"] = self.aperture
+  #   self.mount_dict["thickness"] = self.thickness
   
   def draw_fc(self):
     self.update_draw_dict()
@@ -414,14 +442,31 @@ class Stripe_mirror(Curved_Mirror):
   def draw_mount(self):
     # self.update_mount()
     # self._update_mount_dict()
-    self.mount = Composed_Mount()
-    self.mount.set_geom(self.get_geom())
-    mon1 = Special_mount(**self.mount_dict)
-    # print(mon1.normal,mon1.docking_obj.normal,mon1.docking_normal)
-    # mon1.docking_obj.normal = -self.normal
-    mon2 = Mount(aperture=25.4*2)
-    self.mount.add(mon1)
-    self.mount.add(mon2)
+    if self.mount.elm_type != "dont_draw":
+      # self._update_mount_dict()
+      # self.mount.elm_type = "mirror"
+      # self.mount.pos = self.pos
+      # self.mount.normal = self.normal
+      self.mount.aperture = self.aperture
+      if self.mount.mount_list[0].thickness != self.thickness:
+          geom = deepcopy(self.get_geom())
+          mount_geom = deepcopy(self.mount.get_geom())
+          a=geom[0]+np.array((self.thickness-10)*self.mount._axes[:,0])
+          # geom[0] = a
+          # geom[1] = mount_geom[1]
+          self.mount.set_geom([a,mount_geom[1]])
+      # self.mount.Flip90 = self.mount_dict["Flip90"]
+      # self.mount.model = self.mount_dict['model']
+      # self.mount.post_type = self.mount_dict["post_type"]
+    # self.mount = Composed_Mount()
+    # self.mount.set_geom(self.get_geom())
+    # mon1 = Special_mount(**self.mount_dict)
+    # # print(mon1.normal,mon1.docking_obj.normal,mon1.docking_normal)
+    # # mon1.docking_obj.normal = -self.normal
+    # mon2 = Mount(aperture=25.4*2)
+    # self.mount.add(mon1)
+    # self.mount.add(mon2)
+    
     # print(self.aperture)
     return (self.mount.draw())
 
@@ -441,16 +486,23 @@ class Cylindrical_Mirror(Stripe_mirror):
     self.draw_dict["Radius"] = radius
     self.draw_dict["height"]=height
     self.draw_dict["thickness"]=thickness
-    self._update_mount_dict()
+    # self._update_mount_dict()
     self.mount = Composed_Mount()
+    self.mount.set_geom(self.get_geom())
+    # mon1 = Special_mount(**self.mount_dict)
+    mon1 = Special_mount(model="Stripe mirror mount",name=self.name +"_mount",
+                         thickness=self.thickness)
+    mon2 = Mount(aperture=25.4*2)
+    self.mount.add(mon1)
+    self.mount.add(mon2)
     # self.draw_dict["model_type"]="Stripe"
 
-  def _update_mount_dict(self):
-    super()._update_mount_dict()
-    self.mount_dict["model"] = "Stripe mirror mount"
-    self.mount_dict["name"] = self.name + "_mount"
-    # self.mount_dict["aperture"] = self.aperture
-    self.mount_dict["thickness"] = self.thickness
+  # def _update_mount_dict(self):
+  #   super()._update_mount_dict()
+  #   self.mount_dict["model"] = "Stripe mirror mount"
+  #   self.mount_dict["name"] = self.name + "_mount"
+  #   # self.mount_dict["aperture"] = self.aperture
+  #   self.mount_dict["thickness"] = self.thickness
 
   @property
   def radius(self):

@@ -19,7 +19,7 @@ class Component(Geom_Object):
   """
   def __init__(self, name="Component", **kwargs):
     super().__init__(name, **kwargs)
-    self.mount_dict = dict()
+    # self.mount_dict = dict()
     # self.mount_dict["pos"] = self.pos
     # self.mount_dict["normal"] = self.normal
     self.mount = Mount(name=name+"_mount", elm_type="dont_draw")
