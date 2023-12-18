@@ -97,6 +97,8 @@ class Geom_Object(object):
     # self._axes = self._updated_axes(normal, NORM0)
     # the raw_dict contains all important parameters for the FreeCAD models
     self.draw_dict = {"name": self.name, "geom":self.get_geom()}
+    # self.draw_dict = {}
+    # self.update_draw_dict()
 
 
 
@@ -313,13 +315,13 @@ class Geom_Object(object):
     corresponding draw function
     """
     if freecad_da:
-      return self.draw_fc()
+      return self.draw_freecad()
     else:
       txt = self.draw_text()
       print(txt)
       return txt
 
-  def draw_fc(self):
+  def draw_freecad(self):
     """
     ruft falls FreeCAD vorhanden ist die entsprechende Zeichenfunktion aus
     freecad_models auf, gibt im Normalfall eine Referenz auf das entsprechende
@@ -333,7 +335,7 @@ class Geom_Object(object):
     return self.freecad_model(**self.draw_dict)
 
   def freecad_model(self, **kwargs):
-    #ToDo: fürs Debugging hier einfach einen Zylinder mit norm uns k zeichnen
+    # ToDo: fürs Debugging hier einfachch einen Zylinder mit norm uns k zeichnen
     return None
 
 

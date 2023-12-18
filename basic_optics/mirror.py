@@ -52,7 +52,8 @@ class Mirror(Opt_Element):
     self.__phi = phi
     self.update_normal()
     #Cosmetics
-    self.draw_dict["Radius"] = 0
+    self.update_draw_dict()
+    self.freecad_model = model_mirror
     self._update_mount_dict()
     self.mount = Mount(**self.mount_dict)
     self.mount.pos = self.pos
@@ -208,12 +209,17 @@ class Mirror(Opt_Element):
     txt += ', ' + super().__repr__()[n+1::]
     return txt
 
-  def draw_fc(self):
-    self.update_draw_dict()
+  def update_draw_dict(self):
+    super().update_draw_dict()
     self.draw_dict["dia"]=self.aperture
+    self.draw_dict["Radius"] = 0
+    
 
-    obj = model_mirror(**self.draw_dict)
-    return obj
+  # def draw_fc(self):
+    # self.update_draw_dict()
+
+    # obj = model_mirror(**self.draw_dict)
+    # return obj
   
   def draw_mount(self):
     # self.update_mount()

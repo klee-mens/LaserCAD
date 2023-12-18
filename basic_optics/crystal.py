@@ -27,6 +27,7 @@ class Crystal(Opt_Element):
     self.thickness=thickness
     self.draw_dict["thickness"]=self.thickness
     self.relative_refractive_index = n
+    self.freecad_model = model_crystal
 
   def next_ray(self, ray):
     ray2 = deepcopy(ray)
@@ -75,9 +76,9 @@ class Crystal(Opt_Element):
       ray4.pos = ray3.endpoint()
     return ray4
 
-  def draw_fc(self):
-    self.update_draw_dict()
-    return model_crystal(**self.draw_dict)
+  # def draw_freecad(self, **kwargs):
+    # self.update_draw_dict()
+    # return model_crystal(**self.draw_dict)
 
   def draw_mount_fc(self):
     self.update_draw_dict()
@@ -95,15 +96,9 @@ class Crystal(Opt_Element):
   def __repr__(self):
     n = len(self.class_name())
     txt = 'Crystal('
-    
-    # txt = 'Lens(f=' + repr(self.focal_length)
     txt += ', ' + super().__repr__()[n+1::]
     return txt
 
-  # def to_dict(self):
-  #   dc = super().to_dict()
-
-  #   return dc
 
   def from_dict(dc):
     oe = Opt_Element()

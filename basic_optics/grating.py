@@ -30,6 +30,8 @@ class Grating(Opt_Element):
     self.mount_dict["height"] = self.height
     self.mount_dict["thickness"] = self.thickness
     self.mount = Grating_mount(**self.mount_dict)
+    self.update_draw_dict()
+    self.freecad_model = model_grating
     # self.blazeangel = 32
     # self.draw_dict['width'] = self.width
     # self.draw_dict['thickness'] = self.thickness
@@ -71,14 +73,17 @@ class Grating(Opt_Element):
     ray2.normal = n_r
     return ray2
 
-  def draw_fc(self):
-    dims = (self.width, self.height, self.thickness)
-    return model_grating(name=self.name, dimensions=dims, geom=self.get_geom())
+  def update_draw_dict(self):
+    super().update_draw_dict()
+    self.draw_dict["dimensions"] = (self.width, self.height, self.thickness)
+  
+
+    # return (name=self.name, dimensions=dims, geom=self.get_geom())
 
   def draw_mount_fc(self):
     # helper_dict = dict(self.draw_dict)
     # obj = grating_mount(**helper_dict)
-    obj = grating_mount(name=self.name,height=self.height,
+    obj = Grating_mount(name=self.name,height=self.height,
                         thickness=self.thickness,#base_exists=self.draw_dict['base_exists'],
                         geom=self.get_geom())
     return obj

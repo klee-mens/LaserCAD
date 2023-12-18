@@ -16,8 +16,8 @@ class Lens(Opt_Element):
   def __init__(self, f=100, name="NewLens", **kwargs):
     super().__init__(name=name, **kwargs)
     self.focal_length = f
-    self.draw_dict["thickness"] = 3 #sieht schöner aus
-    self.draw_dict["Radius1"] = 300
+    self.update_draw_dict()
+    self.freecad_model = model_lens
     self._update_mount_dict()
     self.mount = Mount(**self.mount_dict)
     
@@ -41,11 +41,18 @@ class Lens(Opt_Element):
   def next_ray(self, ray):
     return self.refraction(ray)
 
-  def draw_fc(self):
-    self.update_draw_dict()
+  def update_draw_dict(self):
+    super().update_draw_dict()
     self.draw_dict["dia"]=self.aperture
+    self.draw_dict["thickness"] = 3 #sieht schöner aus
+    self.draw_dict["Radius1"] = 300
+    
+
+  # def draw_fc(self):
+    # self.update_draw_dict()
     # model_lens(self.name, dia=self.aperture, geom_info=self.get_geom())
-    return model_lens(**self.draw_dict)
+    # self.draw_dict["dia"]=self.aperture
+    # return model_lens(**self.draw_dict)
 
   def draw_mount_fc(self):
     # obj = lens_mount(**self.draw_dict)

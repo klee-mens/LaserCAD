@@ -45,7 +45,7 @@ class Post_and_holder(Geom_Object):
     return draw_1inch_post(name=model,h_diff = height_difference,
                             color=self.draw_dict["post_color"],geom = self.get_geom())
   
-  def draw_fc(self):
+  def draw_freecad(self, **kwargs):
     self.draw_dict["geom"]=self.get_geom()
     self.draw_dict["name"] = self.name 
     self.draw_dict["post_color"] = self.post_color

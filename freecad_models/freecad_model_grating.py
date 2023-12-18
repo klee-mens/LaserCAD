@@ -22,7 +22,7 @@ DEFUALT_COLOR = (170/255, 170/255, 1.0)
 # DEFALUT_MOUNT_COLOR = (0.75,0.75,0.75)
 
 def model_grating(name="grating", dimensions=DEFUALT_DIM, geom=GEOM0, 
-                  color=DEFUALT_COLOR):
+                  color=DEFUALT_COLOR, **kwargs):
   """
   kreiert das Model eines Gitters durch simples Erzeugen eines Quaders
   creates the model of a grid by simply creating a box

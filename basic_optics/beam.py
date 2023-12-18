@@ -270,7 +270,7 @@ class Beam(Geom_Object):
     self._rearange_subobjects_axes(old_axes, new_axes, self._rays)
 
 
-  def draw_fc(self):
+  def draw_freecad(self):
     if self.draw_dict["model"] == "Gaussian":
       return model_Gaussian_beam(name=self.name, q_para=self.q_para,
                                  wavelength=self.wavelength,
@@ -331,7 +331,7 @@ class Gaussian_Beam(Ray):
     txt += ', ' + super().__repr__()[n+1::]
     return txt
 
-  def draw_fc(self):
+  def draw_freecad(self):
     if self.draw_dict["model"] == "Gaussian":
       return model_Gaussian_beam(name=self.name, q_para=self.q_para,
                                  wavelength=self.wavelength,prop=self.length,
