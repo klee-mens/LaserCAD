@@ -68,6 +68,10 @@ first_propagation = 20 # legnth of the first ray_bundle to flip mirror1 mm
 distance_flip_mirror1_grating = 300
 distance_roof_top_grating = 600
 
+input_radius = 10
+C1 = np.pi/2 # assume input_radius*input_angle = lambda/pi*C1, C1 is a const. C1=1 if the input beam is a Gaussian beam
+input_angle = (lambda_mid+delta_lamda/2)/np.pi*C1/input_radius
+
 # calculated parameters according to the grating equation
 v = lambda_mid/grating_const
 s = np.sin(seperation_angle)
@@ -112,7 +116,7 @@ wavels = np.linspace(lambda_mid-delta_lamda/2, lambda_mid+delta_lamda/2, number_
 rays = []
 cmap = plt.cm.gist_rainbow
 for wavel in wavels:
-    B_test = Beam(radius=1.25*1.6,angle=0.001/1.6)
+    B_test = Beam(radius=input_radius,angle=input_angle)
     B_test.make_cone_distribution(ray_count=9)
     ray_group =B_test.get_all_rays()
     for rn in ray_group:
@@ -257,8 +261,10 @@ Stretcher.add_fixed_elm(pure_cosmetic)
 # note that pure cosmetic (pos6) is not in the sequence
 # Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0,6,7,8,9,7,6,10]) #two Gratings Compressor
 # Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0,6,7,8,9,10,11,12]) #four Gratings Compressor
-Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0])
+Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0]) #no compressor
 Stretcher.recompute_optical_axis()
+
+Stretcher.propagate(1500)
 # ip=Intersection_plane()
 # ip.set_geom(Stretcher.last_geom())
 # ip.spot_diagram(Stretcher._beams[-1],aberration_analysis=True)
@@ -270,6 +276,8 @@ ip_s.spot_diagram(Stretcher._beams[-1])
 ip= Intersection_plane(name="the start of the Stretcher")
 ip.set_geom(Stretcher.get_geom())
 ip.spot_diagram(Stretcher._beams[0])
+ip.draw()
+ip_s.draw()
 pathlength = {}
 for ii in range(Stretcher._beams[0]._ray_count):
   wavelength = Stretcher._beams[0].get_all_rays()[ii].wavelength
@@ -357,87 +365,3 @@ plt.xlabel("angular frequency ω (rad/s)")
 plt.ylabel("The third order derivative of φ(ω)")
 plt.axhline(fai3[int(len(fai3)/2)], color = 'black', linewidth = 1)
 print("3rd order dispersion at the center wavelength:",fai3[int(len(fai3)/2)])
-# SinS = np.sin(10/180*np.pi)
-# CosS = np.cos(10/180*np.pi)
-# Grat1 = Grating(grat_const=grating_const, order=-1)
-# Grat1.pos -=(500,0,periscope_height)
-# Grat1.normal = grating_normal
-# Grat1.normal = -Grat1.normal
-# Grat2 = Grating(grat_const=grating_const, order=-1)
-# propagation_length = 100
-# Grat2.pos -= (500-propagation_length*CosS,SinS*propagation_length,periscope_height)
-# Grat2.normal = grating_normal
-
-# C_RoofTop1 = Mirror()
-# C_RoofTop1.pos -= (700,SinS*propagation_length,periscope_height)
-# C_RoofTop1.normal = (-1,0,-1)
-# C_RoofTop2 = Mirror()
-# C_RoofTop2.pos -= (700,SinS*propagation_length,0)
-# C_RoofTop2.normal = (-1,0,1)
-
-# C_RoofTop1.draw = dont
-# C_RoofTop1.draw_dict["mount_type"] = "dont_draw"
-# C_RoofTop2.draw = dont
-# C_RoofTop2.draw_dict["mount_type"] = "dont_draw"
-# pure_cosmetic = Mirror(name="RoofTop_Mirror")
-# pure_cosmetic.draw_dict["mount_type"] = "rooftop_mirror_mount"
-# pure_cosmetic.pos = (C_RoofTop1.pos + C_RoofTop2.pos ) / 2
-# pure_cosmetic.normal = (C_RoofTop1.normal + C_RoofTop2.normal ) / 2
-# pure_cosmetic.draw_dict["model_type"] = "Rooftop"
-
-# ip = Intersection_plane()
-# ip.pos -= (100,0,0)
-
-
-# Compressor = Composition()
-# Compressor.set_geom(Stretcher.last_geom())
-# Compressor.set_light_source(Stretcher._beams[-1])
-# Compressor.add_fixed_elm(Grat1)
-# Compressor.add_fixed_elm(Grat2)
-# Compressor.add_fixed_elm(C_RoofTop1)
-# Compressor.add_fixed_elm(C_RoofTop2)
-# Compressor.add_fixed_elm(ip)
-# Compressor.add_fixed_elm(pure_cosmetic)
-
-# Compressor.set_sequence([0,1,2,3,1,0,4])
-
-# Compressor.propagate(200)
-# # Compressor.recompute_optical_axis()
-# Compressor.draw()
-# # return Stretcher
-# ip.spot_diagram(Compressor._beams[-1])
-# # Stretcher = Make_Stretcher_chromeo()
-# # Stretcher.draw()
-
-# pathlength = {}
-# for ii in range(Compressor._beams[0]._ray_count):
-#   wavelength = Compressor._beams[0].get_all_rays()[ii].wavelength
-#   pathlength[wavelength] = 0
-# for jj in range(len(Compressor._beams)-1):
-#   for ii in Compressor._beams[jj].get_all_rays():
-#     a=pathlength[ii.wavelength]
-#     pathlength[ii.wavelength] = a +ii.length
-# ray_lam = [ray.wavelength for ray in Compressor._beams[0].get_all_rays()]
-# path = [pathlength[ii] for ii in ray_lam]
-# path_diff = [ii-path[int(len(path)/2)] for ii in path]
-# fai = [path_diff[ii]/ray_lam[ii]*2*np.pi for ii in range(len(path))]
-# omega = [c0/ii*2*np.pi for ii in ray_lam]
-# para = np.polyfit(omega, fai, 5)
-# fai2 = [20*para[0]*ii**3+12*para[1]*ii**2+6*para[2]*ii+2*para[3] for ii in omega]
-# # fai2 = [para[0]*ii**5+para[1]*ii**4+para[2]*ii**3+para[3]*ii**2+para[4]*ii+para[5] for ii in omega]
-# delay_mid = path[int(len(path)/2)]/c0
-# delay = [(pa/c0-delay_mid)*1E9 for pa in path]
-# plt.figure()
-# ax1=plt.subplot(1,2,1)
-# plt.plot(ray_lam,path)
-# plt.ylabel("pathlength (mm)")
-# plt.xlabel("wavelength (mm)")
-# plt.title("Pathlength at different wavelength")
-# plt.axhline(path[int(len(path)/2)], color = 'black', linewidth = 1)
-# ax2=plt.subplot(1,2,2)
-# plt.plot(ray_lam,delay)
-# plt.ylabel("delay (ns)")
-# plt.xlabel("wavelength (mm)")
-# plt.title("Delay at different wavelength")
-# plt.axhline(0, color = 'black', linewidth = 1)
-# plt.show()

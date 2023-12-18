@@ -122,13 +122,13 @@ class Mount(Geom_Object):
       self.model = get_model_by_aperture_and_element(self.elm_type, self.aperture)
     else:
       self.model = model
-    if self.model in MIRROR_LIST:
-      stl_file=thisfolder+"\\mount_meshes\\adjusted mirror mount\\" + self.model + ".stl"
-    elif self.model in LENS_LIST:
-      stl_file=thisfolder+"\\mount_meshes\\adjusted lens mount\\" + self.model + ".stl"
-    else:
-      stl_file=thisfolder+"\\mount_meshes\\special mount\\" + self.model + ".stl"
-    self.draw_dict["stl_file"]=stl_file
+    # if self.model in MIRROR_LIST:
+    #   stl_file=thisfolder+"\\mount_meshes\\adjusted mirror mount\\" + self.model + ".stl"
+    # elif self.model in LENS_LIST:
+    #   stl_file=thisfolder+"\\mount_meshes\\adjusted lens mount\\" + self.model + ".stl"
+    # else:
+    #   stl_file=thisfolder+"\\mount_meshes\\special mount\\" + self.model + ".stl"
+    # self.draw_dict["stl_file"]=stl_file
     self.mount_in_database = self.set_by_table()
     post = Post_and_holder(name=self.name + "post",elm_type=self.elm_type,post_type=post_type)
     post.set_geom(self.docking_obj.get_geom())
@@ -266,9 +266,9 @@ class Special_mount(Mount):
   def __init__(self, name="special_mounmt",model="special_mount",aperture=25.4,thickness=10,
                docking_pos = (1,2,3),docking_normal=(0,0,1),drawing_post=False, **kwargs):
     super().__init__(name, **kwargs)
-    self.draw_dict["aperture"] = aperture
+    # self.draw_dict["aperture"] = aperture
     self.aperture = aperture
-    self.draw_dict["thickness"] = thickness
+    # self.draw_dict["thickness"] = thickness
     self.thickness = thickness
     self.draw_dict["geom"]=self.get_geom()
     self.model = model
