@@ -19,13 +19,13 @@ class Lens(Opt_Element):
     self.update_draw_dict()
     self.freecad_model = model_lens
     self._update_mount_dict()
-    self.mount = Mount(**self.mount_dict)
+    # self.mount = Mount(**self.mount_dict)
     
-  def _update_mount_dict(self):
-    super()._update_mount_dict()
-    self.mount_dict["elm_type"] = "lens"
-    self.mount_dict["name"] = self.name + "_mount"
-    self.mount_dict["aperture"] = self.aperture
+  # def _update_mount_dict(self):
+  #   super()._update_mount_dict()
+  #   self.mount_dict["elm_type"] = "lens"
+  #   self.mount_dict["name"] = self.name + "_mount"
+  #   self.mount_dict["aperture"] = self.aperture
 
   @property
   def focal_length(self):

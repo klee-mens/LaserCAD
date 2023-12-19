@@ -35,7 +35,6 @@ class Opt_Element(Component):
   def __init__(self, **kwargs):
     super().__init__(**kwargs)
     self._matrix = np.eye(2)
-    self.aperture = 1*inch # Apertur in mm, wichtig für Klippingabfrage (not yet implemented)
     self.length = 0 #Länge in mm, die meisten opt Elemente sind 2D, also 0
     # self.group = [] # falls das Element in eine Baugruppe eingesetzt wird
     #Parameter zum zeichnen

@@ -20,7 +20,7 @@ import numpy as np
 DEFALUT_CAV_PATH = thisfolder
 DEFALUT_MIRROR_PATH = thisfolder + "mount_meshes/mirror"
 DEFALUT_LENS_PATH = thisfolder + "mount_meshes/lens"
-DEFALUT_SPEIAL_MOUNT_PATH = thisfolder + "mount_meshes/special mount"
+DEFALUT_SPEIAL_MOUNT_PATH = thisfolder + "mount_meshes/special_mount"
 MIRROR_LIST1 = os.listdir(DEFALUT_MIRROR_PATH)
 MIRROR_LIST = []
 for i in MIRROR_LIST1:

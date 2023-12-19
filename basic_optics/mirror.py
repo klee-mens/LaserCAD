@@ -15,6 +15,7 @@ from .optical_element import Opt_Element
 # from ..non_interactings import Mount
 # from ..non_interactings import Post_and_holder
 from .mount import Mount,Composed_Mount,Special_mount
+from .mount2 import default_mirror_mount,Unit_Mount
 # from .post import Post_and_holder
 import numpy as np
 from copy import deepcopy
@@ -54,10 +55,12 @@ class Mirror(Opt_Element):
     #Cosmetics
     self.update_draw_dict()
     self.freecad_model = model_mirror
-    self._update_mount_dict()
-    self.mount = Mount(**self.mount_dict)
-    self.mount.pos = self.pos
-    self.mount.normal = self.normal
+
+    
+    # self._update_mount_dict()
+    # self.mount = Mount(**self.mount_dict)
+    # self.mount.pos = self.pos
+    # self.mount.normal = self.normal
     # self.post = self.mount.get_post()
     
   def _update_mount_dict(self):
