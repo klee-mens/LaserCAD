@@ -561,7 +561,7 @@ def draw_post(name="TR50_M", height=0,xshift=0,color=DEFAULT_POST_COLOR, geom=No
   update_geom_info(obj, geom, off0=offset)
   return obj
 
-def draw_1inch_post(name="TR50_M",h_diff=5,color=DEFAULT_POST_COLOR,
+def draw_1inch_post(name="TR50_M",h_diff=5,ll=0,color=DEFAULT_POST_COLOR,
                     geom=None):
   DOC = get_DOC()
   POS = geom[0]
@@ -573,7 +573,7 @@ def draw_1inch_post(name="TR50_M",h_diff=5,color=DEFAULT_POST_COLOR,
   datei1 = thisfolder + "post/1inchPost/" + name
   datei1 += ".stl"
   obj = load_STL(datei1, name = name,color = color)
-  Geom_ground = (np.array((POS[0],POS[1],0)), np.array((AXES)))
+  Geom_ground = (np.array((POS[0],POS[1],ll)), np.array((AXES)))
   Geom_diff = (np.array((POS[0],POS[1],geom[0][2]-h_diff)), np.array((AXES)))
   update_geom_info(obj, Geom_ground)
   obj1 = DOC.addObject("Part::Cylinder","Cylinder")
@@ -589,7 +589,7 @@ def draw_1inch_post(name="TR50_M",h_diff=5,color=DEFAULT_POST_COLOR,
   add_to_composition(part, container)
   return part
 
-def draw_post_holder (name="PH50_M", height=0,xshift=0,color=DEFAULT_HOLDER_COLOR, geom=None):
+def draw_post_holder (name="PH50_M", height=0,ll=0,xshift=0,color=DEFAULT_HOLDER_COLOR, geom=None):
   """
   draw the post holder
   Normally, this function is not called separately.
@@ -622,7 +622,8 @@ def draw_post_holder (name="PH50_M", height=0,xshift=0,color=DEFAULT_HOLDER_COLO
   datei1 = thisfolder + "post/post_holder/" + name
   datei1 += ".stl"
   obj = load_STL(datei1, name=name,color=color)
-  Geom_ground = (np.array((POS[0],POS[1],0)), np.array((NORMAL)))
+  Geom_ground = (np.array((POS[0],POS[1],ll)), np.array((NORMAL)))
+  """
   if name =="PH100_M":
     offset=Vector(xshift+4.3,-1.5,height+54)
     obj.Placement = Placement(offset, Rotation(90,0,90), Vector(0,0,0))
@@ -668,6 +669,8 @@ def draw_post_holder (name="PH50_M", height=0,xshift=0,color=DEFAULT_HOLDER_COLO
     offset=Vector(xshift-4.5,-5.5,height+31.25)
     obj.Placement = Placement(offset, Rotation(90,0,90), Vector(0,0,0))
     update_geom_info(obj, Geom_ground, off0=offset)
+  """
+  update_geom_info(obj, Geom_ground, off0=0)
   return obj
 
 def draw_post_base(name="BA1L", height=0,xshift=0, geom=None):

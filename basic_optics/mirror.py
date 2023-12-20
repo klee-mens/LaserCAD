@@ -226,17 +226,17 @@ class Mirror(Opt_Element):
   
   def draw_mount(self):
     # self.update_mount()
-    if self.mount.elm_type != "dont_draw":
-      # self._update_mount_dict()
-      self.mount.elm_type = "mirror"
-      self.mount.pos = self.pos
-      self.mount.normal = self.normal
-      self.mount.aperture = self.aperture
-      self.mount.Flip90 = self.mount_dict["Flip90"]
-      # self._update_mount_dict()
-      self.mount.model = self.mount_dict['model']
-      self.mount.post_type = self.mount_dict["post_type"]
-    return (self.mount.draw())
+    # if self.Mount.elm_type != "dont_draw":
+    #   # self._update_mount_dict()
+    #   self.Mount.elm_type = "mirror"
+    #   self.Mount.pos = self.pos
+    #   self.Mount.normal = self.normal
+    #   self.Mount.aperture = self.aperture
+    #   self.Mount.Flip90 = self.mount_dict["Flip90"]
+    #   # self._update_mount_dict()
+    #   self.Mount.model = self.mount_dict['model']
+    #   self.Mount.post_type = self.mount_dict["post_type"]
+    return (self.Mount.draw())
   
   # def draw_mount_fc(self):
     # self.update_draw_dict()

@@ -49,7 +49,7 @@ class Component(Geom_Object):
 
   def draw_mount(self):
     # self.update_mount()
-    return (self.mount.draw())
+    return (self.Mount.draw())
   
   def _pos_changed(self, old_pos, new_pos):
     self._rearange_subobjects_pos( old_pos, new_pos, [self.Mount])

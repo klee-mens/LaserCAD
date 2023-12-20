@@ -31,19 +31,22 @@ MIRROR_LIST1 = os.listdir(DEFALUT_MIRROR_PATH)
 MIRROR_LIST = []
 for i in MIRROR_LIST1:
   a,b,c = str.partition(i, ".")
-  MIRROR_LIST.append(a)
+  if "stl" in c:
+    MIRROR_LIST.append(a)
 
 LENS_LIST1 = os.listdir(DEFALUT_LENS_PATH)
 LENS_LIST = []
 for i in LENS_LIST1:
   a,b,c = str.partition(i, ".")
-  LENS_LIST.append(a)
+  if "stl" in c:
+    LENS_LIST.append(a)
   
 SPECIAL_LIST1 = os.listdir(DEFALUT_SPEIAL_MOUNT_PATH)
 SPECIAL_LIST = []
 for i in SPECIAL_LIST1:
   a,b,c = str.partition(i, ".")
-  SPECIAL_LIST.append(a)
+  if "stl" in c:
+    SPECIAL_LIST.append(a)
 del a,b,c,i,SPECIAL_LIST1,LENS_LIST1,MIRROR_LIST1
 
 def default_mirror_mount(aperture):
@@ -74,6 +77,7 @@ def get_mount_by_aperture_and_element(aperture,elm_type):
       model = "LMR1.5_M"
     elif aperture <=25.4*2:
       model = "LMR2_M"
+    post = "0.5inch_post"
   elif elm_type == "Mirror":
     if aperture<= 25.4/2:
       model = "POLARIS-K05"
@@ -89,9 +93,16 @@ def get_mount_by_aperture_and_element(aperture,elm_type):
       model = "KS4"
     else:
       model = "large mirror mount"
+    post = "1inch_post"
   else:
     model = "dont_draw"
-  return Unit_Mount(model=model)
+  
+  Output_mount = Composed_Mount(unit_model_list=[model,post])
+  # Output_mount = Composed_Mount()
+  # Output_mount.add(Unit_Mount(model = model))
+  # Output_mount.add(Post(model = post))
+  
+  return Output_mount
 
 # def Load_unit_mount(model = "KS1"):
 #     if model in MIRROR_LIST:
@@ -111,7 +122,24 @@ class Unit_Mount(Geom_Object):
     self.set_by_table()
     self.draw_dict["stl_file"] = self.path + self.model + ".stl"
     self.freecad_model = load_STL
+    self.is_horizontal = True
+    self.draw_dict["color"] = DEFAULT_MOUNT_COLOR
     
+  def set_axes(self, new_axes):
+    if self.is_horizontal:
+      old_axes = self.get_axes()
+      newx, newy, newz = new_axes[:,0], new_axes[:,1], new_axes[:,2]
+      newx = np.array((newx[0],newx[1],0))
+      newx *= 1/np.linalg.norm(newx)
+      newz = np.array((0,0,1))
+      newy = np.cross(newz, newx)
+      self._axes[:,0] = newx
+      self._axes[:,1] = newy
+      self._axes[:,2] = newz
+      self._axes_changed(old_axes, self.get_axes())
+    else:
+      super().set_axes(new_axes)
+      
   
     
   def set_by_table(self):
@@ -133,6 +161,7 @@ class Unit_Mount(Geom_Object):
     else:
         model_type = ""
         print("whathzmutrzjtezj")
+        return False
     folder = thisfolder+"mount_meshes\\"+model_type+"\\"
     with open(folder+model_type+"mounts.csv") as csvfile: 
       reader = csv.DictReader(csvfile)
@@ -166,13 +195,28 @@ class Unit_Mount(Geom_Object):
   
   def _axes_changed(self, old_axes, new_axes):
     self._rearange_subobjects_axes( old_axes, new_axes, [self.docking_obj])
-    
-class Post(Unit_Mount):
-  def __init__(self, name="post",model="1_inch_post", **kwargs):
+
+
+
+
+class Post(Geom_Object):
+  def __init__(self, name="post",model="1inch_post", **kwargs):
     super().__init__(name, **kwargs)
+    self.axis_fixed = True
+    self._lower_limit = 0
+    self.draw_dict["post_color"] = DEFALUT_POST_COLOR
+    self.draw_dict["holder_color"] = DEFALUT_HOLDER_COLOR
+    self.model=model
+    self.docking_obj = Geom_Object()
+  
+  def set_axes(self, new_axes):
+    if self.axis_fixed:
+      self._axes = np.eye(3)
+    else:
+      super().set_axes(new_axes)
   
   def find_1inch_post(self):
-    height = self.pos[2]
+    height = self.pos[2] - self._lower_limit
     if height<12.5:
       print("Warning, there is no suitable post holder at this height")
       return None
@@ -185,103 +229,159 @@ class Post(Unit_Mount):
       if height < default_post_height[i+1] and height > default_post_height[i]:
         model = model_name[i]
         height_difference = height - default_post_height[i]
-    return draw_1inch_post(name=model,h_diff = height_difference,
+    return draw_1inch_post(name=model,h_diff = height_difference,ll=self._lower_limit,
                             color=self.draw_dict["post_color"],geom = self.get_geom())
+  
+  def draw_post_part(self,name="post_part", base_exists=False, 
+                     post_color=DEFALUT_POST_COLOR,holder_color=DEFALUT_HOLDER_COLOR, geom=None):
+    """
+    Draw the post part, including post, post holder and base
+    Assuming that all optics are placed in the plane of z = 0.
+  
+    Parameters
+    ----------
+    name : String, optional
+      The name of the part. The default is "post_part".
+    height : float/int, optional
+      distance from the center of the mirror to the bottom of the mount.
+      The default is 12.
+    xshift : float/int, optional
+      distance from the center of the mirror to the cavity at the bottom of the 
+      mount. The default is 0.
+    geom : TYPE, optional
+      mount geom. The default is None.
+  
+    Returns
+    -------
+    part : TYPE
+      A part which includes the post, the post holder and the slotted bases.
+  
+    """
+    POS = geom[0]
+    POS[2]-=self._lower_limit
+    if (POS[2]<34) or (POS[2]>190):
+      print("Warning, there is no suitable post holder and slotted base at this height")
+      return None
+    post_length=50
+    if base_exists:
+        if POS[2]>110:
+          post_length=100
+        elif POS[2]>90:
+          post_length=75
+        elif POS[2]>65:
+          post_length=50
+        elif POS[2]>55:
+          post_length=40
+        elif POS[2]>40:
+          post_length=30
+        else:
+          post_length=20
+          post2 = draw_post_holder(name="PH20E_M", ll=self._lower_limit,
+                                   color=holder_color, geom=geom)
+        POS[2]+=self._lower_limit
+        post = draw_post(name="TR"+str(post_length)+"_M", color=post_color,geom=geom)
+        if post_length>20:
+          post2 = draw_post_holder(name="PH"+str(post_length)+"_M", ll=self._lower_limit,
+                                   color=holder_color, geom=geom)
+    else:
+        if POS[2]>105:
+          post_length=100
+        elif POS[2]>85:
+          post_length=75
+        elif POS[2]>60:
+          post_length=50
+        elif POS[2]>50:
+          post_length=40
+        elif POS[2]>35:
+          post_length=30
+        else:
+          post_length=20
+          post2 = draw_post_holder(name="PH"+str(post_length)+"E_M", ll=self._lower_limit,
+                                   color=holder_color, geom=geom)
+        POS[2]+=self._lower_limit
+        post = draw_post(name="TR"+str(post_length)+"_M", color=post_color,geom=geom)
+        post2 = draw_post_holder(name="PH"+str(post_length)+"E_M", ll=self._lower_limit,
+                                 color=holder_color, geom=geom)
+    if base_exists:
+      if post_length>90 or post_length<31:
+          post1 = draw_post_base(name="BA2_M", geom=geom)
+      else:
+          post1 = draw_post_base(name="BA1L",  geom=geom)
+    else:
+      post1 = None
+    # print(name,"'s height=",POS[2]+post_length)
+    print(name,"'s height=",POS[2])
+    part = initialize_composition_old(name=name)
+    container = post,post1,post2
+    add_to_composition(part, container)
+    return part
+  
+  def set_lower_limit(self,lower_limit):
+    self._lower_limit = lower_limit
+    self.docking_obj.pos = np.array((self.pos[0],self.pos[1],self._lower_limit))
+  
+  def _pos_changed(self, old_pos, new_pos):
+    self.docking_obj.pos = np.array((self.pos[0],self.pos[1],self._lower_limit))
   
   def draw_freecad(self, **kwargs):
     self.draw_dict["geom"]=self.get_geom()
     self.draw_dict["name"] = self.name 
-    self.draw_dict["post_color"] = self.post_color
-    self.draw_dict["holder_color"] = self.holder_color
-    if self.elm_type == "dont_draw":
+    if self.model == "dont_draw":
       return None
     print(self.name,"'s position = ",self.pos)
-    # return draw_post_part(**self.draw_dict)
-    if self.post_type == "1inch_post":
+    if self.model == "1inch_post":
       return self.find_1inch_post()
-    elif self.post_type == "0.5inch_post":
-      return draw_post_part(**self.draw_dict)
+    elif self.model == "0.5inch_post":
+      return self.draw_post_part(**self.draw_dict)
     else:
       return draw_large_post(height=self.pos[2],geom=self.get_geom())
     
-def draw_post_part(name="post_part", base_exists=False, 
-                   post_color=DEFALUT_POST_COLOR,holder_color=DEFALUT_HOLDER_COLOR, geom=None):
+ 
+class Composed_Mount(Geom_Object):
   """
-  Draw the post part, including post, post holder and base
-  Assuming that all optics are placed in the plane of z = 0.
-
-  Parameters
-  ----------
-  name : String, optional
-    The name of the part. The default is "post_part".
-  height : float/int, optional
-    distance from the center of the mirror to the bottom of the mount.
-    The default is 12.
-  xshift : float/int, optional
-    distance from the center of the mirror to the cavity at the bottom of the 
-    mount. The default is 0.
-  geom : TYPE, optional
-    mount geom. The default is None.
-
-  Returns
-  -------
-  part : TYPE
-    A part which includes the post, the post holder and the slotted bases.
-
+  This one is for compositions of mulitple mounts stacked togehter
+  The add function drags every new mount to the docking position of the old one
+  and as usual all are moved correctly when the Composed_Mount is moved
   """
-  POS = geom[0]
-  AXES = geom[1]
-  if np.shape(AXES)==(3,):
-    NORMAL=AXES
-  else:
-    NORMAL=AXES[:,0]
-  if (POS[2]<34) or (POS[2]>190):
-    print("Warning, there is no suitable post holder and slotted base at this height")
-    return None
-  post_length=50
-  if base_exists:
-      if POS[2]>110:
-        post_length=100
-      elif POS[2]>90:
-        post_length=75
-      elif POS[2]>65:
-        post_length=50
-      elif POS[2]>55:
-        post_length=40
-      elif POS[2]>40:
-        post_length=30
-      else:
-        post_length=20
-        post2 = draw_post_holder(name="PH20E_M", 
-                                 color=holder_color, geom=geom)
-      post = draw_post(name="TR"+str(post_length)+"_M", color=post_color,geom=geom)
-      if post_length>20:
-        post2 = draw_post_holder(name="PH"+str(post_length)+"_M", color=holder_color, geom=geom)
-  else:
-      if POS[2]>105:
-        post_length=100
-      elif POS[2]>85:
-        post_length=75
-      elif POS[2]>60:
-        post_length=50
-      elif POS[2]>50:
-        post_length=40
-      elif POS[2]>35:
-        post_length=30
-      else:
-        post_length=20
-        post2 = draw_post_holder(name="PH"+str(post_length)+"E_M", color=holder_color, geom=geom)
-      post = draw_post(name="TR"+str(post_length)+"_M", color=post_color,geom=geom)
-      post2 = draw_post_holder(name="PH"+str(post_length)+"E_M", color=holder_color, geom=geom)
-  if base_exists:
-    if post_length>90 or post_length<31:
-        post1 = draw_post_base(name="BA2_M", geom=geom)
-    else:
-        post1 = draw_post_base(name="BA1L",  geom=geom)
-  else:
-    post1 = None
-  print(name,"'s height=",NORMAL[2]+post_length)
-  part = initialize_composition_old(name=name)
-  container = post,post1,post2
-  add_to_composition(part, container)
-  return part
+  def __init__(self, unit_model_list=[], **kwargs):
+    self.unit_model_list = unit_model_list
+    self.mount_list = []
+    super().__init__(**kwargs)
+    self.docking_obj = Geom_Object()
+    self.docking_obj.set_geom(self.get_geom())
+    for model in self.unit_model_list:
+      if "post" in model:
+        newmount = Post(model=model)
+      else:  
+        newmount = Unit_Mount(model=model)
+      self.add(newmount)
+    
+  def add(self, mount):
+    mount.set_geom(self.docking_obj.get_geom())
+    self.mount_list.append(mount)
+    self.docking_obj.set_geom(mount.docking_obj.get_geom())
+    
+  def draw_freecad(self):
+    part = initialize_composition_old(name="mount, post and base")
+    container = []
+    for mount in self.mount_list:
+      # container.append(mount.draw_fc())
+      container.append(mount.draw())
+    add_to_composition(part, container)
+    return part
+    
+  def _pos_changed(self, old_pos, new_pos):
+    self._rearange_subobjects_pos(old_pos, new_pos,[self.mount_list[0]])
+    for mount_number in range(len(self.mount_list)-1):
+      first = self.mount_list[mount_number]
+      second = self.mount_list[mount_number+1]
+      second.pos = first.docking_obj.pos
+  
+  def _axes_changed(self, old_axes, new_axes):
+    self._rearange_subobjects_axes( old_axes, new_axes, [self.mount_list[0]])
+    for mount_number in range(len(self.mount_list)-1):
+      first = self.mount_list[mount_number]
+      second = self.mount_list[mount_number+1]
+      second.set_geom(first.docking_obj.get_geom())
+
+    
