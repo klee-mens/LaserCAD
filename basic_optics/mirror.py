@@ -401,6 +401,11 @@ class Stripe_mirror(Curved_Mirror):
     # self.mount.add(mon1)
     # self.mount.add(mon2)
   
+  def set_mount_to_default(self):
+    self.mount = Composed_Mount()
+    
+    self.mount.set_geom(self.get_geom())
+  
   def _update_mount_dict(self):
     super()._update_mount_dict()
     self.mount_dict["model"] = "Stripe mirror mount"
@@ -414,7 +419,6 @@ class Stripe_mirror(Curved_Mirror):
     # self.draw_dict["mount_type"] = "POLARIS-K1-Step"
     self.draw_dict["Radius1"] = self.radius
     self.draw_dict["thickness"] = self.thickness
-    print(self.draw_dict["thickness"] )
     self.draw_dict["model_type"] = "Stripe"
     obj = model_mirror(**self.draw_dict)
     return obj

@@ -25,40 +25,44 @@ from LaserCAD.freecad_models import clear_doc, setview, freecad_da
 from LaserCAD.basic_optics import Mirror,Crystal
 from LaserCAD.basic_optics import Beam,Grating, Composition, inch, Curved_Mirror, Ray, Geom_Object, LinearResonator, Lens, Component
 from LaserCAD.freecad_models.utils import thisfolder, load_STL
-from LaserCAD.basic_optics.mount2 import Unit_Mount,Post, Composed_Mount
+from LaserCAD.basic_optics.mount2 import Unit_Mount,Post, Composed_Mount,Special_Mount
 from LaserCAD.basic_optics.mount2 import MIRROR_LIST,LENS_LIST
 
 if freecad_da:
   clear_doc()
 
-# mir = Lens()
+mir = Lens()
+
+# mir.Mount.mount_list[-1].set_lower_limit(22)
+# mir.aperture = 2*inch
+# mir.set_mount_to_default()
 # mir.pos = (39,123,90)
 # mir.normal = (1,2,0.5)
-# mir.Mount.mount_list[-1].set_lower_limit(22)
-# # mir.aperture = 2*inch
-# # mir.set_mount_to_default()
+# mir.set_mount_to_default()
+a= Special_Mount()
+a.draw()
 # mir.draw()
 # mir.Mount.draw()
 
-for i in range(len(MIRROR_LIST)):
-  M = Composed_Mount(unit_model_list=[MIRROR_LIST[i],"1inch_post"])
-  aperture = M.mount_list[0].aperture
-  mir= Mirror()
-  mir.aperture = aperture
-  mir.Mount = M
-  mir.pos = (i*50,0,50+i*10)
-  mir.draw()
-  mir.Mount.draw()
+# for i in range(len(MIRROR_LIST)):
+#   M = Composed_Mount(unit_model_list=[MIRROR_LIST[i],"1inch_post"])
+#   aperture = M.mount_list[0].aperture
+#   mir= Mirror()
+#   mir.aperture = aperture
+#   mir.Mount = M
+#   mir.pos = (i*50,0,50+i*10)
+#   mir.draw()
+#   mir.Mount.draw()
   
-for i in range(len(LENS_LIST)):
-  M = Composed_Mount(unit_model_list=[LENS_LIST[i],"0.5inch_post"])
-  aperture = M.mount_list[0].aperture
-  mir= Lens()
-  mir.aperture = aperture
-  mir.Mount = M
-  mir.pos = (i*50,-100,100+i*10)
-  mir.draw()
-  mir.Mount.draw()
+# for i in range(len(LENS_LIST)):
+#   M = Composed_Mount(unit_model_list=[LENS_LIST[i],"0.5inch_post"])
+#   aperture = M.mount_list[0].aperture
+#   mir= Lens()
+#   mir.aperture = aperture
+#   mir.Mount = M
+#   mir.pos = (i*50,-100,100+i*10)
+#   mir.draw()
+#   mir.Mount.draw()
 
 # M = Unit_Mount(model="KS2")
 # M.is_horizontal = False

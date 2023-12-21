@@ -159,9 +159,8 @@ class Unit_Mount(Geom_Object):
     elif self.model in LENS_LIST:
         model_type="lens"
     else:
-        model_type = ""
-        print("whathzmutrzjtezj")
-        return False
+        model_type = "special_mount"
+        # return False
     folder = thisfolder+"mount_meshes\\"+model_type+"\\"
     with open(folder+model_type+"mounts.csv") as csvfile: 
       reader = csv.DictReader(csvfile)
@@ -180,6 +179,7 @@ class Unit_Mount(Geom_Object):
         
     if not mount_in_database:
       print("This mount is not in the database.")
+      self.path = folder
       return False
     self.aperture = aperture
     
@@ -336,7 +336,12 @@ class Post(Geom_Object):
     else:
       return draw_large_post(height=self.pos[2],geom=self.get_geom())
     
- 
+class Special_Mount():
+  def __init__(self, name="mount",model="Stripe mirror mount", **kwargs):
+    super().__init__(name, **kwargs)
+    self.is_horizontal = False
+    # self.draw_dict["stl_file"] = thisfolder+"mount_meshes\\special_mount\\"+self.model+".stl"
+
 class Composed_Mount(Geom_Object):
   """
   This one is for compositions of mulitple mounts stacked togehter

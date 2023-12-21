@@ -29,6 +29,7 @@ class Component(Geom_Object):
     
   def set_mount_to_default(self):
     self.Mount = get_mount_by_aperture_and_element(self.aperture, self.class_name())
+    self.Mount.set_geom(self.get_geom())
     
     # self.mount = Mount(name=name+"_mount", elm_type="dont_draw")
     # self.mount.pos = self.pos
