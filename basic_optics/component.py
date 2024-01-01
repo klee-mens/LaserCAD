@@ -21,14 +21,14 @@ class Component(Geom_Object):
   """
   def __init__(self, name="Component", **kwargs):
     super().__init__(name, **kwargs)
-    # self.mount_dict = dict()
-    # self.mount_dict["pos"] = self.pos
-    # self.mount_dict["normal"] = self.
-    self.aperture = 1*inch # Apertur in mm, wichtig für Klippingabfrage (not yet implemented)
+    self.aperture = 1*inch # Aperture in mm for drawing, Mount and clipping (not yet implemented)
+    self.thickness = 5 # Thickness in mm, importent for mount placing and drawing
     self.set_mount_to_default()
     
   def set_mount_to_default(self):
-    self.Mount = get_mount_by_aperture_and_element(self.aperture, self.class_name())
+    self.Mount = get_mount_by_aperture_and_element(self.aperture, 
+                                                   self.class_name(), 
+                                                   self.thickness)
     self.Mount.set_geom(self.get_geom())
     
     # self.mount = Mount(name=name+"_mount", elm_type="dont_draw")
@@ -36,17 +36,21 @@ class Component(Geom_Object):
     # self.mount.normal = self.normal
     # self.post = Post_and_holder(name=name+"post",elm_type="dont_draw")
     
+  def update_draw_dict(self):
+    super().update_draw_dict()
+    self.draw_dict["dia"]=self.aperture
+    self.draw_dict["thickness"] = self.thickness
   # def update_mount(self):
   #   self._update_mount_dict()
   #   self.mount = Mount(**self.mount_dict)
   
   
-  def _update_mount_dict(self):
+  # def _update_mount_dict(self):
     # self.mount_dict["pos"] = self.pos
     # self.mount_dict["normal"] = self.normal
     # self.mount.pos = self.pos
     # self.mount.normal = self.normal
-    pass
+    # pass
 
   def draw_mount(self):
     # self.update_mount()

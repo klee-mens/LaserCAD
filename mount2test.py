@@ -32,6 +32,11 @@ if freecad_da:
   clear_doc()
 
 mir = Lens()
+mir.thickness = 15
+mir.set_mount_to_default()
+mir.draw()
+mir.draw_mount()
+
 
 # mir.Mount.mount_list[-1].set_lower_limit(22)
 # mir.aperture = 2*inch
@@ -39,8 +44,8 @@ mir = Lens()
 # mir.pos = (39,123,90)
 # mir.normal = (1,2,0.5)
 # mir.set_mount_to_default()
-a= Special_Mount()
-a.draw()
+# a= Special_Mount()
+# a.draw()
 # mir.draw()
 # mir.Mount.draw()
 

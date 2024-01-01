@@ -39,11 +39,8 @@ class Opt_Element(Component):
     # self.group = [] # falls das Element in eine Baugruppe eingesetzt wird
     #Parameter zum zeichnen
     self.draw_dict.update({"dia":self.aperture,
-                           "thickness":5,
-                           "model_type":"DEFAULT",
-                           # "mount_type": "default",
-                           # "mount_name": self.name+"_mount"
-                           })
+                           "thickness":self.thickness,
+                           "model_type":"DEFAULT"})
 
   def matrix(self):
     return np.array(self._matrix)

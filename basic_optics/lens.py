@@ -16,16 +16,9 @@ class Lens(Opt_Element):
   def __init__(self, f=100, name="NewLens", **kwargs):
     super().__init__(name=name, **kwargs)
     self.focal_length = f
+    self.thickness = 3
     self.update_draw_dict()
     self.freecad_model = model_lens
-    self._update_mount_dict()
-    # self.mount = Mount(**self.mount_dict)
-    
-  # def _update_mount_dict(self):
-  #   super()._update_mount_dict()
-  #   self.mount_dict["elm_type"] = "lens"
-  #   self.mount_dict["name"] = self.name + "_mount"
-  #   self.mount_dict["aperture"] = self.aperture
 
   @property
   def focal_length(self):
@@ -43,16 +36,9 @@ class Lens(Opt_Element):
 
   def update_draw_dict(self):
     super().update_draw_dict()
-    self.draw_dict["dia"]=self.aperture
-    self.draw_dict["thickness"] = 3 #sieht schöner aus
     self.draw_dict["Radius1"] = 300
+    self.draw_dict["Radius2"] = 0
     
-
-  # def draw_fc(self):
-    # self.update_draw_dict()
-    # model_lens(self.name, dia=self.aperture, geom_info=self.get_geom())
-    # self.draw_dict["dia"]=self.aperture
-    # return model_lens(**self.draw_dict)
 
   def draw_mount_fc(self):
     # obj = lens_mount(**self.draw_dict)
@@ -74,6 +60,20 @@ class Lens(Opt_Element):
     txt += ', ' + super().__repr__()[n+1::]
     return txt
 
+  # def draw_fc(self):
+    # self.update_draw_dict()
+    # model_lens(self.name, dia=self.aperture, geom_info=self.get_geom())
+    # self.draw_dict["dia"]=self.aperture
+    # return model_lens(**self.draw_dict)
+
+    # self._update_mount_dict()
+    # self.mount = Mount(**self.mount_dict)
+    
+  # def _update_mount_dict(self):
+  #   super()._update_mount_dict()
+  #   self.mount_dict["elm_type"] = "lens"
+  #   self.mount_dict["name"] = self.name + "_mount"
+  #   self.mount_dict["aperture"] = self.aperture
 #   def __repr__(self):
 #     txt = 'Lens(f=' + repr(self.focal_length)
 #     txt += ', name="' + self.name
