@@ -50,7 +50,7 @@ for i in SPECIAL_LIST1:
 del a,b,c,i,SPECIAL_LIST1,LENS_LIST1,MIRROR_LIST1
 
 
-def get_mount_by_aperture_and_element(aperture,elm_type,thickness):
+def get_mount_by_aperture_and_element(aperture, elm_type, elm_thickness):
   if elm_type == "Lens":
     if aperture<= 25.4/2:
       model = "MLH05_M"
@@ -81,9 +81,10 @@ def get_mount_by_aperture_and_element(aperture,elm_type,thickness):
     model = "dont_draw"
   
   Output_mount = Composed_Mount(unit_model_list=[model,post])
-  Output_mount.mount_list[0].element_thickness = thickness
+  Output_mount.mount_list[0].element_thickness = elm_thickness
   Output_mount.mount_list[0].aperture = aperture
   return Output_mount
+
 
 
 class Unit_Mount(Geom_Object):
@@ -172,7 +173,11 @@ class Unit_Mount(Geom_Object):
   def reverse(self):
     x,y,z = self.get_coordinate_system()
     self.rotate(z, np.pi)
-    self.pos += x * -self.element_thickness
+    self.pos += x * self.element_thickness
+
+  def update_draw_dict(self):
+    super().update_draw_dict()
+    self.draw_dict["stl_file"] = self.path + self.model + ".stl"
 
   def _pos_changed(self, old_pos, new_pos):
     self._rearange_subobjects_pos( old_pos, new_pos, [self.docking_obj])
@@ -320,11 +325,6 @@ class Post(Geom_Object):
     else:
       return draw_large_post(height=self.pos[2],geom=self.get_geom())
     
-class Special_Mount():
-  def __init__(self, name="mount",model="Stripe mirror mount", **kwargs):
-    super().__init__(**kwargs)
-    self.is_horizontal = False
-    # self.draw_dict["stl_file"] = thisfolder+"mount_meshes/special_mount/"+self.model+".stl"
 
 class Composed_Mount(Geom_Object):
   """
@@ -358,6 +358,11 @@ class Composed_Mount(Geom_Object):
       container.append(mount.draw())
     add_to_composition(part, container)
     return part
+  
+  def reverse(self):
+    first = self.mount_list[0]
+    first.reverse()
+    self.set_geom(self.get_geom()) # to adjust the other elements
     
   def _pos_changed(self, old_pos, new_pos):
     self._rearange_subobjects_pos(old_pos, new_pos,[self.mount_list[0]])
@@ -374,6 +379,25 @@ class Composed_Mount(Geom_Object):
       second.set_geom(first.docking_obj.get_geom())
 
 
+class Stripe_Mirror_Mount(Composed_Mount):
+  """
+  this
+  """
+  def __init__(self, mirror_thickness=10, **kwargs):
+    super().__init__(**kwargs)
+    self.mirror_thickness = mirror_thickness
+    stripe = Unit_Mount()
+    stripe.path = thisfolder+"mount_meshes/special_mount/"
+    stripe.model = "Stripe_mirror_mount"
+    stripe.docking_obj.pos += (-1, 104.3, 0)
+    stripe.docking_obj.normal = (-1,0,0)
+    self.add(stripe)
+    # K2 = Unit_Mount(model="POLARIS-K2")
+    # self.add(K2)
+    # post = Post()
+    # self.add(post)
+    self.add(Unit_Mount(model="POLARIS-K2"))
+    self.add(Post())
 
 # class Special_mount(Unit_Mount):
 #   """
