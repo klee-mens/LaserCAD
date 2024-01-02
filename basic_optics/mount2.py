@@ -95,8 +95,8 @@ def get_mount_by_aperture_and_element(aperture,elm_type):
       model = "large mirror mount"
     post = "1inch_post"
   else:
-    model = "dont_draw"
-  
+    model =post= "dont_draw"
+    # post = "dont_draw"
   Output_mount = Composed_Mount(unit_model_list=[model,post])
   # Output_mount = Composed_Mount()
   # Output_mount.add(Unit_Mount(model = model))
@@ -119,11 +119,12 @@ class Unit_Mount(Geom_Object):
     super().__init__(name, **kwargs)
     self.model = model
     self.docking_obj = Geom_Object()
-    self.set_by_table()
-    self.draw_dict["stl_file"] = self.path + self.model + ".stl"
-    self.freecad_model = load_STL
     self.is_horizontal = True
-    self.draw_dict["color"] = DEFAULT_MOUNT_COLOR
+    if self.model != "dont_draw":
+      self.set_by_table()
+      self.draw_dict["stl_file"] = self.path + self.model + ".stl"
+      self.freecad_model = load_STL
+      self.draw_dict["color"] = DEFAULT_MOUNT_COLOR
     
   def set_axes(self, new_axes):
     if self.is_horizontal:
