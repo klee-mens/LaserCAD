@@ -95,7 +95,7 @@ class Unit_Mount(Geom_Object):
   Usually exists as part of the component
   """
   # def __init__(self, name="mount",model="default", **kwargs):
-  def __init__(self, name="mount",model="dont_draw", **kwargs):
+  def __init__(self, model="dont_draw", name="mount", **kwargs):
     super().__init__(name, **kwargs)
     self.model = model
     self.path = ""
@@ -405,13 +405,7 @@ class Composed_Mount(Geom_Object):
 class Stripe_Mirror_Mount(Composed_Mount):
   def __init__(self, **kwargs):
     super().__init__(**kwargs)
-    stripe = Unit_Mount()
-    stripe.path = thisfolder+"mount_meshes/special_mount/"
-    stripe.model = "Stripe_mirror_mount"
-    stripe.set_by_table()
-    stripe.freecad_model = load_STL
-    # stripe.docking_obj.pos += (-1, 104.3, 0)
-    # stripe.docking_obj.normal = (-1,0,0)
+    stripe = Unit_Mount("Stripe_mirror_mount")
     self.add(stripe)
     self.add(Unit_Mount(model="POLARIS-K2"))
     self.add(Post())
@@ -419,11 +413,7 @@ class Stripe_Mirror_Mount(Composed_Mount):
 class Rooftop_Mirror_Mount(Composed_Mount):
   def __init__(self, **kwargs):
     super().__init__(**kwargs)
-    roof = Unit_Mount()
-    roof.path = thisfolder+"mount_meshes/special_mount/"
-    roof.model = "Rooftop_mirror_mount"
-    roof.set_by_table()
-    roof.freecad_model = load_STL
+    roof = Unit_Mount("Rooftop_mirror_mount")
     self.add(roof)
     self.add(Unit_Mount(model="POLARIS-K2"))
     self.add(Post())
