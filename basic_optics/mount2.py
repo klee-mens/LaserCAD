@@ -408,9 +408,23 @@ class Stripe_Mirror_Mount(Composed_Mount):
     stripe = Unit_Mount()
     stripe.path = thisfolder+"mount_meshes/special_mount/"
     stripe.model = "Stripe_mirror_mount"
-    stripe.docking_obj.pos += (-1, 104.3, 0)
-    stripe.docking_obj.normal = (-1,0,0)
+    stripe.set_by_table()
+    stripe.freecad_model = load_STL
+    # stripe.docking_obj.pos += (-1, 104.3, 0)
+    # stripe.docking_obj.normal = (-1,0,0)
     self.add(stripe)
+    self.add(Unit_Mount(model="POLARIS-K2"))
+    self.add(Post())
+    
+class Rooftop_Mirror_Mount(Composed_Mount):
+  def __init__(self, **kwargs):
+    super().__init__(**kwargs)
+    roof = Unit_Mount()
+    roof.path = thisfolder+"mount_meshes/special_mount/"
+    roof.model = "Rooftop_mirror_mount"
+    roof.set_by_table()
+    roof.freecad_model = load_STL
+    self.add(roof)
     self.add(Unit_Mount(model="POLARIS-K2"))
     self.add(Post())
 

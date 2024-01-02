@@ -11,8 +11,8 @@ from .geom_object import TOLERANCE, NORM0
 from .ray import Ray
 from .optical_element import Opt_Element
 from .mount import Mount,Composed_Mount,Special_mount
-from .mount2 import Stripe_Mirror_Mount
-from ..freecad_models import model_mirror, model_stripe_mirror
+from .mount2 import Stripe_Mirror_Mount, Rooftop_Mirror_Mount
+from ..freecad_models import model_mirror, model_stripe_mirror, model_rooftop_mirror
 # from ..freecad_models import model_mirror, mirror_mount
 # from ..freecad_models.freecad_model_composition import initialize_composition_old, add_to_composition
 # from ..non_interactings import Mount
@@ -230,42 +230,42 @@ class Mirror(Opt_Element):
   
 
 
-class Rooftop_mirror(Mirror):
-  def __init__(self, aperture=10, **kwargs):
-    self.aperture = aperture
-    super().__init__(**kwargs)
-    self._update_mount_dict()
-    # self.mount = Composed_Mount()
-    # mon1 = Special_mount(**self.mount_dict)
-    # mon2 = Mount(aperture=25.4*2)
-    # self.mount.add(mon1)
-    # self.mount.add(mon2)
+# class Rooftop_mirror(Mirror):
+#   def __init__(self, aperture=10, **kwargs):
+#     self.aperture = aperture
+#     super().__init__(**kwargs)
+#     self._update_mount_dict()
+#     # self.mount = Composed_Mount()
+#     # mon1 = Special_mount(**self.mount_dict)
+#     # mon2 = Mount(aperture=25.4*2)
+#     # self.mount.add(mon1)
+#     # self.mount.add(mon2)
   
-  def _update_mount_dict(self):
-    super()._update_mount_dict()
-    self.mount_dict["model"] = "rooftop mirror mount"
-    self.mount_dict["name"] = self.name + "_mount"
-    self.mount_dict["aperture"] = self.aperture
-    # self.mount_dict["thickness"] = self.thickness
+#   def _update_mount_dict(self):
+#     super()._update_mount_dict()
+#     self.mount_dict["model"] = "rooftop mirror mount"
+#     self.mount_dict["name"] = self.name + "_mount"
+#     self.mount_dict["aperture"] = self.aperture
+#     # self.mount_dict["thickness"] = self.thickness
   
-  def draw_fc(self):
-    self.update_draw_dict()
-    self.draw_dict["dia"]=self.aperture
-    self.draw_dict["model_type"] = "Rooftop"
-    obj = model_mirror(**self.draw_dict)
-    return obj
+#   def draw_fc(self):
+#     self.update_draw_dict()
+#     self.draw_dict["dia"]=self.aperture
+#     self.draw_dict["model_type"] = "Rooftop"
+#     obj = model_mirror(**self.draw_dict)
+#     return obj
   
-  def draw_mount(self):
-    # self.update_mount()
-    self._update_mount_dict()
-    self.mount = Composed_Mount()
-    self.mount.set_geom(self.get_geom())
-    mon1 = Special_mount(**self.mount_dict)
-    mon2 = Mount(aperture=25.4*2)
-    self.mount.add(mon1)
-    self.mount.add(mon2)
-    # print(self.aperture)
-    return (self.mount.draw())
+#   def draw_mount(self):
+#     # self.update_mount()
+#     self._update_mount_dict()
+#     self.mount = Composed_Mount()
+#     self.mount.set_geom(self.get_geom())
+#     mon1 = Special_mount(**self.mount_dict)
+#     mon2 = Mount(aperture=25.4*2)
+#     self.mount.add(mon1)
+#     self.mount.add(mon2)
+#     # print(self.aperture)
+#     return (self.mount.draw())
 
 
 
@@ -365,7 +365,23 @@ class Stripe_mirror(Curved_Mirror):
     self.draw_dict["height"] = self.height
     self.draw_dict["model_type"] = "Stripe"
     
+class Rooftop_mirror(Mirror):
+  def __init__(self, **kwargs):
+    super().__init__(**kwargs)
+    self.freecad_model = model_rooftop_mirror
+    self.set_mount_to_default()
     
+  def set_mount_to_default(self):
+    smm = Rooftop_Mirror_Mount()
+    smm.set_geom(self.get_geom())
+    smm.pos += self.normal * self.aperture / 2
+    self.Mount = smm
+
+  def update_draw_dict(self):
+    super().update_draw_dict()
+    self.draw_dict["dia"] = self.aperture
+    self.draw_dict["model_type"] = "Rooftop"    
+
 def stripe_mirror_draw_test():
   sm = Stripe_mirror()
   sm.pos = (130, 89, 120)
@@ -374,8 +390,16 @@ def stripe_mirror_draw_test():
   sm.set_mount_to_default()
   sm.draw()
   sm.draw_mount()
-  
-  
+
+def Rooftop_mirror_draw_test():
+  rm = Rooftop_mirror()
+  rm.pos = (120,50,130)
+  rm.normal = (1,-1,0)
+  rm.aperture = 10
+  rm.set_mount_to_default()
+  rm.draw()
+  rm.draw_mount()
+
   # def set_mount_to_default(self):
   #   self.mount = Composed_Mount()
     

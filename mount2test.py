@@ -32,20 +32,28 @@ if freecad_da:
   clear_doc()
   
 from LaserCAD.basic_optics.mount2 import Stripe_Mirror_Mount
-from LaserCAD.basic_optics.mirror import Stripe_mirror
+from LaserCAD.basic_optics.mirror import Stripe_mirror,Rooftop_mirror
 
 # cm = Curved_Mirror()
-sm = Stripe_mirror()
-sm.pos = (130, 89, 120)
-sm.normal = (1,1,0)
-sm.thickness = 40
-sm.set_mount_to_default()
-sm.draw()
-sm.draw_mount()
+# sm = Stripe_mirror()
+# sm.pos = (130, 89, 120)
+# sm.normal = (1,1,0)
+# sm.thickness = 40
+# sm.set_mount_to_default()
+# sm.draw()
+# sm.draw_mount()
 
 # smm = Stripe_Mirror_Mount()
 # smm.draw()
 
+
+rm = Rooftop_mirror()
+rm.pos = (120,50,130)
+rm.normal = (1,-1,0)
+rm.aperture = 10
+rm.set_mount_to_default()
+rm.draw()
+rm.draw_mount()
 # mir = Lens()
 # mir.thickness = 15
 # mir.set_mount_to_default()
@@ -60,11 +68,11 @@ sm.draw_mount()
 # mir2.draw()
 # mir2.draw_mount()
 
-mir2 = Mirror()
-mir2.pos += (50,0,0)
-mir2.Mount.reverse()
-mir2.draw()
-mir2.draw_mount()
+# mir2 = Mirror()
+# mir2.pos += (50,0,0)
+# mir2.Mount.reverse()
+# mir2.draw()
+# mir2.draw_mount()
 
 # mir.Mount.mount_list[-1].set_lower_limit(22)
 # mir.aperture = 2*inch
