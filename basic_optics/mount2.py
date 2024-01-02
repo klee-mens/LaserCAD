@@ -49,23 +49,6 @@ for i in SPECIAL_LIST1:
     SPECIAL_LIST.append(a)
 del a,b,c,i,SPECIAL_LIST1,LENS_LIST1,MIRROR_LIST1
 
-# def default_mirror_mount(aperture):
-#   print(aperture)
-#   if aperture<= 25.4/2:
-#     model = "POLARIS-K05"
-#   elif aperture <= 25.4:
-#     model = "POLARIS-K1"
-#   elif aperture <= 25.4*1.5:
-#     model = "POLARIS-K15S4"
-#   elif aperture <=25.4*2:
-#     model = "POLARIS-K2"
-#   elif aperture <=25.4*3:
-#     model = "POLARIS-K3S5"
-#   elif aperture <=25.4*4:
-#     model = "KS4"
-#   else:
-#     model = "large mirror mount"
-#   return Unit_Mount(model=model)
 
 def get_mount_by_aperture_and_element(aperture,elm_type,thickness):
   if elm_type == "Lens":
@@ -98,16 +81,10 @@ def get_mount_by_aperture_and_element(aperture,elm_type,thickness):
     model = "dont_draw"
   
   Output_mount = Composed_Mount(unit_model_list=[model,post])
-  Output_mount.thickness = thickness
-  # Output_mount = Composed_Mount()
-  # Output_mount.add(Unit_Mount(model = model))
-  # Output_mount.add(Post(model = post))
-  
+  Output_mount.mount_list[0].element_thickness = thickness
+  Output_mount.mount_list[0].aperture = aperture
   return Output_mount
 
-# def Load_unit_mount(model = "KS1"):
-#     if model in MIRROR_LIST:
-#         return Mount(model)
 
 class Unit_Mount(Geom_Object):
   """
@@ -119,12 +96,15 @@ class Unit_Mount(Geom_Object):
   def __init__(self, name="mount",model="default", **kwargs):
     super().__init__(name, **kwargs)
     self.model = model
+    self.path = ""
     self.docking_obj = Geom_Object()
+    self.element_thickness = 5 #standard thickness of for example a mirror
+    self.aperture = 25.4
+    self.is_horizontal = True
     self.set_by_table()
     self.draw_dict["stl_file"] = self.path + self.model + ".stl"
-    self.freecad_model = load_STL
-    self.is_horizontal = True
     self.draw_dict["color"] = DEFAULT_MOUNT_COLOR
+    self.freecad_model = load_STL
     
   def set_axes(self, new_axes):
     if self.is_horizontal:
@@ -140,8 +120,6 @@ class Unit_Mount(Geom_Object):
       self._axes_changed(old_axes, self.get_axes())
     else:
       super().set_axes(new_axes)
-      
-  
     
   def set_by_table(self):
     """
@@ -185,11 +163,16 @@ class Unit_Mount(Geom_Object):
     self.aperture = aperture
     
     docking_normal = np.array((DockNormalX,DockNormalY,DockNormalZ))
-    self.docking_obj = Geom_Object()
+    # self.docking_obj = Geom_Object()
     self.docking_obj.pos = self.pos+DockingX*self._axes[:,0]+DockingY*self._axes[:,1]+DockingZ*self._axes[:,2]
     self.docking_obj.normal = docking_normal
     self.path = folder
     return True
+  
+  def reverse(self):
+    x,y,z = self.get_coordinate_system()
+    self.rotate(z, np.pi)
+    self.pos += x * -self.element_thickness
 
   def _pos_changed(self, old_pos, new_pos):
     self._rearange_subobjects_pos( old_pos, new_pos, [self.docking_obj])
