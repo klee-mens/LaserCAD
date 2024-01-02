@@ -36,14 +36,6 @@ class Opt_Element(Component):
     super().__init__(**kwargs)
     self._matrix = np.eye(2)
     self.length = 0 #Länge in mm, die meisten opt Elemente sind 2D, also 0
-    # self.group = [] # falls das Element in eine Baugruppe eingesetzt wird
-    #Parameter zum zeichnen
-    self.draw_dict.update({"dia":self.aperture,
-                           "thickness":5,
-                           "model_type":"DEFAULT",
-                           # "mount_type": "default",
-                           # "mount_name": self.name+"_mount"
-                           })
 
   def matrix(self):
     return np.array(self._matrix)
@@ -182,23 +174,6 @@ class Opt_Element(Component):
     ray2.normal = norm2
 
     return ray2
-
-
-  # def draw_mount(self):
-  #   if freecad_da:
-  #     return self.draw_mount_fc()
-  #   else:
-  #     txt = self.draw_mount_text()
-  #     print(txt)
-  #     return txt
-
-  # def draw_mount_fc(self):
-  #   #ToDo: fürs Debugging hier einfach einen Zylinder mit norm uns k zeichnen
-  #   return None
-
-  # def draw_mount_text(self):
-  #   txt = "Kein Mount für <" +self.name + "> gefunden."
-  #   return txt
 
 
 def refraction_tests():

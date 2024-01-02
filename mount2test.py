@@ -25,13 +25,46 @@ from LaserCAD.freecad_models import clear_doc, setview, freecad_da
 from LaserCAD.basic_optics import Mirror,Crystal
 from LaserCAD.basic_optics import Beam,Grating, Composition, inch, Curved_Mirror, Ray, Geom_Object, LinearResonator, Lens, Component
 from LaserCAD.freecad_models.utils import thisfolder, load_STL
-from LaserCAD.basic_optics.mount2 import Unit_Mount,Post, Composed_Mount,Special_Mount
+from LaserCAD.basic_optics.mount2 import Unit_Mount,Post, Composed_Mount
 from LaserCAD.basic_optics.mount2 import MIRROR_LIST,LENS_LIST
 
 if freecad_da:
   clear_doc()
+  
+from LaserCAD.basic_optics.mount2 import Stripe_Mirror_Mount
+from LaserCAD.basic_optics.mirror import Stripe_mirror
 
-mir = Lens()
+# cm = Curved_Mirror()
+sm = Stripe_mirror()
+sm.pos = (130, 89, 120)
+sm.normal = (1,1,0)
+sm.thickness = 40
+sm.set_mount_to_default()
+sm.draw()
+sm.draw_mount()
+
+# smm = Stripe_Mirror_Mount()
+# smm.draw()
+
+# mir = Lens()
+# mir.thickness = 15
+# mir.set_mount_to_default()
+# mir.draw()
+# mir.draw_mount()
+
+
+# mir2 = Mirror()
+# a = Unit_Mount(model='POLARIS-K1')
+# mir2.Mount = a
+# a.reverse()
+# mir2.draw()
+# mir2.draw_mount()
+
+mir2 = Mirror()
+mir2.pos += (50,0,0)
+mir2.Mount.reverse()
+mir2.draw()
+mir2.draw_mount()
 
 # mir.Mount.mount_list[-1].set_lower_limit(22)
 # mir.aperture = 2*inch
@@ -39,8 +72,8 @@ mir = Lens()
 # mir.pos = (39,123,90)
 # mir.normal = (1,2,0.5)
 # mir.set_mount_to_default()
-a= Special_Mount()
-a.draw()
+# a= Special_Mount()
+# a.draw()
 # mir.draw()
 # mir.Mount.draw()
 

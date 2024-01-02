@@ -89,7 +89,7 @@ class Geom_Object(object):
 
   siehe tests()
   """
-  def __init__(self, name=NAME0):
+  def __init__(self, name=NAME0, **kwargs):
     self.name = name
     self._pos = POS0
     self._axes = np.eye(3)
@@ -349,6 +349,7 @@ class Geom_Object(object):
     "drawn", i.e. all relevant parameters from the <draw_dict> will be
     by text, returns the text as str
     """
+    self.update_draw_dict()
     txt = "The geometric object <" + self.class_name() + ":" + self.name
     txt += "> is drawn to the position"
     txt += vec2str(self.pos) + " with the direction " + vec2str(self.normal)

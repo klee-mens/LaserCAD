@@ -16,16 +16,9 @@ class Lens(Opt_Element):
   def __init__(self, f=100, name="NewLens", **kwargs):
     super().__init__(name=name, **kwargs)
     self.focal_length = f
-    self.update_draw_dict()
+    self.thickness = 3
+    # self.update_draw_dict()
     self.freecad_model = model_lens
-    self._update_mount_dict()
-    # self.mount = Mount(**self.mount_dict)
-    
-  # def _update_mount_dict(self):
-  #   super()._update_mount_dict()
-  #   self.mount_dict["elm_type"] = "lens"
-  #   self.mount_dict["name"] = self.name + "_mount"
-  #   self.mount_dict["aperture"] = self.aperture
 
   @property
   def focal_length(self):
@@ -43,30 +36,23 @@ class Lens(Opt_Element):
 
   def update_draw_dict(self):
     super().update_draw_dict()
-    self.draw_dict["dia"]=self.aperture
-    self.draw_dict["thickness"] = 3 #sieht schöner aus
     self.draw_dict["Radius1"] = 300
+    self.draw_dict["Radius2"] = 0
     
 
-  # def draw_fc(self):
-    # self.update_draw_dict()
-    # model_lens(self.name, dia=self.aperture, geom_info=self.get_geom())
-    # self.draw_dict["dia"]=self.aperture
-    # return model_lens(**self.draw_dict)
-
-  def draw_mount_fc(self):
-    # obj = lens_mount(**self.draw_dict)
-    # post_pos = xshift*self.normal+self.pos
-    return lens_mount(**self.draw_dict)
+  # def draw_mount_fc(self):
+  #   # obj = lens_mount(**self.draw_dict)
+  #   # post_pos = xshift*self.normal+self.pos
+  #   return lens_mount(**self.draw_dict)
   
-  def draw_mount_text(self):
-    if self.draw_dict["mount_type"] == "dont_draw":
-      txt = "<" + self.name + ">'s mount will not be drawn."
-    elif self.draw_dict["mount_type"] == "default":
-      txt = "<" + self.name + ">'s mount is the default mount."
-    else:
-      txt = "<" + self.name + ">'s mount is the " + self.draw_dict["mount_type"] + "."
-    return txt
+  # def draw_mount_text(self):
+  #   if self.draw_dict["mount_type"] == "dont_draw":
+  #     txt = "<" + self.name + ">'s mount will not be drawn."
+  #   elif self.draw_dict["mount_type"] == "default":
+  #     txt = "<" + self.name + ">'s mount is the default mount."
+  #   else:
+  #     txt = "<" + self.name + ">'s mount is the " + self.draw_dict["mount_type"] + "."
+  #   return txt
   
   def __repr__(self):
     n = len(self.class_name())
@@ -74,6 +60,20 @@ class Lens(Opt_Element):
     txt += ', ' + super().__repr__()[n+1::]
     return txt
 
+  # def draw_fc(self):
+    # self.update_draw_dict()
+    # model_lens(self.name, dia=self.aperture, geom_info=self.get_geom())
+    # self.draw_dict["dia"]=self.aperture
+    # return model_lens(**self.draw_dict)
+
+    # self._update_mount_dict()
+    # self.mount = Mount(**self.mount_dict)
+    
+  # def _update_mount_dict(self):
+  #   super()._update_mount_dict()
+  #   self.mount_dict["elm_type"] = "lens"
+  #   self.mount_dict["name"] = self.name + "_mount"
+  #   self.mount_dict["aperture"] = self.aperture
 #   def __repr__(self):
 #     txt = 'Lens(f=' + repr(self.focal_length)
 #     txt += ', name="' + self.name
@@ -86,16 +86,16 @@ class Lens(Opt_Element):
 
   #   return dc
 
-  def from_dict(dc):
-    oe = Opt_Element()
-    oe.name = dc["name"]
-    oe.pos = dc["pos"]
-    oe.normal = dc["normal"]
-    oe._axes = dc["axes"]
-    oe._matrix = dc["matrix"]
-    oe.aperture = dc["aperture"]
-    oe.group = dc["group"]
-    return oe
+  # def from_dict(dc):
+  #   oe = Opt_Element()
+  #   oe.name = dc["name"]
+  #   oe.pos = dc["pos"]
+  #   oe.normal = dc["normal"]
+  #   oe._axes = dc["axes"]
+  #   oe._matrix = dc["matrix"]
+  #   oe.aperture = dc["aperture"]
+  #   oe.group = dc["group"]
+  #   return oe
 
 def tests():
   from basic_optics import Ray
