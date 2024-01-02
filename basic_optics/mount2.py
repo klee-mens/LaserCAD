@@ -61,7 +61,7 @@ def get_mount_by_aperture_and_element(aperture, elm_type, elm_thickness):
     elif aperture <=25.4*2:
       model = "LMR2_M"
     post = "0.5inch_post"
-  elif elm_type == "Mirror":
+  elif elm_type == "Mirror" or elm_type == "Curved_Mirror":
     if aperture<= 25.4/2:
       model = "POLARIS-K05"
     elif aperture <= 25.4:
@@ -78,7 +78,8 @@ def get_mount_by_aperture_and_element(aperture, elm_type, elm_thickness):
       model = "large mirror mount"
     post = "1inch_post"
   else:
-    model = "dont_draw"
+    # model = "dont_draw"
+    return Unit_Mount()
   
   Output_mount = Composed_Mount(unit_model_list=[model,post])
   Output_mount.mount_list[0].element_thickness = elm_thickness
@@ -94,7 +95,8 @@ class Unit_Mount(Geom_Object):
     Mon = Mount(elm_type="mirror")
   Usually exists as part of the component
   """
-  def __init__(self, name="mount",model="default", **kwargs):
+  # def __init__(self, name="mount",model="default", **kwargs):
+  def __init__(self, name="mount",model="dont_draw", **kwargs):
     super().__init__(name, **kwargs)
     self.model = model
     self.path = ""
@@ -178,6 +180,16 @@ class Unit_Mount(Geom_Object):
   def update_draw_dict(self):
     super().update_draw_dict()
     self.draw_dict["stl_file"] = self.path + self.model + ".stl"
+    
+  def draw_text(self):
+    txt = super().draw_text()
+    txt += " and the model " + self.model
+  
+  def __repr__(self):
+    txt = super().__repr__()
+    ind = txt.index(",")
+    txt2 = txt[0:ind] + ', model="' + self.model + '"' + txt[ind::]
+    return txt2
 
   def _pos_changed(self, old_pos, new_pos):
     self._rearange_subobjects_pos( old_pos, new_pos, [self.docking_obj])
@@ -324,7 +336,8 @@ class Post(Geom_Object):
       return self.draw_post_part(**self.draw_dict)
     else:
       return draw_large_post(height=self.pos[2],geom=self.get_geom())
-    
+
+
 
 class Composed_Mount(Geom_Object):
   """
@@ -364,6 +377,13 @@ class Composed_Mount(Geom_Object):
     first.reverse()
     self.set_geom(self.get_geom()) # to adjust the other elements
     
+  def __repr__(self):
+   txt = super().__repr__()
+   ind = txt.index(",")
+   modellist = str([um.model for um in self.mount_list])
+   txt2 = txt[0:ind] + ', unit_model_list=' + modellist + txt[ind::]
+   return txt2
+    
   def _pos_changed(self, old_pos, new_pos):
     self._rearange_subobjects_pos(old_pos, new_pos,[self.mount_list[0]])
     for mount_number in range(len(self.mount_list)-1):
@@ -379,23 +399,16 @@ class Composed_Mount(Geom_Object):
       second.set_geom(first.docking_obj.get_geom())
 
 
+
 class Stripe_Mirror_Mount(Composed_Mount):
-  """
-  this
-  """
-  def __init__(self, mirror_thickness=10, **kwargs):
+  def __init__(self, **kwargs):
     super().__init__(**kwargs)
-    self.mirror_thickness = mirror_thickness
     stripe = Unit_Mount()
     stripe.path = thisfolder+"mount_meshes/special_mount/"
     stripe.model = "Stripe_mirror_mount"
     stripe.docking_obj.pos += (-1, 104.3, 0)
     stripe.docking_obj.normal = (-1,0,0)
     self.add(stripe)
-    # K2 = Unit_Mount(model="POLARIS-K2")
-    # self.add(K2)
-    # post = Post()
-    # self.add(post)
     self.add(Unit_Mount(model="POLARIS-K2"))
     self.add(Post())
 

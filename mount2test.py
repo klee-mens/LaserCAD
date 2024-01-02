@@ -34,11 +34,17 @@ if freecad_da:
 from LaserCAD.basic_optics.mount2 import Stripe_Mirror_Mount
 from LaserCAD.basic_optics.mirror import Stripe_mirror
 
+# cm = Curved_Mirror()
 sm = Stripe_mirror()
+sm.pos = (130, 89, 120)
+sm.normal = (1,1,0)
+sm.thickness = 40
+sm.set_mount_to_default()
 sm.draw()
+sm.draw_mount()
 
-smm = Stripe_Mirror_Mount()
-smm.draw()
+# smm = Stripe_Mirror_Mount()
+# smm.draw()
 
 # mir = Lens()
 # mir.thickness = 15
