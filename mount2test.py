@@ -34,8 +34,9 @@ if freecad_da:
 from LaserCAD.basic_optics.mount2 import Stripe_Mirror_Mount
 from LaserCAD.basic_optics.mirror import Stripe_mirror,Rooftop_mirror
 
-# cm = Curved_Mirror()
-# sm = Stripe_mirror()
+# sm = Curved_Mirror()
+# sm.aperture =25.4*6
+# # sm = Stripe_mirror()
 # sm.pos = (130, 89, 120)
 # sm.normal = (1,1,0)
 # sm.thickness = 40
@@ -47,19 +48,34 @@ from LaserCAD.basic_optics.mirror import Stripe_mirror,Rooftop_mirror
 # smm.draw()
 
 
-rm = Rooftop_mirror()
-rm.pos = (120,50,130)
-rm.normal = (1,-1,0)
-rm.aperture = 10
-rm.set_mount_to_default()
-rm.draw()
-rm.draw_mount()
-# mir = Lens()
-# mir.thickness = 15
-# mir.set_mount_to_default()
-# mir.draw()
-# mir.draw_mount()
+# rm = Rooftop_mirror()
+# rm.pos = (120,50,130)
+# rm.normal = (1,-1,0)
+# rm.aperture = 10
+# rm.set_mount_to_default()
+# rm.draw()
+# rm.draw_mount()
 
+# grat = Grating()
+# grat.pos = (120,13,150)
+# grat.normal = (1,-1,0)
+# grat.height = 40
+# grat.thickness = 8
+# grat.set_mount_to_default()
+# grat.draw()
+# grat.draw_mount()
+
+mon = Composed_Mount()
+mon1 = Unit_Mount("56_degree_mounts")
+mon.add(mon1)
+mon2 = Unit_Mount("65_degree_mounts")
+mon.add(mon2)
+mon3 = Unit_Mount("H45")
+mon.add(mon3)
+mon4 = Unit_Mount("KS1")
+mon.add(mon4)
+mon.add(Post())
+mon.draw()
 
 # mir2 = Mirror()
 # a = Unit_Mount(model='POLARIS-K1')

@@ -8,7 +8,7 @@ Created on Sun Aug 21 20:28:02 2022
 
 # from basic_optics import Opt_Element
 # from .basic_optics.freecad_models import model_lens
-from ..freecad_models import model_lens, lens_mount, model_crystal,model_crystal_mount
+from ..freecad_models import model_crystal,model_crystal_mount
 from .optical_element import Opt_Element
 from copy import deepcopy
 import numpy as np

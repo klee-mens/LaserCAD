@@ -12,26 +12,28 @@ from .optical_element import Opt_Element
 from .ray import Ray
 from ..freecad_models import model_grating
 # from ..freecad_models import grating_mount
-from .mount import Grating_mount
+# from .mount import Grating_mount
+from .mount2 import Grating_Mount
 
 class Grating(Opt_Element):
   """
   Klasse für Gitter
   """
   def __init__(self, grat_const=0.005, order=1, **kwargs):
+    self.height = 60
+    self.thickness = 8
     super().__init__(**kwargs)
     self.grating_constant = grat_const
     #Konstanten zum zeichnen, für die sonstige Berechnung unwichtig
     self.width = 50
-    self.height = 60
-    self.thickness = 8
     self.diffraction_order = order
-    self.mount_dict["elm_type"] = "grating"
-    self.mount_dict["height"] = self.height
-    self.mount_dict["thickness"] = self.thickness
-    self.mount = Grating_mount(**self.mount_dict)
+    # self.mount_dict["elm_type"] = "grating"
+    # self.mount_dict["height"] = self.height
+    # self.mount_dict["thickness"] = self.thickness
+    # self.mount = Grating_mount(**self.mount_dict)
     self.update_draw_dict()
     self.freecad_model = model_grating
+    self.set_mount_to_default()
     # self.blazeangel = 32
     # self.draw_dict['width'] = self.width
     # self.draw_dict['thickness'] = self.thickness
@@ -77,9 +79,13 @@ class Grating(Opt_Element):
     super().update_draw_dict()
     self.draw_dict["dimensions"] = (self.width, self.height, self.thickness)
   
+  def set_mount_to_default(self):
+    smm = Grating_Mount(height=self.height,thickness=self.thickness)
+    smm.set_geom(self.get_geom())
+    self.Mount = smm
 
     # return (name=self.name, dimensions=dims, geom=self.get_geom())
-
+"""
   def draw_mount_fc(self):
     # helper_dict = dict(self.draw_dict)
     # obj = grating_mount(**helper_dict)
@@ -96,7 +102,7 @@ class Grating(Opt_Element):
     # else:
     #   txt = self.name + "'s mount is " + self.mount_type + "."
       return txt
-
+"""
 
 def grating_test1():
   grat = Grating()

@@ -62,6 +62,7 @@ def get_mount_by_aperture_and_element(aperture, elm_type, elm_thickness):
       model = "LMR2_M"
     post = "0.5inch_post"
   elif elm_type == "Mirror" or elm_type == "Curved_Mirror":
+    post = "1inch_post"
     if aperture<= 25.4/2:
       model = "POLARIS-K05"
     elif aperture <= 25.4:
@@ -75,16 +76,20 @@ def get_mount_by_aperture_and_element(aperture, elm_type, elm_thickness):
     elif aperture <=25.4*4:
       model = "KS4"
     else:
-      model = "large mirror mount"
-    post = "1inch_post"
+      model = "6inch_mirror_mount"
+      post = "big_post"
   else:
     return Unit_Mount()
   
   Output_mount = Composed_Mount(unit_model_list=[model,post])
   Output_mount.mount_list[0].element_thickness = elm_thickness
   Output_mount.mount_list[0].aperture = aperture
+  if aperture>25.4*4:
+    first = Output_mount.mount_list[0]
+    x,y,z = first.get_coordinate_system()
+    first.pos += x * first.element_thickness
+    Output_mount.set_geom(Output_mount.get_geom())
   return Output_mount
-
 
 
 class Unit_Mount(Geom_Object):
@@ -95,22 +100,20 @@ class Unit_Mount(Geom_Object):
   Usually exists as part of the component
   """
   # def __init__(self, name="mount",model="default", **kwargs):
-  def __init__(self, model="dont_draw", name="mount", **kwargs):
+  def __init__(self, model="dont_draw", name="mount",element_thickness=5, **kwargs):
     super().__init__(name, **kwargs)
     self.model = model
     self.path = ""
     self.docking_obj = Geom_Object()
-
-    self.element_thickness = 5 #standard thickness of for example a mirror
+    self.element_thickness = element_thickness #standard thickness of for example a mirror
     self.aperture = 25.4
     self.is_horizontal = True
     if self.model != "dont_draw":
       self.set_by_table()
       self.draw_dict["stl_file"] = self.path + self.model + ".stl"
       self.freecad_model = load_STL
-      self.draw_dict["color"] = DEFAULT_MOUNT_COLOR
+      # self.draw_dict["color"] = DEFAULT_MOUNT_COLOR
 
-    
   def set_axes(self, new_axes):
     if self.is_horizontal:
       old_axes = self.get_axes()
@@ -148,6 +151,7 @@ class Unit_Mount(Geom_Object):
     folder = thisfolder+"mount_meshes/"+model_type+"/"
     with open(folder+model_type+"mounts.csv") as csvfile: 
       reader = csv.DictReader(csvfile)
+      
       for row in reader:
         buf.append(row)
     for mount_loop in buf:
@@ -160,7 +164,8 @@ class Unit_Mount(Geom_Object):
         DockNormalX = float(mount_loop["DockNormalX"])
         DockNormalY = float(mount_loop["DockNormalY"])
         DockNormalZ = float(mount_loop["DockNormalZ"])
-        
+        self.draw_dict["color"] = eval(mount_loop["color"])
+        # eval
     if not mount_in_database:
       print("This mount is not in the database.")
       self.path = folder
@@ -403,11 +408,12 @@ class Composed_Mount(Geom_Object):
 
 
 class Stripe_Mirror_Mount(Composed_Mount):
-  def __init__(self, **kwargs):
+  def __init__(self, mirror_thickness=10,**kwargs):
     super().__init__(**kwargs)
+    self.docking_obj.pos += self.normal * mirror_thickness
     stripe = Unit_Mount("Stripe_mirror_mount")
     self.add(stripe)
-    self.add(Unit_Mount(model="POLARIS-K2"))
+    self.add(Unit_Mount("POLARIS-K2"))
     self.add(Post())
     
 class Rooftop_Mirror_Mount(Composed_Mount):
@@ -415,8 +421,24 @@ class Rooftop_Mirror_Mount(Composed_Mount):
     super().__init__(**kwargs)
     roof = Unit_Mount("Rooftop_mirror_mount")
     self.add(roof)
-    self.add(Unit_Mount(model="POLARIS-K2"))
+    self.add(Unit_Mount("POLARIS-K2"))
     self.add(Post())
+
+class Grating_Mount(Composed_Mount):
+  def __init__(self,height=50,thickness=8, **kwargs):
+    super().__init__(**kwargs)
+    self.height = height
+    self.thickness = thickness
+    gratingmount = Unit_Mount()
+    gratingmount.draw_dict["height"] = self.height
+    gratingmount.draw_dict["thickness"] = self.thickness
+    gratingmount.freecad_model = grating_mount#(height=self.height,thickness=self.thickness)
+    gratingmount.docking_obj.pos += (9+self.thickness,0,0)
+    gratingmount.docking_obj.normal = (1,0,0)
+    self.add(gratingmount)
+    self.add(Unit_Mount("POLARIS-K1"))
+    self.add(Post())
+    
 
 # class Special_mount(Unit_Mount):
 #   """

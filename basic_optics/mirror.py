@@ -355,9 +355,9 @@ class Stripe_mirror(Curved_Mirror):
     self.set_mount_to_default()
     
   def set_mount_to_default(self):
-    smm = Stripe_Mirror_Mount()
+    smm = Stripe_Mirror_Mount(mirror_thickness=self.thickness)
     smm.set_geom(self.get_geom())
-    smm.pos += self.normal * self.thickness
+    # smm.pos += self.normal * self.thickness
     self.Mount = smm
     
   def update_draw_dict(self):

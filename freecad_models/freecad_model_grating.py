@@ -89,9 +89,9 @@ def grating_mount(name="grating_mount",height=50,thickness=8,drawing_post=True,b
   else:
     print("there is no suitable mount for this grating")
     return None
-  mount1 = draw_mount(name=grating_mount_name+"_base",height=height,thickness=thickness,geom=geom)
-  mount2 = draw_mount(name=grating_mount_name+"_buttom_half",height=height,thickness=thickness,geom=geom)
-  mount3 = draw_mount(name=grating_mount_name+"_top_half",height=height,thickness=thickness,geom=geom)
+  mount1 = draw_grating_mount(name=grating_mount_name+"_base",height=height,thickness=thickness,geom=geom)
+  mount2 = draw_grating_mount(name=grating_mount_name+"_buttom_half",height=height,thickness=thickness,geom=geom)
+  mount3 = draw_grating_mount(name=grating_mount_name+"_top_half",height=height,thickness=thickness,geom=geom)
   
   xshift=17
   shiftvec=Vector(xshift,0,0)
@@ -116,16 +116,16 @@ def grating_mount(name="grating_mount",height=50,thickness=8,drawing_post=True,b
   newaxs[:,0] = new_normal
   geom = (new_pos, newaxs)
   xshift = 0
-  other_mount = mirror_mount(mount_name="mirror_mount",mount_type="default",drawing_post=drawing_post,base_exists=base_exists, geom=geom, dia=25.4)
+  # other_mount = mirror_mount(mount_name="mirror_mount",mount_type="default",drawing_post=drawing_post,base_exists=base_exists, geom=geom, dia=25.4)
   if drawing_post:
     part = initialize_composition_old(name="Grating mount, post and base")
   else:
     part = initialize_composition_old(name="Grating mount")
-  container = mount1,mount2,mount3,other_mount
+  container = mount1,mount2,mount3#,other_mount
   add_to_composition(part, container)
   return part
 
-def draw_mount(name="KGM60_base",height=50,thickness=8,geom=None):
+def draw_grating_mount(name="KGM60_base",height=50,thickness=8,geom=None):
   """
     Draw the part of the mount.
     Since the grating mount is divided into three parts, this function will 
