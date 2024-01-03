@@ -48,6 +48,12 @@ from LaserCAD.basic_optics.mirror import Stripe_mirror,Rooftop_mirror
 # smm.draw()
 
 
+from LaserCAD.non_interactings import Lambda_Plate
+
+lam = Lambda_Plate()
+lam.draw()
+lam.draw_mount()
+
 # rm = Rooftop_mirror()
 # rm.pos = (120,50,130)
 # rm.normal = (1,-1,0)
@@ -65,17 +71,17 @@ from LaserCAD.basic_optics.mirror import Stripe_mirror,Rooftop_mirror
 # grat.draw()
 # grat.draw_mount()
 
-mon = Composed_Mount()
-mon1 = Unit_Mount("56_degree_mounts")
-mon.add(mon1)
-mon2 = Unit_Mount("65_degree_mounts")
-mon.add(mon2)
-mon3 = Unit_Mount("H45")
-mon.add(mon3)
-mon4 = Unit_Mount("KS1")
-mon.add(mon4)
-mon.add(Post())
-mon.draw()
+# mon = Composed_Mount()
+# mon1 = Unit_Mount("56_degree_mounts")
+# mon.add(mon1)
+# mon2 = Unit_Mount("65_degree_mounts")
+# mon.add(mon2)
+# mon3 = Unit_Mount("H45")
+# mon.add(mon3)
+# mon4 = Unit_Mount("KS1")
+# mon.add(mon4)
+# mon.add(Post())
+# mon.draw()
 
 # mir2 = Mirror()
 # a = Unit_Mount(model='POLARIS-K1')
