@@ -10,14 +10,14 @@ Created on Wed Aug 24 16:28:07 2022
 from .geom_object import TOLERANCE, NORM0
 from .ray import Ray
 from .optical_element import Opt_Element
-from .mount import Mount,Composed_Mount,Special_mount
-from .mount2 import Stripe_Mirror_Mount, Rooftop_Mirror_Mount
+# from .mount import Mount,Composed_Mount,Special_mount
+from .mount import Stripe_Mirror_Mount, Rooftop_Mirror_Mount
 from ..freecad_models import model_mirror, model_stripe_mirror, model_rooftop_mirror
 # from ..freecad_models import model_mirror, mirror_mount
 # from ..freecad_models.freecad_model_composition import initialize_composition_old, add_to_composition
 # from ..non_interactings import Mount
 # from ..non_interactings import Post_and_holder
-# from .mount2 import default_mirror_mount,Unit_Mount
+# from .mount import default_mirror_mount,Unit_Mount
 # from .post import Post_and_holder
 import numpy as np
 from copy import deepcopy

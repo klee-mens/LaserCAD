@@ -27,6 +27,7 @@ from LaserCAD.freecad_models.utils import thisfolder, load_STL
 from LaserCAD.basic_optics.mirror import Stripe_mirror,Rooftop_mirror
 from LaserCAD.non_interactings import Faraday_Isolator, Pockels_Cell, Lambda_Plate
 from LaserCAD.non_interactings.table import Table
+from LaserCAD.basic_optics import Unit_Mount,Composed_Mount,Post
 
 c0 = 299792458*1000 #mm/s
 
@@ -44,7 +45,7 @@ distance_faraday_mirror = 100
 
 seed_laser = Component(name="IPG_Seed_Laser")
 
-stl_file=thisfolder+"/mount_meshes/special mount/Laser_Head-Body.stl"
+stl_file=thisfolder+"/misc_meshes/Laser_Head-Body.stl"
 seed_laser.draw_dict["stl_file"]=stl_file
 color = (170/255, 170/255, 127/255)
 seed_laser.draw_dict["color"]=color
@@ -114,6 +115,7 @@ def Make_Stretcher_chromeo():
 
   Concav = Curved_Mirror(radius=radius_concave,name="Concav_Mirror")
   Concav.aperture = aperture_concave
+  Concav.set_mount_to_default()
 
   StripeM = Stripe_mirror(radius= -radius_concave/2,thickness=25,  name="Stripe_Mirror")
   #Cosmetics
@@ -121,6 +123,7 @@ def Make_Stretcher_chromeo():
   StripeM.draw_dict["height"] = height_stripe_mirror
   StripeM.draw_dict["thickness"] = 25 # arbitrary
   StripeM.draw_dict["model_type"] = "Stripe"
+  StripeM.set_mount_to_default()
 
   Grat = Grating(grat_const=grating_const, name="Gitter", order=-1)
   Grat.normal = grating_normal
@@ -160,6 +163,10 @@ def Make_Stretcher_chromeo():
 
   Stretcher.propagate(first_propagation)
   FlipMirror_In_Out = Mirror(phi=-90, name="FlipMirrorInOut")
+  FlipMirror_In_Out.Mount = Composed_Mount()
+  FlipMirror_In_Out.Mount.add(Unit_Mount("MH25_KMSS"))
+  FlipMirror_In_Out.Mount.add(Post())
+  FlipMirror_In_Out.Mount.set_geom(FlipMirror_In_Out.get_geom())
   Stretcher.add_on_axis(FlipMirror_In_Out)
   FlipMirror_In_Out.pos += (0,0,-periscope_height/2)
   Stretcher.propagate(distance_flip_mirror1_grating)
@@ -183,17 +190,18 @@ def Make_Stretcher_chromeo():
 
   RoofTop1.draw = dont
   # RoofTop1.draw_dict["mount_type"] = "dont_draw"
-  RoofTop1.mount.elm_type = "dont_draw"
+  RoofTop1.Mount = Unit_Mount("dont_draw")
   RoofTop2.draw = dont
-  RoofTop2.mount.elm_type = "dont_draw"
+  RoofTop2.Mount = Unit_Mount("dont_draw")
   # RoofTop2.draw_dict["mount_type"] = "dont_draw"
 
   pure_cosmetic = Rooftop_mirror(name="RoofTop_Mirror")
-  pure_cosmetic.draw_dict["mount_type"] = "rooftop_mirror_mount"
+  # pure_cosmetic.draw_dict["mount_type"] = "rooftop_mirror_mount"
   pure_cosmetic.pos = (RoofTop1.pos + RoofTop2.pos ) / 2
   pure_cosmetic.normal = (RoofTop1.normal + RoofTop2.normal ) / 2
   pure_cosmetic.aperture = periscope_height
   pure_cosmetic.draw_dict["model_type"] = "Rooftop"
+  pure_cosmetic.set_mount_to_default()
   Stretcher.add_fixed_elm(pure_cosmetic)
 
   # setting the final sequence and the last propagation for visualization
@@ -276,6 +284,7 @@ TFP_pp = Mirror(phi = -180+2*tfp_angle)
 TFP_pp.draw_dict["color"] = (1.0, 0.0, 2.0)
 TFP_pp.draw_dict["thickness"] = 4
 TFP_pp.aperture = 2*inch
+TFP_pp.set_mount_to_default()
 PulsePicker.add_on_axis(TFP_pp)
 TFP_pp.pos += -1 * TFP_pp.normal * tfp_push_forward
 PulsePicker.recompute_optical_axis()
@@ -396,7 +405,8 @@ mir1 = Mirror(phi=180)
 TFP1 = Mirror(phi= 180 - 2*tfp_angle, name="TFP1")
 TFP1.draw_dict["color"] = (1.0, 0.0, 2.0)
 TFP1.aperture = tfp_aperture
-TFP1.mount_dict["Flip90"]=True
+TFP1.set_mount_to_default()
+# TFP1.mount_dict["Flip90"]=True
 
 cm = Curved_Mirror(radius=focal*2, phi = 180)
 PockelsCell = Pockels_Cell(name="PockelZelleRes1")

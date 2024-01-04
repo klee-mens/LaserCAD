@@ -13,7 +13,7 @@ from .ray import Ray
 from ..freecad_models import model_grating
 # from ..freecad_models import grating_mount
 # from .mount import Grating_mount
-from .mount2 import Grating_Mount
+from .mount import Grating_Mount
 
 class Grating(Opt_Element):
   """

@@ -291,7 +291,7 @@ class Beam(Geom_Object):
       container = []
       for nn in range(self._ray_count):
         our=self._rays[nn]
-        obj = our.draw_fc()
+        obj = our.draw_freecad()
         container.append(obj)
       add_to_composition(part, container)
       return part

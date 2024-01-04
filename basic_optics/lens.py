@@ -10,7 +10,7 @@ Created on Sun Aug 21 20:28:02 2022
 # from .basic_optics.freecad_models import model_lens
 from ..freecad_models import model_lens, lens_mount
 from .optical_element import Opt_Element
-from .mount import Mount
+# from .mount import Mount
 
 class Lens(Opt_Element):
   def __init__(self, f=100, name="NewLens", **kwargs):

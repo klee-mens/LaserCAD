@@ -51,6 +51,8 @@ from LaserCAD.basic_optics.mirror import Stripe_mirror,Rooftop_mirror
 from LaserCAD.non_interactings import Lambda_Plate
 
 lam = Lambda_Plate()
+lam.pos +=(10,20,30)
+lam.normal = (1,1,0)
 lam.draw()
 lam.draw_mount()
 
