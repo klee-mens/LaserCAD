@@ -7,7 +7,7 @@ Created on Sat Aug 19 14:40:56 2023
 
 from ..freecad_models.utils import thisfolder,load_STL,rotate,translate
 from ..freecad_models.freecad_model_composition import initialize_composition_old,add_to_composition
-from ..freecad_models.freecad_model_mounts import mirror_mount,DEFAULT_MOUNT_COLOR,DEFAULT_MAX_ANGULAR_OFFSET
+from ..freecad_models.freecad_model_mounts import mirror_mount,DEFAULT_MOUNT_COLOR,DEFAULT_MAX_ANGULAR_OFFSET,model_Post_Marker
 from ..freecad_models.freecad_model_grating import grating_mount
 from .geom_object import Geom_Object
 from .post import Post_and_holder
@@ -21,6 +21,8 @@ POST_LIST = ["1inch_post","0.5inch_post","big_post"]
 import csv
 import os
 import numpy as np
+import math
+
 
 DEFALUT_CAV_PATH = thisfolder
 DEFALUT_MIRROR_PATH = thisfolder + "mount_meshes/mirror"
@@ -438,7 +440,47 @@ class Grating_Mount(Composed_Mount):
     self.add(gratingmount)
     self.add(Unit_Mount("POLARIS-K1"))
     self.add(Post())
+
+class Post_Marker(Unit_Mount):
+  def __init__(self, name="Post_Marker",size=2,**kwargs):
+    super().__init__(name,**kwargs)
+    self.name = name + "'s holder"
+    self.size = size
+    self.quot_x = math.floor(self.pos[0]/(25*size))
+    self.quot_y = math.floor(self.pos[1]/(25*size))
+    self.h1 = (self.quot_x*(25*size),self.quot_y*(25*size))
+    if self.pos[0]-self.h1[0]<16:
+      self.h1=(self.h1[0]-25,self.h1[1])
+    if self.pos[1]-self.h1[1]<16:
+      self.h1=(self.h1[0],self.h1[1]-25)
+    if self.h1[0]+(25*size)-self.pos[0]<16:
+      self.h1=(self.h1[0]+25,self.h1[1])
+    if self.h1[1]+(25*size)-self.pos[1]<16:
+      self.h1=(self.h1[0],self.h1[1]+25)
+    self.freecad_model = model_Post_Marker
     
+  def _pos_changed(self, old_pos, new_pos):
+    self.quot_x = math.floor(new_pos[0]/(25*self.size))
+    self.quot_y = math.floor(new_pos[1]/(25*self.size))
+    self.h1 = (self.quot_x*(25*self.size),self.quot_y*(25*self.size))
+    if new_pos[0]-self.h1[0]<16:
+      self.h1=(self.h1[0]-25,self.h1[1])
+    if new_pos[1]-self.h1[1]<16:
+      self.h1=(self.h1[0],self.h1[1]-25)
+    if self.h1[0]+(25*self.size)-new_pos[0]<16:
+      self.h1=(self.h1[0]+25,self.h1[1])
+    if self.h1[1]+(25*self.size)-new_pos[1]<16:
+      self.h1=(self.h1[0],self.h1[1]+25)
+    print(self.name," holes' pos=",self.h1,(self.h1[0]+(25*self.size),self.h1[1]),
+          (self.h1[0]+(25*self.size),self.h1[1]+(25*self.size)),
+          (self.h1[0],self.h1[1]+(25*self.size)))
+  
+  def update_draw_dict(self):
+    super().update_draw_dict()
+    self.draw_dict["h1"] = self.h1
+    self.draw_dict["h2"] = (self.h1[0]+75,self.h1[1])
+    self.draw_dict["h3"] = (self.h1[0]+75,self.h1[1]+75)
+    self.draw_dict["h4"] = (self.h1[0],self.h1[1]+75)
 
 # class Special_mount(Unit_Mount):
 #   """

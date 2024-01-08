@@ -24,8 +24,8 @@ from LaserCAD.freecad_models import clear_doc, setview, freecad_da
 from LaserCAD.basic_optics import Mirror,Crystal
 from LaserCAD.basic_optics import Beam,Grating, Composition, inch, Curved_Mirror, Ray, Geom_Object, LinearResonator, Lens, Component
 from LaserCAD.freecad_models.utils import thisfolder, load_STL
-from LaserCAD.basic_optics.mount2 import Unit_Mount,Post, Composed_Mount
-from LaserCAD.basic_optics.mount2 import MIRROR_LIST,LENS_LIST
+from LaserCAD.basic_optics.mount import Unit_Mount,Post, Composed_Mount
+from LaserCAD.basic_optics.mount import MIRROR_LIST,LENS_LIST
 
 if freecad_da:
   clear_doc()
@@ -37,6 +37,9 @@ for i in range(len(MIRROR_LIST)):
   mir.aperture = aperture
   mir.Mount = M
   mir.pos = (i*50,0,50+i*10)
+  if mir.aperture > 25.4*4:
+    mir.pos -= (50,0,0)
+    mir.Mount.pos += mir.normal*mir.thickness
   mir.draw()
   mir.Mount.draw()
   

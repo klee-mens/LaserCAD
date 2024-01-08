@@ -25,13 +25,13 @@ from LaserCAD.freecad_models import clear_doc, setview, freecad_da
 from LaserCAD.basic_optics import Mirror,Crystal
 from LaserCAD.basic_optics import Beam,Grating, Composition, inch, Curved_Mirror, Ray, Geom_Object, LinearResonator, Lens, Component
 from LaserCAD.freecad_models.utils import thisfolder, load_STL
-from LaserCAD.basic_optics.mount2 import Unit_Mount,Post, Composed_Mount
-from LaserCAD.basic_optics.mount2 import MIRROR_LIST,LENS_LIST
+from LaserCAD.basic_optics.mount import Unit_Mount,Post, Composed_Mount,Post_Marker
+from LaserCAD.basic_optics.mount import MIRROR_LIST,LENS_LIST
 
 if freecad_da:
   clear_doc()
   
-from LaserCAD.basic_optics.mount2 import Stripe_Mirror_Mount
+from LaserCAD.basic_optics.mount import Stripe_Mirror_Mount
 from LaserCAD.basic_optics.mirror import Stripe_mirror,Rooftop_mirror
 
 # sm = Curved_Mirror()
@@ -50,11 +50,34 @@ from LaserCAD.basic_optics.mirror import Stripe_mirror,Rooftop_mirror
 
 from LaserCAD.non_interactings import Lambda_Plate
 
-lam = Lambda_Plate()
-lam.pos +=(10,20,30)
-lam.normal = (1,1,0)
-lam.draw()
-lam.draw_mount()
+# mon = Composed_Mount()
+# mon1 = Unit_Mount("56_degree_mounts")
+# mon.add(mon1)
+# mon2 = Unit_Mount("65_degree_mounts")
+# mon.add(mon2)
+# mon3 = Unit_Mount("H45")
+# mon.add(mon3)
+# mon4 = Unit_Mount("KS1")
+# mon.add(mon4)
+# mon.add(Post())
+# mon.add(Post_Marker())
+# mon.draw()
+
+M= Mirror()
+M.Mount.add(Post_Marker(name=M.name,size=3))
+M.pos = (19.5-16,12.5+18+25,80)
+# M.normal = (1,1,0)
+M.draw()
+M.draw_mount()
+# from LaserCAD.freecad_models.freecad_model_mounts import model_Post_Marker
+# if freecad_da:
+#   obj=model_Post_Marker(geom=M.Mount.mount_list[1].get_geom())
+
+# lam = Lambda_Plate()
+# lam.pos +=(10,20,30)
+# lam.normal = (1,1,0)
+# lam.draw()
+# lam.draw_mount()
 
 # rm = Rooftop_mirror()
 # rm.pos = (120,50,130)

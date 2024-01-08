@@ -833,7 +833,7 @@ def building_mount(name="mount",  Radius1=13, Hole_Radius=2, thickness=10,
   
   pad = obj.newObject('PartDesign::Pad','Pad')
   pad.Profile = sketch
-  pad.Length = thickness
+  pad.Length = height
   pad.ReferenceAxis = (sketch,['N_Axis'])
   pad.Midplane = 1
   sketch.Visibility = False
@@ -1118,4 +1118,87 @@ def model_table(name="table",geom= None):
   obj.Placement = Placement(Vector(0,0,-10), Rotation(0,0,0), Vector(0,0,0))
   update_geom_info(obj, geom)
   DOC.recompute()
+  return obj
+
+def model_Post_Marker(name="marker", h1 = (0,0), h2 = (75,0), h3 = (75,75), 
+                      h4 = (0,75),color=DEFAULT_MOUNT_COLOR,geom=None,stl_file=""):
+  POS = geom[0]
+  DOC = get_DOC()
+  obj = DOC.addObject('PartDesign::Body', name)
+  sketch = obj.newObject('Sketcher::SketchObject', name+'_sketch')
+  #sketch.Support = (DOC.getObject('YZ_Plane002'),[''])
+  sketch.MapMode = 'FlatFace'
+  if POS[1]-h1[1]<h3[1]-POS[1]:
+    sketch.addGeometry(Part.ArcOfCircle(Part.Circle(Vector(h1[0],h1[1],0),
+                                                    Vector(0,0,1),10),-np.pi,-np.pi/2),False)
+    sketch.addGeometry(Part.LineSegment(Vector(h1[0],h1[1]-10,0),
+                                        Vector(h2[0],h1[1]-10,0)),False)
+    sketch.addGeometry(Part.ArcOfCircle(Part.Circle(Vector(h2[0],h2[1],0),
+                                                    Vector(0,0,1),10),-np.pi/2,0),False)
+    sketch.addGeometry(Part.LineSegment(Vector(h2[0]+10,h2[1],0),
+                                        Vector(h2[0]+10,POS[1],0)),False)
+    sketch.addGeometry(Part.LineSegment(Vector(h2[0]+10,POS[1],0),
+                                        Vector(POS[0]+16,POS[1],0)),False)
+    sketch.addGeometry(Part.ArcOfCircle(Part.Circle(Vector(POS[0],POS[1],0),
+                                                    Vector(0,0,1),16),-np.pi,0),False)
+    sketch.addGeometry(Part.LineSegment(Vector(POS[0]-16,POS[1],0),
+                                        Vector(h1[0]-10,POS[1],0)),False)
+    sketch.addGeometry(Part.LineSegment(Vector(h1[0]-10,POS[1],0),
+                                        Vector(h1[0]-10,h1[1],0)),False)
+    sketch.addGeometry(Part.Circle(Vector(h1[0],h1[1],0),Vector(0,0,1),2.5),False)
+    sketch.addGeometry(Part.Circle(Vector(h2[0],h2[1],0),Vector(0,0,1),2.5),False)
+  else:
+    sketch.addGeometry(Part.ArcOfCircle(Part.Circle(Vector(h3[0],h3[1],0),
+                                                    Vector(0,0,1),10),0,np.pi/2),False)
+    
+    sketch.addGeometry(Part.LineSegment(Vector(h3[0],h3[1]+10,0),
+                                        Vector(h4[0],h3[1]+10,0)),False)
+    
+    sketch.addGeometry(Part.ArcOfCircle(Part.Circle(Vector(h4[0],h4[1],0),
+                                                    Vector(0,0,1),10),np.pi/2,np.pi),False)
+    sketch.addGeometry(Part.LineSegment(Vector(h4[0]-10,h4[1],0),
+                                        Vector(h4[0]-10,POS[1],0)),False)
+    sketch.addGeometry(Part.LineSegment(Vector(h4[0]-10,POS[1],0),
+                                        Vector(POS[0]-16,POS[1],0)),False)
+    sketch.addGeometry(Part.ArcOfCircle(Part.Circle(Vector(POS[0],POS[1],0),
+                                                    Vector(0,0,1),16),0,np.pi),False)
+    sketch.addGeometry(Part.LineSegment(Vector(POS[0]+16,POS[1],0),
+                                        Vector(h3[0]+10,POS[1],0)),False)
+    sketch.addGeometry(Part.LineSegment(Vector(h3[0]+10,POS[1],0),
+                                        Vector(h3[0]+10,h3[1],0)),False)
+    sketch.addGeometry(Part.Circle(Vector(h3[0],h3[1],0),Vector(0,0,1),2.5),False)
+    sketch.addGeometry(Part.Circle(Vector(h4[0],h4[1],0),Vector(0,0,1),2.5),False)
+  
+  """
+  sketch.addGeometry(Part.LineSegment(Vector(h2[0]+10,h2[1],0),
+                                      Vector(h2[0]+10,h3[1],0)),False)
+  
+  sketch.addGeometry(Part.ArcOfCircle(Part.Circle(Vector(h3[0],h3[1],0),
+                                                  Vector(0,0,1),10),0,np.pi/2),False)
+  
+  sketch.addGeometry(Part.LineSegment(Vector(h3[0],h3[1]+10,0),
+                                      Vector(h4[0],h3[1]+10,0)),False)
+  
+  sketch.addGeometry(Part.ArcOfCircle(Part.Circle(Vector(h4[0],h4[1],0),
+                                                  Vector(0,0,1),10),np.pi/2,np.pi),False)
+  
+  sketch.addGeometry(Part.LineSegment(Vector(h4[0]-10,h4[1],0),
+                                      Vector(h4[0]-10,h1[1],0)),False)
+  
+  sketch.addGeometry(Part.Circle(Vector(h3[0],h3[1],0),Vector(0,0,1),2.5),False)
+  sketch.addGeometry(Part.Circle(Vector(h4[0],h4[1],0),Vector(0,0,1),2.5),False)
+  sketch.addGeometry(Part.Circle(Vector(POS[0],POS[1],0),Vector(0,0,1),16),False)
+  """
+  
+  pad = obj.newObject('PartDesign::Pad','Pad')
+  pad.Profile = sketch
+  pad.Length = 5
+  pad.ReferenceAxis = (sketch,['N_Axis'])
+  pad.Midplane = 1
+  sketch.Visibility = False
+  
+  DOC.recompute()
+  obj.ViewObject.ShapeColor = color
+  offset=Vector(0,0,2.5)
+  obj.Placement = Placement(offset, Rotation(0,0,0), Vector(0,0,0))
   return obj

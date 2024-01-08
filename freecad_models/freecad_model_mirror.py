@@ -86,7 +86,7 @@ def model_round_mirror(name="mirror", dia=25, thickness=5, Radius=0, geom=None, 
     mirror47 = mirror("mirror_47", dia=25, d=5, R=200)
   """
   DOC = get_DOC()
-  obj = model_lens(name, dia, Radius=-Radius, Radius2=0, thickness=thickness)
+  obj = model_lens(name, dia, Radius1=-Radius, Radius2=0, thickness=thickness)
 
 
   if "color" in kwargs.keys():
