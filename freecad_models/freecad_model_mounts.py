@@ -1121,7 +1121,7 @@ def model_table(name="table",geom= None):
   return obj
 
 def model_Post_Marker(name="marker", h1 = (0,0), h2 = (75,0), h3 = (75,75), 
-                      h4 = (0,75),color=DEFAULT_MOUNT_COLOR,geom=None,stl_file=""):
+                      h4 = (0,75),color=DEFAULT_MOUNT_COLOR,geom=None,**kwargs):
   POS = geom[0]
   DOC = get_DOC()
   obj = DOC.addObject('PartDesign::Body', name)
@@ -1147,13 +1147,12 @@ def model_Post_Marker(name="marker", h1 = (0,0), h2 = (75,0), h3 = (75,75),
                                         Vector(h1[0]-10,h1[1],0)),False)
     sketch.addGeometry(Part.Circle(Vector(h1[0],h1[1],0),Vector(0,0,1),2.5),False)
     sketch.addGeometry(Part.Circle(Vector(h2[0],h2[1],0),Vector(0,0,1),2.5),False)
+    button = True
   else:
     sketch.addGeometry(Part.ArcOfCircle(Part.Circle(Vector(h3[0],h3[1],0),
                                                     Vector(0,0,1),10),0,np.pi/2),False)
-    
     sketch.addGeometry(Part.LineSegment(Vector(h3[0],h3[1]+10,0),
                                         Vector(h4[0],h3[1]+10,0)),False)
-    
     sketch.addGeometry(Part.ArcOfCircle(Part.Circle(Vector(h4[0],h4[1],0),
                                                     Vector(0,0,1),10),np.pi/2,np.pi),False)
     sketch.addGeometry(Part.LineSegment(Vector(h4[0]-10,h4[1],0),
@@ -1168,28 +1167,7 @@ def model_Post_Marker(name="marker", h1 = (0,0), h2 = (75,0), h3 = (75,75),
                                         Vector(h3[0]+10,h3[1],0)),False)
     sketch.addGeometry(Part.Circle(Vector(h3[0],h3[1],0),Vector(0,0,1),2.5),False)
     sketch.addGeometry(Part.Circle(Vector(h4[0],h4[1],0),Vector(0,0,1),2.5),False)
-  
-  """
-  sketch.addGeometry(Part.LineSegment(Vector(h2[0]+10,h2[1],0),
-                                      Vector(h2[0]+10,h3[1],0)),False)
-  
-  sketch.addGeometry(Part.ArcOfCircle(Part.Circle(Vector(h3[0],h3[1],0),
-                                                  Vector(0,0,1),10),0,np.pi/2),False)
-  
-  sketch.addGeometry(Part.LineSegment(Vector(h3[0],h3[1]+10,0),
-                                      Vector(h4[0],h3[1]+10,0)),False)
-  
-  sketch.addGeometry(Part.ArcOfCircle(Part.Circle(Vector(h4[0],h4[1],0),
-                                                  Vector(0,0,1),10),np.pi/2,np.pi),False)
-  
-  sketch.addGeometry(Part.LineSegment(Vector(h4[0]-10,h4[1],0),
-                                      Vector(h4[0]-10,h1[1],0)),False)
-  
-  sketch.addGeometry(Part.Circle(Vector(h3[0],h3[1],0),Vector(0,0,1),2.5),False)
-  sketch.addGeometry(Part.Circle(Vector(h4[0],h4[1],0),Vector(0,0,1),2.5),False)
-  sketch.addGeometry(Part.Circle(Vector(POS[0],POS[1],0),Vector(0,0,1),16),False)
-  """
-  
+    button = False
   pad = obj.newObject('PartDesign::Pad','Pad')
   pad.Profile = sketch
   pad.Length = 5
@@ -1197,8 +1175,33 @@ def model_Post_Marker(name="marker", h1 = (0,0), h2 = (75,0), h3 = (75,75),
   pad.Midplane = 1
   sketch.Visibility = False
   
-  DOC.recompute()
-  obj.ViewObject.ShapeColor = color
+  # obj.ViewObject.ShapeColor = color
   offset=Vector(0,0,2.5)
   obj.Placement = Placement(offset, Rotation(0,0,0), Vector(0,0,0))
-  return obj
+  if button:
+    obj1 = DOC.addObject("Part::Cone","Cone")
+    obj1.Placement=Placement(Vector(h1[0],h1[1],0), Rotation(0,0,0), Vector(0,0,0))
+    obj2 = DOC.addObject("Part::Cone","Cone")
+    obj2.Placement=Placement(Vector(h2[0],h2[1],0), Rotation(0,0,0), Vector(0,0,0))
+  else:
+    obj1 = DOC.addObject("Part::Cone","Cone")
+    obj1.Placement=Placement(Vector(h3[0],h3[1],0), Rotation(0,0,0), Vector(0,0,0))
+    obj2 = DOC.addObject("Part::Cone","Cone")
+    obj2.Placement=Placement(Vector(h4[0],h4[1],0), Rotation(0,0,0), Vector(0,0,0))
+  obj1.Radius1 = obj2.Radius1 = 0
+  obj1.Radius2 = obj2.Radius2 = 5
+  obj1.Height = obj2.Height = 5
+  obj_new = DOC.addObject("Part::Cut",name+"Cut001")
+  obj_new.Base = obj
+  obj_new.Tool = obj1
+  obj.Visibility=False
+  obj1.Visibility=False
+  obj_new1 = DOC.addObject("Part::Cut",name+"Cut002")
+  obj_new1.Base = obj_new
+  obj_new1.Tool = obj2
+  obj_new.Visibility=False
+  obj2.Visibility=False
+  
+  DOC.recompute()
+  obj_new1.ViewObject.ShapeColor = color
+  return obj_new1

@@ -86,11 +86,14 @@ def get_mount_by_aperture_and_element(aperture, elm_type, elm_thickness):
   Output_mount = Composed_Mount(unit_model_list=[model,post])
   Output_mount.mount_list[0].element_thickness = elm_thickness
   Output_mount.mount_list[0].aperture = aperture
+  
   if aperture>25.4*4:
     first = Output_mount.mount_list[0]
     x,y,z = first.get_coordinate_system()
     first.pos += x * first.element_thickness
     Output_mount.set_geom(Output_mount.get_geom())
+  else:
+    Output_mount.add(Post_Marker())
   return Output_mount
 
 
@@ -442,7 +445,7 @@ class Grating_Mount(Composed_Mount):
     self.add(Post())
 
 class Post_Marker(Unit_Mount):
-  def __init__(self, name="Post_Marker",size=2,**kwargs):
+  def __init__(self, name="Post_Marker",size=3,**kwargs):
     super().__init__(name,**kwargs)
     self.name = name + "'s holder"
     self.size = size

@@ -63,12 +63,23 @@ from LaserCAD.non_interactings import Lambda_Plate
 # mon.add(Post_Marker())
 # mon.draw()
 
-M= Mirror()
-M.Mount.add(Post_Marker(name=M.name,size=3))
-M.pos = (19.5-16,12.5+18+25,80)
-# M.normal = (1,1,0)
-M.draw()
-M.draw_mount()
+mir=Mirror()
+mir.draw()
+comp = Composition()
+comp.propagate(300)
+comp.add_on_axis(Mirror(phi=0, theta=90))
+
+comp.propagate(400)
+
+comp.pos += (12,25,0)
+comp.draw()
+
+# M= Mirror()
+# # M.Mount.add(Post_Marker(name=M.name,size=3))
+# M.pos = (19.5-16,12.5+18,80)
+# # M.normal = (1,1,0)
+# M.draw()
+# M.draw_mount()
 # from LaserCAD.freecad_models.freecad_model_mounts import model_Post_Marker
 # if freecad_da:
 #   obj=model_Post_Marker(geom=M.Mount.mount_list[1].get_geom())
