@@ -71,7 +71,7 @@ comp.add_on_axis(Mirror(phi=0, theta=90))
 
 comp.propagate(400)
 
-comp.pos += (12,25,0)
+comp.pos += (12,50,0)
 comp.draw()
 
 # M= Mirror()
