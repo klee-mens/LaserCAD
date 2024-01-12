@@ -75,7 +75,8 @@ class Mirror(Opt_Element):
   #   self.mount_dict["Flip90"] = False
     
     # self.mount_dict["post_type"] = self.post_type
-    
+
+  
   def update_normal(self):
     """
     aktualisiert die Normale des Mirrors entsprechend der __incident_normal, 

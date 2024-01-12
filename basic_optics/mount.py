@@ -11,7 +11,7 @@ from ..freecad_models.freecad_model_mounts import mirror_mount,DEFAULT_MOUNT_COL
 from ..freecad_models.freecad_model_grating import grating_mount
 from .geom_object import Geom_Object
 from .post import Post_and_holder
-from ..freecad_models.freecad_model_mounts import draw_post,draw_post_holder,draw_post_base,draw_1inch_post,draw_large_post
+from ..freecad_models.freecad_model_mounts import draw_post,draw_post_holder,draw_post_base,draw_1inch_post,draw_large_post,model_mirror_holder
 
 DEFALUT_POST_COLOR = (0.8,0.8,0.8)
 DEFALUT_HOLDER_COLOR = (0.2,0.2,0.2)
@@ -92,8 +92,8 @@ def get_mount_by_aperture_and_element(aperture, elm_type, elm_thickness):
     x,y,z = first.get_coordinate_system()
     first.pos += x * first.element_thickness
     Output_mount.set_geom(Output_mount.get_geom())
-  else:
-    Output_mount.add(Post_Marker())
+  # else:
+  #   Output_mount.add(Post_Marker())
   return Output_mount
 
 
@@ -176,7 +176,6 @@ class Unit_Mount(Geom_Object):
       self.path = folder
       return False
     self.aperture = aperture
-    
     docking_normal = np.array((DockNormalX,DockNormalY,DockNormalZ))
     # self.docking_obj = Geom_Object()
     self.docking_obj.pos = self.pos+DockingX*self._axes[:,0]+DockingY*self._axes[:,1]+DockingZ*self._axes[:,2]
@@ -208,8 +207,6 @@ class Unit_Mount(Geom_Object):
   
   def _axes_changed(self, old_axes, new_axes):
     self._rearange_subobjects_axes( old_axes, new_axes, [self.docking_obj])
-
-
 
 
 class Post(Geom_Object):
@@ -364,8 +361,12 @@ class Composed_Mount(Geom_Object):
     self.docking_obj = Geom_Object()
     self.docking_obj.set_geom(self.get_geom())
     for model in self.unit_model_list:
-      if "post" in model:
+      if "Marker" in model:
+        newmount = Post_Marker()
+      elif "post" in model:
         newmount = Post(model=model)
+      elif "Angular" in model:
+        newmount = Adaptive_Angular_Mount()
       else:  
         newmount = Unit_Mount(model=model)
       self.add(newmount)
@@ -484,6 +485,55 @@ class Post_Marker(Unit_Mount):
     self.draw_dict["h2"] = (self.h1[0]+75,self.h1[1])
     self.draw_dict["h3"] = (self.h1[0]+75,self.h1[1]+75)
     self.draw_dict["h4"] = (self.h1[0],self.h1[1]+75)
+
+class Adaptive_Angular_Mount(Unit_Mount):
+  def __init__(self, aperture=25.4,angle = 30,**kwargs):
+    super().__init__(**kwargs)
+    self.aperture = aperture
+    self.angle = angle
+    self.docking_obj = Geom_Object()
+    self.rot_angle = abs(90-angle)
+    dia_l = int(aperture/10+1)*10
+    self.docking_obj.pos = self.pos+self.normal * (dia_l/(2*np.tan(self.rot_angle/180*np.pi))+1.5)
+    self.docking_obj.normal = self.normal
+    self.freecad_model = model_mirror_holder
+    
+  def update_draw_dict(self):
+    super().update_draw_dict()
+    self.draw_dict["dia"] = self.aperture
+    self.draw_dict["angle"] = self.rot_angle
+  
+  def set_axes(self, new_axes):
+    if abs(new_axes[2][0])>0:
+      z=-new_axes[2][0]
+      self.angle = np.arcsin(z)*180/np.pi
+      dia_l = int(self.aperture/10+1)*10
+      self.docking_obj.normal = self.normal
+      if self.angle>0:
+        self.rot_angle = (90-self.angle) 
+        self.docking_obj.pos = self.pos+self.normal * (dia_l/(2*np.tan(self.rot_angle/180*np.pi))+1.5)
+      else:
+        self.rot_angle = (-90-self.angle) 
+        self.docking_obj.pos = self.pos+self.normal * (dia_l/(2*np.tan(-self.rot_angle/180*np.pi))+1.5)
+    # elif new_axes[2][0]>0:
+    #   z=new_axes[2][0]
+    #   self.angle = np.arcsin(z)*180/np.pi
+    #   self.rot_angle = abs(90-self.angle)
+    #   dia_l = int(self.aperture/10+1)*10
+    #   self.docking_obj.pos = self.pos+self.normal * (dia_l/(2*np.tan(self.rot_angle/180*np.pi))+1.5)
+    #   self.docking_obj.normal = self.normal
+    super().set_axes(new_axes)
+    
+  # def _pos_changed(self, old_pos, new_pos):
+  #   self._rearange_subobjects_pos( old_pos, new_pos, [self.docking_obj])
+  
+  # def _axes_changed(self, old_axes, new_axes):
+  #   self._rearange_subobjects_axes( old_axes, new_axes, [self.docking_obj])
+  
+  # def reverse(self):
+  #   x,y,z = self.get_coordinate_system()
+  #   self.rotate(z, np.pi)
+  #   self.pos += x * self.element_thickness
 
 # class Special_mount(Unit_Mount):
 #   """

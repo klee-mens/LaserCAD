@@ -1246,8 +1246,14 @@ def model_Post_Marker(name="marker", h1 = (0,0), h2 = (75,0), h3 = (75,75),
   return obj_new1
 
 def model_mirror_holder(name="mirror_holder",dia = 25.4,angle = 30,
-                        color=DEFAULT_MOUNT_COLOR, geom = None):
+                        color=DEFAULT_MOUNT_COLOR, geom = None,**kwargs):
   DOC = get_DOC()
+  print(angle)
+  reverse= False
+  if angle<0:
+    angle= -angle
+    reverse=True
+  print(angle)
   dia_l = int(dia/10+1)*10
   obj1 = DOC.addObject("Part::Cylinder", "Cylinder")
   obj1.Label = "Cylinder"
@@ -1267,19 +1273,28 @@ def model_mirror_holder(name="mirror_holder",dia = 25.4,angle = 30,
   obj4 = DOC.addObject("Part::Cylinder", "Cylinder")
   obj4.Label = "Cylinder"
   obj4.Radius = dia/2
-  obj4.Placement = Placement(Vector(5*np.sin(angle/180*np.pi),0,-5*np.cos(angle)), Rotation(0,-angle,0), Vector(0,0,0))
+  obj4.Placement = Placement(Vector(5*np.sin(angle/180*np.pi),0,-5*np.cos(angle/180*np.pi)), Rotation(0,-angle,0), Vector(0,0,0))
   obj5 = DOC.addObject("Part::Cylinder", "Cylinder")
   obj5.Label = "Cylinder"
   obj5.Radius = dia/2
   obj5.Height = 6
-  obj5.Placement = Placement(Vector(dia_l/(2*np.tan(angle/180*np.pi)),0,0), Rotation(0,90,0), Vector(0,0,0))
+  obj5.Placement = Placement(Vector(dia_l/(2*np.tan(angle/180*np.pi))-1,0,0), Rotation(0,90,0), Vector(0,0,0))
   obj_new1 = DOC.addObject("Part::MultiFuse","Fusion")
   obj_new1.Shapes = [obj3,obj5,]
   obj3.Visibility = False
   obj5.Visibility = False
+  obj_new2 = DOC.addObject("Part::Cut","Cut")
+  obj_new2.Base = obj_new1
+  obj_new2.Tool = obj4
+  obj6 = DOC.addObject("Part::Cylinder", "Cylinder")
+  obj6.Radius = 1.5
+  obj6.Height = dia_l
+  obj6.Placement = Placement(Vector(2.5*np.sin(angle/180*np.pi),0,-2.5*np.cos(angle/180*np.pi)), Rotation(0,0,90), Vector(0,0,0))
   obj_new = DOC.addObject("Part::Cut",name)
-  obj_new.Base = obj_new1
-  obj_new.Tool = obj4
+  obj_new.Base = obj_new2
+  obj_new.Tool = obj6
+  if reverse:
+    obj_new.Placement = Placement(Vector(0,0,0), Rotation(0,0,180), Vector(0,0,0))
   update_geom_info(obj_new,geom)
   DOC.recompute()
   return obj_new
