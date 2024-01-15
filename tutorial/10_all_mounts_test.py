@@ -36,7 +36,7 @@ for i in range(len(MIRROR_LIST)):
   mir= Mirror()
   mir.aperture = aperture
   mir.Mount = M
-  mir.pos = (i*50,0,50+i*10)
+  mir.pos = (i*75,0,50+i*10)
   if mir.aperture > 25.4*4:
     mir.pos -= (50,0,0)
     mir.Mount.pos += mir.normal*mir.thickness
@@ -49,7 +49,7 @@ for i in range(len(LENS_LIST)):
   mir= Lens()
   mir.aperture = aperture
   mir.Mount = M
-  mir.pos = (i*50,-100,100+i*10)
+  mir.pos = (i*75,-100,100+i*10)
   mir.draw()
   mir.Mount.draw()
 

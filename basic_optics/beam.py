@@ -362,6 +362,13 @@ class Gaussian_Beam(Ray):
     cone.set_length(self.length)
     return cone
 
+  def get_all_rays(self):
+    ray = Ray()
+    ray.set_geom(self.get_geom())
+    ray.wavelength = self.wavelength
+    ray.length = self.length
+    return [ray]
+
 if __name__ == "__main__":
   b = Beam(name = "Strahlo", radius=2)
   print(b)
