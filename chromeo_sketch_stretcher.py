@@ -332,7 +332,7 @@ b.pos-= (0,0,b.pos[2])
 b.length = 780
 b.width = 150
 b.height = Plane_height-23
-b.pos -= (b.length/2,b.width/2,-b.height/2)
+b.pos -= (b.length/2,b.width/2,0)
 b.draw_dict["color"]= (0.2,0.2,0.2)
 b.draw()
 

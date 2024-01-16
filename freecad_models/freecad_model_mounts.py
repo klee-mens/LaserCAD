@@ -1116,7 +1116,7 @@ def model_table(name="table",length=4000,width=1500,height=10,color = DEFAULT_MO
   obj.Width = width
   obj.Height = height
   obj.ViewObject.ShapeColor=color
-  obj.Placement = Placement(Vector(0,0,-10), Rotation(0,0,0), Vector(0,0,0))
+  obj.Placement = Placement(Vector(0,0,0), Rotation(0,0,0), Vector(0,0,0))
   update_geom_info(obj, geom)
   DOC.recompute()
   return obj
