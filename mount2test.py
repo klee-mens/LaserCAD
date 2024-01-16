@@ -64,8 +64,17 @@ from LaserCAD.non_interactings import Lambda_Plate
 # mon.draw()
 
 mir=Mirror()
-mir.pos = (0,0,0)
+# mir.pos = (0,0,0)
+mir.Mount.mount_list[0].flip()
 mir.draw()
+mir.draw_mount()
+
+mir2=Mirror()
+mir2.pos += (0,50,0)
+# mir.Mount.mount_list[0].flip()
+mir2.draw()
+mir2.draw_mount()
+
 # comp = Composition()
 # comp.propagate(300)
 # comp.add_on_axis(Mirror(phi=0, theta=90))

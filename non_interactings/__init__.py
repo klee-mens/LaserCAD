@@ -11,3 +11,4 @@ from .faraday import Faraday_Isolator
 from .pockels_cell import Pockels_Cell
 from .crystal import Crystal
 from .breadboard import Breadboard
+from .table import Table

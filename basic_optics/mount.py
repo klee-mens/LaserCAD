@@ -9,7 +9,7 @@ from ..freecad_models.utils import thisfolder,load_STL,rotate,translate
 from ..freecad_models.freecad_model_composition import initialize_composition_old,add_to_composition
 from ..freecad_models.freecad_model_mounts import mirror_mount,DEFAULT_MOUNT_COLOR,DEFAULT_MAX_ANGULAR_OFFSET,model_Post_Marker
 from ..freecad_models.freecad_model_grating import grating_mount
-from .geom_object import Geom_Object
+from .geom_object import Geom_Object, rotation_matrix
 from .post import Post_and_holder
 from ..freecad_models.freecad_model_mounts import draw_post,draw_post_holder,draw_post_base,draw_1inch_post,draw_large_post,model_mirror_holder
 
@@ -113,6 +113,7 @@ class Unit_Mount(Geom_Object):
     self.element_thickness = element_thickness #standard thickness of for example a mirror
     self.aperture = 25.4
     self.is_horizontal = True
+    self.flip_angle = 0
     if self.model != "dont_draw":
       self.set_by_table()
       self.draw_dict["stl_file"] = self.path + self.model + ".stl"
@@ -187,9 +188,16 @@ class Unit_Mount(Geom_Object):
     x,y,z = self.get_coordinate_system()
     self.rotate(z, np.pi)
     self.pos += x * self.element_thickness
+    
+  def flip(self, angle=90):
+    self.flip_angle = angle
+  
 
   def update_draw_dict(self):
     super().update_draw_dict()
+    modified_axes = self.get_axes()
+    modified_axes = np.matmul(rotation_matrix(self.normal, self.flip_angle/180*np.pi), modified_axes)
+    self.draw_dict["geom"] = (self.pos, modified_axes)
     self.draw_dict["stl_file"] = self.path + self.model + ".stl"
     
   def draw_text(self):

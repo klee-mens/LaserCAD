@@ -1108,13 +1108,14 @@ def load_mount_from_csv(mount_type = "default",model_type="lens"):
 #   DOC.recompute()
 #   return obj
 
-def model_table(name="table",geom= None):
+def model_table(name="table",length=4000,width=1500,height=10,color = DEFAULT_MOUNT_COLOR,geom= None,**kwargs):
   DOC = get_DOC()
   obj = DOC.addObject("Part::Box",name)
   obj.Label = name
-  obj.Length = 4000
-  obj.Width = 1500
-  obj.Height = 10
+  obj.Length = length
+  obj.Width = width
+  obj.Height = height
+  obj.ViewObject.ShapeColor=color
   obj.Placement = Placement(Vector(0,0,-10), Rotation(0,0,0), Vector(0,0,0))
   update_geom_info(obj, geom)
   DOC.recompute()

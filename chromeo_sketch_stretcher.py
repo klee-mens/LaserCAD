@@ -27,8 +27,8 @@ from LaserCAD.basic_optics.mirror import Rooftop_mirror,Stripe_mirror
 # from LaserCAD.basic_optics import LinearResonator, Lens
 from LaserCAD.basic_optics import Grating, Intersection_plane
 import matplotlib.pyplot as plt
-# from LaserCAD.freecad_models.utils import thisfolder, load_STL
-# from LaserCAD.non_interactings import Faraday_Isolator, Pockels_Cell, Lambda_Plate
+from LaserCAD.freecad_models.utils import thisfolder, load_STL
+from LaserCAD.non_interactings import Faraday_Isolator, Pockels_Cell, Lambda_Plate,Table
 from LaserCAD.basic_optics.mount import Unit_Mount
 
 if freecad_da:
@@ -71,6 +71,7 @@ distance_roof_top_grating = 600
 
 input_radius = 1.25
 C1 = np.pi/2 # assume input_radius*input_angle = lambda/pi*C1, C1 is a const. C1=1 if the input beam is a Gaussian beam
+C1 = 1 # assume input_radius*input_angle = lambda/pi*C1, C1 is a const. C1=1 if the input beam is a Gaussian beam
 input_angle = (lambda_mid+delta_lamda/2)/np.pi*C1/input_radius
 # input_angle = 0
 
@@ -196,12 +197,12 @@ pure_cosmetic.aperture = periscope_height
 pure_cosmetic.draw_dict["model_type"] = "Rooftop"
 pure_cosmetic.set_mount_to_default()
 
-le1 = Lens(f=-75)
-le1.pos -= (0,0,periscope_height)
-le2 = Lens(f=100)
-le2.pos -= (25,0,periscope_height)
-Stretcher.add_fixed_elm(le1)
-Stretcher.add_fixed_elm(le2)
+# le1 = Lens(f=-75)
+# le1.pos -= (0,0,periscope_height)
+# le2 = Lens(f=100)
+# le2.pos -= (25,0,periscope_height)
+# Stretcher.add_fixed_elm(le1)
+# Stretcher.add_fixed_elm(le2)
 
 ip_s = Intersection_plane(name="the end of the Stretcher")
 # ip_s.pos -=(0,0,periscope_height) #two gratings
@@ -224,7 +225,7 @@ Grat1 = Grating(grat_const=grating_const, order=-1)
 Grat1.pos -=(500,0,periscope_height)
 Grat1.normal = Grating_normal
 Grat1.normal = -Grat1.normal
-Plane_height = 29
+Plane_height = 23+25.4
 Grat2 = Grating(grat_const=grating_const, order=-1)
 # propagation_length = 99.9995
 # propagation_length = seperation*2-0.0078
@@ -264,10 +265,10 @@ pure_cosmetic1.aperture = periscope_height
 # Four Gratings Compressor
 # =============================================================================
 Grat3 =Grating(grat_const=grating_const,order=1)
-Grat3.pos = (Grat1.pos[0]-400,Grat2.pos[1],Grat2.pos[2])
+Grat3.pos = (Grat1.pos[0]-Grat2.pos[0]+Grat1.pos[0]-50-2*35*abs(Grat1.normal[0]),Grat2.pos[1],Grat2.pos[2])
 Grat3.normal = (Grat1.normal[0],-Grat1.normal[1],Grat1.normal[2])
 Grat4 =Grating(grat_const=grating_const,order=1)
-Grat4.pos = (Grat2.pos[0]-400,Grat1.pos[1],Grat2.pos[2])
+Grat4.pos = (Grat2.pos[0]-Grat2.pos[0]+Grat1.pos[0]-50-2*35*abs(Grat1.normal[0]),Grat1.pos[1],Grat2.pos[2])
 Grat4.normal = (Grat2.normal[0],-Grat2.normal[1],Grat2.normal[2])
 
 Grat1.height=Grat2.height=Grat3.height=Grat4.height=25
@@ -276,8 +277,12 @@ Grat1.set_mount_to_default()
 Grat2.set_mount_to_default()
 Grat3.set_mount_to_default()
 Grat4.set_mount_to_default()
+Grat1.Mount.mount_list[1].flip(-90)
+Grat2.Mount.mount_list[1].flip(-90)
 Grat4.Mount.mount_list[-1]._lower_limit = Plane_height
 Grat1.Mount.mount_list[-1]._lower_limit = Plane_height
+Grat3.Mount.mount_list[-1]._lower_limit = Plane_height-23
+Grat2.Mount.mount_list[-1]._lower_limit = Plane_height-23
 Grat1.Mount.mount_list[1].model = "POLARIS-K1E3"
 Grat2.Mount.mount_list[1].model = "POLARIS-K1E3"
 Grat3.Mount.mount_list[1].model = "POLARIS-K1E3"
@@ -301,7 +306,7 @@ Stretcher.add_fixed_elm(pure_cosmetic)
 # setting the final sequence and the last propagation for visualization
 # note that pure cosmetic (pos6) is not in the sequence
 # Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0,6,7,8,9,7,6,10]) #two Gratings Compressor
-Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0,8,9,10,11]) #four Gratings Compressor
+Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0,6,7,8,9])#8,9,10,11]) #four Gratings Compressor
 # Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0]) #no compressor
 Stretcher.recompute_optical_axis()
 Stretcher.pos += (0,0,24)
@@ -312,18 +317,45 @@ Stretcher.propagate(500)
 # ip.draw()
 from LaserCAD.basic_optics import Gaussian_Beam
 gb = Gaussian_Beam(radius=input_radius,angle=input_angle)
-gb.wavelength = 2.4e-3
+gb.wavelength = 2.3e-3
 Stretcher.set_light_source(gb)
 Stretcher.draw()
+a = Pockels_Cell()
+a.pos = (Grat1.pos+Grat4.pos)/2
+a.pos-= (0,16,a.pos[2]-Plane_height+23)
+a.normal = (0,1,0)
+a.draw_dict["stl_file"]=thisfolder+"misc_meshes/XR25C.stl"
+a.draw()
+b = Table()
+b.pos = (Grat1.pos+Grat4.pos)/2
+b.pos-= (0,0,b.pos[2])
+b.length = 780
+b.width = 150
+b.height = Plane_height-23
+b.pos -= (b.length/2,b.width/2,-b.height/2)
+b.draw_dict["color"]= (0.2,0.2,0.2)
+b.draw()
+
+# c = Table()
+# c.pos = (Grat1.pos+Grat4.pos)/2
+# c.pos-= (0,0,c.pos[2]-20-30)
+# c.length = 250
+# c.width = 75
+# c.height = 5.8
+# c.pos -= (c.length/2,c.width/2,-c.height/2)
+# c.draw()
 # Stretcher.draw_beams()
 # Stretcher.draw_elements()
 # ip.spot_diagram(Stretcher._beams[-1],aberration_analysis=True)
 
+# -----------------------------------------------------------------------------
+# draw the spot diagram, 
+# -----------------------------------------------------------------------------
+# ip= Intersection_plane(name="the start of the Stretcher")
 # ip_s.spot_diagram(Stretcher._beams[-1])
-ip= Intersection_plane(name="the start of the Stretcher")
-ip.set_geom(Stretcher.get_geom())
+# ip.set_geom(Stretcher.get_geom())
 # ip.spot_diagram(Stretcher._beams[0])
-# ip.spot_diagram(Stretcher._beams[14])
+# # ip.spot_diagram(Stretcher._beams[14])
 # ip.draw()
 # ip_s.draw()
 # pathlength = {}
@@ -335,18 +367,21 @@ ip.set_geom(Stretcher.get_geom())
 #     a=pathlength[ii.wavelength]
 #     pathlength[ii.wavelength] = a +ii.length
     
-"""
-add the optical path length in crystal
-"""
-# Crystal_length = 10
-# for ii in range(Stretcher._beams[0]._ray_count):
-#     w1 = Stretcher._beams[0].get_all_rays()[ii].wavelength
-#     w = w1*1000
-#     n = np.sqrt(8.393 + 0.14383/(w**2-0.2421**2) + 4430.99/(w**2-36.71**2)) #ZnS
-#     # print(n)
-#     n = np.sqrt(2.2864 + 1.1280*(w**2)/(w**2 - 0.0562) - 0.0188*(w**2)) # RTP
-#     pathlength[w1] += n * Crystal_length
-# -----------------------------------------------------------------------------
+# """
+# add the optical path length in crystal
+# """
+# # Crystal_length = 10
+# # for ii in range(Stretcher._beams[0]._ray_count):
+# #     w1 = Stretcher._beams[0].get_all_rays()[ii].wavelength
+# #     w = w1*1000
+# #     n = np.sqrt(8.393 + 0.14383/(w**2-0.2421**2) + 4430.99/(w**2-36.71**2)) #ZnS
+# #     # print(n)
+# #     n = np.sqrt(2.2864 + 1.1280*(w**2)/(w**2 - 0.0562) - 0.0188*(w**2)) # RTP
+# #     pathlength[w1] += n * Crystal_length
+# # -----------------------------------------------------------------------------
+# """
+# calculate the GDD,TOD
+# """
 # ray_lam = [ray.wavelength for ray in Stretcher._beams[0].get_all_rays()]
 # path = [pathlength[ii] for ii in ray_lam]
 # path_diff = [ii-path[int(len(path)/2)] for ii in path]
@@ -415,4 +450,4 @@ add the optical path length in crystal
 # print("3rd order dispersion at the center wavelength:",fai3[int(len(fai3)/2)])
 
 
-# Stretcher.draw_beams()
+# # Stretcher.draw_beams()
