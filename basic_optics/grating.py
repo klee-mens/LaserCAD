@@ -13,6 +13,7 @@ from .ray import Ray
 from ..freecad_models import model_grating
 from .mount import Grating_Mount
 
+
 class Grating(Opt_Element):
   """
   Klasse für Gitter
@@ -40,23 +41,15 @@ class Grating(Opt_Element):
     gratAx *= -1 #selbe Konvention wie beim Spiegel, 1,0,0 heißt Reflektion von 1,0,0
     r1 = ray.normal #einfallender Strahl
     pos = ray.intersect_with(self)
-    # print("Gitternorm, Raynorm", norm, r1)
     sagital_component = np.sum(r1 * sagit)
-
     sinA = np.sum( sagit * np.cross(r1, norm) )
-    # print("sinA:", sinA)
     sinB = order * ray.wavelength/ self.grating_constant - sinA
-    # print(sinB)
     ray2 = deepcopy(ray)
     ray2.name = "next_" + ray.name
     ray2.pos = pos
     ray2.normal = (np.sqrt(1-sinB**2) * norm + sinB * gratAx) * np.sqrt(1-sagital_component**2) + sagital_component * sagit
-
     k_prop = np.cross(norm,np.cross(ray.normal*2*np.pi/ray.wavelength,norm))
     k_p_out = k_prop+order*2*np.pi/self.grating_constant*gratAx
-    # print()
-    # print("SQRT: ", ((2*np.pi/ray.wavelength)**2-np.linalg.norm(k_p_out)**2))
-    # print()
     k_r = k_p_out + abs(np.sqrt((2*np.pi/ray.wavelength)**2-np.linalg.norm(k_p_out)**2))*norm
     n_r = k_r/np.linalg.norm(k_r)
     ray2.normal = n_r
@@ -71,25 +64,7 @@ class Grating(Opt_Element):
     smm.set_geom(self.get_geom())
     self.Mount = smm
 
-    # return (name=self.name, dimensions=dims, geom=self.get_geom())
-"""
-  def draw_mount_fc(self):
-    # helper_dict = dict(self.draw_dict)
-    # obj = grating_mount(**helper_dict)
-    obj = Grating_mount(name=self.name,height=self.height,
-                        thickness=self.thickness,#base_exists=self.draw_dict['base_exists'],
-                        geom=self.get_geom())
-    return obj
 
-  def draw_mount_text(self):
-    # if self.mount_type == "dont_draw":
-    #   txt = self.name + "'s mount will not be drawn."
-    # elif self.mount_type == "default":
-      txt = "<" + self.name + ">'s mount is the default mount."
-    # else:
-    #   txt = self.name + "'s mount is " + self.mount_type + "."
-      return txt
-"""
 
 def grating_test1():
   grat = Grating()
