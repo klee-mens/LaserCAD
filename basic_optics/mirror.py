@@ -5,33 +5,14 @@ Created on Wed Aug 24 16:28:07 2022
 @author: mens
 """
 
-# from basic_optics import Opt_Element, TOLERANCE, Ray
-# from basic_optics.freecad_models import model_mirror, freecad_da
 from .geom_object import TOLERANCE, NORM0
 from .ray import Ray
 from .optical_element import Opt_Element
-# from .mount import Mount,Composed_Mount,Special_mount
 from .mount import Stripe_Mirror_Mount, Rooftop_Mirror_Mount
 from ..freecad_models import model_mirror, model_stripe_mirror, model_rooftop_mirror
-# from ..freecad_models import model_mirror, mirror_mount
-# from ..freecad_models.freecad_model_composition import initialize_composition_old, add_to_composition
-# from ..non_interactings import Mount
-# from ..non_interactings import Post_and_holder
-# from .mount import default_mirror_mount,Unit_Mount
-# from .post import Post_and_holder
 import numpy as np
 from copy import deepcopy
 
-# try:
-  # import FreeCAD
-  # DOC = FreeCAD.activeDocument()
-  # print(DOC)
-  # from FreeCAD import Vector, Placement, Rotation
-# except:
-  # freecad_da = False
-  # DOC = None
-
-# from ..freecad_models.utils import freecad_da, update_geom_info, get_DOC, rotate, thisfolder
 
 class Mirror(Opt_Element):
   """
@@ -54,28 +35,7 @@ class Mirror(Opt_Element):
     self.__theta = theta
     self.__phi = phi
     self.update_normal()
-    #Cosmetics
-    # self.update_draw_dict()
     self.freecad_model = model_mirror
-
-    
-    # self._update_mount_dict()
-    # self.mount = Mount(**self.mount_dict)
-    # self.mount.pos = self.pos
-    # self.mount.normal = self.normal
-    # self.post = self.mount.get_post()
-    
-  # def _update_mount_dict(self):
-  #   super()._update_mount_dict()
-  #   self.mount_dict["elm_type"] = "mirror"
-  #   self.mount_dict["name"] = self.name + "_mount"
-  #   self.mount_dict["aperture"] = self.aperture
-  #   self.mount_dict["post_type"] = "1inch_post"
-  #   self.mount_dict["model"] = "default"
-  #   self.mount_dict["Flip90"] = False
-    
-    # self.mount_dict["post_type"] = self.post_type
-
   
   def update_normal(self):
     """
@@ -219,54 +179,6 @@ class Mirror(Opt_Element):
     super().update_draw_dict()
     self.draw_dict["dia"]=self.aperture
     self.draw_dict["Radius"] = 0
-  
-  # def draw_mount_text(self):
-  #   if self.draw_dict["mount_type"] == "dont_draw":
-  #     txt = "<" + self.name + ">'s mount will not be drawn."
-  #   elif self.draw_dict["mount_type"] == "default":
-  #     txt = "<" + self.name + ">'s mount is the default mount."
-  #   else:
-  #     txt = "<" + self.name + ">'s mount is the " + self.draw_dict["mount_type"] + "."
-  #   return txt
-  
-
-
-# class Rooftop_mirror(Mirror):
-#   def __init__(self, aperture=10, **kwargs):
-#     self.aperture = aperture
-#     super().__init__(**kwargs)
-#     self._update_mount_dict()
-#     # self.mount = Composed_Mount()
-#     # mon1 = Special_mount(**self.mount_dict)
-#     # mon2 = Mount(aperture=25.4*2)
-#     # self.mount.add(mon1)
-#     # self.mount.add(mon2)
-  
-#   def _update_mount_dict(self):
-#     super()._update_mount_dict()
-#     self.mount_dict["model"] = "rooftop mirror mount"
-#     self.mount_dict["name"] = self.name + "_mount"
-#     self.mount_dict["aperture"] = self.aperture
-#     # self.mount_dict["thickness"] = self.thickness
-  
-#   def draw_fc(self):
-#     self.update_draw_dict()
-#     self.draw_dict["dia"]=self.aperture
-#     self.draw_dict["model_type"] = "Rooftop"
-#     obj = model_mirror(**self.draw_dict)
-#     return obj
-  
-#   def draw_mount(self):
-#     # self.update_mount()
-#     self._update_mount_dict()
-#     self.mount = Composed_Mount()
-#     self.mount.set_geom(self.get_geom())
-#     mon1 = Special_mount(**self.mount_dict)
-#     mon2 = Mount(aperture=25.4*2)
-#     self.mount.add(mon1)
-#     self.mount.add(mon2)
-#     # print(self.aperture)
-#     return (self.mount.draw())
 
 
 
@@ -331,15 +243,6 @@ class Curved_Mirror(Mirror):
     p0 = ray.intersect_with_sphere(center, self.radius) #Auftreffpunkt p0
     surface_norm = p0 - center #Normale auf Spiegeloberfläche in p0 
     surface_norm *= 1/np.linalg.norm(surface_norm) #normieren
-    #Reflektionsgesetz
-    # if np.std(ray2.normal-self.normal)<TOLERANCE and np.std(p0-self.pos)<TOLERANCE:
-    #   ray2.pos = p0
-    #   a=ray2.normal
-    #   a=a*-1
-    #   ray3 = Ray(name = ray2.name)
-    #   ray3.pos = p0
-    #   ray3.normal = a
-    #   return ray3
     ray2.normal = ray.normal - 2*np.sum(ray.normal*surface_norm)*surface_norm
     ray2.pos = p0
     return ray2
