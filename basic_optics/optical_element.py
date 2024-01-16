@@ -59,50 +59,6 @@ class Opt_Element(Component):
     ray2.pos = ray.intersect_with(self) #dadruch wird ray.length verändert(!)
     return ray2
 
-  def next_beam(self, beam):
-    """
-    erzeugt den durch das opt Elem veränderten Beam und gibt ihn zurück
-    und zwar ultra lazy
-    Parameters
-    ----------
-    beam : Beam()
-
-    Returns
-    -------
-    next Beam()
-    """
-    if type(beam) == type(Gaussian_Beam()):
-      return self.next_gauss(beam)
-    newb = deepcopy(beam)
-    newb.name = "next_" + beam.name
-    rays = beam.get_all_rays(by_reference=True)
-    # if beam._distribution == "Gaussian":
-
-    newrays = []
-    for ray in rays:
-      nr = self.next_ray(ray)
-      if not nr:
-        return False #Für Elemente die nicht mit Strahlen interagieren wird -1 als beam zurück gegeben
-      newrays.append(nr)
-    newb.override_rays(newrays)
-    # if beam._distribution == "Gaussian":
-    #   [[A,B],[C,D]] = self._matrix
-    #   q_parameter = deepcopy(beam.q_para)
-    #   q_parameter += beam.get_all_rays()[0].length
-    #   newb.q_para = (A*q_parameter+B)/(C*q_parameter+D)
-    return newb
-
-  def next_gauss(self,gaussian):
-      next_gaussian = deepcopy(gaussian)
-      next_middle = self.next_ray(gaussian) #change the length of Gaussian
-      next_gaussian.set_geom(next_middle.get_geom())
-      [[A,B],[C,D]] = self._matrix
-      q_parameter = deepcopy(gaussian.q_para)
-      q_parameter += gaussian.length
-      next_gaussian.q_para = (A*q_parameter+B)/(C*q_parameter+D)
-      # print(next_gaussian.q_para)
-      return next_gaussian
-
   def reflection(self, ray):
     """
     erzeugt den nächsten Strahl aus <Ray> mit Hilfe des Reflexionsgesetzes
@@ -127,8 +83,6 @@ class Opt_Element(Component):
     ray2.normal = newk
     # print("REFL", k, km, scpr, newk, ray2.normal)
     return ray2
-
-
 
   def refraction(self, ray):
     ray2 = deepcopy(ray)
@@ -174,6 +128,45 @@ class Opt_Element(Component):
     ray2.normal = norm2
 
     return ray2
+  
+
+  def next_beam(self, beam):
+    """
+    erzeugt den durch das opt Elem veränderten Beam und gibt ihn zurück
+    und zwar ultra lazy
+    Parameters
+    ----------
+    beam : Beam()
+
+    Returns
+    -------
+    next Beam()
+    """
+    if type(beam) == type(Gaussian_Beam()):
+      return self.next_gauss(beam)
+    newb = deepcopy(beam)
+    newb.name = "next_" + beam.name
+    rays = beam.get_all_rays(by_reference=True)
+    newrays = []
+    for ray in rays:
+      nr = self.next_ray(ray)
+      if not nr:
+        return False #Für Elemente die nicht mit Strahlen interagieren wird -1 als beam zurück gegeben
+      newrays.append(nr)
+    newb.override_rays(newrays)
+    return newb
+
+  def next_gauss(self,gaussian):
+      next_gaussian = deepcopy(gaussian)
+      next_middle = self.next_ray(gaussian) #change the length of Gaussian
+      next_gaussian.set_geom(next_middle.get_geom())
+      [[A,B],[C,D]] = self._matrix
+      q_parameter = deepcopy(gaussian.q_para)
+      q_parameter += gaussian.length
+      next_gaussian.q_para = (A*q_parameter+B)/(C*q_parameter+D)
+      # print(next_gaussian.q_para)
+      return next_gaussian
+
 
 
 def refraction_tests():
@@ -199,7 +192,6 @@ def refraction_tests():
   print(r10.intersection(foc_eb))
   print(r11.intersection(foc_eb))
   print(r12.intersection(foc_eb))
-
 
 def tests():
   # Test mit Sammellinse f = 50

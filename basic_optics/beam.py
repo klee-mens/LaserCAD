@@ -9,12 +9,9 @@ Created on Mon Aug 22 12:34:44 2022
 from . constants import TOLERANCE
 from . geom_object import Geom_Object
 from . ray import Ray
-# import Ray, Geom_Object, TOLERANCE
-# from basic_optics.freecad_models import model_beam,model_ray_1D,model_Gaussian_beam
 from .. freecad_models import model_beam,model_ray_1D,model_Gaussian_beam
 from .. freecad_models.freecad_model_beam import model_beam_new
 from .. freecad_models.freecad_model_composition import initialize_composition_old, add_to_composition
-# from .optical_element import Opt_Element
 
 from copy import deepcopy
 import numpy as np
@@ -381,8 +378,3 @@ if __name__ == "__main__":
   print(b.outer_rays())
   print("Radius, Winkel von b:", b.radius_angle())
 
-  # print("Beam valide:", b.is_valid())
-  # c = deepcopy(b)
-  # murx = ["banane", 12, 3.1]
-  # c.override_rays(murx)
-  # print("Beam immer noch valide:", c.is_valid())
