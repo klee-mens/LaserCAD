@@ -483,9 +483,6 @@ class Post_Marker(Unit_Mount):
       self.h1=(self.h1[0]+25,self.h1[1])
     if self.h1[1]+(25*self.size)-new_pos[1]<16:
       self.h1=(self.h1[0],self.h1[1]+25)
-    print(self.name," holes' pos=",self.h1,(self.h1[0]+(25*self.size),self.h1[1]),
-          (self.h1[0]+(25*self.size),self.h1[1]+(25*self.size)),
-          (self.h1[0],self.h1[1]+(25*self.size)))
   
   def update_draw_dict(self):
     super().update_draw_dict()
@@ -493,6 +490,9 @@ class Post_Marker(Unit_Mount):
     self.draw_dict["h2"] = (self.h1[0]+75,self.h1[1])
     self.draw_dict["h3"] = (self.h1[0]+75,self.h1[1]+75)
     self.draw_dict["h4"] = (self.h1[0],self.h1[1]+75)
+    print(self.name," holes' pos=",self.h1,(self.h1[0]+(25*self.size),self.h1[1]),
+          (self.h1[0]+(25*self.size),self.h1[1]+(25*self.size)),
+          (self.h1[0],self.h1[1]+(25*self.size)))
 
 class Adaptive_Angular_Mount(Unit_Mount):
   def __init__(self, aperture=25.4,angle = 30,**kwargs):

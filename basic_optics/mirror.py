@@ -8,7 +8,7 @@ Created on Wed Aug 24 16:28:07 2022
 from .geom_object import TOLERANCE, NORM0
 from .ray import Ray
 from .optical_element import Opt_Element
-from .mount import Stripe_Mirror_Mount, Rooftop_Mirror_Mount
+from .mount import Stripe_Mirror_Mount, Rooftop_Mirror_Mount, Unit_Mount
 from ..freecad_models import model_mirror, model_stripe_mirror, model_rooftop_mirror
 import numpy as np
 from copy import deepcopy
@@ -347,7 +347,7 @@ def Rooftop_mirror_draw_test():
 
 
 
-class Cylindrical_Mirror(Mirror):
+class Cylindrical_Mirror(Stripe_mirror):
   """
   The class of Cylindrical mirror.
   Cylindrical mirror have those parameters:
@@ -360,10 +360,12 @@ class Cylindrical_Mirror(Mirror):
   def __init__(self, radius=200,height=10, thickness=25, **kwargs):
     super().__init__(**kwargs)
     self.radius = radius
-    self.draw_dict["Radius"] = radius
-    self.draw_dict["height"]=height
-    self.draw_dict["thickness"]=thickness
+    # self.draw_dict["Radius"] = radius
+    self.height=height
+    self.thickness=thickness
     self.draw_dict["model_type"]="Stripe"
+    self.freecad_model = model_mirror
+    self.Mount = Unit_Mount("dont_draw")
 
   @property
   def radius(self):
@@ -383,39 +385,46 @@ class Cylindrical_Mirror(Mirror):
     else:
       self._matrix[1,0] = -2/x
 
-  def focal_length(self):
-    return self.radius/2
+  # def focal_length(self):
+  #   return self.radius/2
 
-  def next_ray(self, ray):
-    # r1 = self.refraction(ray)
-    # r2 = self.reflection(r1)
-    r2 = self.next_ray_tracing(ray)
-    return r2
+  # def next_ray(self, ray):
+  #   # r1 = self.refraction(ray)
+  #   # r2 = self.reflection(r1)
+  #   r2 = self.next_ray_tracing(ray)
+  #   return r2
 
-  def __repr__(self):
-    txt = 'Cylindrical_Mirror(radius=' + repr(self.radius)
-    txt += ', ' + super().__repr__()[7::]
-    return txt
+  # def __repr__(self):
+  #   txt = 'Cylindrical_Mirror(radius=' + repr(self.radius)
+  #   txt += ', ' + super().__repr__()[7::]
+  #   return txt
 
-  def next_geom(self, geom):
-    r0 = Ray()
-    r0.set_geom(geom)
-    r1 = self.next_ray(r0)
-    return r1.get_geom()
+  # def next_geom(self, geom):
+  #   r0 = Ray()
+  #   r0.set_geom(geom)
+  #   r1 = self.next_ray(r0)
+  #   return r1.get_geom()
 
-  def draw_fc(self):
-    self.update_draw_dict()
+  def update_draw_dict(self):
+    super().update_draw_dict()
     self.draw_dict["dia"]=self.aperture
-    # self.draw_dict["mount_type"] = "POLARIS-K1-Step"
-    self.draw_dict["Radius1"] = self.radius
-    obj = model_mirror(**self.draw_dict)
-    # default = Vector(0,0,1)
-    # xx,yy,zz = self.get_coordinate_system()
-    # zz = Vector(zz)
-    # angle = default.getAngle(zz)*180/np.pi
-    # vec = default.cross(zz)
-    # rotate(obj, vec, angle, off0=0)
-    return obj
+    self.draw_dict["Radius"] = self.radius
+    self.draw_dict["height"]=self.height
+    self.draw_dict["thickness"]=self.thickness
+
+  # def draw_fc(self):
+  #   self.update_draw_dict()
+  #   self.draw_dict["dia"]=self.aperture
+  #   # self.draw_dict["mount_type"] = "POLARIS-K1-Step"
+  #   self.draw_dict["Radius1"] = self.radius
+  #   obj = model_mirror(**self.draw_dict)
+  #   # default = Vector(0,0,1)
+  #   # xx,yy,zz = self.get_coordinate_system()
+  #   # zz = Vector(zz)
+  #   # angle = default.getAngle(zz)*180/np.pi
+  #   # vec = default.cross(zz)
+  #   # rotate(obj, vec, angle, off0=0)
+  #   return obj
   
   def next_ray_tracing(self, ray):
     """

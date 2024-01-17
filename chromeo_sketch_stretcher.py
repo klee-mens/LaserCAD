@@ -204,11 +204,6 @@ pure_cosmetic.set_mount_to_default()
 # Stretcher.add_fixed_elm(le1)
 # Stretcher.add_fixed_elm(le2)
 
-ip_s = Intersection_plane(name="the end of the Stretcher")
-# ip_s.pos -=(0,0,periscope_height) #two gratings
-# ip_s.pos -=(1000,0,periscope_height) #four gratings
-ip_s.pos -=(1000,0,periscope_height-24) #four gratings
-
 # angle = 10.00134
 # angle = 10.001
 angle = 10
@@ -315,10 +310,11 @@ Stretcher.propagate(500)
 # ip.set_geom(Stretcher.last_geom())
 # ip.spot_diagram(Stretcher._beams[-1],aberration_analysis=True)
 # ip.draw()
+
 from LaserCAD.basic_optics import Gaussian_Beam
 gb = Gaussian_Beam(radius=input_radius,angle=input_angle)
 gb.wavelength = 2.3e-3
-Stretcher.set_light_source(gb)
+# Stretcher.set_light_source(gb)
 Stretcher.draw()
 a = Pockels_Cell()
 a.pos = (Grat1.pos+Grat4.pos)/2
@@ -348,16 +344,20 @@ b.draw()
 # Stretcher.draw_elements()
 # ip.spot_diagram(Stretcher._beams[-1],aberration_analysis=True)
 
-# -----------------------------------------------------------------------------
-# draw the spot diagram, 
-# -----------------------------------------------------------------------------
-# ip= Intersection_plane(name="the start of the Stretcher")
-# ip_s.spot_diagram(Stretcher._beams[-1])
-# ip.set_geom(Stretcher.get_geom())
-# ip.spot_diagram(Stretcher._beams[0])
-# # ip.spot_diagram(Stretcher._beams[14])
-# ip.draw()
-# ip_s.draw()
+# =============================================================================
+# draw the spot diagram
+# =============================================================================
+ip_s = Intersection_plane(name="the end of the Stretcher")
+# ip_s.pos -=(0,0,periscope_height) #two gratings
+# ip_s.pos -=(1000,0,periscope_height) #four gratings
+ip_s.set_geom(Stretcher.last_geom()) #four gratings
+ip= Intersection_plane(name="the start of the Stretcher")
+ip_s.spot_diagram(Stretcher._beams[-1])
+ip.set_geom(Stretcher.get_geom())
+ip.spot_diagram(Stretcher._beams[0])
+# ip.spot_diagram(Stretcher._beams[14])
+ip.draw()
+ip_s.draw()
 # pathlength = {}
 # for ii in range(Stretcher._beams[0]._ray_count):
 #   wavelength = Stretcher._beams[0].get_all_rays()[ii].wavelength
