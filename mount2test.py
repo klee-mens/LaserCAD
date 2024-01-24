@@ -63,17 +63,29 @@ from LaserCAD.non_interactings import Lambda_Plate
 # mon.add(Post_Marker())
 # mon.draw()
 
-mir=Mirror()
-# mir.pos = (0,0,0)
-mir.Mount.mount_list[0].flip()
-mir.draw()
-mir.draw_mount()
-
-mir2=Mirror()
-mir2.pos += (0,50,0)
+# mir=Mirror()
+# # mir.pos = (0,0,0)
 # mir.Mount.mount_list[0].flip()
-mir2.draw()
-mir2.draw_mount()
+# mir.draw()
+# mir.draw_mount()
+
+# mir2=Mirror()
+# mir2.pos += (0,50,0)
+# # mir.Mount.mount_list[0].flip()
+# mir2.draw()
+# mir2.draw_mount()
+
+
+from LaserCAD.freecad_models.freecad_model_geom_object import model_geom_object
+
+# if freecad_da:
+  # model_geom_object()
+
+g = Geom_Object()
+# g.freecad_model = model_geom_object
+g.pos = (1,2,3)
+# g.normal = (1,1,0)
+g.draw()
 
 # comp = Composition()
 # comp.propagate(300)
