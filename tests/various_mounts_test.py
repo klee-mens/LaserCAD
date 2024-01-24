@@ -74,6 +74,11 @@ mir4.mount = M
 mir4.draw()
 mir4.draw_mount()
 
+
+# mir5=Mirror()
+# mir5.mount=M
+# mir5.draw()
+# mir5.draw_mount()
 # from LaserCAD.non_interactings.table import Table
 # t = Table()
 # t.pos = (-1000,-500,0)

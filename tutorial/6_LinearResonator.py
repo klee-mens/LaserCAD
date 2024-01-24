@@ -36,6 +36,7 @@ reso.set_wavelength(1e-3)
 # add the end mirror with certain aperture, propagate
 mir1 = Mirror()
 mir1.aperture = 2*inch
+mir1.set_mount_to_default()
 reso.add_on_axis(mir1)
 reso.propagate(100)
 
@@ -68,6 +69,9 @@ reso.add_on_axis(Curved_Mirror(radius=2000))
 reso.draw()
 
 
+from LaserCAD.freecad_models.freecad_model_mirror import model_mirror
+
 
 if freecad_da:
+  model_mirror()
   setview()

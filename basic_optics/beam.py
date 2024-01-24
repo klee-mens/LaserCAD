@@ -9,12 +9,9 @@ Created on Mon Aug 22 12:34:44 2022
 from . constants import TOLERANCE
 from . geom_object import Geom_Object
 from . ray import Ray
-# import Ray, Geom_Object, TOLERANCE
-# from basic_optics.freecad_models import model_beam,model_ray_1D,model_Gaussian_beam
 from .. freecad_models import model_beam,model_ray_1D,model_Gaussian_beam
 from .. freecad_models.freecad_model_beam import model_beam_new
 from .. freecad_models.freecad_model_composition import initialize_composition_old, add_to_composition
-# from .optical_element import Opt_Element
 
 from copy import deepcopy
 import numpy as np
@@ -270,7 +267,7 @@ class Beam(Geom_Object):
     self._rearange_subobjects_axes(old_axes, new_axes, self._rays)
 
 
-  def draw_fc(self):
+  def draw_freecad(self):
     if self.draw_dict["model"] == "Gaussian":
       return model_Gaussian_beam(name=self.name, q_para=self.q_para,
                                  wavelength=self.wavelength,
@@ -291,7 +288,7 @@ class Beam(Geom_Object):
       container = []
       for nn in range(self._ray_count):
         our=self._rays[nn]
-        obj = our.draw_fc()
+        obj = our.draw_freecad()
         container.append(obj)
       add_to_composition(part, container)
       return part
@@ -331,7 +328,7 @@ class Gaussian_Beam(Ray):
     txt += ', ' + super().__repr__()[n+1::]
     return txt
 
-  def draw_fc(self):
+  def draw_freecad(self):
     if self.draw_dict["model"] == "Gaussian":
       return model_Gaussian_beam(name=self.name, q_para=self.q_para,
                                  wavelength=self.wavelength,prop=self.length,
@@ -362,6 +359,13 @@ class Gaussian_Beam(Ray):
     cone.set_length(self.length)
     return cone
 
+  def get_all_rays(self):
+    ray = Ray()
+    ray.set_geom(self.get_geom())
+    ray.wavelength = self.wavelength
+    ray.length = self.length
+    return [ray]
+
 if __name__ == "__main__":
   b = Beam(name = "Strahlo", radius=2)
   print(b)
@@ -374,8 +378,3 @@ if __name__ == "__main__":
   print(b.outer_rays())
   print("Radius, Winkel von b:", b.radius_angle())
 
-  # print("Beam valide:", b.is_valid())
-  # c = deepcopy(b)
-  # murx = ["banane", 12, 3.1]
-  # c.override_rays(murx)
-  # print("Beam immer noch valide:", c.is_valid())

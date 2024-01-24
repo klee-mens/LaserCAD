@@ -11,31 +11,23 @@ from copy import deepcopy
 from .optical_element import Opt_Element
 from .ray import Ray
 from ..freecad_models import model_grating
-# from ..freecad_models import grating_mount
-from .mount import Grating_mount
+from .mount import Grating_Mount
+
 
 class Grating(Opt_Element):
   """
   Klasse für Gitter
   """
   def __init__(self, grat_const=0.005, order=1, **kwargs):
-    super().__init__(**kwargs)
-    self.grating_constant = grat_const
-    #Konstanten zum zeichnen, für die sonstige Berechnung unwichtig
-    self.width = 50
     self.height = 60
     self.thickness = 8
+    super().__init__(**kwargs)
+    self.grating_constant = grat_const
+    self.width = 50
     self.diffraction_order = order
-    self.mount_dict["elm_type"] = "grating"
-    self.mount_dict["height"] = self.height
-    self.mount_dict["thickness"] = self.thickness
-    self.mount = Grating_mount(**self.mount_dict)
-    # self.blazeangel = 32
-    # self.draw_dict['width'] = self.width
-    # self.draw_dict['thickness'] = self.thickness
-    # self.draw_dict['height'] = self.height
-    # dims = (self.thickness, self.width, self.height)
-    # print("dims:", dims)
+    self.update_draw_dict()
+    self.freecad_model = model_grating
+    self.set_mount_to_default()
 
   def next_ray(self, ray, order=None):
     """
@@ -49,48 +41,29 @@ class Grating(Opt_Element):
     gratAx *= -1 #selbe Konvention wie beim Spiegel, 1,0,0 heißt Reflektion von 1,0,0
     r1 = ray.normal #einfallender Strahl
     pos = ray.intersect_with(self)
-    # print("Gitternorm, Raynorm", norm, r1)
     sagital_component = np.sum(r1 * sagit)
-
     sinA = np.sum( sagit * np.cross(r1, norm) )
-    # print("sinA:", sinA)
     sinB = order * ray.wavelength/ self.grating_constant - sinA
-    # print(sinB)
     ray2 = deepcopy(ray)
     ray2.name = "next_" + ray.name
     ray2.pos = pos
     ray2.normal = (np.sqrt(1-sinB**2) * norm + sinB * gratAx) * np.sqrt(1-sagital_component**2) + sagital_component * sagit
-
     k_prop = np.cross(norm,np.cross(ray.normal*2*np.pi/ray.wavelength,norm))
     k_p_out = k_prop+order*2*np.pi/self.grating_constant*gratAx
-    # print()
-    # print("SQRT: ", ((2*np.pi/ray.wavelength)**2-np.linalg.norm(k_p_out)**2))
-    # print()
     k_r = k_p_out + abs(np.sqrt((2*np.pi/ray.wavelength)**2-np.linalg.norm(k_p_out)**2))*norm
     n_r = k_r/np.linalg.norm(k_r)
     ray2.normal = n_r
     return ray2
 
-  def draw_fc(self):
-    dims = (self.width, self.height, self.thickness)
-    return model_grating(name=self.name, dimensions=dims, geom=self.get_geom())
+  def update_draw_dict(self):
+    super().update_draw_dict()
+    self.draw_dict["dimensions"] = (self.width, self.height, self.thickness)
+  
+  def set_mount_to_default(self):
+    smm = Grating_Mount(height=self.height,thickness=self.thickness)
+    smm.set_geom(self.get_geom())
+    self.Mount = smm
 
-  def draw_mount_fc(self):
-    # helper_dict = dict(self.draw_dict)
-    # obj = grating_mount(**helper_dict)
-    obj = grating_mount(name=self.name,height=self.height,
-                        thickness=self.thickness,#base_exists=self.draw_dict['base_exists'],
-                        geom=self.get_geom())
-    return obj
-
-  def draw_mount_text(self):
-    # if self.mount_type == "dont_draw":
-    #   txt = self.name + "'s mount will not be drawn."
-    # elif self.mount_type == "default":
-      txt = "<" + self.name + ">'s mount is the default mount."
-    # else:
-    #   txt = self.name + "'s mount is " + self.mount_type + "."
-      return txt
 
 
 def grating_test1():

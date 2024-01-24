@@ -6,8 +6,10 @@ Created on Sat Aug 19 13:59:08 2023
 """
 
 from .geom_object import Geom_Object
+from .constants import inch
 # from ..non_interactings import 
-from .mount import Mount
+# from .mount import Mount
+from .mount import Unit_Mount, get_mount_by_aperture_and_element
 # from .post import Post_and_holder
 
 from .. freecad_models import freecad_da
@@ -19,41 +21,32 @@ class Component(Geom_Object):
   """
   def __init__(self, name="Component", **kwargs):
     super().__init__(name, **kwargs)
-    self.mount_dict = dict()
-    # self.mount_dict["pos"] = self.pos
-    # self.mount_dict["normal"] = self.normal
-    self.mount = Mount(name=name+"_mount", elm_type="dont_draw")
-    self.mount.pos = self.pos
-    self.mount.normal = self.normal
-    # self.post = Post_and_holder(name=name+"post",elm_type="dont_draw")
+    self.aperture = 1*inch # Aperture in mm for drawing, Mount and clipping (not yet implemented)
+    self.thickness = 5 # Thickness in mm, importent for mount placing and drawing
+    self.set_mount_to_default()
     
-  # def update_mount(self):
-  #   self._update_mount_dict()
-  #   self.mount = Mount(**self.mount_dict)
-
-  def _update_mount_dict(self):
-    # self.mount_dict["pos"] = self.pos
-    # self.mount_dict["normal"] = self.normal
-    self.mount.pos = self.pos
-    self.mount.normal = self.normal
-    pass
+  def set_mount_to_default(self):
+    self.Mount = get_mount_by_aperture_and_element(self.aperture, 
+                                                   self.class_name(), 
+                                                   self.thickness)
+    self.Mount.set_geom(self.get_geom())
+  
+  
+  def update_draw_dict(self):
+    super().update_draw_dict()
+    self.draw_dict["dia"]=self.aperture
+    self.draw_dict["thickness"] = self.thickness
 
   def draw_mount(self):
     # self.update_mount()
-    return (self.mount.draw())
+    return (self.Mount.draw())
   
   def _pos_changed(self, old_pos, new_pos):
-    self._rearange_subobjects_pos( old_pos, new_pos, [self.mount])
+    self._rearange_subobjects_pos( old_pos, new_pos, [self.Mount])
   
   def _axes_changed(self, old_axes, new_axes):
-    self._rearange_subobjects_axes( old_axes, new_axes, [self.mount])
+    self._rearange_subobjects_axes( old_axes, new_axes, [self.Mount])
   
-  #   if freecad_da:
-  #     return self.draw_mount_fc()
-  #   else:
-  #     txt = self.draw_mount_text()
-  #     print(txt)
-  #     return txt
 
   # def draw_mount_fc(self):
   #   #ToDo: fürs Debugging hier einfach einen Zylinder mit norm uns k zeichnen

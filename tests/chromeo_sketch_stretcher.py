@@ -26,6 +26,7 @@ from LaserCAD.basic_optics import Grating, Crystal, Intersection_plane
 import matplotlib.pyplot as plt
 from LaserCAD.freecad_models.utils import thisfolder, load_STL
 from LaserCAD.non_interactings import Faraday_Isolator, Pockels_Cell, Lambda_Plate
+from LaserCAD.basic_optics.mount import Unit_Mount
 
 if freecad_da:
   clear_doc()
@@ -148,9 +149,9 @@ Stretcher.add_on_axis(RoofTop2)
 
 RoofTop1.draw = dont
 # RoofTop1.draw_dict["mount_type"] = "dont_draw"
-RoofTop1.mount.elm_type = "dont_draw"
+RoofTop1.Mount = Unit_Mount("dont_draw")
 RoofTop2.draw = dont
-RoofTop2.mount.elm_type = "dont_draw"
+RoofTop2.Mount = Unit_Mount("dont_draw")
 
 pure_cosmetic = Rooftop_mirror(name="RoofTop_Mirror")
 pure_cosmetic.draw_dict["mount_type"] = "rooftop_mirror_mount"
@@ -181,9 +182,9 @@ C_RoofTop2.pos -= (700,SinS*propagation_length,0)
 C_RoofTop2.normal = (-1,0,1)
 
 C_RoofTop1.draw = dont
-C_RoofTop1.mount.elm_type = "dont_draw"
+C_RoofTop1.Mount = Unit_Mount("dont_draw")
 C_RoofTop2.draw = dont
-C_RoofTop2.mount.elm_type = "dont_draw"
+C_RoofTop2.Mount = Unit_Mount("dont_draw")
 pure_cosmetic1 = Rooftop_mirror(name="RoofTop_Mirror")
 pure_cosmetic1.draw_dict["mount_type"] = "rooftop_mirror_mount"
 pure_cosmetic1.pos = (C_RoofTop1.pos + C_RoofTop2.pos ) / 2

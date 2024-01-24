@@ -561,7 +561,7 @@ def draw_post(name="TR50_M", height=0,xshift=0,color=DEFAULT_POST_COLOR, geom=No
   update_geom_info(obj, geom, off0=offset)
   return obj
 
-def draw_1inch_post(name="TR50_M",h_diff=5,color=DEFAULT_POST_COLOR,
+def draw_1inch_post(name="TR50_M",h_diff=5,ll=0,color=DEFAULT_POST_COLOR,
                     geom=None):
   DOC = get_DOC()
   POS = geom[0]
@@ -573,7 +573,7 @@ def draw_1inch_post(name="TR50_M",h_diff=5,color=DEFAULT_POST_COLOR,
   datei1 = thisfolder + "post/1inchPost/" + name
   datei1 += ".stl"
   obj = load_STL(datei1, name = name,color = color)
-  Geom_ground = (np.array((POS[0],POS[1],0)), np.array((AXES)))
+  Geom_ground = (np.array((POS[0],POS[1],ll)), np.array((AXES)))
   Geom_diff = (np.array((POS[0],POS[1],geom[0][2]-h_diff)), np.array((AXES)))
   update_geom_info(obj, Geom_ground)
   obj1 = DOC.addObject("Part::Cylinder","Cylinder")
@@ -589,7 +589,7 @@ def draw_1inch_post(name="TR50_M",h_diff=5,color=DEFAULT_POST_COLOR,
   add_to_composition(part, container)
   return part
 
-def draw_post_holder (name="PH50_M", height=0,xshift=0,color=DEFAULT_HOLDER_COLOR, geom=None):
+def draw_post_holder (name="PH50_M", height=0,ll=0,xshift=0,color=DEFAULT_HOLDER_COLOR, geom=None):
   """
   draw the post holder
   Normally, this function is not called separately.
@@ -622,7 +622,8 @@ def draw_post_holder (name="PH50_M", height=0,xshift=0,color=DEFAULT_HOLDER_COLO
   datei1 = thisfolder + "post/post_holder/" + name
   datei1 += ".stl"
   obj = load_STL(datei1, name=name,color=color)
-  Geom_ground = (np.array((POS[0],POS[1],0)), np.array((NORMAL)))
+  Geom_ground = (np.array((POS[0],POS[1],ll)), np.array((NORMAL)))
+  """
   if name =="PH100_M":
     offset=Vector(xshift+4.3,-1.5,height+54)
     obj.Placement = Placement(offset, Rotation(90,0,90), Vector(0,0,0))
@@ -668,6 +669,8 @@ def draw_post_holder (name="PH50_M", height=0,xshift=0,color=DEFAULT_HOLDER_COLO
     offset=Vector(xshift-4.5,-5.5,height+31.25)
     obj.Placement = Placement(offset, Rotation(90,0,90), Vector(0,0,0))
     update_geom_info(obj, Geom_ground, off0=offset)
+  """
+  update_geom_info(obj, Geom_ground, off0=0)
   return obj
 
 def draw_post_base(name="BA1L", height=0,xshift=0, geom=None):
@@ -830,7 +833,7 @@ def building_mount(name="mount",  Radius1=13, Hole_Radius=2, thickness=10,
   
   pad = obj.newObject('PartDesign::Pad','Pad')
   pad.Profile = sketch
-  pad.Length = thickness
+  pad.Length = height
   pad.ReferenceAxis = (sketch,['N_Axis'])
   pad.Midplane = 1
   sketch.Visibility = False
@@ -1105,14 +1108,195 @@ def load_mount_from_csv(mount_type = "default",model_type="lens"):
 #   DOC.recompute()
 #   return obj
 
-def model_table(name="table",geom= None):
+def model_table(name="table",length=4000,width=1500,height=10,color = DEFAULT_MOUNT_COLOR,geom= None,**kwargs):
   DOC = get_DOC()
   obj = DOC.addObject("Part::Box",name)
   obj.Label = name
-  obj.Length = 4000
-  obj.Width = 1500
-  obj.Height = 10
-  obj.Placement = Placement(Vector(0,0,-10), Rotation(0,0,0), Vector(0,0,0))
+  obj.Length = length
+  obj.Width = width
+  obj.Height = height
+  obj.ViewObject.ShapeColor=color
+  obj.Placement = Placement(Vector(0,0,0), Rotation(0,0,0), Vector(0,0,0))
   update_geom_info(obj, geom)
   DOC.recompute()
   return obj
+
+def model_Post_Marker(name="marker", h1 = (0,0), h2 = (75,0), h3 = (75,75), 
+                      h4 = (0,75),color=DEFAULT_MOUNT_COLOR,geom=None,**kwargs):
+  POS = geom[0]
+  DOC = get_DOC()
+  obj = DOC.addObject('PartDesign::Body', name)
+  sketch = obj.newObject('Sketcher::SketchObject', name+'_sketch')
+  #sketch.Support = (DOC.getObject('YZ_Plane002'),[''])
+  sketch.MapMode = 'FlatFace'
+  if POS[1]-h1[1]<h3[1]-POS[1]:
+    sketch.addGeometry(Part.ArcOfCircle(Part.Circle(Vector(h1[0],h1[1],0),
+                                                    Vector(0,0,1),10),-np.pi,-np.pi/2),False)
+    sketch.addConstraint(Sketcher.Constraint('DistanceY',-1,1,0,3,h1[1]))
+    sketch.addConstraint(Sketcher.Constraint('DistanceX',-1,1,0,3,h1[0]))
+    sketch.addConstraint(Sketcher.Constraint('DistanceY',-1,1,0,1,h1[1])) 
+    sketch.addGeometry(Part.LineSegment(Vector(h1[0],h1[1]-10,0),
+                                        Vector(h2[0],h1[1]-10,0)),False)
+    sketch.addConstraint(Sketcher.Constraint('DistanceX',1,1,1,2,h2[0]-h1[0]))
+    sketch.addGeometry(Part.ArcOfCircle(Part.Circle(Vector(h2[0],h2[1],0),
+                                                    Vector(0,0,1),10),-np.pi/2,0),False)
+    sketch.addConstraint(Sketcher.Constraint('DistanceX',2,3,h2[0])) 
+    sketch.addGeometry(Part.LineSegment(Vector(h2[0]+10,h2[1],0),
+                                        Vector(h2[0]+10,POS[1],0)),False)
+    sketch.addConstraint(Sketcher.Constraint('DistanceY',3,1,3,2,POS[1]-h2[1]))
+    sketch.addGeometry(Part.LineSegment(Vector(h2[0]+10,POS[1],0),
+                                        Vector(POS[0]+16,POS[1],0)),False)
+    sketch.addConstraint(Sketcher.Constraint('DistanceX',4,2,4,1,h2[0]-POS[0]-6)) 
+    sketch.addGeometry(Part.ArcOfCircle(Part.Circle(Vector(POS[0],POS[1],0),
+                                                    Vector(0,0,1),16),-np.pi,0),False)
+    sketch.addConstraint(Sketcher.Constraint('DistanceY',-1,1,5,3,POS[1])) 
+    sketch.addGeometry(Part.LineSegment(Vector(POS[0]-16,POS[1],0),
+                                        Vector(h1[0]-10,POS[1],0)),False)
+    sketch.addConstraint(Sketcher.Constraint('DistanceX',6,2,6,1,POS[0]-6-h1[0])) 
+    sketch.addGeometry(Part.LineSegment(Vector(h1[0]-10,POS[1],0),
+                                        Vector(h1[0]-10,h1[1],0)),False)
+    sketch.addGeometry(Part.Circle(Vector(h1[0],h1[1],0),Vector(0,0,1),3),False)
+    sketch.addGeometry(Part.Circle(Vector(h2[0],h2[1],0),Vector(0,0,1),3),False)
+    button = True
+  else:
+    sketch.addGeometry(Part.ArcOfCircle(Part.Circle(Vector(h3[0],h3[1],0),
+                                                    Vector(0,0,1),10),0,np.pi/2),False)
+    sketch.addConstraint(Sketcher.Constraint('DistanceY',-1,1,0,3,h3[1]))
+    sketch.addConstraint(Sketcher.Constraint('DistanceX',-1,1,0,3,h3[0]))
+    sketch.addConstraint(Sketcher.Constraint('DistanceY',-1,1,0,1,h3[1])) 
+    sketch.addGeometry(Part.LineSegment(Vector(h3[0],h3[1]+10,0),
+                                        Vector(h4[0],h3[1]+10,0)),False)
+    sketch.addConstraint(Sketcher.Constraint('DistanceX',1,1,1,2,h4[0]-h3[0]))
+    sketch.addGeometry(Part.ArcOfCircle(Part.Circle(Vector(h4[0],h4[1],0),
+                                                    Vector(0,0,1),10),np.pi/2,np.pi),False)
+    sketch.addConstraint(Sketcher.Constraint('DistanceX',2,3,h4[0])) 
+    sketch.addGeometry(Part.LineSegment(Vector(h4[0]-10,h4[1],0),
+                                        Vector(h4[0]-10,POS[1],0)),False)
+    sketch.addConstraint(Sketcher.Constraint('DistanceY',3,1,3,2,POS[1]-h4[1]))
+    sketch.addGeometry(Part.LineSegment(Vector(h4[0]-10,POS[1],0),
+                                        Vector(POS[0]-16,POS[1],0)),False)
+    sketch.addConstraint(Sketcher.Constraint('DistanceX',4,2,4,1,h4[0]-POS[0]+6))
+    sketch.addGeometry(Part.ArcOfCircle(Part.Circle(Vector(POS[0],POS[1],0),
+                                                    Vector(0,0,1),16),0,np.pi),False)
+    sketch.addConstraint(Sketcher.Constraint('DistanceY',-1,1,5,3,POS[1])) 
+    sketch.addGeometry(Part.LineSegment(Vector(POS[0]+16,POS[1],0),
+                                        Vector(h3[0]+10,POS[1],0)),False)
+    sketch.addConstraint(Sketcher.Constraint('DistanceX',6,1,6,2,h3[0]-POS[0]-6))
+    sketch.addGeometry(Part.LineSegment(Vector(h3[0]+10,POS[1],0),
+                                        Vector(h3[0]+10,h3[1],0)),False)
+    sketch.addGeometry(Part.Circle(Vector(h3[0],h3[1],0),Vector(0,0,1),5),False)
+    sketch.addGeometry(Part.Circle(Vector(h4[0],h4[1],0),Vector(0,0,1),5),False)
+    button = False
+  sketch.addConstraint(Sketcher.Constraint('Radius',0,10)) 
+  sketch.addConstraint(Sketcher.Constraint('Angle',0,np.pi/2))
+  sketch.addConstraint(Sketcher.Constraint('Coincident',1,1,0,2)) 
+  sketch.addConstraint(Sketcher.Constraint('Horizontal',1))
+  sketch.addConstraint(Sketcher.Constraint('Coincident',2,1,1,2)) 
+  sketch.addConstraint(Sketcher.Constraint('Radius',2,10)) 
+  sketch.addConstraint(Sketcher.Constraint('Angle',2,np.pi/2)) 
+  sketch.addConstraint(Sketcher.Constraint('Coincident',3,1,2,2))
+  sketch.addConstraint(Sketcher.Constraint('Vertical',3)) 
+  sketch.addConstraint(Sketcher.Constraint('Coincident',4,1,3,2)) 
+  sketch.addConstraint(Sketcher.Constraint('Horizontal',4))
+  sketch.addConstraint(Sketcher.Constraint('Coincident',5,2,4,2)) 
+  sketch.addConstraint(Sketcher.Constraint('Angle',5,np.pi)) 
+  sketch.addConstraint(Sketcher.Constraint('Radius',5,16)) 
+  sketch.addConstraint(Sketcher.Constraint('Coincident',6,1,5,1)) 
+  sketch.addConstraint(Sketcher.Constraint('Horizontal',6)) 
+  sketch.addConstraint(Sketcher.Constraint('Coincident',7,1,6,2)) 
+  sketch.addConstraint(Sketcher.Constraint('Coincident',7,2,0,1))
+  sketch.addConstraint(Sketcher.Constraint('Coincident',8,3,0,3)) 
+  sketch.addConstraint(Sketcher.Constraint('Diameter',8,10)) 
+  sketch.addConstraint(Sketcher.Constraint('Coincident',9,3,2,3)) 
+  sketch.addConstraint(Sketcher.Constraint('Diameter',9,10)) 
+  pad = obj.newObject('PartDesign::Pad','Pad')
+  pad.Profile = sketch
+  pad.Length = 5
+  pad.ReferenceAxis = (sketch,['N_Axis'])
+  pad.Midplane = 1
+  sketch.Visibility = False
+  
+  # obj.ViewObject.ShapeColor = color
+  offset=Vector(0,0,2.5)
+  obj.Placement = Placement(offset, Rotation(0,0,0), Vector(0,0,0))
+  if button:
+    obj1 = DOC.addObject("Part::Cone","Cone")
+    obj1.Placement=Placement(Vector(h1[0],h1[1],0), Rotation(0,0,0), Vector(0,0,0))
+    obj2 = DOC.addObject("Part::Cone","Cone")
+    obj2.Placement=Placement(Vector(h2[0],h2[1],0), Rotation(0,0,0), Vector(0,0,0))
+  else:
+    obj1 = DOC.addObject("Part::Cone","Cone")
+    obj1.Placement=Placement(Vector(h3[0],h3[1],0), Rotation(0,0,0), Vector(0,0,0))
+    obj2 = DOC.addObject("Part::Cone","Cone")
+    obj2.Placement=Placement(Vector(h4[0],h4[1],0), Rotation(0,0,0), Vector(0,0,0))
+  obj1.Radius1 = obj2.Radius1 = 0
+  obj1.Radius2 = obj2.Radius2 = 5
+  obj1.Height = obj2.Height = 5
+  obj_new = DOC.addObject("Part::Cut",name+"Cut001")
+  obj_new.Base = obj
+  obj_new.Tool = obj1
+  obj.Visibility=False
+  obj1.Visibility=False
+  obj_new1 = DOC.addObject("Part::Cut",name+"Cut002")
+  obj_new1.Base = obj_new
+  obj_new1.Tool = obj2
+  obj_new.Visibility=False
+  obj2.Visibility=False
+  DOC.recompute()
+  obj_new1.ViewObject.ShapeColor = color
+  return obj_new1
+
+def model_mirror_holder(name="mirror_holder",dia = 25.4,angle = 30,
+                        color=DEFAULT_MOUNT_COLOR, geom = None,**kwargs):
+  DOC = get_DOC()
+  print(angle)
+  reverse= False
+  if angle<0:
+    angle= -angle
+    reverse=True
+  print(angle)
+  dia_l = int(dia/10+1)*10
+  obj1 = DOC.addObject("Part::Cylinder", "Cylinder")
+  obj1.Label = "Cylinder"
+  obj1.Radius = dia_l/2
+  obj1.Height = dia_l/np.tan(angle/180*np.pi)
+  obj1.Placement = Placement(Vector(-dia_l/(2*np.tan(angle/180*np.pi)),0,0), Rotation(0,90,0), Vector(0,0,0))
+  obj2 = DOC.addObject("Part::Box","Box")
+  obj2.Length = dia_l/np.sin(angle/180*np.pi)
+  obj2.Width = dia_l/np.sin(angle/180*np.pi)
+  obj2.Height = dia_l/np.sin(angle/180*np.pi)
+  obj2.Placement = Placement(Vector(-dia_l/(2*np.tan(angle/180*np.pi)),-dia_l/np.sin(angle/180*np.pi)/2,-dia_l/2), Rotation(0,-angle,0), Vector(0,0,0))
+  obj3 = DOC.addObject("Part::Cut","Cut")
+  obj3.Base = obj1
+  obj3.Tool = obj2
+  obj1.Visibility = False
+  obj2.Visibility = False
+  obj4 = DOC.addObject("Part::Cylinder", "Cylinder")
+  obj4.Label = "Cylinder"
+  obj4.Radius = dia/2
+  obj4.Placement = Placement(Vector(5*np.sin(angle/180*np.pi),0,-5*np.cos(angle/180*np.pi)), Rotation(0,-angle,0), Vector(0,0,0))
+  obj5 = DOC.addObject("Part::Cylinder", "Cylinder")
+  obj5.Label = "Cylinder"
+  obj5.Radius = dia/2
+  obj5.Height = 6
+  obj5.Placement = Placement(Vector(dia_l/(2*np.tan(angle/180*np.pi))-1,0,0), Rotation(0,90,0), Vector(0,0,0))
+  obj_new1 = DOC.addObject("Part::MultiFuse","Fusion")
+  obj_new1.Shapes = [obj3,obj5,]
+  obj3.Visibility = False
+  obj5.Visibility = False
+  obj_new2 = DOC.addObject("Part::Cut","Cut")
+  obj_new2.Base = obj_new1
+  obj_new2.Tool = obj4
+  obj6 = DOC.addObject("Part::Cylinder", "Cylinder")
+  obj6.Radius = 1.5
+  obj6.Height = dia_l
+  obj6.Placement = Placement(Vector(2.5*np.sin(angle/180*np.pi),0,-2.5*np.cos(angle/180*np.pi)), Rotation(0,0,90), Vector(0,0,0))
+  obj_new = DOC.addObject("Part::Cut",name)
+  obj_new.Base = obj_new2
+  obj_new.Tool = obj6
+  if reverse:
+    obj_new.Placement = Placement(Vector(0,0,0), Rotation(0,0,180), Vector(0,0,0))
+  update_geom_info(obj_new,geom)
+  DOC.recompute()
+  return obj_new
+  

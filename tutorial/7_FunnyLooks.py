@@ -49,7 +49,7 @@ All objects could be easily added to a composition
 mir1 = Mirror()
 mir1.draw()
 print()
-print(mir1.draw_dict)
+# print(mir1.draw_dict)
 
 
 mir2 = Mirror()
@@ -63,25 +63,26 @@ mir2.draw_dict["color"] = (1.0, 0.0, 1.0)
 mir2.draw()
 
 
-mir3 = Mirror()
-mir3.pos += (180, -170, 10)
-mir3.normal = (1,2,0)
-print()
-print(mir3.mount_dict)
-# mir3.mount_dict["model"] = thisfolder + "\mount_meshes\special mount\spartan.stl"
-mir3.mount_dict["model"] = "\spartan"
+# mir3 = Mirror()
+# mir3.pos += (180, -170, 10)
+# mir3.normal = (1,2,0)
+# print()
+# # mir3.mount_dict["model"] = thisfolder + "\mount_meshes\special mount\spartan.stl"
+# mir3.mount_dict["model"] = "\spartan"
 
-mir3.mount.post.elm_type = "dont_draw"
-mir3.mount.docking_obj.pos += (-19, -46, -15)
+# mir3.mount.post.elm_type = "dont_draw"
+# mir3.mount.docking_obj.pos += (-19, -46, -15)
 
 # mir3.mount.dr
 
-mir3.draw()
-mir3.draw_mount()
+# mir3.draw()
+# mir3.draw_mount()
+
+
 
 from LaserCAD.freecad_models.utils import load_STL, thisfolder
 seed_laser = Component()
-stl_file=thisfolder+"\mount_meshes\special mount\Laser_Head-Body.stl"
+stl_file=thisfolder+"\misc_meshes\Laser_Head-Body.stl"
 seed_laser.draw_dict["stl_file"]=stl_file
 color = (170/255, 170/255, 127/255)
 seed_laser.draw_dict["color"]=color

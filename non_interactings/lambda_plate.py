@@ -5,35 +5,25 @@ Created on Sat Aug 19 13:11:01 2023
 @author: mens
 """
 
-from ..freecad_models import model_lambda_plate,model_mirror
-# from ..basic_optics import Component
-from ..basic_optics.mount import Special_mount
-from LaserCAD.basic_optics.component import Component
+from ..freecad_models import model_mirror
+from ..basic_optics import Component
+from ..basic_optics.mount import Unit_Mount,Composed_Mount,Post
+
+DEFAULT_LAMBDA_PLATE_COLOR = (255,255,0)
 
 class Lambda_Plate(Component):
 
-  def __init__(self,thickness=2, **kwargs):
-    super().__init__(**kwargs)
+  def __init__(self, name="LambdaPlate", **kwargs):
+    super().__init__(name=name, **kwargs)
     self.aperture = 25.4/2
-    self.draw_dict["thickness"]=thickness
-    self._update_mount_dict()
-    self.mount = Special_mount(**self.mount_dict)
+    self.thickness = 2
+    self.freecad_model = model_mirror
+    self.set_mount_to_default()
+    self.draw_dict["Radius"] = 0
+    self.draw_dict["color"] = DEFAULT_LAMBDA_PLATE_COLOR    
     
-  def _update_mount_dict(self):
-    super()._update_mount_dict()
-    self.mount_dict["elm_type"] = "mirror"
-    self.mount_dict["name"] = self.name + "_mount"
-    self.mount_dict["model"] = "lamuda_mirror_mount"
-    self.mount_dict["docking_pos"] = (6,0,-33.35)
-    self.mount_dict["drawing_post"] = True
-
-  def draw_fc(self):
-    self.update_draw_dict()
-    self.draw_dict["dia"]=self.aperture
-    obj = model_mirror(**self.draw_dict)
-    return obj
-
-  # def draw_mount_fc(self):
-  #   self.update_draw_dict()
-  #   obj = model_lambda_plate(**self.draw_dict)
-  #   return obj
+  def set_mount_to_default(self):
+    self.Mount = Composed_Mount()
+    self.Mount.add(Unit_Mount("lambda_mirror_mount"))
+    self.Mount.add(Post())
+    self.Mount.set_geom(self.get_geom())
