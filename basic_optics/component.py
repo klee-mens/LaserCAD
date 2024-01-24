@@ -46,19 +46,3 @@ class Component(Geom_Object):
   
   def _axes_changed(self, old_axes, new_axes):
     self._rearange_subobjects_axes( old_axes, new_axes, [self.Mount])
-  
-
-  # def draw_mount_fc(self):
-  #   #ToDo: fürs Debugging hier einfach einen Zylinder mit norm uns k zeichnen
-  #   return None
-
-  # def draw_mount_text(self):
-  #   txt = "Kein Mount für <" +self.name + "> gefunden."
-  #   return txt
-
-  # def __make_unit(self):
-  #   """ToDo: one day this will become something like: make a unit consisting of
-  #   self, Geom_Obj::mount, Geom_Obj::post
-  #   or smt like this...
-  #   """
-  #   pass

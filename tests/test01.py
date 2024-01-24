@@ -27,7 +27,7 @@ from LaserCAD.freecad_models.utils import load_STL, freecad_da, setview, clear_d
 g = Geom_Object()
 g.pos = (-30, -100, 50)
 g.normal = (1,1,1)
-stl_file=thisfolder+"/mount_meshes/special mount/Laser_Head-Body.stl"
+stl_file=thisfolder+"/misc_meshes/Laser_Head-Body.stl"
 g.draw_dict["stl_file"] = stl_file
 g.freecad_model = load_STL
 g.draw()

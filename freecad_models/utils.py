@@ -243,6 +243,8 @@ def update_geom_info(obj, geom_info, off0=0):
 
 def load_STL(stl_file, name="new_mesh", geom=None, off0=0,
              color=(0.90,0.90,0.90), **kwargs):
+  if "dont_draw" in stl_file:
+    return None
   DOC = get_DOC()
   obj = DOC.addObject("Mesh::Feature", name)
   obj.Mesh = Mesh.Mesh(stl_file)

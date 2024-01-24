@@ -114,10 +114,10 @@ class Unit_Mount(Geom_Object):
     self.aperture = 25.4
     self.is_horizontal = True
     self.flip_angle = 0
+    self.freecad_model = load_STL
     if self.model != "dont_draw":
       self.set_by_table()
       self.draw_dict["stl_file"] = self.path + self.model + ".stl"
-      self.freecad_model = load_STL
       # self.draw_dict["color"] = DEFAULT_MOUNT_COLOR
 
   def set_axes(self, new_axes):

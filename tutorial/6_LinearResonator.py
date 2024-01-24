@@ -57,7 +57,7 @@ reso.propagate(150)
 # add a Pockels Cell (no influence, polarisation is not included), propagate
 # reso.add_on_axis(Pockels_Cell())
 pc = Pockels_Cell()
-pc.draw_dict["color"] = (0.1, 0.1, 0.1)
+pc.draw_dict["color"] = (0.3, 0.3, 0.4)
 reso.add_on_axis(pc)
 reso.propagate(250)
 

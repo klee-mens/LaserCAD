@@ -6,7 +6,7 @@ Created on Thu Jun 22 10:56:05 2023
 """
 
 from .. basic_optics import Mirror, Beam, Composition, Component
-from .. basic_optics import Special_mount, Mount, Composed_Mount, Post_and_holder
+from .. basic_optics import Unit_Mount, Composed_Mount, Post_and_holder, Rooftop_Mirror_Mount
 from ..freecad_models import model_crystal
 
 
@@ -113,8 +113,8 @@ def RoofTop_Mirror(name="RoofTopMirror", height=20, direction=1):
   rooftop_model.pos += (height/2, 0, -height/2)
   roof.add_fixed_elm(rooftop_model)
   
-  rooftop_M1 = Special_mount(model="rooftop mirror mount")
-  M2 = Mount(model="POLARIS-K2")
+  rooftop_M1 = Rooftop_Mirror_Mount()
+  M2 = Unit_Mount(model="POLARIS-K2")
   rooftop_model = Composed_Mount()
   rooftop_model.add(rooftop_M1)
   rooftop_model.add(M2)
