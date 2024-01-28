@@ -15,8 +15,8 @@ ind = pfad.rfind("lasercad")
 pfad = pfad[0:ind-1]
 if not pfad in sys.path:
   sys.path.append(pfad)
-  
-  
+
+
 from LaserCAD.freecad_models import clear_doc, setview, freecad_da
 from LaserCAD.basic_optics import Mirror, Beam, Composition, inch
 from LaserCAD.basic_optics import Curved_Mirror, Ray, Component
@@ -73,5 +73,4 @@ from LaserCAD.freecad_models.freecad_model_mirror import model_mirror
 
 
 if freecad_da:
-  model_mirror()
   setview()
