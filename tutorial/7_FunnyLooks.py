@@ -75,7 +75,7 @@ class Spartan_Mount(Composed_Mount):
     um = Unit_Mount()
     um.model = "Spartan"
     um.path = pfad + "misc_meshes/"
-    um.docking_obj.pos += (-20, -2, -35) # from manual adjustments in FreeCAD
+    um.docking_obj.pos += (24, 2, -35) # from manual adjustments in FreeCAD
     self.add(um)
     self.add(Post())
     
