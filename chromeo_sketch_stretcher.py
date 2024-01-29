@@ -282,6 +282,7 @@ Grat1.Mount.mount_list[1].model = "POLARIS-K1E3"
 Grat2.Mount.mount_list[1].model = "POLARIS-K1E3"
 Grat3.Mount.mount_list[1].model = "POLARIS-K1E3"
 Grat4.Mount.mount_list[1].model = "POLARIS-K1E3"
+Grat2.
 
 print("setting pos=",(Grat1.pos+Grat2.pos+Grat3.pos+Grat4.pos)/4)
 ip = Intersection_plane()

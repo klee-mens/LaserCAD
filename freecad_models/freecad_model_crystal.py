@@ -61,6 +61,7 @@ def model_crystal(name="crystal",model="cube", width=50, height=10, thickness=25
     DESCRIPTION.
 
   """
+  print(geom)
   DOC = get_DOC()
   if model== "round":
     obj = model_lens(name, dia=width, Radius1=0, Radius2=0, thickness=thickness)
@@ -104,10 +105,9 @@ def model_crystal(name="crystal",model="cube", width=50, height=10, thickness=25
   obj.ViewObject.ShapeColor = color
   obj.ViewObject.Transparency = Transparency
   obj.Placement=Placement(Vector(0,0,0), Rotation(90,0,90), Vector(0,0,0))
-  
   update_geom_info(obj, geom)
   DOC.recompute()
-
+  print(obj.Placement)
   return obj
 
 def model_crystal_mount(name="crystal_mount",model="cube", width=50, height=10, thickness=25, geom=None, **kwargs):

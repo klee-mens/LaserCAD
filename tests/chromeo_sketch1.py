@@ -26,7 +26,7 @@ import matplotlib.pyplot as plt
 from LaserCAD.freecad_models.utils import thisfolder, load_STL
 from LaserCAD.non_interactings import Faraday_Isolator, Pockels_Cell, Lambda_Plate
 from LaserCAD.basic_optics.mirror import Rooftop_mirror,Stripe_mirror
-from LaserCAD.basic_optics.mount import Mount,Composed_Mount,Special_mount
+from LaserCAD.basic_optics.mount import Unit_Mount,Composed_Mount,Special_mount
 from LaserCAD.non_interactings.table import Table
 if freecad_da:
   clear_doc()
@@ -165,7 +165,7 @@ def Make_Stretcher_chromeo():
   Mount1=Special_mount(model="MH25",drawing_post=False)
   Mount1.docking_obj.pos = Mount1.pos+(6.3,0,0)
   Mount1.docking_obj.normal = Mount1.normal
-  Mount2=Mount(model="KMSS")
+  Mount2=Unit_Mount(model="KMSS")
   mount.add(Mount1)
   mount.add(Mount2)
   FlipMirror_In_Out.mount = mount
@@ -235,7 +235,7 @@ FlipMirror_pp_mount=Composed_Mount()
 FlipMirror_pp_mount_Mount1=Special_mount(model="MH25",drawing_post=False)
 FlipMirror_pp_mount_Mount1.docking_obj.pos = FlipMirror_pp_mount_Mount1.pos+(6.3,0,0)
 FlipMirror_pp_mount_Mount1.docking_obj.normal = FlipMirror_pp_mount_Mount1.normal
-FlipMirror_pp_mount_Mount2=Mount(model="KMSS")
+FlipMirror_pp_mount_Mount2=Unit_Mount(model="KMSS")
 FlipMirror_pp_mount.add(FlipMirror_pp_mount_Mount1)
 FlipMirror_pp_mount.add(FlipMirror_pp_mount_Mount2)
 FlipMirror_pp.mount = FlipMirror_pp_mount

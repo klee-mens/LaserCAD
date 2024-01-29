@@ -449,9 +449,16 @@ class Grating_Mount(Composed_Mount):
     gratingmount.freecad_model = grating_mount#(height=self.height,thickness=self.thickness)
     gratingmount.docking_obj.pos += (9+self.thickness,0,0)
     gratingmount.docking_obj.normal = (1,0,0)
+    if self.height<26 and self.height>24:
+      gratingmount.path = thisfolder+"mount_meshes/Grating/"
+      gratingmount.model = "Grat_designed_mount"
+      gratingmount.draw_dict["stl_file"] = thisfolder+"mount_meshes/Grating/Grat_designed_mount.stl"
+      gratingmount.freecad_model = load_STL
+      gratingmount.docking_obj.pos -= (3.9,0,0)
     self.add(gratingmount)
     self.add(Unit_Mount("POLARIS-K1"))
     self.add(Post())
+    
 
 class Post_Marker(Unit_Mount):
   def __init__(self, name="Post_Marker",size=3,**kwargs):

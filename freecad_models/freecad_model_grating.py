@@ -94,6 +94,8 @@ def grating_mount(name="grating_mount",height=50,thickness=8,drawing_post=True,b
   mount3 = draw_grating_mount(name=grating_mount_name+"_top_half",height=height,thickness=thickness,geom=geom)
   
   xshift=17
+  if height>24 and height<26:
+    xshift = 20
   shiftvec=Vector(xshift,0,0)
   default=Vector(1,0,0)
   default_axis=Vector(0,1,0)

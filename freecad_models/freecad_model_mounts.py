@@ -622,7 +622,7 @@ def draw_post_holder (name="PH50_M", height=0,ll=0,xshift=0,color=DEFAULT_HOLDER
   datei1 = thisfolder + "post/post_holder/" + name
   datei1 += ".stl"
   obj = load_STL(datei1, name=name,color=color)
-  Geom_ground = (np.array((POS[0],POS[1],ll)), np.array((NORMAL)))
+  Geom_ground = (np.array((POS[0]+xshift*NORMAL[0],POS[1]+xshift*NORMAL[1],ll)), np.array((NORMAL)))
   """
   if name =="PH100_M":
     offset=Vector(xshift+4.3,-1.5,height+54)
