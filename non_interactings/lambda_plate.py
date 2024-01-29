@@ -5,11 +5,9 @@ Created on Sat Aug 19 13:11:01 2023
 @author: mens
 """
 
-from ..freecad_models import model_lambda_plate,model_mirror
-# from ..basic_optics import Component
-# from ..basic_optics.mount import Special_mount
+from ..freecad_models import model_mirror
+from ..basic_optics import Component
 from ..basic_optics.mount import Unit_Mount,Composed_Mount,Post
-from LaserCAD.basic_optics.component import Component
 
 DEFAULT_LAMBDA_PLATE_COLOR = (255,255,0)
 

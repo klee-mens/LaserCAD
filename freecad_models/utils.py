@@ -14,7 +14,7 @@ inch = 25.4
 import numpy as np
 POS0 = np.array((0.0, 0.0, 80.0))
 NORMAL0 = np.array((1.0, 0.0, 0.0))
-GEOM0 = (POS0, NORMAL0)
+GEOM0 = (POS0, np.eye(3))
 
 
 try:

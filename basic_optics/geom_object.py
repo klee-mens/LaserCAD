@@ -7,7 +7,7 @@ Created on Thu Aug 18 10:46:05 2022
 
 import numpy as np
 from .constants import TOLERANCE, NAME0, NORM0, POS0
-from .. freecad_models import freecad_da
+from .. freecad_models import freecad_da, model_geom_object
 
 
 
@@ -95,6 +95,7 @@ class Geom_Object(object):
     self._axes = np.eye(3)
     # das eigene Kordinatensystem, die erste Spalte ist immer die Normale
     self.draw_dict = {"name": self.name, "geom":self.get_geom()}
+    self.freecad_model = model_geom_object
 
   @property
   def pos(self):
@@ -392,9 +393,9 @@ class Geom_Object(object):
     self.update_draw_dict()
     return self.freecad_model(**self.draw_dict)
 
-  def freecad_model(self, **kwargs):
-    # ToDo: fürs Debugging hier einfachch einen Zylinder mit norm uns k zeichnen
-    return None
+  # def freecad_model(self, **kwargs):
+  #   # ToDo: fürs Debugging hier einfachch einen Zylinder mit norm uns k zeichnen
+  #   return None
 
   def draw_text(self):
     """
