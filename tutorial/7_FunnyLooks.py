@@ -18,7 +18,7 @@ pfad = pfad[0:ind-1]
 if not pfad in sys.path:
   sys.path.append(pfad)
 
-from LaserCAD.basic_optics import Mirror, Component
+from LaserCAD.basic_optics import Mirror, Component, Composition
 from LaserCAD.basic_optics import Composed_Mount, Unit_Mount, Post
 from LaserCAD.freecad_models import freecad_da, clear_doc, setview, pfad
 
@@ -65,9 +65,8 @@ mir2.draw()
 
 
 
-mir3 = Mirror()
-mir3.pos += (180, -170, 10)
-mir3.normal = (1,2,0)
+# mir3.normal = (1,2,0)
+# mir3.pos += (180, -170, 10)
 
 class Spartan_Mount(Composed_Mount):
   def __init__(self):
@@ -78,10 +77,29 @@ class Spartan_Mount(Composed_Mount):
     um.docking_obj.pos += (24, 2, -35) # from manual adjustments in FreeCAD
     self.add(um)
     self.add(Post())
+
+mir3 = Mirror(phi=75)
+mir3.set_mount(Spartan_Mount())
+mir4 = Mirror(phi=-60)
+mir4.set_mount(Spartan_Mount())
+mir5 = Mirror(phi=90)
+mir5.set_mount(Spartan_Mount())
     
-mir3.Mount = Spartan_Mount()
-mir3.draw()
-mir3.draw_mount()
+comp = Composition(name="MirrorAssembly")
+comp.pos += (-200, -300, 0)
+comp.propagate(200)
+comp.add_on_axis(mir3)
+comp.propagate(200)
+comp.add_on_axis(mir4)
+comp.propagate(200)
+comp.add_on_axis(mir5)
+comp.propagate(200)
+
+comp.draw()
+# mir3.Mount = Spartan_Mount()
+# mir3.Mount.set_geom()
+# mir3.draw()
+# mir3.draw_mount()
 
 
 

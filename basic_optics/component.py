@@ -31,6 +31,9 @@ class Component(Geom_Object):
                                                    self.thickness)
     self.Mount.set_geom(self.get_geom())
   
+  def set_mount(self, mount):
+    mount.set_geom(self.get_geom())
+    self.Mount = mount
   
   def update_draw_dict(self):
     super().update_draw_dict()
