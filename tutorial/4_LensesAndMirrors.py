@@ -21,42 +21,25 @@ from LaserCAD.basic_optics import Mirror, Curved_Mirror, Lens, Beam, Ray
 from LaserCAD.basic_optics import Intersection_plane,Cylindrical_Mirror
 from LaserCAD.freecad_models import freecad_da, clear_doc, setview
 
-# =============================================================================
-# about lenses and mirrors
-# =============================================================================
-
-"""
-
-Here you see some interaction of optical elements with Beams
-
-Standard Beams (=cone distributet bemas with 2 rays, one inner and one outer)
-are definded with a radius and an opening angle in radiant, 0 means colimated.
-
-Lenses are defined directly with their focal length. Names are optional, 
-they will apear in FreeCAD. 
-
-Mirrors are defined with two deflection angles: phi gives the angle of 
-deflection in the xy Plane, theta the tilt in z-Direction. So a normal Flip-
-Mirror would have phi = +- 90, theta=0. Phi=180 is the default and means total
-back reflection. You can use the formular phi = 180 - 2*AOI where AOI is the
-anlge of incidence. All angles are in degrees. The combinatino phi=0, theta=0 
-raises an error (grazing incidence). The Curved mirror is a special mirror, 
-which has all mirrors value. Besdies, the curverd mirror has some different 
-values like raduis, which describes the curvature of the mirror. Here are some 
-examples of how curved mirrors can focus beams. Another class called 
-'Intersection_plane' can set up a plane and is primarily used to show a spot 
-diagram of the beam on that plane. Besides, an anisotropic mirror named as
-'Cylindrical_Mirror' is a special mirror with some certain radius in one 
-direction and flat in the other.
-
-"""
 
 
 if freecad_da:
   clear_doc()
   
 
-le1 = Lens(f=200, name="Lens1")
+"""
+Here you see some interaction of optical elements with Beams
+
+Standard Beams (=cone distributet bemas with 2 rays, one inner and one outer)
+are definded with a radius and an opening angle in radiant, 0 means colimated.
+
+Lenses are defined directly with their focal length. Names are optional, 
+they will apear in FreeCAD.
+
+The next_beam function which all Opt_Elements like Lens or Mirror have, 
+transformes the incident beam to the outgoing beam. 
+"""
+le1 = Lens(f=200, name="LensOne")
 le1.pos += (0,100,0)
 le1.draw()
 
@@ -69,7 +52,6 @@ le2 = Lens(f=250, name="lens2")
 le2.pos += (42, 0, 0)
 b2 = le2.next_beam(b1)
 
-
 le2.draw()
 b1.draw()
 b2.draw()
@@ -77,6 +59,16 @@ b2.draw()
 print()
 print()
 
+
+
+"""
+Mirrors are defined with two deflection angles: phi gives the angle of 
+deflection in the xy Plane, theta the tilt in z-Direction. So a normal Flip-
+Mirror would have phi = +- 90, theta=0. Phi=180 is the default and means total
+back reflection. You can use the formular phi = 180 - 2*AOI where AOI is the
+anlge of incidence. All angles are in degrees. The combinatino phi=0, theta=0 
+raises an error (grazing incidence). 
+"""
 b11 = Beam(radius=4, angle=0)
 b11.pos += (0,-100,0)
 
@@ -91,6 +83,15 @@ b21.draw()
 print()
 print()
 
+
+
+
+"""
+The Curved mirror has all values of the mirror and additionally a radius, 
+which describes the curvature of the mirror. The outgoing beam will be deflected 
+and focused. The usage is again via the next_beam function.
+Here are some examples of how curved mirrors can focus beams. 
+"""
 b12 = Beam(radius=2,angle=0)
 b12.pos += (0,200,0)
 
@@ -105,6 +106,12 @@ b22.draw()
 print()
 print()
 
+
+
+"""
+The 'Intersection_plane' can set up a plane and is primarily used to show a spot 
+diagram of the beam on that plane. 
+"""
 b13 = Beam(radius=3,angle=0,distribution="square")
 b13.pos += (0,300,0)
 
@@ -127,6 +134,13 @@ ip.spot_diagram(b33)
 print()
 print()
 
+
+
+"""
+Besides, an anisotropic mirror named as
+'Cylindrical_Mirror' is a special mirror with some certain radius in one 
+direction and flat in the other.
+"""
 b14 = Beam(radius=5,distribution="circular")
 b14.pos += (0,500,0)
 
@@ -137,13 +151,6 @@ b24 = mir4.next_beam(b14)
 mir4.draw()
 b14.draw()
 b24.draw()
-
-print()
-print()
-
-# =============================================================================
-# ToDo: Curved Mirror aND sPOT dIAGRAMS -> He 
-# =============================================================================
 
 if freecad_da:
   setview()

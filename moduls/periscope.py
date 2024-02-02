@@ -5,80 +5,92 @@ Created on Thu Jun 22 10:56:05 2023
 @author: 12816
 """
 
-from .. basic_optics import Mirror, Beam, Composition, Component
-from .. basic_optics import Unit_Mount, Composed_Mount, Post_and_holder, Rooftop_Mirror_Mount
-from ..freecad_models import model_crystal
+from .. basic_optics import Mirror, Composition, Component
+from .. basic_optics import Unit_Mount, Rooftop_Mirror_Mount
+from ..freecad_models import model_rooftop_mirror
 
 
 
-def Make_Periscope(name="Periskop", length=150, theta = 90, dist1=75, dist2=75):
-
-  m1 = Mirror(theta=theta)
-  # p = Propagation(d=length)
-  m2 = Mirror(theta=-theta)
-  peris = Composition(name=name)
-  peris.propagate(dist1)
-  peris.add_on_axis(m1)
-  peris.propagate(length)
-  peris.add_on_axis(m2)
-  peris.propagate(dist2)
-
-  return peris
-
-
-def Periscope2(name="Periskop", length=160,theta = 90, phi = 0, dist1=75, dist2=75):
-# def Periscope(name="Periskop", length=120, theta=0, dist1=75, dist2=75):
+def Make_Periscope(name="Periskop", height=150, up=True, backwards=False):
   """
-  constructs a Periscope with <name> and Distance <dist1> to the first mirror,
-  <length> between the two mirrors and <dist2> after the last mirror
-  
-  irgendwann einmal:
-  the vector between the two mirrors has an angle of <theta> to the z-Axis  
+  Creates an up=True going periscope that translates the incoming beam for a
+  specific height=150 mm. If backwards=False is true, the beam is also back 
+  reflected as in Make_RoofTop_Mirror.
+  Since there is now standard solution for the 2 mirrors to be mounted (at 
+  least not to my knowledge) the Mounts are set to the unspecific Unit_Mount()
+  which will not be drawn.
 
   Parameters
   ----------
   name : TYPE, optional
     DESCRIPTION. The default is "Periskop".
-  length : TYPE, optional
-    DESCRIPTION. The default is 120.
-  theta : TYPE, optional
-    Angle to the z-Axis in Degress (0->360°). The default is 0.
-  dist1 : TYPE, optional
-    DESCRIPTION. The default is 75.
-  dist2 : TYPE, optional
-    DESCRIPTION. The default is 75.
+  height : TYPE, optional
+    DESCRIPTION. The default is 150.
+  up : TYPE, optional
+    DESCRIPTION. The default is True.
+  backwards : TYPE, optional
+    DESCRIPTION. The default is False.
 
   Returns
   -------
-  the Compostion
+  peris : TYPE
+    DESCRIPTION.
 
   """
-  lightsource = Beam(radius=1, angle=0)
+
   peris = Composition(name=name)
-  peris.set_light_source(lightsource)
-  peris.propagate(dist1)
-  m1 = Mirror()
-  peris.add_on_axis(m1)
-  m1.normal = (1,0,1)
-  peris.recompute_optical_axis()
+  if up:
+    m1 = Mirror(theta=90)
+  else:
+    m1 = Mirror(theta=-90)
   
-  # theta *= 180/np.pi
-  # m1.normal = (1, -np.sin(theta), -np.cos(theta)) #siehe Skizze irgendwo...
-  peris.propagate(length)
+  m1.set_mount(Unit_Mount()) # default Mount is invisible
+  peris.add_on_axis(m1)
+
+  peris.propagate(height)
+
   m2 = Mirror()
+  m2.set_mount(Unit_Mount()) # default Mount is invisible
   peris.add_on_axis(m2)
-  m2.normal= (1,0,-1)
-  peris.recompute_optical_axis()
-  # m2.normal = -m1.normal
-  peris.propagate(dist2)
+  n1 = m1.normal
+  if backwards:
+    m2.normal = (n1[0], n1[1], -n1[2])
+  else:
+    m2.normal = -n1
   
   return peris
 
 
 
-def RoofTop_Mirror(name="RoofTopMirror", height=20, direction=1):
+
+class Rooftop_Mirror_Component(Component):
   """
-  direction=1 RofftopMirror goes down
+  This is the pure cosmetic component, that give the rooftop mirror its shape,
+  but does not actually interact with the beam. It sits in the middle between
+  the two invisible mirrors of the real RoofTopMirror Composition.
+  """
+  def __init__(self, **kwargs):
+    super().__init__(**kwargs)
+    self.freecad_model = model_rooftop_mirror
+    self.set_mount_to_default()
+    
+  def set_mount_to_default(self):
+    smm = Rooftop_Mirror_Mount()
+    smm.set_geom(self.get_geom())
+    smm.pos += self.normal * self.aperture / 2
+    self.Mount = smm
+
+  def update_draw_dict(self):
+    super().update_draw_dict()
+    self.draw_dict["dia"] = self.aperture
+    self.draw_dict["model_type"] = "Rooftop"    
+
+
+def Make_RoofTop_Mirror(name="RoofTopMirror", height=20, up=True):
+  """
+  creates a RoofTopMirror as an composition of 2 mirrors and an purely 
+  cosmetic Component for the 3D view.
+  In fact it is nothing more than an fancy looking backward periscope.
 
   Parameters
   ----------
@@ -86,41 +98,43 @@ def RoofTop_Mirror(name="RoofTopMirror", height=20, direction=1):
     DESCRIPTION. The default is "RoofTopMirror".
   height : TYPE, optional
     DESCRIPTION. The default is 20.
-  direction : TYPE, optional
-    DESCRIPTION. The default is 1.
+  up : TYPE, optional
+    DESCRIPTION. The default is True.
 
   Returns
   -------
-  None.
+  roof : TYPE
+    DESCRIPTION.
 
   """
-  roof = Composition(name=name)
-  roof.height = height
-  m1 = Mirror(phi=0, theta=-90*direction)
-  m2 = Mirror(phi=0, theta=-90*direction)
-  roof.add_on_axis(m1)
-  roof.propagate(height)
-  roof.add_on_axis(m2)
-  #cosmetics
-  def dont_draw():
-    return None
-  m1.draw = dont_draw
-  m1.draw_dict["mount_type"] = "dont_draw"
-  m2.draw = dont_draw
-  m2.draw_dict["mount_type"] = "dont_draw"
-  rooftop_model = Component()
-  rooftop_model.freecad_model = model_crystal
-  rooftop_model.pos += (height/2, 0, -height/2)
-  roof.add_fixed_elm(rooftop_model)
+
+  roof = Make_Periscope(name=name, height=height, up=up, backwards=True)
+  roof.height = height # just for the records
+  m1, m2 = roof._elements
+  m1.invisible = True
+  m2.invisible = True
+
+  pure_cosmetic = Rooftop_Mirror_Component(name="RoofTop_Mirror")
+  pure_cosmetic.pos += (0,0,height/2)
+  pure_cosmetic.draw_dict["model_type"] = "Rooftop"
+  pure_cosmetic.set_mount_to_default()
   
-  rooftop_M1 = Rooftop_Mirror_Mount()
-  M2 = Unit_Mount(model="POLARIS-K2")
-  rooftop_model = Composed_Mount()
-  rooftop_model.add(rooftop_M1)
-  rooftop_model.add(M2)
-  rooftop_model.pos += (height/2, 0, -height/2)
-  post_part = Post_and_holder(xshift=M2.xshift,height=-M2.zshift)
-  post_part.set_geom(M2.get_geom())
-  roof.add_fixed_elm(rooftop_model)
-  roof.add_fixed_elm(post_part)
+  roof.add_fixed_elm(pure_cosmetic)
+  
   return roof
+
+
+
+
+def Rooftop_mirror_draw_test():
+  rm = Rooftop_Mirror_Component()
+  rm.pos = (120,50,130)
+  rm.normal = (1,-1,0)
+  rm.aperture = 10
+  rm.set_mount_to_default()
+  rm.draw()
+  rm.draw_mount()
+
+
+
+

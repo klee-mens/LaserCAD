@@ -24,9 +24,11 @@ from LaserCAD.basic_optics import LinearResonator, Lens
 from LaserCAD.basic_optics import Grating, Crystal
 import matplotlib.pyplot as plt
 from LaserCAD.freecad_models.utils import thisfolder, load_STL
-from LaserCAD.basic_optics.mirror import Stripe_mirror,Rooftop_mirror
+from LaserCAD.basic_optics.mirror import Stripe_mirror
+# from LaserCAD.moduls.periscope import Rooftop_Mirror_Component
 from LaserCAD.non_interactings import Faraday_Isolator, Pockels_Cell, Lambda_Plate
 from LaserCAD.non_interactings.table import Table
+from LaserCAD.moduls import Make_RoofTop_Mirror
 from LaserCAD.basic_optics import Unit_Mount,Composed_Mount,Post
 
 c0 = 299792458*1000 #mm/s
@@ -104,7 +106,7 @@ def Make_Stretcher_chromeo():
   distance_flip_mirror1_grating = 300
   distance_roof_top_grating = 600
 
-  # calculated parameters according to the grating equation
+  # calculated parameters according to the grating equation and set the grating
   v = lambda_mid/grating_const
   s = np.sin(seperation_angle)
   c = np.cos(seperation_angle)
@@ -112,26 +114,27 @@ def Make_Stretcher_chromeo():
   b = np.sqrt(a**2 - (v**2 - s**2)/(2*(1+c)))
   sinB = a - b
   grating_normal = (np.sqrt(1-sinB**2), sinB, 0)
+  Grat = Grating(grat_const=grating_const, name="Gitter", order=-1)
+  Grat.normal = grating_normal
 
+  #set the big sphere
   Concav = Curved_Mirror(radius=radius_concave,name="Concav_Mirror")
   Concav.aperture = aperture_concave
   Concav.set_mount_to_default()
 
+  # set the convex stripe mirror and its cosmetics
   StripeM = Stripe_mirror(radius= -radius_concave/2,thickness=25,  name="Stripe_Mirror")
-  #Cosmetics
   StripeM.aperture = width_stripe_mirror
   StripeM.draw_dict["height"] = height_stripe_mirror
   StripeM.draw_dict["thickness"] = 25 # arbitrary
   StripeM.draw_dict["model_type"] = "Stripe"
   StripeM.set_mount_to_default()
 
-  Grat = Grating(grat_const=grating_const, name="Gitter", order=-1)
-  Grat.normal = grating_normal
-
+  # prepare the helper Composition
   helper = Composition()
   helper_light_source = Beam(angle=0, wavelength=lambda_mid)
   helper.set_light_source(helper_light_source)
-  #to adjust the wavelength of the oA
+  #to adjust the wavelength of the oA and set everything on axis
   helper.redefine_optical_axis(helper_light_source.inner_ray())
   helper.add_fixed_elm(Grat)
   helper.recompute_optical_axis()
@@ -147,8 +150,6 @@ def Make_Stretcher_chromeo():
   cmap = plt.cm.gist_rainbow
   for wavel in wavels:
     rn = Ray()
-    # rn.normal = vec
-    # rn.pos = pos0
     rn.wavelength = wavel
     x = 1-(wavel - lambda_mid + delta_lamda/2) / delta_lamda
     rn.draw_dict["color"] = cmap( x )
@@ -182,31 +183,12 @@ def Make_Stretcher_chromeo():
 
   # adding the rooftop mirror and it's cosmetics
   Stretcher.propagate(distance_roof_top_grating)
-  RoofTop1 = Mirror(phi=0, theta=90)
-  Stretcher.add_on_axis(RoofTop1)
-  Stretcher.propagate(periscope_height)
-  RoofTop2 = Mirror(phi=0, theta=90)
-  Stretcher.add_on_axis(RoofTop2)
-
-  RoofTop1.draw = dont
-  # RoofTop1.draw_dict["mount_type"] = "dont_draw"
-  RoofTop1.Mount = Unit_Mount("dont_draw")
-  RoofTop2.draw = dont
-  RoofTop2.Mount = Unit_Mount("dont_draw")
-  # RoofTop2.draw_dict["mount_type"] = "dont_draw"
-
-  pure_cosmetic = Rooftop_mirror(name="RoofTop_Mirror")
-  # pure_cosmetic.draw_dict["mount_type"] = "rooftop_mirror_mount"
-  pure_cosmetic.pos = (RoofTop1.pos + RoofTop2.pos ) / 2
-  pure_cosmetic.normal = (RoofTop1.normal + RoofTop2.normal ) / 2
-  pure_cosmetic.aperture = periscope_height
-  pure_cosmetic.draw_dict["model_type"] = "Rooftop"
-  pure_cosmetic.set_mount_to_default()
-  Stretcher.add_fixed_elm(pure_cosmetic)
-
-  # setting the final sequence and the last propagation for visualization
-  # note that pure cosmetic (pos6) is not in the sequence
-  Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0])
+  
+  
+  RoofTopMirror = Make_RoofTop_Mirror(height=periscope_height, up=False)
+  
+  Stretcher.add_supcomposition_on_axis(RoofTopMirror)
+  Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0]) # believe me :)
   Stretcher.recompute_optical_axis()
   Stretcher.propagate(100)
   # Stretcher.draw()
@@ -543,12 +525,14 @@ BigPump.set_geom(amp2._elements[2].get_geom())
 
 Seed.draw()
 Stretcher.draw()
-PulsePicker.draw()
-Amplifier_I.draw()
-Pump.draw()
-amp2.draw()
-BigPump.draw()
+# PulsePicker.draw()
+# Amplifier_I.draw()
+# Pump.draw()
+# amp2.draw()
+# BigPump.draw()
 
+# t=Table()
+# t.draw()
 
 # =============================================================================
 # breadboards
@@ -576,7 +560,5 @@ from LaserCAD.non_interactings import Breadboard
 
 # PulsePicker.draw()
 # Amplifier_I.draw()
-t=Table()
-t.draw()
 if freecad_da:
   setview()

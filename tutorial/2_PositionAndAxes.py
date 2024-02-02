@@ -32,13 +32,6 @@ in x-Direction.
 
 Btw ALL LENGTHS, EVEN WAVELENGTHS, MUST BE GIVEN IN mm!
 
-If executed in FreeCAD, the draw() function will construct and load the 
-according 3D files. If executed in a "normal" shell, the draw() function will 
-print out some usefull information about the object (which works with nearly any object).
-Note that the coordinte system stays always orthonormal and right handed. Also
-note, that the normal has always a norm of 1.
-The draw_mount function in the end will draw the default mount and post of the
-mirror and adjust them to the right position and direction.
 """
 
 # =============================================================================
@@ -71,6 +64,17 @@ print()
 print("Position of mir1:", mir1.pos)
 print("Normal of mir1:", mir1.normal)
 print("Coordinate system of mir1\nx-Vector, y-Vector, z-Vector:", mir1.get_coordinate_system())
+
+
+"""
+If executed in FreeCAD, the draw() function will construct and load the 
+according 3D files. If executed in a "normal" shell, the draw() function will 
+print out some usefull information about the object (which works with nearly any object).
+Note that the coordinte system stays always orthonormal and right handed. Also
+note, that the normal has always a norm of 1.
+The draw_mount function in the end will draw the default mount and post of the
+mirror and adjust them to the right position and direction.
+"""
 
 print()
 print()
