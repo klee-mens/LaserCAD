@@ -23,4 +23,4 @@ def telescope_test():
   return teles
 
 if __name__ == "__main__":
-  telescope_test()
+  telescope_test()git 

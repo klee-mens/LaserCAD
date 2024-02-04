@@ -17,6 +17,7 @@ if freecad_da:
 
 DEFAULT_COLOR_CRIMSON = (0.86,0.08,0.24) #crimson
 MIN_RADIUS =0.5
+BEAM_TRANSPARENCY = 0
 
 
 def model_beam(name="beam", dia=10, prop=200,  f=130, color=DEFAULT_COLOR_CRIMSON, 
@@ -60,7 +61,7 @@ def model_beam(name="beam", dia=10, prop=200,  f=130, color=DEFAULT_COLOR_CRIMSO
 
   obj.Placement = FreeCAD.Placement(Vector(0,0,0), FreeCAD.Rotation(Vector(0,1,0),90), Vector(0,0,0))
   obj.ViewObject.ShapeColor = color
-  # obj.ViewObject.Transparency = 50
+  obj.ViewObject.Transparency = BEAM_TRANSPARENCY
   obj.Label = name
   update_geom_info(obj, geom_info)
 

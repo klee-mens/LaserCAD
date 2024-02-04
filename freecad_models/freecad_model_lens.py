@@ -17,6 +17,8 @@ import numpy as np
 
 DEFALUT_MAX_ANGULAR_OFFSET = 10
 DEFAULT_COLOR_LENS = (0/255,170/255,124/255)
+# LENS_TRANSPARENCY = 50
+LENS_TRANSPARENCY = 0
 
 import csv
 if freecad_da:
@@ -124,7 +126,7 @@ def model_lens(name="lens", dia=25, Radius1=300, Radius2=0, thickness=3, geom=No
   sketch.Visibility = False
 
   obj.ViewObject.ShapeColor = DEFAULT_COLOR_LENS
-  obj.ViewObject.Transparency = 50
+  obj.ViewObject.Transparency = LENS_TRANSPARENCY
   update_geom_info(obj, geom)
   #DOC.recompute()
 
