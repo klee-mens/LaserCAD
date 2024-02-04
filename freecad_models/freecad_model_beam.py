@@ -60,7 +60,7 @@ def model_beam(name="beam", dia=10, prop=200,  f=130, color=DEFAULT_COLOR_CRIMSO
 
   obj.Placement = FreeCAD.Placement(Vector(0,0,0), FreeCAD.Rotation(Vector(0,1,0),90), Vector(0,0,0))
   obj.ViewObject.ShapeColor = color
-  obj.ViewObject.Transparency = 50
+  # obj.ViewObject.Transparency = 50
   obj.Label = name
   update_geom_info(obj, geom_info)
 
@@ -108,7 +108,7 @@ def model_beam_new(name="beam", radius=5, length=200,  angle=0.02,
       DOC.recompute()
   obj.Placement = FreeCAD.Placement(Vector(0,0,0), FreeCAD.Rotation(Vector(0,1,0),90), Vector(0,0,0))
   obj.ViewObject.ShapeColor = color
-  obj.ViewObject.Transparency = 50
+  # obj.ViewObject.Transparency = 50
   obj.Label = name
   update_geom_info(obj, geom_info)
 

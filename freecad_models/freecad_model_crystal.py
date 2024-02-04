@@ -67,7 +67,7 @@ def model_crystal(name="crystal",model="cube", width=50, height=10, thickness=25
     obj.ViewObject.ShapeColor = color
     obj.ViewObject.Transparency = Transparency
     update_geom_info(obj, geom)
-    DOC.recompute()
+    #DOC.recompute()
     return obj
   obj = DOC.addObject('PartDesign::Body', name)
   sketch = obj.newObject('Sketcher::SketchObject', name+'_sketch')
@@ -106,7 +106,7 @@ def model_crystal(name="crystal",model="cube", width=50, height=10, thickness=25
   obj.Placement=Placement(Vector(0,0,0), Rotation(90,0,90), Vector(0,0,0))
   
   update_geom_info(obj, geom)
-  DOC.recompute()
+  #DOC.recompute()
 
   return obj
 
@@ -216,7 +216,7 @@ def model_crystal_mount(name="crystal_mount",model="cube", width=50, height=10, 
   pad.ReferenceAxis = (sketch,['N_Axis'])
   sketch.Visibility = False
   
-  DOC.recompute()
+  #DOC.recompute()
   sketch001 = obj.newObject('Sketcher::SketchObject', name+'_sketch001')
   sketch001.Support = (pad,['Face3',])
   sketch001.MapMode = 'FlatFace'
@@ -237,7 +237,7 @@ def model_crystal_mount(name="crystal_mount",model="cube", width=50, height=10, 
   obj.ViewObject.Transparency = 0
   obj.Placement=Placement(Vector(0,0,0), Rotation(90,0,90), Vector(0,0,0))
   update_geom_info(obj, geom)
-  DOC.recompute()
+  #DOC.recompute()
   post_part=draw_post_part(name="post_part",
                            height=20,xshift=(thickness + 2)/2, geom=geom)
   part = initialize_composition_old(name="mount, post and base")

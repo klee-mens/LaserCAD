@@ -123,13 +123,8 @@ def Make_Stretcher_chromeo():
   Concav.set_mount_to_default()
 
   # set the convex stripe mirror and its cosmetics
-  StripeM = Stripe_mirror(radius= -radius_concave/2,thickness=25,  name="Stripe_Mirror")
-  StripeM.aperture = width_stripe_mirror
-  StripeM.draw_dict["height"] = height_stripe_mirror
-  StripeM.draw_dict["thickness"] = 25 # arbitrary
-  StripeM.draw_dict["model_type"] = "Stripe"
-  StripeM.set_mount_to_default()
-
+  StripeM = Stripe_mirror(radius= -radius_concave/2)
+  
   # prepare the helper Composition
   helper = Composition()
   helper_light_source = Beam(angle=0, wavelength=lambda_mid)
@@ -191,7 +186,8 @@ def Make_Stretcher_chromeo():
   Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0]) # believe me :)
   Stretcher.recompute_optical_axis()
   Stretcher.propagate(100)
-  # Stretcher.draw()
+  
+  # calculate path length and make spot diagrams
   pathlength = {}
   for ii in range(Stretcher._beams[0]._ray_count):
     wavelength = Stretcher._beams[0].get_all_rays()[ii].wavelength

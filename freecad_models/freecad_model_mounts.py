@@ -107,14 +107,14 @@ def lens_mount(mount_name="lens_mount", mount_type="MLH05_M",
                                height=height,xshift=xshift, geom=geom)
     else:
       
-      DOC.recompute()
+      #DOC.recompute()
       return building_mount(Radius1=dia/2,height=height,color=color,geom=geom)
     new_mount = building_mount(Radius1=dia/2,height=height,color=color,geom=geom)
 
     part = initialize_composition_old(name="mount, post and base")
     container = post_part,new_mount
     add_to_composition(part, container)
-    DOC.recompute()
+    #DOC.recompute()
     return part
 
   if only_info:
@@ -138,12 +138,12 @@ def lens_mount(mount_name="lens_mount", mount_type="MLH05_M",
     post_part=draw_post_part(name="post_part",base_exists=base_exists,
                              height=height,xshift=xshift, geom=geom)
   else:
-    DOC.recompute()
+    #DOC.recompute()
     return obj
   part = initialize_composition_old(name="mount, post and base")
   container = post_part,obj
   add_to_composition(part, container)
-  DOC.recompute()
+  #DOC.recompute()
   return part
 
 def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
@@ -327,7 +327,7 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
       post_part=draw_post_part(name="post_part",base_exists=base_exists,
                                height=height,xshift=xshift, geom=geom)
     else:
-      DOC.recompute()
+      #DOC.recompute()
       return new_mount
     part = initialize_composition_old(name="mount, post and base")
     container = post_part,new_mount, additional_mount
@@ -367,7 +367,7 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
       part = initialize_composition_old(name="mount, post and base")
       container = post,post1,post2,obj, additional_mount
       add_to_composition(part, container)
-      DOC.recompute()
+      #DOC.recompute()
       return part
   if not mount_adjusted:
     obj.Placement = place
@@ -382,12 +382,12 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
     post_part=draw_post_part(name=mount_name+" post_part",base_exists=base_exists,
                              height=height,xshift=xshift, geom=geom)
   else:
-    DOC.recompute()
+    #DOC.recompute()
     return obj
   part = initialize_composition_old(name="mount, post and base")
   container = post_part,obj,additional_mount
   add_to_composition(part, container)
-  DOC.recompute()
+  #DOC.recompute()
   print(mount_name,"'s post postiton=",np.array(POS)+xshift*np.array(NORMAL))
   return part
 
@@ -721,7 +721,7 @@ def draw_post_base(name="BA1L", height=0,xshift=0, geom=None):
     offset=Vector(xshift,0,height+4.5)
     obj.Placement = Placement(offset, Rotation(90,0,90), Vector(0,0,0))
     update_geom_info(obj, Geom_ground, off0=offset)
-  DOC.recompute()
+  #DOC.recompute()
   return obj
 
 def draw_post_special(name="TR50_M", height=12,xshift=0,color=DEFAULT_POST_COLOR, geom=None):
@@ -774,7 +774,7 @@ def draw_post_special(name="TR50_M", height=12,xshift=0,color=DEFAULT_POST_COLOR
     obj.Placement=Placement(Vector(offset), Rotation(0,-0,180), Vector(0,0,0))
     update_geom_info(obj, geom, off0=offset)
     rotate(obj,Vector(0,1,0),180/pi*np.arctan(NORMAL[2]/(pow(NORMAL[0]**2+NORMAL[1]**2,0.5))))
-  DOC.recompute()
+  #DOC.recompute()
   return obj
 
 def building_mount(name="mount",  Radius1=13, Hole_Radius=2, thickness=10, 
@@ -839,7 +839,7 @@ def building_mount(name="mount",  Radius1=13, Hole_Radius=2, thickness=10,
   sketch.Visibility = False
   
   
-  DOC.recompute()
+  #DOC.recompute()
   sketch001 = obj.newObject('Sketcher::SketchObject', name+'_sketch001')
   sketch001.Support = (pad,['Face3',])
   sketch001.MapMode = 'FlatFace'
@@ -863,7 +863,7 @@ def building_mount(name="mount",  Radius1=13, Hole_Radius=2, thickness=10,
   obj.Placement=Placement(Vector(0,0,0), Rotation(90,0,90), Vector(0,0,0))
   update_geom_info(obj, geom)
   
-  DOC.recompute()
+  #DOC.recompute()
   return obj
 
 def draw_large_mount(thickness=30,color=DEFAULT_MOUNT_COLOR,geom=None):
@@ -1105,7 +1105,7 @@ def load_mount_from_csv(mount_type = "default",model_type="lens"):
 #   DOC = get_DOC()
 #   obj = load_STL(datei1, name="optical breadboard")
 #   obj.Placement =Placement(Vector(-750,-400,0),Rotation(0,0,0), Vector(0,0,0))
-#   DOC.recompute()
+#   #DOC.recompute()
 #   return obj
 
 def model_table(name="table",length=4000,width=1500,height=10,color = DEFAULT_MOUNT_COLOR,geom= None,**kwargs):
@@ -1118,7 +1118,7 @@ def model_table(name="table",length=4000,width=1500,height=10,color = DEFAULT_MO
   obj.ViewObject.ShapeColor=color
   obj.Placement = Placement(Vector(0,0,0), Rotation(0,0,0), Vector(0,0,0))
   update_geom_info(obj, geom)
-  DOC.recompute()
+  #DOC.recompute()
   return obj
 
 def model_Post_Marker(name="marker", h1 = (0,0), h2 = (75,0), h3 = (75,75), 
@@ -1242,7 +1242,7 @@ def model_Post_Marker(name="marker", h1 = (0,0), h2 = (75,0), h3 = (75,75),
   obj_new1.Tool = obj2
   obj_new.Visibility=False
   obj2.Visibility=False
-  DOC.recompute()
+  #DOC.recompute()
   obj_new1.ViewObject.ShapeColor = color
   return obj_new1
 
@@ -1297,6 +1297,6 @@ def model_mirror_holder(name="mirror_holder",dia = 25.4,angle = 30,
   if reverse:
     obj_new.Placement = Placement(Vector(0,0,0), Rotation(0,0,180), Vector(0,0,0))
   update_geom_info(obj_new,geom)
-  DOC.recompute()
+  #DOC.recompute()
   return obj_new
   

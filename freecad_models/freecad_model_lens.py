@@ -126,7 +126,7 @@ def model_lens(name="lens", dia=25, Radius1=300, Radius2=0, thickness=3, geom=No
   obj.ViewObject.ShapeColor = DEFAULT_COLOR_LENS
   obj.ViewObject.Transparency = 50
   update_geom_info(obj, geom)
-  DOC.recompute()
+  #DOC.recompute()
 
   return obj
 """
@@ -174,7 +174,7 @@ def lens_mount(mount_name="mirror_mount", dia=inch,  geom=None,
   update_geom_info(obj, geom, off0=offset)
   obj.Label = mount_name
 
-  DOC.recompute()
+  #DOC.recompute()
   return obj
 
 """

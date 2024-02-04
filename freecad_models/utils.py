@@ -45,6 +45,8 @@ def setview():
   """Rearrange View"""
   FreeCAD.Gui.SendMsgToActiveView("ViewFit")
   FreeCAD.Gui.activeDocument().activeView().viewAxometric()
+  DOC = get_DOC()
+  DOC.recompute()
 
 def start_DOC(DOC):
   """Has to called to open the Document for the FreeCAD objects to show
@@ -251,7 +253,7 @@ def load_STL(stl_file, name="new_mesh", geom=None, off0=0,
   obj.Label = name
   update_geom_info(obj, geom, off0)
   obj.ViewObject.ShapeColor = color
-  DOC.recompute()
+  ##DOC.recompute()
   return obj
 
 def load_STEP(step_file, name="new_step", geom=None, off0=0, **kwargs):
@@ -259,5 +261,5 @@ def load_STEP(step_file, name="new_step", geom=None, off0=0, **kwargs):
   obj = ImportGui.insert(step_file, DOC_NAME)
   obj.Label = name
   update_geom_info(obj, geom, off0)
-  DOC.recompute()
+  ##DOC.recompute()
   return obj

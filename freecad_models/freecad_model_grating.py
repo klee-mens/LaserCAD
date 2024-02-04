@@ -54,7 +54,7 @@ def model_grating(name="grating", dimensions=DEFUALT_DIM, geom=GEOM0,
   obj.Placement = Placement(offset, Rotation(0,0,0), Vector(0,0,0))
 
   update_geom_info(obj, geom, off0=offset)
-  DOC.recompute()
+  #DOC.recompute()
   return obj
 
 def grating_mount(name="grating_mount",height=50,thickness=8,drawing_post=True,base_exists=False,geom=None, **kwargs):

@@ -23,7 +23,8 @@ if freecad_da:
  
 DEFAULT_COLOR_JOERG = (0.8,0.2,0.8)
 DEFAULT_COLOR = (199/255, 144/255, 28/255) #Messing
-DEFAULT_TRANSPARENCY = 50
+# DEFAULT_TRANSPARENCY = 50
+DEFAULT_TRANSPARENCY = 0
 DEFALUT_MAX_ANGULAR_OFFSET = 10
 
 
@@ -100,7 +101,7 @@ def model_round_mirror(name="mirror", dia=25, thickness=5, Radius=0, geom=None, 
   update_geom_info(obj, geom)
 
   DOC = get_DOC()
-  DOC.recompute()
+  #DOC.recompute()
   return obj
 
 
@@ -194,7 +195,7 @@ def model_stripe_mirror(name="Stripe_Mirror", dia=75, Radius=250, thickness=25,
   update_geom_info(obj, geom)
 
   DOC = get_DOC()
-  DOC.recompute()
+  #DOC.recompute()
   
   return obj
 
@@ -264,7 +265,7 @@ def model_rooftop_mirror(name="rooftop_mirror",dia=0, geom=None, **kwargs):
   obj.Placement = Placement(offset, Rotation(0,-180,90), Vector(0,0,0))
   update_geom_info(obj, geom, off0=offset)
   # DOC = get_DOC()
-  DOC.recompute()
+  #DOC.recompute()
   
   return obj
 

@@ -40,11 +40,13 @@ def Make_Amplifier_Typ_II_simple(name="AmpTyp2s", focal_length=600, magnificatio
     cm2.pos = (0,0,0) # der Ausgangspunkt
     cm2.normal = (-1,0,0) # umgekehrte Ausrichtung des Aufbaus
     cm2.aperture = aperture_small
+    cm2.set_mount_to_default()
 
     lens1 = Lens(f=focal_length)
     lens1.normal = (1,0,0) #eigentlich egal, kann auch +1,0,0 sein
     lens1.pos = (dist2,0,0) #d2 = b vom cm2 entfernt
     lens1.aperture = aperture_big
+    lens1.set_mount_to_default()
 
     plane_mir = Mirror()
     plane_mir.pos = (dist1+dist2, 0, 0)
@@ -53,6 +55,7 @@ def Make_Amplifier_Typ_II_simple(name="AmpTyp2s", focal_length=600, magnificatio
     # print("p1:", lens1.pos - (0, beam_sep, 0))
     plane_mir.set_normal_with_2_points(point0, point1)
     plane_mir.aperture = aperture_small
+    plane_mir.set_mount_to_default()
 
     ls = Beam(angle=0) # kollimierter Anfangsbeam
     # ls.pos = beam_pos
@@ -94,11 +97,13 @@ def Make_Amplifier_Typ_II_Mirror(name="AmpTyp2sr", focal_length=600, magnificati
   cm2.pos = (0,0,0) # der Ausgangspunkt
   cm2.normal = (-1,0,0) # umgekehrte Ausrichtung des Aufbaus
   cm2.aperture = aperture_small
+  cm2.set_mount_to_default()
 
   cm1 = Curved_Mirror(radius= Radius1)
   cm1.pos = (dist2,0,0)
   cm1.normal = (np.cos(theta),np.sin(theta),0)
   cm1.aperture = aperture_big
+  cm1.set_mount_to_default()
 
   plane_mir = Mirror()
   plane_mir.pos = (dist2-dist1*np.cos(theta*2), -dist1*np.sin(theta*2), 0)
@@ -107,6 +112,7 @@ def Make_Amplifier_Typ_II_Mirror(name="AmpTyp2sr", focal_length=600, magnificati
   # print("p1:", lens1.pos - (0, beam_sep, 0))
   plane_mir.set_normal_with_2_points(point0, point1)
   plane_mir.aperture = aperture_small
+  plane_mir.set_mount_to_default()
 
   ls = Beam(angle=0) # kollimierter Anfangsbeam
   # ls.pos = beam_pos
@@ -151,11 +157,13 @@ def Make_Amplifier_Typ_II_UpDown(name="AmpTyp2sr", focal_length=600, magnificati
   cm2.pos = (0,0,0) # der Ausgangspunkt
   cm2.normal = (-1,0,0) # umgekehrte Ausrichtung des Aufbaus
   cm2.aperture = aperture_small
+  cm2.set_mount_to_default()
 
   cm1 = Curved_Mirror(radius= Radius1)
   cm1.pos = (dist2,0,0)
   cm1.normal = (np.cos(theta),np.sin(theta),0)
   cm1.aperture = aperture_big
+  cm1.set_mount_to_default()
 
   PHI = 180*theta/np.pi*(roundtrips2+1) - 180 #?
   plane_mir = Mirror(phi=PHI)
@@ -165,6 +173,7 @@ def Make_Amplifier_Typ_II_UpDown(name="AmpTyp2sr", focal_length=600, magnificati
   # print("p1:", lens1.pos - (0, beam_sep, 0))
   # plane_mir.set_normal_with_2_points(point0, point1)
   plane_mir.aperture = aperture_small
+  plane_mir.set_mount_to_default()
 
   ls = Beam(angle=0) # kollimierter Anfangsbeam
   # ls.pos = beam_pos
@@ -223,12 +232,15 @@ def Make_Amplifier_Typ_II_plane(name="AmpTyp2s" ,focal_length=600 ,magnification
   
   curved = Curved_Mirror(radius= Radius2)
   curved.aperture = aperture_small
+  curved.set_mount_to_default()
   
   lens1 = Curved_Mirror(radius=focal_length*2, phi=180-3)
   lens1.aperture = aperture_big
+  lens1.set_mount_to_default()
   
   plane_mir = Mirror(phi=PHI0)
   plane_mir.aperture = aperture_small
+  plane_mir.set_mount_to_default()
   
   ls = Beam(angle=0) # kollimierter Anfangsbeam
   
@@ -300,14 +312,17 @@ def Make_Amplifier_Typ_II_with_theta(name="AmpTyp2s" ,focal_length=600 ,magnific
   # curved = Curved_Mirror(radius= Radius2)
   curved = Curved_Mirror(radius= Radius2, phi=0, theta=180)
   curved.aperture = aperture_small
+  curved.set_mount_to_default()
   
   # lens1 = Curved_Mirror(radius=focal_length*2, theta=-THETA0)
   lens1 = Curved_Mirror(radius=focal_length*2, phi=0, theta=THETA0-180)
   lens1.aperture = aperture_big
+  lens1.set_mount_to_default()
   
   # plane_mir = Mirror(phi=PHI0, theta=2*THETA0)
   plane_mir = Mirror(phi=PHI0)
   plane_mir.aperture = aperture_small
+  plane_mir.set_mount_to_default()
   
   ls = Beam(angle=0) # kollimierter Anfangsbeam
   
@@ -385,19 +400,24 @@ def Make_Amplifier_Typ_II_Juergen(name="AmpTyp2s" ,focal_length=600 ,magnificati
   # curved = Curved_Mirror(radius= Radius2)
   curved = Curved_Mirror(radius= Radius2, phi=0, theta=180)
   curved.aperture = aperture_small
+  curved.set_mount_to_default()
   
   # lens1 = Curved_Mirror(radius=focal_length*2, theta=-THETA0)
   lens1 = Curved_Mirror(radius=focal_length*2, phi=0, theta=THETA0-180)
   lens1.aperture = aperture_big
+  lens1.set_mount_to_default()
   
   flip1 = Mirror(phi=90)
   flip1.aperture=2*inch
+  flip1.set_mount_to_default()
   flip2 = Mirror(phi=90)
   flip2.aperture=2*inch
+  flip2.set_mount_to_default()
 
   # plane_mir = Mirror(phi=PHI0, theta=2*THETA0)
   plane_mir = Mirror(phi=-PHI0)
   plane_mir.aperture = aperture_small
+  plane_mir.set_mount_to_default()
   
   ls = Beam(angle=0, radius=1.5) # kollimierter Anfangsbeam
   

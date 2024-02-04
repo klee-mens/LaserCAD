@@ -210,6 +210,11 @@ Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0,6,7,8,9,7,6,10])
 Stretcher.recompute_optical_axis()
 
 Stretcher.draw()
+
+
+# =============================================================================
+# Optical path length and spot diagrams
+# =============================================================================
 ip_s.spot_diagram(Stretcher._beams[-1])
 pathlength = {}
 for ii in range(Stretcher._beams[0]._ray_count):
@@ -244,87 +249,7 @@ plt.title("Delay at different wavelength")
 plt.axhline(0, color = 'black', linewidth = 1)
 plt.show()
 
-# SinS = np.sin(10/180*np.pi)
-# CosS = np.cos(10/180*np.pi)
-# Grat1 = Grating(grat_const=grating_const, order=-1)
-# Grat1.pos -=(500,0,periscope_height)
-# Grat1.normal = grating_normal
-# Grat1.normal = -Grat1.normal
-# Grat2 = Grating(grat_const=grating_const, order=-1)
-# propagation_length = 100
-# Grat2.pos -= (500-propagation_length*CosS,SinS*propagation_length,periscope_height)
-# Grat2.normal = grating_normal
-
-# C_RoofTop1 = Mirror()
-# C_RoofTop1.pos -= (700,SinS*propagation_length,periscope_height)
-# C_RoofTop1.normal = (-1,0,-1)
-# C_RoofTop2 = Mirror()
-# C_RoofTop2.pos -= (700,SinS*propagation_length,0)
-# C_RoofTop2.normal = (-1,0,1)
-
-# C_RoofTop1.draw = dont
-# C_RoofTop1.draw_dict["mount_type"] = "dont_draw"
-# C_RoofTop2.draw = dont
-# C_RoofTop2.draw_dict["mount_type"] = "dont_draw"
-# pure_cosmetic = Mirror(name="RoofTop_Mirror")
-# pure_cosmetic.draw_dict["mount_type"] = "rooftop_mirror_mount"
-# pure_cosmetic.pos = (C_RoofTop1.pos + C_RoofTop2.pos ) / 2
-# pure_cosmetic.normal = (C_RoofTop1.normal + C_RoofTop2.normal ) / 2
-# pure_cosmetic.draw_dict["model_type"] = "Rooftop"
-
-# ip = Intersection_plane()
-# ip.pos -= (100,0,0)
 
 
-# Compressor = Composition()
-# Compressor.set_geom(Stretcher.last_geom())
-# Compressor.set_light_source(Stretcher._beams[-1])
-# Compressor.add_fixed_elm(Grat1)
-# Compressor.add_fixed_elm(Grat2)
-# Compressor.add_fixed_elm(C_RoofTop1)
-# Compressor.add_fixed_elm(C_RoofTop2)
-# Compressor.add_fixed_elm(ip)
-# Compressor.add_fixed_elm(pure_cosmetic)
-
-# Compressor.set_sequence([0,1,2,3,1,0,4])
-
-# Compressor.propagate(200)
-# # Compressor.recompute_optical_axis()
-# Compressor.draw()
-# # return Stretcher
-# ip.spot_diagram(Compressor._beams[-1])
-# # Stretcher = Make_Stretcher_chromeo()
-# # Stretcher.draw()
-
-# pathlength = {}
-# for ii in range(Compressor._beams[0]._ray_count):
-#   wavelength = Compressor._beams[0].get_all_rays()[ii].wavelength
-#   pathlength[wavelength] = 0
-# for jj in range(len(Compressor._beams)-1):
-#   for ii in Compressor._beams[jj].get_all_rays():
-#     a=pathlength[ii.wavelength]
-#     pathlength[ii.wavelength] = a +ii.length
-# ray_lam = [ray.wavelength for ray in Compressor._beams[0].get_all_rays()]
-# path = [pathlength[ii] for ii in ray_lam]
-# path_diff = [ii-path[int(len(path)/2)] for ii in path]
-# fai = [path_diff[ii]/ray_lam[ii]*2*np.pi for ii in range(len(path))]
-# omega = [c0/ii*2*np.pi for ii in ray_lam]
-# para = np.polyfit(omega, fai, 5)
-# fai2 = [20*para[0]*ii**3+12*para[1]*ii**2+6*para[2]*ii+2*para[3] for ii in omega]
-# # fai2 = [para[0]*ii**5+para[1]*ii**4+para[2]*ii**3+para[3]*ii**2+para[4]*ii+para[5] for ii in omega]
-# delay_mid = path[int(len(path)/2)]/c0
-# delay = [(pa/c0-delay_mid)*1E9 for pa in path]
-# plt.figure()
-# ax1=plt.subplot(1,2,1)
-# plt.plot(ray_lam,path)
-# plt.ylabel("pathlength (mm)")
-# plt.xlabel("wavelength (mm)")
-# plt.title("Pathlength at different wavelength")
-# plt.axhline(path[int(len(path)/2)], color = 'black', linewidth = 1)
-# ax2=plt.subplot(1,2,2)
-# plt.plot(ray_lam,delay)
-# plt.ylabel("delay (ns)")
-# plt.xlabel("wavelength (mm)")
-# plt.title("Delay at different wavelength")
-# plt.axhline(0, color = 'black', linewidth = 1)
-# plt.show()
+if freecad_da:
+  setview()
