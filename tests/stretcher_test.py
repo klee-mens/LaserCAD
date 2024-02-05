@@ -13,12 +13,12 @@ ind = pfad.rfind("lasercad")
 pfad = pfad[0:ind-1]
 if not pfad in sys.path:
   sys.path.append(pfad)
-from LaserCAD.moduls import Make_Stretcher
+from LaserCAD.moduls import Make_Stretcher_chromeo
 from LaserCAD.freecad_models import freecad_da, clear_doc, setview
 
 
-def stretcher_test():  
-  stretch1 = Make_Stretcher()
+def stretcher_test():
+  stretch1 = Make_Stretcher_chromeo()
   stretch1.pos = (0, 0, 100)
   stretch1.draw()
   return stretch1

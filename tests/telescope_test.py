@@ -16,11 +16,11 @@ if not pfad in sys.path:
 from LaserCAD.moduls import Make_Telescope
 
 
-def telescope_test():  
+def telescope_test():
   teles = Make_Telescope()
   teles.pos = (0, 500,100)
   teles.draw()
   return teles
 
 if __name__ == "__main__":
-  telescope_test()git 
+  telescope_test()
