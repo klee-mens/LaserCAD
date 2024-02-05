@@ -21,7 +21,7 @@ from LaserCAD.freecad_models import freecad_da, clear_doc, setview
 if freecad_da:
   clear_doc()
 
-def Amplifter_Typ_I_test():  
+def Amplifter_Typ_I_test():
   Ampli1 = Make_Amplifier_Typ_I_simple()
   Ampli1.pos = (0, 0,100)
   Ampli1.draw()
@@ -43,9 +43,11 @@ def Amplifter_Typ_II_test():
   return Ampli1,Ampli2,Ampli3
 
 if __name__ == "__main__":
-  Amplifter_Typ_I_test()
+  # Amplifter_Typ_I_test()
   # Amplifter_Typ_II_test()
-  
-  
+  from LaserCAD.moduls.type_II_Amplifier import Make_Amplifier_Typ_II_plane
+  amp = Make_Amplifier_Typ_II_plane(roundtrips2=2)
+  # amp.draw()
+
 if freecad_da:
   setview()

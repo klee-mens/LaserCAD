@@ -19,8 +19,8 @@ DEFALUT_MAX_ANGULAR_OFFSET = 10
 DEFAULT_COLOR_LENS = (0/84,0/255,255/255)
 DEFAULT_COLOR_CRYSTAL = (131/255,27/255,44/255)
 DEFALUT_MOUNT_COLOR = (207/255,138/255,0/255)
-# CRYSTAL_TRANSPARENCY = 50
-CRYSTAL_TRANSPARENCY  = 0
+CRYSTAL_TRANSPARENCY = 50
+# CRYSTAL_TRANSPARENCY  = 0
 if freecad_da:
   from FreeCAD import Vector, Placement, Rotation
   import Part
@@ -28,7 +28,7 @@ if freecad_da:
 
 
 
-def model_crystal(name="crystal",model="cube", width=50, height=10, thickness=25, 
+def model_crystal(name="crystal",model="cube", width=50, height=10, thickness=25,
                   color=DEFAULT_COLOR_CRYSTAL,
                   Transparency=CRYSTAL_TRANSPARENCY , geom=None, **kwargs):
   """
@@ -37,7 +37,7 @@ def model_crystal(name="crystal",model="cube", width=50, height=10, thickness=25
   name : string, optional
     crystal name. The default is "crystal".
   model : string, optional
-    The model of crystal. It can be "cube" or "round" for cubic crystal and 
+    The model of crystal. It can be "cube" or "round" for cubic crystal and
     circular crystal. The default is "cube".
   width : float, optional
     The width or radius of the crystal. The default is 50.
@@ -71,7 +71,7 @@ def model_crystal(name="crystal",model="cube", width=50, height=10, thickness=25
   obj = DOC.addObject('PartDesign::Body', name)
   sketch = obj.newObject('Sketcher::SketchObject', name+'_sketch')
   sketch.MapMode = 'FlatFace'
-  
+
   geoList = []
   geoList.append(Part.LineSegment(Vector(-width/2,height/2,0),Vector(width/2,height/2,0)))
   geoList.append(Part.LineSegment(Vector(width/2,height/2,0),Vector(width/2,-height/2,0)))
@@ -90,20 +90,20 @@ def model_crystal(name="crystal",model="cube", width=50, height=10, thickness=25
   sketch.addConstraint(conList)
   del geoList, conList
   sketch.addConstraint(Sketcher.Constraint('DistanceX',0,1,0,2,width))
-  sketch.addConstraint(Sketcher.Constraint('DistanceY',1,2,1,1,height)) 
+  sketch.addConstraint(Sketcher.Constraint('DistanceY',1,2,1,1,height))
   sketch.addConstraint(Sketcher.Constraint('DistanceY',-1,1,0,2,height/2))
-  sketch.addConstraint(Sketcher.Constraint('DistanceX',-1,1,0,2,width/2)) 
-  
+  sketch.addConstraint(Sketcher.Constraint('DistanceX',-1,1,0,2,width/2))
+
   pad = obj.newObject('PartDesign::Pad','Pad')
   pad.Profile = sketch
   pad.Length = thickness
   pad.ReferenceAxis = (sketch,['N_Axis'])
   sketch.Visibility = False
-  
+
   obj.ViewObject.ShapeColor = color
   obj.ViewObject.Transparency = Transparency
   obj.Placement=Placement(Vector(0,0,0), Rotation(90,0,90), Vector(0,0,0))
-  
+
   update_geom_info(obj, geom)
   #DOC.recompute()
 
@@ -116,7 +116,7 @@ def model_crystal_mount(name="crystal_mount",model="cube", width=50, height=10, 
   name : string, optional
     crystal name. The default is "crystal".
   model : string, optional
-    The model of crystal. It can be "cube" or "round" for cubic crystal and 
+    The model of crystal. It can be "cube" or "round" for cubic crystal and
     circular crystal. The default is "cube".
   width : float, optional
     The width or radius of the crystal. The default is 50.
@@ -158,9 +158,9 @@ def model_crystal_mount(name="crystal_mount",model="cube", width=50, height=10, 
     sketch.addConstraint(conList)
     del geoList, conList
     sketch.addConstraint(Sketcher.Constraint('DistanceX',0,1,0,2,width))
-    sketch.addConstraint(Sketcher.Constraint('DistanceY',1,2,1,1,height)) 
+    sketch.addConstraint(Sketcher.Constraint('DistanceY',1,2,1,1,height))
     sketch.addConstraint(Sketcher.Constraint('DistanceY',-1,1,0,2,height/2))
-    sketch.addConstraint(Sketcher.Constraint('DistanceX',-1,1,0,2,width/2)) 
+    sketch.addConstraint(Sketcher.Constraint('DistanceX',-1,1,0,2,width/2))
     geoList = []
     geoList.append(Part.LineSegment(Vector(-20,20,0),Vector(20,20,0)))
     geoList.append(Part.LineSegment(Vector(20,20,0),Vector(20,-20,0)))
@@ -179,13 +179,13 @@ def model_crystal_mount(name="crystal_mount",model="cube", width=50, height=10, 
     sketch.addConstraint(conList)
     del geoList, conList
     sketch.addConstraint(Sketcher.Constraint('DistanceX',4,1,4,2,40))
-    sketch.addConstraint(Sketcher.Constraint('DistanceY',5,2,5,1,40)) 
+    sketch.addConstraint(Sketcher.Constraint('DistanceY',5,2,5,1,40))
     sketch.addConstraint(Sketcher.Constraint('DistanceY',-1,1,4,2,20))
-    sketch.addConstraint(Sketcher.Constraint('DistanceX',-1,1,4,2,20)) 
+    sketch.addConstraint(Sketcher.Constraint('DistanceX',-1,1,4,2,20))
   else:
     sketch.addGeometry(Part.Circle(Vector(0,0,0),Vector(0,0,1),width/2),False)
-    sketch.addConstraint(Sketcher.Constraint('Coincident',0,3,-1,1)) 
-    sketch.addConstraint(Sketcher.Constraint('Diameter',0,width)) 
+    sketch.addConstraint(Sketcher.Constraint('Coincident',0,3,-1,1))
+    sketch.addConstraint(Sketcher.Constraint('Diameter',0,width))
     geoList = []
     geoList.append(Part.LineSegment(Vector(-20,20,0),Vector(20,20,0)))
     geoList.append(Part.LineSegment(Vector(20,20,0),Vector(20,-20,0)))
@@ -204,34 +204,34 @@ def model_crystal_mount(name="crystal_mount",model="cube", width=50, height=10, 
     sketch.addConstraint(conList)
     del geoList, conList
     sketch.addConstraint(Sketcher.Constraint('DistanceX',1,1,1,2,40))
-    sketch.addConstraint(Sketcher.Constraint('DistanceY',2,2,2,1,40)) 
+    sketch.addConstraint(Sketcher.Constraint('DistanceY',2,2,2,1,40))
     sketch.addConstraint(Sketcher.Constraint('DistanceY',0,3,1,2,20))
-    sketch.addConstraint(Sketcher.Constraint('DistanceX',0,3,1,2,20)) 
-  
-  
+    sketch.addConstraint(Sketcher.Constraint('DistanceX',0,3,1,2,20))
+
+
   pad = obj.newObject('PartDesign::Pad','Pad')
   pad.Profile = sketch
   pad.Length = thickness + 2
   pad.ReferenceAxis = (sketch,['N_Axis'])
   sketch.Visibility = False
-  
+
   #DOC.recompute()
   sketch001 = obj.newObject('Sketcher::SketchObject', name+'_sketch001')
   sketch001.Support = (pad,['Face3',])
   sketch001.MapMode = 'FlatFace'
-  
+
   sketch001.addGeometry(Part.Circle(Vector(0,(thickness + 2)/2,0),Vector(0,0,1),2),
                         False)
-  sketch001.addConstraint(Sketcher.Constraint('PointOnObject',0,3,-2)) 
-  sketch001.addConstraint(Sketcher.Constraint('Diameter',0,2*2)) 
-  sketch001.addConstraint(Sketcher.Constraint('DistanceY',-1,1,0,3,(thickness + 2)/2)) 
-  
+  sketch001.addConstraint(Sketcher.Constraint('PointOnObject',0,3,-2))
+  sketch001.addConstraint(Sketcher.Constraint('Diameter',0,2*2))
+  sketch001.addConstraint(Sketcher.Constraint('DistanceY',-1,1,0,3,(thickness + 2)/2))
+
   Pocket = obj.newObject('PartDesign::Pocket','Pocket')
   Pocket.Profile = sketch001
   Pocket.Length = 10
   Pocket.ReferenceAxis = (sketch001,['N_Axis'])
   sketch001.Visibility = False
-  
+
   obj.ViewObject.ShapeColor = DEFALUT_MOUNT_COLOR
   obj.ViewObject.Transparency = 0
   obj.Placement=Placement(Vector(0,0,0), Rotation(90,0,90), Vector(0,0,0))
