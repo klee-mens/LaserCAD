@@ -1217,18 +1217,18 @@ def model_Post_Marker(name="marker", h1 = (0,0), h2 = (75,0), h3 = (75,75),
   sketch.Visibility = False
   
   # obj.ViewObject.ShapeColor = color
-  offset=Vector(0,0,2.5)
+  offset=Vector(0,0,2.5+POS[2])
   obj.Placement = Placement(offset, Rotation(0,0,0), Vector(0,0,0))
   if button:
     obj1 = DOC.addObject("Part::Cone","Cone")
-    obj1.Placement=Placement(Vector(h1[0],h1[1],0), Rotation(0,0,0), Vector(0,0,0))
+    obj1.Placement=Placement(Vector(h1[0],h1[1],POS[2]), Rotation(0,0,0), Vector(0,0,0))
     obj2 = DOC.addObject("Part::Cone","Cone")
-    obj2.Placement=Placement(Vector(h2[0],h2[1],0), Rotation(0,0,0), Vector(0,0,0))
+    obj2.Placement=Placement(Vector(h2[0],h2[1],POS[2]), Rotation(0,0,0), Vector(0,0,0))
   else:
     obj1 = DOC.addObject("Part::Cone","Cone")
-    obj1.Placement=Placement(Vector(h3[0],h3[1],0), Rotation(0,0,0), Vector(0,0,0))
+    obj1.Placement=Placement(Vector(h3[0],h3[1],POS[2]), Rotation(0,0,0), Vector(0,0,0))
     obj2 = DOC.addObject("Part::Cone","Cone")
-    obj2.Placement=Placement(Vector(h4[0],h4[1],0), Rotation(0,0,0), Vector(0,0,0))
+    obj2.Placement=Placement(Vector(h4[0],h4[1],POS[2]), Rotation(0,0,0), Vector(0,0,0))
   obj1.Radius1 = obj2.Radius1 = 0
   obj1.Radius2 = obj2.Radius2 = 5
   obj1.Height = obj2.Height = 5

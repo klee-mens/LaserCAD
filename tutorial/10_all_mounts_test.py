@@ -42,6 +42,15 @@ for i in range(len(MIRROR_LIST)):
     mir.Mount.pos += mir.normal*mir.thickness
   mir.draw()
   mir.Mount.draw()
+
+mir = Mirror() 
+M = Composed_Mount(unit_model_list=["Adaptive_Angular_Mount","KS1","1inch_post"])
+mir.pos = (0,100,80)
+mir.normal = (1,1,-2)
+mir.Mount = M
+M.set_geom(mir.get_geom())
+mir.draw()
+mir.draw_mount()
   
 for i in range(len(LENS_LIST)):
   M = Composed_Mount(unit_model_list=[LENS_LIST[i],"0.5inch_post"])
@@ -52,6 +61,8 @@ for i in range(len(LENS_LIST)):
   mir.pos = (i*75,-100,100+i*10)
   mir.draw()
   mir.Mount.draw()
+
+
 
 if freecad_da:
   setview()

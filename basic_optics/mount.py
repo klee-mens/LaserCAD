@@ -452,7 +452,7 @@ class Grating_Mount(Composed_Mount):
     if self.height<26 and self.height>24:
       gratingmount.path = thisfolder+"mount_meshes/Grating/"
       gratingmount.model = "Grat_designed_mount"
-      gratingmount.draw_dict["stl_file"] = thisfolder+"mount_meshes/Grating/Grat_designed_mount.stl"
+      # gratingmount.draw_dict["stl_file"] = thisfolder+"mount_meshes/Grating/Grat_designed_mount.stl"
       gratingmount.freecad_model = load_STL
       gratingmount.docking_obj.pos -= (3.9,0,0)
     self.add(gratingmount)
@@ -530,13 +530,13 @@ class Adaptive_Angular_Mount(Unit_Mount):
       else:
         self.rot_angle = (-90-self.angle) 
         self.docking_obj.pos = self.pos+self.normal * (dia_l/(2*np.tan(-self.rot_angle/180*np.pi))+1.5)
-    # elif new_axes[2][0]>0:
-    #   z=new_axes[2][0]
-    #   self.angle = np.arcsin(z)*180/np.pi
-    #   self.rot_angle = abs(90-self.angle)
-    #   dia_l = int(self.aperture/10+1)*10
-    #   self.docking_obj.pos = self.pos+self.normal * (dia_l/(2*np.tan(self.rot_angle/180*np.pi))+1.5)
-    #   self.docking_obj.normal = self.normal
+    elif new_axes[2][0]>0:
+      z=new_axes[2][0]
+      self.angle = np.arcsin(z)*180/np.pi
+      self.rot_angle = abs(90-self.angle)
+      dia_l = int(self.aperture/10+1)*10
+      self.docking_obj.pos = self.pos+self.normal * (dia_l/(2*np.tan(self.rot_angle/180*np.pi))+1.5)
+      self.docking_obj.normal = self.normal
     super().set_axes(new_axes)
     
   # def _pos_changed(self, old_pos, new_pos):

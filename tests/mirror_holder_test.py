@@ -39,7 +39,7 @@ from LaserCAD.basic_optics.mount import Adaptive_Angular_Mount
 
 mir = Mirror(theta= 120) 
 M = Composed_Mount(unit_model_list=["Adaptive_Angular_Mount","KS1","1inch_post"])
-mir.normal = (1,0,0.5)
+mir.normal = (1,1,-2)
 mir.Mount = M
 M.set_geom(mir.get_geom())
 # mir.normal = (1,0,-2)

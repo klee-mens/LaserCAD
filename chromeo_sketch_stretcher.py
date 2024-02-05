@@ -29,7 +29,7 @@ from LaserCAD.basic_optics import Grating, Intersection_plane
 import matplotlib.pyplot as plt
 from LaserCAD.freecad_models.utils import thisfolder, load_STL
 from LaserCAD.non_interactings import Faraday_Isolator, Pockels_Cell, Lambda_Plate,Table
-from LaserCAD.basic_optics.mount import Unit_Mount
+from LaserCAD.basic_optics.mount import Unit_Mount, Post_Marker
 
 if freecad_da:
   clear_doc()
@@ -122,11 +122,11 @@ wavels = np.linspace(lambda_mid-delta_lamda/2, lambda_mid+delta_lamda/2, number_
 rays = []
 cmap = plt.cm.gist_rainbow
 for wavel in wavels:
-    B_test = Beam(radius=input_radius,angle=input_angle)
-    B_test.make_cone_distribution(ray_count=9)
-    ray_group =B_test.get_all_rays()
-    for rn in ray_group:
-      # rn = Ray()
+    # B_test = Beam(radius=input_radius,angle=input_angle)
+    # B_test.make_cone_distribution(ray_count=9)
+    # ray_group =B_test.get_all_rays()
+    # for rn in ray_group:
+      rn = Ray()
       # rn.normal = vec
       # rn.pos = pos0
       rn.wavelength = wavel
@@ -184,9 +184,11 @@ Stretcher.add_on_axis(RoofTop2)
 
 RoofTop1.draw = dont
 # RoofTop1.draw_dict["mount_type"] = "dont_draw"
-RoofTop1.Mount = Unit_Mount("dont_draw")
+# RoofTop1.Mount = Unit_Mount("dont_draw")
 RoofTop2.draw = dont
-RoofTop2.Mount = Unit_Mount("dont_draw")
+# RoofTop2.Mount = Unit_Mount("dont_draw")
+RoofTop1.Mount.draw =dont
+RoofTop2.Mount.draw =dont
 
 pure_cosmetic = Rooftop_mirror(name="RoofTop_Mirror")
 pure_cosmetic.draw_dict["mount_type"] = "rooftop_mirror_mount"
@@ -217,7 +219,7 @@ sinB_new = a - B
 Grating_normal = (np.sqrt(1-sinB_new**2), sinB_new, 0)
 
 Grat1 = Grating(grat_const=grating_const, order=-1)
-Grat1.pos -=(500,0,periscope_height)
+Grat1.pos -=(500-10,0,periscope_height)
 Grat1.normal = Grating_normal
 Grat1.normal = -Grat1.normal
 Plane_height = 23+25.4
@@ -227,7 +229,7 @@ Grat2 = Grating(grat_const=grating_const, order=-1)
 propagation_length = seperation*2-0.008
 
 # propagation_length = 99.9949
-Grat2.pos -= (500-propagation_length*CosS,SinS*propagation_length,periscope_height)
+Grat2.pos -= (500-10-propagation_length*CosS,SinS*propagation_length,periscope_height)
 Grat2.normal = Grating_normal
 
 shift_direction = np.cross((0,0,1),Grat1.normal)
@@ -260,10 +262,10 @@ pure_cosmetic1.aperture = periscope_height
 # Four Gratings Compressor
 # =============================================================================
 Grat3 =Grating(grat_const=grating_const,order=1)
-Grat3.pos = (Grat1.pos[0]-Grat2.pos[0]+Grat1.pos[0]-50-2*35*abs(Grat1.normal[0]),Grat2.pos[1],Grat2.pos[2])
+Grat3.pos = (Grat1.pos[0]-Grat2.pos[0]+Grat1.pos[0]-45-2*35*abs(Grat1.normal[0]),Grat2.pos[1],Grat2.pos[2])
 Grat3.normal = (Grat1.normal[0],-Grat1.normal[1],Grat1.normal[2])
 Grat4 =Grating(grat_const=grating_const,order=1)
-Grat4.pos = (Grat2.pos[0]-Grat2.pos[0]+Grat1.pos[0]-50-2*35*abs(Grat1.normal[0]),Grat1.pos[1],Grat2.pos[2])
+Grat4.pos = (Grat2.pos[0]-Grat2.pos[0]+Grat1.pos[0]-45-2*35*abs(Grat1.normal[0]),Grat1.pos[1],Grat2.pos[2])
 Grat4.normal = (Grat2.normal[0],-Grat2.normal[1],Grat2.normal[2])
 
 Grat1.height=Grat2.height=Grat3.height=Grat4.height=25
@@ -282,9 +284,20 @@ Grat1.Mount.mount_list[1].model = "POLARIS-K1E3"
 Grat2.Mount.mount_list[1].model = "POLARIS-K1E3"
 Grat3.Mount.mount_list[1].model = "POLARIS-K1E3"
 Grat4.Mount.mount_list[1].model = "POLARIS-K1E3"
-Grat2.
+Grat1.Mount.mount_list[1].docking_obj.pos = Grat1.Mount.mount_list[1].pos + Grat1.Mount.mount_list[1].normal*17.1-np.array((0,0,1))*25.4
+Grat1.Mount.mount_list[2].set_geom(Grat1.Mount.mount_list[1].docking_obj.get_geom())
+Grat2.Mount.mount_list[1].docking_obj.pos = Grat2.Mount.mount_list[1].pos + Grat2.Mount.mount_list[1].normal*17.1-np.array((0,0,1))*25.4
+Grat2.Mount.mount_list[2].set_geom(Grat2.Mount.mount_list[1].docking_obj.get_geom())
+Grat3.Mount.mount_list[1].docking_obj.pos = Grat3.Mount.mount_list[1].pos + Grat3.Mount.mount_list[1].normal*17.1-np.array((0,0,1))*25.4
+Grat3.Mount.mount_list[2].set_geom(Grat3.Mount.mount_list[1].docking_obj.get_geom())
+Grat4.Mount.mount_list[1].docking_obj.pos = Grat4.Mount.mount_list[1].pos + Grat4.Mount.mount_list[1].normal*17.1-np.array((0,0,1))*25.4
+Grat4.Mount.mount_list[2].set_geom(Grat4.Mount.mount_list[1].docking_obj.get_geom())
+PM1=Post_Marker()
+PM2=Post_Marker()
+Grat2.Mount.add(PM1)
+Grat3.Mount.add(PM2)
 
-print("setting pos=",(Grat1.pos+Grat2.pos+Grat3.pos+Grat4.pos)/4)
+# print("setting pos=",(Grat1.pos+Grat2.pos+Grat3.pos+Grat4.pos)/4)
 ip = Intersection_plane()
 ip.pos -= (100,0,0)
 Stretcher.add_fixed_elm(Grat1)
@@ -319,17 +332,17 @@ gb.wavelength = 2.3e-3
 Stretcher.draw()
 a = Pockels_Cell()
 a.pos = (Grat1.pos+Grat4.pos)/2
-a.pos-= (0,16,a.pos[2]-Plane_height+23)
+a.pos-= (0,15,a.pos[2]-Plane_height+23)
 a.normal = (0,1,0)
 a.draw_dict["stl_file"]=thisfolder+"misc_meshes/XR25C.stl"
 a.draw()
 b = Table()
 b.pos = (Grat1.pos+Grat4.pos)/2
 b.pos-= (0,0,b.pos[2])
-b.length = 780
+b.length = 850
 b.width = 150
 b.height = Plane_height-23
-b.pos -= (b.length/2,b.width/2,0)
+b.pos -= (b.length/2-10,b.width/2,0)
 b.draw_dict["color"]= (0.2,0.2,0.2)
 b.draw()
 
