@@ -22,41 +22,38 @@ from LaserCAD.freecad_models import freecad_da, clear_doc, setview
 
 if freecad_da:
   clear_doc()
-  
-linres = LinearResonator(name="MasterOscillatores")
 
-linres.add_on_axis(Mirror())
-linres.propagate(330)
-linres.add_on_axis(Curved_Mirror(radius=600, phi = 180+13))
-linres.propagate(250)
-linres.add_on_axis(Mirror(phi=90))
-linres.propagate(80)
-linres.add_on_axis(Mirror(phi=90))
-linres.propagate(250)
-linres.add_on_axis(Mirror())
+firsttry = Composition(name="BeamLine1")
+firsttry.set_light_source(Beam(radius=2, angle=0.02))
+firsttry.propagate(200)
+firsttry.add_on_axis(Lens(f=150))
+firsttry.propagate(400)
+firsttry.add_on_axis(Lens(f=120))
+firsttry.propagate(110)
+firsttry.add_on_axis(Mirror(phi=110))
+firsttry.propagate(90)
+firsttry.add_on_axis(Mirror(phi=70))
+firsttry.propagate(150)
+firsttry.add_on_axis(Lens(f=200))
+firsttry.propagate(400)
+firsttry.add_on_axis(Mirror(phi=-90))
+firsttry.propagate(60)
 
-
-beam_out = linres.output_beam()
-beam_out = beam_out.transform_to_cone_beam()
-# beam_out.set_length(400)
-beam_out.draw()
-
-comp = Composition("FancyBeamLine")
-comp.set_geom(beam_out.get_geom())
-comp.set_light_source(beam_out)
-comp.propagate(400)
-comp.add_on_axis(Mirror(phi=120))
-comp.propagate(150)
-comp.add_on_axis(Lens(f=40))
-comp.propagate(40 + 400)
-comp.add_on_axis(Lens(f=400))
-comp.propagate(60)
-
-comp.draw()
+firsttry.draw()
 
 
+mirteles = Composition(name="MirrorTelescope")
+mirteles.pos += (0,200,0)
+mirteles.set_light_source(Beam(radius=2))
+mirteles.propagate(350)
+mirteles.add_on_axis(Curved_Mirror(radius=250, phi=180-15))
+mirteles.propagate(250)
+mirteles.add_on_axis(Curved_Mirror(radius=250, phi=0, theta=180-15))
+mirteles.propagate(350)
 
-# linres.compute_eigenmode()
-linres.draw()  
+mirteles.draw()
+
+
+
 if freecad_da:
   setview()
