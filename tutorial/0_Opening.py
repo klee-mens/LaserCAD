@@ -24,7 +24,7 @@ if freecad_da:
   clear_doc()
 
 firsttry = Composition(name="BeamLine1")
-firsttry.set_light_source(Beam(radius=2, angle=0.02))
+#firsttry.set_light_source(Beam(radius=2, angle=0.02))
 firsttry.propagate(200)
 firsttry.add_on_axis(Lens(f=150))
 firsttry.propagate(400)
@@ -39,12 +39,15 @@ firsttry.propagate(400)
 firsttry.add_on_axis(Mirror(phi=-90))
 firsttry.propagate(60)
 
+firsttry.pos += (0,0,100)
+
 firsttry.draw()
+# firsttry.draw()
 
 
 mirteles = Composition(name="MirrorTelescope")
 mirteles.pos += (0,200,0)
-mirteles.set_light_source(Beam(radius=2))
+#mirteles.set_light_source(Beam(radius=2))
 mirteles.propagate(350)
 mirteles.add_on_axis(Curved_Mirror(radius=250, phi=180-15))
 mirteles.propagate(250)

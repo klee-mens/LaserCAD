@@ -5,16 +5,16 @@ Created on Sat Aug 19 13:16:37 2023
 @author: mens
 """
 
-import numpy as np
-import sys
+# import numpy as np
+# import sys
 
-pfad = __file__
-pfad = pfad.replace("\\","/") #folder conventions windows linux stuff
-pfad = pfad.lower()
-ind = pfad.rfind("lasercad")
-pfad = pfad[0:ind-1]
-if not pfad in sys.path:
-  sys.path.append(pfad)
+# pfad = __file__
+# pfad = pfad.replace("\\","/") #folder conventions windows linux stuff
+# pfad = pfad.lower()
+# ind = pfad.rfind("lasercad")
+# pfad = pfad[0:ind-1]
+# if not pfad in sys.path:
+#   sys.path.append(pfad)
 
 
 # from LaserCAD.non_interactings import Iris
