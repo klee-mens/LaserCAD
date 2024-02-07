@@ -838,7 +838,6 @@ def building_mount(name="mount",  Radius1=13, Hole_Radius=2, thickness=10,
   pad.Midplane = 1
   sketch.Visibility = False
   
-  
   DOC.recompute()
   sketch001 = obj.newObject('Sketcher::SketchObject', name+'_sketch001')
   sketch001.Support = (pad,['Face3',])
