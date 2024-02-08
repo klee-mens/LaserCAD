@@ -9,7 +9,7 @@ from ..freecad_models import model_mirror
 from ..basic_optics import Component
 from ..basic_optics.mount import Unit_Mount,Composed_Mount,Post
 
-DEFAULT_LAMBDA_PLATE_COLOR = (255,255,0)
+DEFAULT_LAMBDA_PLATE_COLOR = (255/255,255/255,0/255)
 
 class Lambda_Plate(Component):
 

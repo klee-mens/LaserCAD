@@ -17,6 +17,8 @@ import numpy as np
 
 DEFALUT_MAX_ANGULAR_OFFSET = 10
 DEFAULT_COLOR_LENS = (0/255,170/255,124/255)
+LENS_TRANSPARENCY = 50
+# LENS_TRANSPARENCY = 0
 
 import csv
 if freecad_da:
@@ -124,17 +126,17 @@ def model_lens(name="lens", dia=25, Radius1=300, Radius2=0, thickness=3, geom=No
   sketch.Visibility = False
 
   obj.ViewObject.ShapeColor = DEFAULT_COLOR_LENS
-  obj.ViewObject.Transparency = 50
+  obj.ViewObject.Transparency = LENS_TRANSPARENCY
   update_geom_info(obj, geom)
-  DOC.recompute()
+  #DOC.recompute()
 
   return obj
 """
 
 def lens_mount(mount_name="mirror_mount", dia=inch,  geom=None,
                 mount_type="DEFAULT", mesh=True, **kwargs):
-  
-  
+
+
   if dia <= 0.51*inch:
     kind = "MLH05_M"
     offset = Vector(1,-9.5,-8.2)
@@ -151,12 +153,12 @@ def lens_mount(mount_name="mirror_mount", dia=inch,  geom=None,
     kind = "LMR2_M"
     offset = Vector(13,-31.2,32.4)
     place = Placement(offset, Rotation(-90,2.22639e-14,90), Vector(0,0,0))
-  
+
   if not mount_type == "DEFAULT":
     kind = mount_type #kind kann auf expliziten Wunsch überschireben werden
     offset = Vector(13,-31.2,112.5)
     place = Placement(offset, Rotation(-90,2.22639e-14,90), Vector(0,0,0))
-    
+
   # if kind == "LMR2_M":
   datei = thisfolder + "mount_meshes/lens/" + kind
   if mesh:
@@ -174,7 +176,7 @@ def lens_mount(mount_name="mirror_mount", dia=inch,  geom=None,
   update_geom_info(obj, geom, off0=offset)
   obj.Label = mount_name
 
-  DOC.recompute()
+  #DOC.recompute()
   return obj
 
 """

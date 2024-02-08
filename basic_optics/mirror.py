@@ -269,23 +269,6 @@ class Stripe_mirror(Curved_Mirror):
     self.draw_dict["height"] = self.height
     self.draw_dict["model_type"] = "Stripe"
     
-class Rooftop_mirror(Mirror):
-  def __init__(self, **kwargs):
-    super().__init__(**kwargs)
-    self.freecad_model = model_rooftop_mirror
-    self.set_mount_to_default()
-    
-  def set_mount_to_default(self):
-    smm = Rooftop_Mirror_Mount()
-    smm.set_geom(self.get_geom())
-    smm.pos += self.normal * self.aperture / 2
-    self.Mount = smm
-
-  def update_draw_dict(self):
-    super().update_draw_dict()
-    self.draw_dict["dia"] = self.aperture
-    self.draw_dict["model_type"] = "Rooftop"    
-
 def stripe_mirror_draw_test():
   sm = Stripe_mirror()
   sm.pos = (130, 89, 120)
@@ -295,14 +278,33 @@ def stripe_mirror_draw_test():
   sm.draw()
   sm.draw_mount()
 
-def Rooftop_mirror_draw_test():
-  rm = Rooftop_mirror()
-  rm.pos = (120,50,130)
-  rm.normal = (1,-1,0)
-  rm.aperture = 10
-  rm.set_mount_to_default()
-  rm.draw()
-  rm.draw_mount()
+# from .component import Component
+# class Rooftop_mirror(Component):
+#   def __init__(self, **kwargs):
+#     super().__init__(**kwargs)
+#     self.freecad_model = model_rooftop_mirror
+#     self.set_mount_to_default()
+    
+#   def set_mount_to_default(self):
+#     smm = Rooftop_Mirror_Mount()
+#     smm.set_geom(self.get_geom())
+#     smm.pos += self.normal * self.aperture / 2
+#     self.Mount = smm
+
+#   def update_draw_dict(self):
+#     super().update_draw_dict()
+#     self.draw_dict["dia"] = self.aperture
+#     self.draw_dict["model_type"] = "Rooftop"    
+
+
+# def Rooftop_mirror_draw_test():
+#   rm = Rooftop_mirror()
+#   rm.pos = (120,50,130)
+#   rm.normal = (1,-1,0)
+#   rm.aperture = 10
+#   rm.set_mount_to_default()
+#   rm.draw()
+#   rm.draw_mount()
 
   # def set_mount_to_default(self):
   #   self.mount = Composed_Mount()

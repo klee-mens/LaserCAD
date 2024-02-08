@@ -15,10 +15,13 @@ if not pfad in sys.path:
   sys.path.append(pfad)
 from LaserCAD.moduls import Make_Amplifier_Typ_I_simple,Make_Amplifier_Typ_I_Mirror
 from LaserCAD.moduls import Make_Amplifier_Typ_II_simple,Make_Amplifier_Typ_II_Mirror
-from LaserCAD.moduls import Make_Amplifier_Typ_II_UpDown,Make_Amplifier_Typ_II_Juergen
-from LaserCAD.moduls import Make_Amplifier_Typ_II_with_theta,Make_Amplifier_Typ_II_plane
+from LaserCAD.moduls import Make_Amplifier_Typ_II_UpDown
+from LaserCAD.freecad_models import freecad_da, clear_doc, setview
 
-def Amplifter_Typ_I_test():  
+if freecad_da:
+  clear_doc()
+
+def Amplifter_Typ_I_test():
   Ampli1 = Make_Amplifier_Typ_I_simple()
   Ampli1.pos = (0, 0,100)
   Ampli1.draw()
@@ -30,23 +33,21 @@ def Amplifter_Typ_I_test():
 def Amplifter_Typ_II_test():
   Ampli1 = Make_Amplifier_Typ_II_simple()
   Ampli1.pos = (0, 0,100)
-  Ampli1.draw()
+  # Ampli1.draw()
   Ampli2 = Make_Amplifier_Typ_II_Mirror()
   Ampli2.pos = (0, 500,100)
-  Ampli2.draw()
+  # Ampli2.draw()
   Ampli3 = Make_Amplifier_Typ_II_UpDown()
   Ampli3.pos = (0, -500,100)
-  Ampli3.draw()
-  Ampli4 = Make_Amplifier_Typ_II_plane()
-  Ampli4.pos = (0, -1000,100)
-  Ampli4.draw()
-  Ampli5 = Make_Amplifier_Typ_II_with_theta()
-  Ampli5.pos = (0, 1000,100)
-  Ampli5.draw()
-  Ampli6 = Make_Amplifier_Typ_II_Juergen()
-  Ampli6.pos = (0, 1500,100)
-  Ampli6.draw()
-  return Ampli1,Ampli2,Ampli3,Ampli4,Ampli5,Ampli6
+  # Ampli3.draw()
+  return Ampli1,Ampli2,Ampli3
 
 if __name__ == "__main__":
-  Amplifter_Typ_I_test()
+  # Amplifter_Typ_I_test()
+  # Amplifter_Typ_II_test()
+  from LaserCAD.moduls.type_II_Amplifier import Make_Amplifier_Typ_II_plane
+  amp = Make_Amplifier_Typ_II_plane(roundtrips2=2)
+  # amp.draw()
+
+if freecad_da:
+  setview()

@@ -23,8 +23,9 @@ from scipy.misc import derivative
 from LaserCAD.freecad_models import clear_doc, freecad_da
 from LaserCAD.basic_optics import Mirror, Beam, Composition, inch
 from LaserCAD.basic_optics import Curved_Mirror, Ray, Lens
-from LaserCAD.basic_optics.mirror import Rooftop_mirror,Stripe_mirror
+from LaserCAD.basic_optics.mirror import Stripe_mirror
 # from LaserCAD.basic_optics import LinearResonator, Lens
+from LaserCAD.moduls import Make_RoofTop_Mirror
 from LaserCAD.basic_optics import Grating, Intersection_plane
 import matplotlib.pyplot as plt
 from LaserCAD.freecad_models.utils import thisfolder, load_STL
@@ -176,28 +177,30 @@ Stretcher.recompute_optical_axis()
 
 # adding the rooftop mirror and it's cosmetics
 Stretcher.propagate(distance_roof_top_grating)
-RoofTop1 = Mirror(phi=0, theta=90)
-Stretcher.add_on_axis(RoofTop1)
-Stretcher.propagate(periscope_height)
-RoofTop2 = Mirror(phi=0, theta=90)
-Stretcher.add_on_axis(RoofTop2)
+# RoofTop1 = Mirror(phi=0, theta=90)
+# Stretcher.add_on_axis(RoofTop1)
+# Stretcher.propagate(periscope_height)
+# RoofTop2 = Mirror(phi=0, theta=90)
+# Stretcher.add_on_axis(RoofTop2)
 
-RoofTop1.draw = dont
-# RoofTop1.draw_dict["mount_type"] = "dont_draw"
-# RoofTop1.Mount = Unit_Mount("dont_draw")
-RoofTop2.draw = dont
-# RoofTop2.Mount = Unit_Mount("dont_draw")
-RoofTop1.Mount.draw =dont
-RoofTop2.Mount.draw =dont
+# RoofTop1.draw = dont
+# # RoofTop1.draw_dict["mount_type"] = "dont_draw"
+# # RoofTop1.Mount = Unit_Mount("dont_draw")
+# RoofTop2.draw = dont
+# # RoofTop2.Mount = Unit_Mount("dont_draw")
+# RoofTop1.Mount.draw =dont
+# RoofTop2.Mount.draw =dont
 
-pure_cosmetic = Rooftop_mirror(name="RoofTop_Mirror")
-pure_cosmetic.draw_dict["mount_type"] = "rooftop_mirror_mount"
-pure_cosmetic.pos = (RoofTop1.pos + RoofTop2.pos ) / 2
-pure_cosmetic.normal = (RoofTop1.normal + RoofTop2.normal ) / 2
-# pure_cosmetic.draw = dont
-pure_cosmetic.aperture = periscope_height
-pure_cosmetic.draw_dict["model_type"] = "Rooftop"
-pure_cosmetic.set_mount_to_default()
+# pure_cosmetic = Rooftop_mirror(name="RoofTop_Mirror")
+# pure_cosmetic.draw_dict["mount_type"] = "rooftop_mirror_mount"
+# pure_cosmetic.pos = (RoofTop1.pos + RoofTop2.pos ) / 2
+# pure_cosmetic.normal = (RoofTop1.normal + RoofTop2.normal ) / 2
+# # pure_cosmetic.draw = dont
+# pure_cosmetic.aperture = periscope_height
+# pure_cosmetic.draw_dict["model_type"] = "Rooftop"
+# pure_cosmetic.set_mount_to_default()
+
+Stretcher.add_supcomposition_on_axis(Make_RoofTop_Mirror(height=periscope_height,up=False))
 
 # le1 = Lens(f=-75)
 # le1.pos -= (0,0,periscope_height)
@@ -309,7 +312,7 @@ Stretcher.add_fixed_elm(C_RoofTop1)
 Stretcher.add_fixed_elm(C_RoofTop2)
 """
 # Stretcher.add_fixed_elm(ip_s)
-Stretcher.add_fixed_elm(pure_cosmetic)
+# Stretcher.add_fixed_elm(pure_cosmetic)
 # Stretcher.add_fixed_elm(pure_cosmetic1)
 
 # setting the final sequence and the last propagation for visualization

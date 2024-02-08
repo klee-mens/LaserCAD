@@ -98,7 +98,7 @@ class Composition(Geom_Object):
   def add_supcomposition_on_axis(self, subcomp):
     subcomp.set_geom(self.last_geom())
     self.add_supcomposition_fixed(subcomp)
-  
+
   def add_supcomposition_fixed(self, subcomp):
     for element in subcomp._elements:
       self.add_fixed_elm(element)
@@ -156,6 +156,7 @@ class Composition(Geom_Object):
 
   def set_sequence(self, seq):
     self._sequence = list(seq)
+    # self.recompute_optical_axis()
 
   def compute_beams(self, external_source=None):
     beamcount = 0
@@ -246,11 +247,11 @@ class Composition(Geom_Object):
     ls.set_geom(self.get_geom())
     ls.name = self.name + "_Lightsource"
     self._beams = [self._lightsource]
-    group_ls = self._lightsource.get_all_rays()
-    counter = 0
-    for ray in group_ls:
-      ray.name = self._lightsource.name + "_" + str(counter)
-      counter += 1
+    # group_ls = self._lightsource.get_all_rays()
+    # counter = 0
+    # for ray in group_ls:
+    #   ray.name = self._lightsource.name + "_" + str(counter)
+    #   counter += 1
 
   def new_catalogue_entry(self, item):
     #gibt jedem neuen Element einen Namen entsprechend seiner Klasse

@@ -17,9 +17,11 @@ if freecad_da:
 
 DEFAULT_COLOR_CRIMSON = (0.86,0.08,0.24) #crimson
 MIN_RADIUS =0.5
+BEAM_TRANSPARENCY = 50
+# BEAM_TRANSPARENCY = 0
 
 
-def model_beam(name="beam", dia=10, prop=200,  f=130, color=DEFAULT_COLOR_CRIMSON, 
+def model_beam(name="beam", dia=10, prop=200,  f=130, color=DEFAULT_COLOR_CRIMSON,
                geom_info=None, **kwargs):
   """creates a red beam with length <prop>, diameter <dia>,
   fokus <f> and name ~
@@ -60,7 +62,7 @@ def model_beam(name="beam", dia=10, prop=200,  f=130, color=DEFAULT_COLOR_CRIMSO
 
   obj.Placement = FreeCAD.Placement(Vector(0,0,0), FreeCAD.Rotation(Vector(0,1,0),90), Vector(0,0,0))
   obj.ViewObject.ShapeColor = color
-  obj.ViewObject.Transparency = 50
+  obj.ViewObject.Transparency = BEAM_TRANSPARENCY
   obj.Label = name
   update_geom_info(obj, geom_info)
 
@@ -70,7 +72,7 @@ def model_beam(name="beam", dia=10, prop=200,  f=130, color=DEFAULT_COLOR_CRIMSO
 def model_beam_new(name="beam", radius=5, length=200,  angle=0.02,
                    color=DEFAULT_COLOR_CRIMSON,geom_info=None, **kwargs):
   DOC = get_DOC()
-  
+
   if abs(angle) < 1E-9:
     obj = DOC.addObject("Part::Cylinder", name)
     obj.Height = length
@@ -108,22 +110,22 @@ def model_beam_new(name="beam", radius=5, length=200,  angle=0.02,
       DOC.recompute()
   obj.Placement = FreeCAD.Placement(Vector(0,0,0), FreeCAD.Rotation(Vector(0,1,0),90), Vector(0,0,0))
   obj.ViewObject.ShapeColor = color
-  obj.ViewObject.Transparency = 50
+  # obj.ViewObject.Transparency = 50
   obj.Label = name
   update_geom_info(obj, geom_info)
 
   DOC.recompute()
   return obj
 
-def model_asti_beam (name="beam", dia_l=10,dia_s=10, prop=200,  f_l=100,f_s=150,rot_angle=0, color=DEFAULT_COLOR_CRIMSON, 
+def model_asti_beam (name="beam", dia_l=10,dia_s=10, prop=200,  f_l=100,f_s=150,rot_angle=0, color=DEFAULT_COLOR_CRIMSON,
                geom_info=None):
   """
   creates a beam that take astigmatism account
   Parameters
   ----------
-  name : string, 
+  name : string,
     beams name. The default is "beam".
-  dia_l : float, 
+  dia_l : float,
     diameter of one direction. The default is 10.
   dia_s : float, optional
     diameter of the other direction. The default is 10.
@@ -212,7 +214,7 @@ def model_asti_beam (name="beam", dia_l=10,dia_s=10, prop=200,  f_l=100,f_s=150,
         else:
           sketch_f2 = obj1.newObject('Sketcher::SketchObject', name+'_sketch_f2')
           sketch_f2.MapMode = 'FlatFace'
-          if f_l<f_s:  
+          if f_l<f_s:
             sketch_f2.addGeometry(Part.Ellipse(Vector(max(abs(dia_l/f_l*(f_s-f_l)),MIN_RADIUS),-0,0),Vector(0,MIN_RADIUS,0),Vector(0,0,0)),False)
             sketch_f2.Placement=Placement(Vector(0,0,f_s), Rotation(Vector(0,0,1),rot_angle), Vector(0,0,0))
           else:
@@ -371,14 +373,14 @@ def model_asti_beam (name="beam", dia_l=10,dia_s=10, prop=200,  f_l=100,f_s=150,
       obj1.ViewObject.Transparency = 50
       update_geom_info(obj1, geom_info)
       obj2=None
-      
+
   part = initialize_composition_old(name="asti beam")
   container = obj,obj1,obj2
   add_to_composition(part, container)
   part.Placement = FreeCAD.Placement(Vector(0,0,0), FreeCAD.Rotation(Vector(0,1,0),90), Vector(0,0,0))
   DOC.recompute()
   return part
-  
+
 def model_Gaussian_beam (name="Gaussian_beam",q_para=-100+200j,prop=200,wavelength=650E-6,
                           color=DEFAULT_COLOR_CRIMSON,beam_count=1, geom_info=None):
     """

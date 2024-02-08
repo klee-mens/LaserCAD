@@ -5,16 +5,16 @@ Created on Sat Aug 19 13:16:37 2023
 @author: mens
 """
 
-import numpy as np
-import sys
+# import numpy as np
+# import sys
 
-pfad = __file__
-pfad = pfad.replace("\\","/") #folder conventions windows linux stuff
-pfad = pfad.lower()
-ind = pfad.rfind("lasercad")
-pfad = pfad[0:ind-1]
-if not pfad in sys.path:
-  sys.path.append(pfad)
+# pfad = __file__
+# pfad = pfad.replace("\\","/") #folder conventions windows linux stuff
+# pfad = pfad.lower()
+# ind = pfad.rfind("lasercad")
+# pfad = pfad[0:ind-1]
+# if not pfad in sys.path:
+#   sys.path.append(pfad)
 
 
 # from LaserCAD.non_interactings import Iris
@@ -36,9 +36,10 @@ for i in range(len(MIRROR_LIST)):
   mir= Mirror()
   mir.aperture = aperture
   mir.Mount = M
-  mir.pos = (i*75,0,50+i*10)
+  mir.pos = (i*85, 0, 50+i*10)
+  mir.normal = (-1, 0.5, 0)
   if mir.aperture > 25.4*4:
-    mir.pos -= (50,0,0)
+    mir.pos -= (50, 0, 0)
     mir.Mount.pos += mir.normal*mir.thickness
   mir.draw()
   mir.Mount.draw()
@@ -46,12 +47,13 @@ for i in range(len(MIRROR_LIST)):
 for i in range(len(LENS_LIST)):
   M = Composed_Mount(unit_model_list=[LENS_LIST[i],"0.5inch_post"])
   aperture = M.mount_list[0].aperture
-  mir= Lens()
-  mir.aperture = aperture
-  mir.Mount = M
-  mir.pos = (i*75,-100,100+i*10)
-  mir.draw()
-  mir.Mount.draw()
+  lens= Lens()
+  lens.aperture = aperture
+  lens.Mount = M
+  lens.pos = (200 + i*85, -180, 90+i*10)
+  lens.normal = (-1, 0.5, 0)
+  lens.draw()
+  lens.Mount.draw()
 
 #   The above code is just a demonstration of how the mount is drawn. The next 
 # step is to demonstrate the practical use of the mount.

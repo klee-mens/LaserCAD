@@ -6,7 +6,7 @@ Created on Wed Aug 24 16:28:18 2022
 """
 
 
-from .utils import freecad_da, update_geom_info, get_DOC, rotate, thisfolder#,translate 
+from .utils import freecad_da, update_geom_info, get_DOC, rotate, thisfolder#,translate
 from .freecad_model_lens import model_lens
 from .freecad_model_composition import initialize_composition_old, add_to_composition
 import numpy as np
@@ -20,10 +20,11 @@ if freecad_da:
   import Sketcher
   import Part
   from math import pi
- 
+
 DEFAULT_COLOR_JOERG = (0.8,0.2,0.8)
 DEFAULT_COLOR = (199/255, 144/255, 28/255) #Messing
 DEFAULT_TRANSPARENCY = 50
+# DEFAULT_TRANSPARENCY = 0
 DEFALUT_MAX_ANGULAR_OFFSET = 10
 
 
@@ -104,10 +105,10 @@ def model_round_mirror(name="mirror", dia=25, thickness=5, Radius=0, geom=None, 
   return obj
 
 
-def model_stripe_mirror(name="Stripe_Mirror", dia=75, Radius=250, thickness=25, 
+def model_stripe_mirror(name="Stripe_Mirror", dia=75, Radius=250, thickness=25,
                         height=10, geom=None, pos=0, axes = "somthing", **kwargs):
   """
-    
+
 
     Parameters
     ----------
@@ -131,15 +132,15 @@ def model_stripe_mirror(name="Stripe_Mirror", dia=75, Radius=250, thickness=25,
     obj : TYPE
         object of mirror.
    example:
-       stripe_mirror=model_stripe_mirror(name="Stripe_Mirror", dia=60, 
-                                         Radius=300, thickness=30, height=15, 
+       stripe_mirror=model_stripe_mirror(name="Stripe_Mirror", dia=60,
+                                         Radius=300, thickness=30, height=15,
                                          geom=None,)
    """
   DOC = get_DOC()
   """Beispiel
   s.o.
   """
-  
+
   Radius *= -1
   a = 1 if Radius>0 else -1
 
@@ -149,29 +150,29 @@ def model_stripe_mirror(name="Stripe_Mirror", dia=75, Radius=250, thickness=25,
   sketch.MapMode = 'FlatFace'
   if a == 1:
     sketch.addGeometry(Part.ArcOfCircle(Part.Circle(Vector(Radius,0,0),Vector(0,0,1),abs(Radius)),0.9*a*pi,0.9*a*pi+0.2*pi),False)
-    sketch.addConstraint(Sketcher.Constraint('PointOnObject',-1,1,0)) 
-    sketch.addConstraint(Sketcher.Constraint('Symmetric',0,1,0,2,-1)) 
-    sketch.addConstraint(Sketcher.Constraint('Radius',0,Radius)) 
-    sketch.addConstraint(Sketcher.Constraint('DistanceY',0,2,0,1,dia)) 
+    sketch.addConstraint(Sketcher.Constraint('PointOnObject',-1,1,0))
+    sketch.addConstraint(Sketcher.Constraint('Symmetric',0,1,0,2,-1))
+    sketch.addConstraint(Sketcher.Constraint('Radius',0,Radius))
+    sketch.addConstraint(Sketcher.Constraint('DistanceY',0,2,0,1,dia))
   else:
     sketch.addGeometry(Part.ArcOfCircle(Part.Circle(Vector(Radius,0,0),Vector(0,0,1),abs(Radius)),np.arcsin(dia/(2*-Radius)),-np.arcsin(dia/(2*-Radius))),False)
-    sketch.addConstraint(Sketcher.Constraint('DistanceX',0,3,-1,1,-Radius)) 
-    sketch.addConstraint(Sketcher.Constraint('PointOnObject',0,3,-1)) 
-    sketch.addConstraint(Sketcher.Constraint('DistanceY',-1,1,0,2,dia/2)) 
-    sketch.addConstraint(Sketcher.Constraint('DistanceY',0,1,-1,1,dia/2)) 
-    sketch.addConstraint(Sketcher.Constraint('Radius',0,-Radius)) 
+    sketch.addConstraint(Sketcher.Constraint('DistanceX',0,3,-1,1,-Radius))
+    sketch.addConstraint(Sketcher.Constraint('PointOnObject',0,3,-1))
+    sketch.addConstraint(Sketcher.Constraint('DistanceY',-1,1,0,2,dia/2))
+    sketch.addConstraint(Sketcher.Constraint('DistanceY',0,1,-1,1,dia/2))
+    sketch.addConstraint(Sketcher.Constraint('Radius',0,-Radius))
   xx = Radius-pow(Radius**2-(dia/2)**2,0.5)
   sketch.addGeometry(Part.LineSegment(Vector(a*xx,dia/2,0.0),Vector(thickness,dia/2,0.0)),False)
-  sketch.addConstraint(Sketcher.Constraint('Coincident',1,1,0,1)) 
-  sketch.addConstraint(Sketcher.Constraint('Horizontal',1)) 
+  sketch.addConstraint(Sketcher.Constraint('Coincident',1,1,0,1))
+  sketch.addConstraint(Sketcher.Constraint('Horizontal',1))
   sketch.addGeometry(Part.LineSegment(Vector(thickness,dia/2,0.0),Vector(thickness,-dia/2,0.0)),False)
-  sketch.addConstraint(Sketcher.Constraint('Coincident',2,1,1,2)) 
-  sketch.addConstraint(Sketcher.Constraint('Vertical',2)) 
+  sketch.addConstraint(Sketcher.Constraint('Coincident',2,1,1,2))
+  sketch.addConstraint(Sketcher.Constraint('Vertical',2))
   sketch.addGeometry(Part.LineSegment(Vector(thickness,-dia/2,0),Vector(a*xx,-dia/2,0)),False)
-  sketch.addConstraint(Sketcher.Constraint('Coincident',3,1,2,2)) 
-  sketch.addConstraint(Sketcher.Constraint('Coincident',3,2,0,2)) 
-  sketch.addConstraint(Sketcher.Constraint('Horizontal',3)) 
-  sketch.addConstraint(Sketcher.Constraint('DistanceX',-1,1,2,2,thickness)) 
+  sketch.addConstraint(Sketcher.Constraint('Coincident',3,1,2,2))
+  sketch.addConstraint(Sketcher.Constraint('Coincident',3,2,0,2))
+  sketch.addConstraint(Sketcher.Constraint('Horizontal',3))
+  sketch.addConstraint(Sketcher.Constraint('DistanceX',-1,1,2,2,thickness))
 
   pad = obj.newObject('PartDesign::Pad','Pad')
   pad.Profile = sketch
@@ -181,7 +182,7 @@ def model_stripe_mirror(name="Stripe_Mirror", dia=75, Radius=250, thickness=25,
   sketch.Visibility = False
   # print("geom=",geom)
   # obj.Placement = Placement(Vector(0,0,0), Rotation(0,0,90), Vector(0,0,0))
-  
+
   if "color" in kwargs.keys():
     obj.ViewObject.ShapeColor = kwargs["color"]
   else:
@@ -195,7 +196,7 @@ def model_stripe_mirror(name="Stripe_Mirror", dia=75, Radius=250, thickness=25,
 
   DOC = get_DOC()
   DOC.recompute()
-  
+
   return obj
 
 
@@ -219,9 +220,9 @@ def model_rooftop_mirror(name="rooftop_mirror",dia=0, geom=None, **kwargs):
   -------
   obj : TYPE
     DESCRIPTION.
-    
+
   example:
-      stripe_mirror= model_rooftop_mirror(name="rooftop_mirror",dia=0, 
+      stripe_mirror= model_rooftop_mirror(name="rooftop_mirror",dia=0,
                                           geom=None, **kwargs)
   """
 
@@ -232,17 +233,17 @@ def model_rooftop_mirror(name="rooftop_mirror",dia=0, geom=None, **kwargs):
   sketch.MapMode = 'FlatFace'
 
   sketch.addGeometry(Part.LineSegment(Vector(0,0,0),Vector(24.748737,24.748737,0)),False)
-  sketch.addConstraint(Sketcher.Constraint('Coincident',-1,1,0,1)) 
+  sketch.addConstraint(Sketcher.Constraint('Coincident',-1,1,0,1))
   sketch.addGeometry(Part.LineSegment(Vector(24.748737,24.748737,0),Vector(24.748737,-24.748737,0)),False)
-  sketch.addConstraint(Sketcher.Constraint('Coincident',0,2,1,1)) 
-  sketch.addConstraint(Sketcher.Constraint('Vertical',1)) 
+  sketch.addConstraint(Sketcher.Constraint('Coincident',0,2,1,1))
+  sketch.addConstraint(Sketcher.Constraint('Vertical',1))
   sketch.addGeometry(Part.LineSegment(Vector(24.748737,-24.748737,0),Vector(0,0,0)),False)
-  sketch.addConstraint(Sketcher.Constraint('Coincident',1,2,2,1)) 
-  sketch.addConstraint(Sketcher.Constraint('Coincident',2,2,0,1)) 
-  sketch.addConstraint(Sketcher.Constraint('Angle',-1,1,0,1,45/180*np.pi)) 
-  sketch.addConstraint(Sketcher.Constraint('Angle',2,2,-1,1,45/180*np.pi)) 
-  sketch.addConstraint(Sketcher.Constraint('Distance',0,35)) 
-  
+  sketch.addConstraint(Sketcher.Constraint('Coincident',1,2,2,1))
+  sketch.addConstraint(Sketcher.Constraint('Coincident',2,2,0,1))
+  sketch.addConstraint(Sketcher.Constraint('Angle',-1,1,0,1,45/180*np.pi))
+  sketch.addConstraint(Sketcher.Constraint('Angle',2,2,-1,1,45/180*np.pi))
+  sketch.addConstraint(Sketcher.Constraint('Distance',0,35))
+
 
   pad = obj.newObject('PartDesign::Pad','Pad')
   pad.Profile = sketch
@@ -250,7 +251,7 @@ def model_rooftop_mirror(name="rooftop_mirror",dia=0, geom=None, **kwargs):
   pad.ReferenceAxis = (sketch,['N_Axis'])
   pad.Midplane = 1
   sketch.Visibility = False
-  
+
   if "color" in kwargs.keys():
     obj.ViewObject.ShapeColor = kwargs["color"]
   else:
@@ -263,8 +264,7 @@ def model_rooftop_mirror(name="rooftop_mirror",dia=0, geom=None, **kwargs):
   offset=Vector(dia/2,0,0)
   obj.Placement = Placement(offset, Rotation(0,-180,90), Vector(0,0,0))
   update_geom_info(obj, geom, off0=offset)
-  # DOC = get_DOC()
   DOC.recompute()
-  
+
   return obj
 

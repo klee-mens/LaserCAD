@@ -14,6 +14,8 @@ if not pfad in sys.path:
   sys.path.append(pfad)
 from LaserCAD.basic_optics import LinearResonator,Mirror,Lens,Curved_Mirror,Composition,Beam,Intersection_plane
 import numpy as np
+from LaserCAD.freecad_models import freecad_da, clear_doc, setview
+
 
 
 def simple_resonator_test():
@@ -31,7 +33,6 @@ def simple_resonator_test():
   return res
 
 def three_resonators_test():
-  from basic_optics.resonator import LinearResonator
 
   res = LinearResonator(name="SimpleRes")
   g = 0.2
@@ -168,9 +169,16 @@ def Lab_Resonator_test():
   seq=np.append(seq, [0,1])
   Comp.set_sequence(seq)
   Comp.propagate(500)
+  Comp.pos += (115,0,0)
   Comp.draw()
   
   return Comp
 
 if __name__ == "__main__":
+
+  if freecad_da:
+    clear_doc()
+  three_resonators_test()
   Lab_Resonator_test()
+  if freecad_da:
+    setview()

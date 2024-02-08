@@ -96,6 +96,7 @@ class Geom_Object(object):
     # das eigene Kordinatensystem, die erste Spalte ist immer die Normale
     self.draw_dict = {"name": self.name, "geom":self.get_geom()}
     self.freecad_model = model_geom_object
+    self.invisible = False
 
   @property
   def pos(self):
@@ -373,6 +374,8 @@ class Geom_Object(object):
     checks whether freecad is available as backend and then calls the
     corresponding draw function
     """
+    if self.invisible:
+      return None
     if freecad_da:
       return self.draw_freecad()
     else:

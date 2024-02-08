@@ -25,9 +25,8 @@ from LaserCAD.freecad_models import freecad_da, clear_doc, setview
 # =============================================================================
 
 """
-Quick intro to compositions. Output is exactly the same but as in 
-LensesAndMirrors positioning is easier
-
+Quick intro to compositions. Output is similar to the one in LensesAndMirrors 
+but the positioning is automatized by the Composition.
 
 You create the composition and add alternating propagations and element. All
 elements will be placed on the optical axes in the exact position automatically. 
