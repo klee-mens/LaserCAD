@@ -129,6 +129,7 @@ if freecad_da:
   setview()
 ```
 <img src="/images/2_PositionAndAxes_1.png" alt="Alt-Text" title="" />
+
 # 3_RaysAndBeams
 ```python
 # =============================================================================
@@ -198,6 +199,7 @@ print()
 ```
 <img src="/images/3_RaysAndBeams_1.png" alt="Alt-Text" title="" />
 <img src="/images/3_RaysAndBeams_2.png" alt="Alt-Text" title="" />
+
 # 4_LensesAndMirrors
 ```python
 # =============================================================================
