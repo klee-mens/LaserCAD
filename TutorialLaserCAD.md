@@ -128,6 +128,7 @@ mir1.draw_mount()
 if freecad_da:
   setview()
 ```
+<img src="/images/2_PositionAndAxes_1.png" alt="Alt-Text" title="" />
 # 3_RaysAndBeams
 ```python
 # =============================================================================
@@ -195,7 +196,8 @@ b4.draw()
 print()
 print()
 ```
-
+<img src="/images/3_RaysAndBeams_1.png" alt="Alt-Text" title="" />
+<img src="/images/3_RaysAndBeams_2.png" alt="Alt-Text" title="" />
 # 4_LensesAndMirrors
 ```python
 # =============================================================================
@@ -341,6 +343,8 @@ print()
 if freecad_da:
   setview()
 ```
+<img src="/images/4_LensesAndMirrors_1.png" alt="Alt-Text" title="" />
+<img src="/images/4_LensesAndMirrors_2.png" alt="Alt-Text" title="" />
 
 # 5_Composition
 ```python
@@ -418,6 +422,10 @@ if freecad_da:
 
 ```
 
+<img src="/images/5_Composition_1.png" alt="Alt-Text" title="" />
+
+<img src="/images/5_Composition_2.png" alt="Alt-Text" title="" />
+
 # 6_LinearResonator
 ```python
 import numpy as np
@@ -490,5 +498,9 @@ from LaserCAD.freecad_models.freecad_model_mirror import model_mirror
 if freecad_da:
   setview()
 ```
+
+<img src="/images/6_LinearResonator_1.png" alt="Alt-Text" title="" />
+
+<img src="/images/6_LinearResonator_2.png" alt="Alt-Text" title="" />
 
 # 7_FunnyLooks
