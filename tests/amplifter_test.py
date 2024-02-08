@@ -47,7 +47,7 @@ if __name__ == "__main__":
   # Amplifter_Typ_II_test()
   from LaserCAD.moduls.type_II_Amplifier import Make_Amplifier_Typ_II_plane
   amp = Make_Amplifier_Typ_II_plane(roundtrips2=2)
-  # amp.draw()
+  amp.draw()
 
 if freecad_da:
   setview()
