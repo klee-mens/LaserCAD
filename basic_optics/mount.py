@@ -360,7 +360,9 @@ class Composed_Mount(Geom_Object):
   """
   This one is for compositions of mulitple mounts stacked togehter
   The add function drags every new mount to the docking position of the old one
-  and as usual all are moved correctly when the Composed_Mount is moved
+  and as usual all are moved correctly when the Composed_Mount is moved.
+  
+  Example: cm = Composed_Mount(unit_model_list=["KS1", "1inch_post"])
   """
   def __init__(self, unit_model_list=[], **kwargs):
     self.unit_model_list = unit_model_list
