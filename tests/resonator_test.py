@@ -4,9 +4,18 @@ Created on Thu Jun 22 10:53:52 2023
 
 @author: 12816
 """
-
-from basic_optics import LinearResonator,Mirror,Lens,Curved_Mirror,Composition,Beam,Intersection_plane
+import sys
+pfad = __file__
+pfad = pfad.replace("\\","/") #folder conventions windows linux stuff
+pfad = pfad.lower()
+ind = pfad.rfind("lasercad")
+pfad = pfad[0:ind-1]
+if not pfad in sys.path:
+  sys.path.append(pfad)
+from LaserCAD.basic_optics import LinearResonator,Mirror,Lens,Curved_Mirror,Composition,Beam,Intersection_plane
 import numpy as np
+from LaserCAD.freecad_models import freecad_da, clear_doc, setview
+
 
 
 def simple_resonator_test():
@@ -24,7 +33,6 @@ def simple_resonator_test():
   return res
 
 def three_resonators_test():
-  from basic_optics.resonator import LinearResonator
 
   res = LinearResonator(name="SimpleRes")
   g = 0.2
@@ -113,19 +121,7 @@ def three_resonators_test():
 
 def Lab_Resonator_test():
   inch = 25.4
-
-  # from basic_optics.tests import three_resonators_test
-  # res1,res2,res3 = three_resonators_test()
-  # teles = Make_Telescope()
-  # teles.draw()
-  # if freecad_da:
-  #   input_output_test()
-  # stretcher = Make_Stretcher()
-  # stretcher.pos=(0,0,100)
-  # stretcher.draw_elements()
-  # stretcher.draw_rays()
-  # stretcher.draw()
-
+  
   d1 = 317
   d2 = 126
   d3 = 285
@@ -144,10 +140,12 @@ def Lab_Resonator_test():
   lightsourse=Beam(distribution="cone")
   lightsourse.normal = (-1,0,0)
   ip = Intersection_plane()
-  ip.pos = (317.,  -0., 100.)+(0.30653, -0.95186,  0.)*500
-
+  ip.pos = np.array((317.,  -0., 100.))+np.array((0.30653, -0.95186,  0.))*500
+  
   ip.normal = (0.30653, -0.95186,  0.)
-  Comp = Composition(pos=(317,0,100),normal=(-1,0,0))
+  Comp = Composition()
+  Comp.pos = (317,0,100)
+  Comp.normal = (-1,0,0)
   # Comp = LinearResonator(pos= (0,0,100),normal=(-1,0,0))
   Comp.set_light_source(lightsourse)
   Comp.propagate(317)
@@ -160,19 +158,27 @@ def Lab_Resonator_test():
   Comp.add_on_axis(Curved)
   Comp.propagate(d4)
   Comp.add_on_axis(End_Mirror2)
-
-
+  
+  
   seq = np.array([0,1,2,3,4,3,2,1])
   roundtrip_sequence = list(seq)
-
+  
   roundtrip=1
   for n in range(roundtrip-1):
     seq = np.append(seq,roundtrip_sequence)
   seq=np.append(seq, [0,1])
   Comp.set_sequence(seq)
   Comp.propagate(500)
+  Comp.pos += (115,0,0)
   Comp.draw()
   
   return Comp
 
-Lab_Resonator_test()
+if __name__ == "__main__":
+
+  if freecad_da:
+    clear_doc()
+  three_resonators_test()
+  Lab_Resonator_test()
+  if freecad_da:
+    setview()

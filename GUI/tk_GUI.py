@@ -14,7 +14,7 @@ sys.path.append('E:\Programme\Spyder\pkgs')
 
 from LaserCAD import basic_optics
 
-from LaserCAD.basic_optics import Mirror,Beam,Cylindrical_Mirror,Intersection_plane,Cylindrical_Mirror1,Curved_Mirror,Ray, Composition, Grating, Lam_Plane
+from LaserCAD.basic_optics import Mirror,Beam,Cylindrical_Mirror,Intersection_plane,Cylindrical_Mirror1,Curved_Mirror,Ray, Composition, Grating
 from LaserCAD.basic_optics import Geom_Object,Lens
 from LaserCAD.freecad_models import clear_doc, freecad_da
 
@@ -24,7 +24,7 @@ from copy import deepcopy
 import tkinter as tk
 from tkinter.filedialog import asksaveasfile 
 
-def GUI(path=""):
+def GUI():
   global comp, element_list,ls
 
   comp = Composition()

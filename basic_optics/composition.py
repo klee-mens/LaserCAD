@@ -8,16 +8,12 @@ Created on Sun Aug 21 20:47:17 2022
 
 from .ray import Ray
 from .beam import Beam
-# from .optical_element import Opt_Element
 from .geom_object import Geom_Object
-# from .lens import Lens
-# from .mirror import Mirror, Curved_Mirror
 from ..freecad_models import warning, freecad_da, initialize_composition, add_to_composition
 import numpy as np
 from copy import deepcopy
 
 
-# class Composition(Opt_Element):
 class Composition(Geom_Object):
   """
   Komposition von Elementen, besitzt optical Axis die mit jedem Element und
@@ -34,18 +30,11 @@ class Composition(Geom_Object):
     self._elements = []
     self._sequence = []
     self._last_prop = 0 #für den Fall, dass eine letzte Propagation nach einem Element noch erwünscht ist
-    # self._last_geom = self.get_geom()
 
     self._lightsource = Beam(radius=1, angle=0)
     self._lightsource.set_geom(self.get_geom())
     self._lightsource.name = self.name + "_Lighsource"
     self._beams = [self._lightsource]
-    group_ls = self._lightsource.get_all_rays()
-    counter = 0
-    # for ray in group_ls:
-    #   ray.name = self._lightsource.name + "_" + str(counter)
-    #   counter += 1
-    # self._ray_groups = [group_ls]
     self._catalogue = {}
     self._drawing_part = -1
     self.non_opticals = []
@@ -109,7 +98,7 @@ class Composition(Geom_Object):
   def add_supcomposition_on_axis(self, subcomp):
     subcomp.set_geom(self.last_geom())
     self.add_supcomposition_fixed(subcomp)
-  
+
   def add_supcomposition_fixed(self, subcomp):
     for element in subcomp._elements:
       self.add_fixed_elm(element)
@@ -157,11 +146,7 @@ class Composition(Geom_Object):
       B = self._optical_axis[counter].length
       M = self._elements[ind]._matrix
       self._matrix = np.matmul(np.array([[1,B], [0,1]]), self._matrix )
-      # print("--")
-      # print(self._matrix)
-      # print("--")
       self._matrix = np.matmul(M, self._matrix )
-    # self._matrix = np.matmul(np.array([[1,self._last_prop], [0,1]]), self._matrix )
     self._matrix = np.matmul(np.array([[1,self._last_prop], [0,1]]), self._matrix ) #last propagation
 
     return np.array(self._matrix)
@@ -172,7 +157,6 @@ class Composition(Geom_Object):
   def set_sequence(self, seq):
     self._sequence = list(seq)
     # self.recompute_optical_axis()
-
 
   def compute_beams(self, external_source=None):
     beamcount = 0
@@ -241,19 +225,15 @@ class Composition(Geom_Object):
   def __init_parts(self):
     if self._drawing_part == -1:
       if freecad_da:
-        # d,e,m,b,r = initialize_composition(self.name)
         d,e,m,b = initialize_composition(self.name)
         self._drawing_part = d
         self._elements_part = e
         self._mounts_part = m
         self._beams_part = b
-        # self._rays_part = r
       else:
         self._elements_part = []
         self._mounts_part = []
-        # self._rays_part = []
         self._beams_part = []
-        # self._drawing_part = [self._elements_part, self._mounts_part, self._rays_part, self._beams_part]
         self._drawing_part = [self._elements_part, self._mounts_part, self._beams_part]
 
 
@@ -263,19 +243,15 @@ class Composition(Geom_Object):
     deren Geom und Namen an
     danach werden _beams[] und raygroups[] neu initialisiert
     """
-
     self._lightsource = ls
-    # self.set_geom(ls.get_geom())
     ls.set_geom(self.get_geom())
     ls.name = self.name + "_Lightsource"
     self._beams = [self._lightsource]
-    group_ls = self._lightsource.get_all_rays()
-    counter = 0
-    for ray in group_ls:
-      ray.name = self._lightsource.name + "_" + str(counter)
-      counter += 1
-    # self._ray_groups = [group_ls]
-
+    # group_ls = self._lightsource.get_all_rays()
+    # counter = 0
+    # for ray in group_ls:
+    #   ray.name = self._lightsource.name + "_" + str(counter)
+    #   counter += 1
 
   def new_catalogue_entry(self, item):
     #gibt jedem neuen Element einen Namen entsprechend seiner Klasse
@@ -297,17 +273,16 @@ class Composition(Geom_Object):
       warning("Das Element -" + str(item) + "- wurde bereits in <" +
             self.name + "> eingefügt.")
 
+
   def _pos_changed(self, old_pos, new_pos):
     """
     wird aufgerufen, wen die Position von <self> verändert wird
     ändert die Position aller __rays mit
     """
-    # print("---pos---geändert---")
     super()._pos_changed(old_pos, new_pos)
     self._rearange_subobjects_pos(old_pos, new_pos, self._elements)
     self._rearange_subobjects_pos(old_pos, new_pos, [self._lightsource]) #sonst wird ls doppelt geshifted
     self._rearange_subobjects_pos(old_pos, new_pos, self._beams[1::])
-    # self._rearange_subobjects_pos(old_pos, new_pos, [r for rg in self._ray_groups[1::] for r in rg])
     self._rearange_subobjects_pos(old_pos, new_pos, self._optical_axis)
     self._rearange_subobjects_pos(old_pos, new_pos, self.non_opticals)
 
@@ -322,11 +297,8 @@ class Composition(Geom_Object):
     self._rearange_subobjects_axes(old_axes, new_axes, [self._lightsource]) #sonst wird ls doppelt geshifted
     self._rearange_subobjects_axes(old_axes, new_axes, self._elements)
     self._rearange_subobjects_axes(old_axes, new_axes, self._beams[1::])
-    # self._rearange_subobjects_axes(old_axes, new_axes, [r for rg in self._ray_groups[1::] for r in rg])
     self._rearange_subobjects_axes(old_axes, new_axes, self._optical_axis)
     self._rearange_subobjects_axes(old_axes, new_axes, self.non_opticals)
-
-
 
 
 def next_name(name, prefix=""):

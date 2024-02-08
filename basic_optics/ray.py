@@ -28,7 +28,9 @@ class Ray(Geom_Object):
     super().__init__(**kwargs)
     self.length = DEFAULT_LENGTH #willkürlich, muss immer neu berechnet werden
     self.wavelength = 660e-6 #Wellenlänge in mm; Default: 660nm
-    self.draw_dict.update({"length":self.length})
+    self.update_draw_dict()
+    self.freecad_model = model_ray_1D
+    # self.draw_dict.update({"length":self.length})
 
   def endpoint(self):
     return self.pos + self.length * self.normal
@@ -180,7 +182,9 @@ class Ray(Geom_Object):
     element : geom_object
     """
     self.set_geom(element.get_geom())
-    pos, norm = element.get_geom()
+    # pos, norm = element.get_geom()
+    # pos = element.pos
+    # norm = element.normal
     xa, ya, za = element.get_coordinate_system()
     vec_in_eb = za*np.cos(theta) - ya*np.sin(theta)
     self.pos += vec_in_eb*h
@@ -191,10 +195,10 @@ class Ray(Geom_Object):
     super().update_draw_dict()
     self.draw_dict["length"] = self.length
 
-  def draw_fc(self):
-    self.update_draw_dict()
-    obj = model_ray_1D(**self.draw_dict)
-    return obj
+  # def draw_freecad(self, **kwargs):
+    # self.update_draw_dict()
+    # obj = model_ray_1D(**self.draw_dict)
+    # return obj
 
 
 

@@ -5,8 +5,8 @@ Created on Thu Jun 22 10:56:05 2023
 @author: 12816
 """
 
-from .. basic_optics import Mirror, Lens, Beam, Composition, inch,Curved_Mirror
 import numpy as np
+from .. basic_optics import Mirror, Lens, Beam, Composition, inch, Curved_Mirror
 
 
 def Make_Amplifier_Typ_I_simple(name = "AmpTyp1s", focal_length=600,
@@ -22,16 +22,19 @@ def Make_Amplifier_Typ_I_simple(name = "AmpTyp1s", focal_length=600,
   plane_mir2.pos = (0,0,0) # der Ausgangspunkt
   plane_mir2.normal = (-1,0,0) # umgekehrte Ausrichtung des Aufbaus
   plane_mir2.aperture = aperture_small
+  plane_mir2.set_mount_to_default()
   
   lens1 = Lens(f=focal_length)
   lens1.normal = (1,0,0) #eigentlich egal, kann auch +1,0,0 sein
   lens1.pos = (dist1,0,0) #d2 = b vom cm2 entfernt
   lens1.aperture = aperture_big
+  lens1.set_mount_to_default()
   
   lens2 = Lens(f=focal_length)
   lens2.normal = (1,0,0) #eigentlich egal, kann auch +1,0,0 sein
   lens2.pos = (dist1+dist2,0,0) #d2 = b vom cm2 entfernt
   lens2.aperture = aperture_big
+  lens2.set_mount_to_default()
   
   plane_mir1 = Mirror()
   plane_mir1.pos = (dist1*2+dist2, 0, 0)
@@ -40,6 +43,7 @@ def Make_Amplifier_Typ_I_simple(name = "AmpTyp1s", focal_length=600,
   # print("p1:", lens1.pos - (0, beam_sep, 0))
   plane_mir1.set_normal_with_2_points(point0, point1)
   plane_mir1.aperture = aperture_small
+  plane_mir1.set_mount_to_default()
   
   ls = Beam(angle=0) # kollimierter Anfangsbeam
   # ls.pos = beam_pos
@@ -79,16 +83,19 @@ def Make_Amplifier_Typ_I_Mirror(name = "AmpTyp1sr", focal_length=600,
   plane_mir2.pos = (dist1*np.cos(theta*2),dist1*np.sin(theta*2),0) # der Ausgangspunkt
   plane_mir2.normal = plane_mir2.pos # umgekehrte Ausrichtung des Aufbaus
   plane_mir2.aperture = aperture_small
+  plane_mir2.set_mount_to_default()
   
   cm2 = Curved_Mirror(radius=Radius1)
   cm2.normal = (-np.cos(theta),-np.sin(theta),0) #eigentlich egal, kann auch +1,0,0 sein
   cm2.pos = (0,0,0) #d2 = b vom cm2 entfernt
   cm2.aperture = aperture_big
+  cm2.set_mount_to_default()
   
   cm1 = Curved_Mirror(radius=Radius1)
   cm1.normal = (np.cos(theta),np.sin(theta),0) #eigentlich egal, kann auch +1,0,0 sein
   cm1.pos = (dist2,0,0) #d2 = b vom cm2 entfernt
   cm1.aperture = aperture_big
+  cm1.set_mount_to_default()
   
   plane_mir1 = Mirror()
   plane_mir1.pos = (dist2-dist1*np.cos(theta*2), -dist1*np.sin(theta*2), 0)
@@ -97,13 +104,11 @@ def Make_Amplifier_Typ_I_Mirror(name = "AmpTyp1sr", focal_length=600,
   # print("p1:", lens1.pos - (0, beam_sep, 0))
   plane_mir1.set_normal_with_2_points(point0, point1)
   plane_mir1.aperture = aperture_small
+  plane_mir1.set_mount_to_default()
   
   ls = Beam(angle=0) # kollimierter Anfangsbeam
-  # ls.pos = beam_pos
-  # ls.normal = plane_mir.pos - beam_pos #soll direkt auch den Planspiegel zeigen
 
   AmpTyp1 = Composition(name=name)
-  # print("geom0:", beam_pos, plane_mir.pos - beam_pos)
   AmpTyp1.pos = beam_pos
   AmpTyp1.normal = plane_mir1.pos - beam_pos
   AmpTyp1.set_light_source(ls)

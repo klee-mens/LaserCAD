@@ -27,6 +27,7 @@ class Intersection_plane(Opt_Element):
     self.draw_dict["Radius"] = dia/2
     self.draw_dict["dia"]=dia
     self.aperture=dia
+    self.freecad_model = model_intersection_plane
     # self.interacts_with_rays = False
     
   def next_ray(self, ray):
@@ -35,9 +36,9 @@ class Intersection_plane(Opt_Element):
     # return ray2
     return ray2
   
-  def draw_fc(self):
-    self.update_draw_dict()
-    return model_intersection_plane(**self.draw_dict)
+  # def draw_fc(self):
+    # self.update_draw_dict()
+    # return model_intersection_plane(**self.draw_dict)
   
   
   def spot_diagram(self, beam, aberration_analysis=False):

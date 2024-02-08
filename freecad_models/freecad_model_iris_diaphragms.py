@@ -76,7 +76,7 @@ def model_intersection_plane(name="intersection_plane", Radius=25, geom=None, **
   obj.Placement=Placement(Vector(0,0,0), Rotation(90,0,90), Vector(0,0,0))
   update_geom_info(obj, geom)
   
-  DOC.recompute()
+  #DOC.recompute()
   return obj
   
 def model_diaphragms(name="diaphragms", Radius=25,Hole_Radius=2, thickness=5,height=20, geom=None, **kwargs):
@@ -139,7 +139,7 @@ def model_diaphragms(name="diaphragms", Radius=25,Hole_Radius=2, thickness=5,hei
   pad.Midplane = 1
   sketch.Visibility = False
   
-  DOC.recompute()
+  #DOC.recompute()
   sketch001 = obj.newObject('Sketcher::SketchObject', name+'_sketch001')
   sketch001.Support = (pad,['Face3',])
   sketch001.MapMode = 'FlatFace'
@@ -165,7 +165,7 @@ def model_diaphragms(name="diaphragms", Radius=25,Hole_Radius=2, thickness=5,hei
   obj.Placement=Placement(Vector(0,0,0), Rotation(90,0,90), Vector(0,0,0))
   update_geom_info(obj, geom)
   
-  DOC.recompute()
+  #DOC.recompute()
   return obj
 
 def model_iris_diaphragms(name="iris", Radius1=10, Radius2=25,Hole_Radius=2, thickness=5,height=20, geom=None, **kwargs):
@@ -237,7 +237,7 @@ def model_iris_diaphragms(name="iris", Radius1=10, Radius2=25,Hole_Radius=2, thi
   sketch.Visibility = False
   
   
-  DOC.recompute()
+  #DOC.recompute()
   sketch001 = obj.newObject('Sketcher::SketchObject', name+'_sketch001')
   sketch001.Support = (pad,['Face3',])
   sketch001.MapMode = 'FlatFace'
@@ -260,7 +260,7 @@ def model_iris_diaphragms(name="iris", Radius1=10, Radius2=25,Hole_Radius=2, thi
   obj.Placement=Placement(Vector(0,0,0), Rotation(90,0,90), Vector(0,0,0))
   update_geom_info(obj, geom)
   
-  DOC.recompute()
+  #DOC.recompute()
   return obj
 
 def iris_post(height=20,geom = None, **kwargs):

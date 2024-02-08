@@ -8,7 +8,7 @@ Created on Sun Aug 21 20:28:02 2022
 
 # from basic_optics import Opt_Element
 # from .basic_optics.freecad_models import model_lens
-from ..freecad_models import model_lens, lens_mount, model_crystal,model_crystal_mount
+from ..freecad_models import model_crystal,model_crystal_mount
 from .optical_element import Opt_Element
 from copy import deepcopy
 import numpy as np
@@ -19,14 +19,25 @@ class Crystal(Opt_Element):
   no definiation of the intensity.
   """
   def __init__(self, width=10,model="cube",thickness=10,n=1.5, name="NewCrystal", **kwargs):
+    self.thickness=thickness
+    self.width = width
+    self.height = width
     super().__init__(name=name, **kwargs)
     self.draw_dict["width"]=width
     self.draw_dict["height"]=width
     self.draw_dict["model"]=model
     self._matrix[0,1] = thickness*(1/n-1)
-    self.thickness=thickness
     self.draw_dict["thickness"]=self.thickness
     self.relative_refractive_index = n
+    self.freecad_model = model_crystal
+    self.Mount.freecad_model = model_crystal_mount
+  
+  def set_mount_to_default(self):
+    super().set_mount_to_default()
+    self.Mount.freecad_model = model_crystal_mount
+    self.Mount.draw_dict["width"]=self.width
+    self.Mount.draw_dict["height"]=self.height
+    self.Mount.draw_dict["thickness"]=self.thickness
 
   def next_ray(self, ray):
     ray2 = deepcopy(ray)
@@ -75,9 +86,9 @@ class Crystal(Opt_Element):
       ray4.pos = ray3.endpoint()
     return ray4
 
-  def draw_fc(self):
-    self.update_draw_dict()
-    return model_crystal(**self.draw_dict)
+  # def draw_freecad(self, **kwargs):
+    # self.update_draw_dict()
+    # return model_crystal(**self.draw_dict)
 
   def draw_mount_fc(self):
     self.update_draw_dict()
@@ -95,15 +106,9 @@ class Crystal(Opt_Element):
   def __repr__(self):
     n = len(self.class_name())
     txt = 'Crystal('
-    
-    # txt = 'Lens(f=' + repr(self.focal_length)
     txt += ', ' + super().__repr__()[n+1::]
     return txt
 
-  # def to_dict(self):
-  #   dc = super().to_dict()
-
-  #   return dc
 
   def from_dict(dc):
     oe = Opt_Element()

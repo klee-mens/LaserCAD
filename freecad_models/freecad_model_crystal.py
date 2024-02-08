@@ -18,6 +18,7 @@ import numpy as np
 #import math
 
 DEFALUT_MAX_ANGULAR_OFFSET = 10
+DEFAULT_COLOR_LENS = (0/84,0/255,255/255)
 DEFAULT_COLOR_CRYSTAL = (131/255,27/255,44/255)
 DEFALUT_MOUNT_COLOR = (207/255,138/255,0/255)
 import csv
@@ -27,6 +28,7 @@ if freecad_da:
   import ImportGui
   import Part
   import Sketcher
+
 
 
 def model_crystal(name="crystal",model="cube", width=50, height=10, thickness=25, color=DEFAULT_COLOR_CRYSTAL,Transparency=50, geom=None, **kwargs):
@@ -59,6 +61,7 @@ def model_crystal(name="crystal",model="cube", width=50, height=10, thickness=25
     DESCRIPTION.
 
   """
+  print(geom)
   DOC = get_DOC()
   if model== "round":
     obj = model_lens(name, dia=width, Radius1=0, Radius2=0, thickness=thickness)
@@ -101,12 +104,10 @@ def model_crystal(name="crystal",model="cube", width=50, height=10, thickness=25
   
   obj.ViewObject.ShapeColor = color
   obj.ViewObject.Transparency = Transparency
-  
   obj.Placement=Placement(Vector(0,0,0), Rotation(90,0,90), Vector(0,0,0))
-  
   update_geom_info(obj, geom)
   DOC.recompute()
-
+  print(obj.Placement)
   return obj
 
 def model_crystal_mount(name="crystal_mount",model="cube", width=50, height=10, thickness=25, geom=None, **kwargs):

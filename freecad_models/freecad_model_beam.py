@@ -6,11 +6,6 @@ Created on Wed Aug 24 01:31:42 2022
 @author: mens
 """
 
-import sys
-# sys.path.append(u'/home/mens/Nextcloud/FreeCAD/opticslib2/basic_objects/freecad_models')
-# sys.path.append(u"C:/Users/mens/Nextcloud/FreeCAD/opticslib2/basic_objects/freecad_models")
-
-# from .utils import freecad_da, update_geom_info
 from .utils import freecad_da, update_geom_info, get_DOC
 from .freecad_model_composition import initialize_composition_old, add_to_composition
 import numpy as np
@@ -22,9 +17,11 @@ if freecad_da:
 
 DEFAULT_COLOR_CRIMSON = (0.86,0.08,0.24) #crimson
 MIN_RADIUS =0.5
+BEAM_TRANSPARENCY = 50
+# BEAM_TRANSPARENCY = 0
 
 
-def model_beam(name="beam", dia=10, prop=200,  f=130, color=DEFAULT_COLOR_CRIMSON, 
+def model_beam(name="beam", dia=10, prop=200,  f=130, color=DEFAULT_COLOR_CRIMSON,
                geom_info=None, **kwargs):
   """creates a red beam with length <prop>, diameter <dia>,
   fokus <f> and name ~
@@ -65,7 +62,7 @@ def model_beam(name="beam", dia=10, prop=200,  f=130, color=DEFAULT_COLOR_CRIMSO
 
   obj.Placement = FreeCAD.Placement(Vector(0,0,0), FreeCAD.Rotation(Vector(0,1,0),90), Vector(0,0,0))
   obj.ViewObject.ShapeColor = color
-  obj.ViewObject.Transparency = 50
+  obj.ViewObject.Transparency = BEAM_TRANSPARENCY
   obj.Label = name
   update_geom_info(obj, geom_info)
 
@@ -75,7 +72,7 @@ def model_beam(name="beam", dia=10, prop=200,  f=130, color=DEFAULT_COLOR_CRIMSO
 def model_beam_new(name="beam", radius=5, length=200,  angle=0.02,
                    color=DEFAULT_COLOR_CRIMSON,geom_info=None, **kwargs):
   DOC = get_DOC()
-  
+
   if abs(angle) < 1E-9:
     obj = DOC.addObject("Part::Cylinder", name)
     obj.Height = length
@@ -113,22 +110,22 @@ def model_beam_new(name="beam", radius=5, length=200,  angle=0.02,
       DOC.recompute()
   obj.Placement = FreeCAD.Placement(Vector(0,0,0), FreeCAD.Rotation(Vector(0,1,0),90), Vector(0,0,0))
   obj.ViewObject.ShapeColor = color
-  obj.ViewObject.Transparency = 50
+  # obj.ViewObject.Transparency = 50
   obj.Label = name
   update_geom_info(obj, geom_info)
 
   DOC.recompute()
   return obj
 
-def model_asti_beam (name="beam", dia_l=10,dia_s=10, prop=200,  f_l=100,f_s=150,rot_angle=0, color=DEFAULT_COLOR_CRIMSON, 
+def model_asti_beam (name="beam", dia_l=10,dia_s=10, prop=200,  f_l=100,f_s=150,rot_angle=0, color=DEFAULT_COLOR_CRIMSON,
                geom_info=None):
   """
   creates a beam that take astigmatism account
   Parameters
   ----------
-  name : string, 
+  name : string,
     beams name. The default is "beam".
-  dia_l : float, 
+  dia_l : float,
     diameter of one direction. The default is 10.
   dia_s : float, optional
     diameter of the other direction. The default is 10.
@@ -217,7 +214,7 @@ def model_asti_beam (name="beam", dia_l=10,dia_s=10, prop=200,  f_l=100,f_s=150,
         else:
           sketch_f2 = obj1.newObject('Sketcher::SketchObject', name+'_sketch_f2')
           sketch_f2.MapMode = 'FlatFace'
-          if f_l<f_s:  
+          if f_l<f_s:
             sketch_f2.addGeometry(Part.Ellipse(Vector(max(abs(dia_l/f_l*(f_s-f_l)),MIN_RADIUS),-0,0),Vector(0,MIN_RADIUS,0),Vector(0,0,0)),False)
             sketch_f2.Placement=Placement(Vector(0,0,f_s), Rotation(Vector(0,0,1),rot_angle), Vector(0,0,0))
           else:
@@ -376,14 +373,14 @@ def model_asti_beam (name="beam", dia_l=10,dia_s=10, prop=200,  f_l=100,f_s=150,
       obj1.ViewObject.Transparency = 50
       update_geom_info(obj1, geom_info)
       obj2=None
-      
+
   part = initialize_composition_old(name="asti beam")
   container = obj,obj1,obj2
   add_to_composition(part, container)
   part.Placement = FreeCAD.Placement(Vector(0,0,0), FreeCAD.Rotation(Vector(0,1,0),90), Vector(0,0,0))
   DOC.recompute()
   return part
-  
+
 def model_Gaussian_beam (name="Gaussian_beam",q_para=-100+200j,prop=200,wavelength=650E-6,
                           color=DEFAULT_COLOR_CRIMSON,beam_count=1, geom_info=None):
     """
@@ -421,22 +418,22 @@ def model_Gaussian_beam (name="Gaussian_beam",q_para=-100+200j,prop=200,waveleng
     w_start = w0 * pow(1+(z_start/z0)**2,0.5)
     # print("w_sart=",w_start)
     w_end = w0 * pow(1+(z_end/z0)**2,0.5)
-    
+
     obj = DOC.addObject('PartDesign::Body', name)
     sketch = obj.newObject('Sketcher::SketchObject', name+'_sketch')
     # sketch.Support = (DOC.getObject('XY_Plane'),[''])
     sketch.MapMode = 'FlatFace'
     sketch.addGeometry(Part.LineSegment(Vector(0,0,0),Vector(0,w_start,0)),False)
-    sketch.addConstraint(Sketcher.Constraint('Coincident',-1,1,0,1)) 
+    sketch.addConstraint(Sketcher.Constraint('Coincident',-1,1,0,1))
     sketch.addConstraint(Sketcher.Constraint('PointOnObject',0,2,-2))
-    sketch.addConstraint(Sketcher.Constraint('DistanceY',0,1,0,2,w_start)) 
+    sketch.addConstraint(Sketcher.Constraint('DistanceY',0,1,0,2,w_start))
     sketch.addGeometry(Part.LineSegment(Vector(0,0,0),Vector(prop,0,0)),False)
-    sketch.addConstraint(Sketcher.Constraint('Coincident',1,1,0,1)) 
-    sketch.addConstraint(Sketcher.Constraint('PointOnObject',1,2,-1)) 
+    sketch.addConstraint(Sketcher.Constraint('Coincident',1,1,0,1))
+    sketch.addConstraint(Sketcher.Constraint('PointOnObject',1,2,-1))
     sketch.addConstraint(Sketcher.Constraint('DistanceX',1,1,1,2,prop))
     sketch.addGeometry(Part.LineSegment(Vector(prop,0,0),Vector(prop,w_end,0)),False)
-    sketch.addConstraint(Sketcher.Constraint('Coincident',2,1,1,2)) 
-    sketch.addConstraint(Sketcher.Constraint('Vertical',2)) 
+    sketch.addConstraint(Sketcher.Constraint('Coincident',2,1,1,2))
+    sketch.addConstraint(Sketcher.Constraint('Vertical',2))
     ii = 0
     for ii in range(int(prop)):
       new_pos = ii*10
@@ -445,20 +442,20 @@ def model_Gaussian_beam (name="Gaussian_beam",q_para=-100+200j,prop=200,waveleng
       if new_pos+10>=prop:
         sketch.addGeometry(Part.LineSegment(Vector(new_pos,new_w,0),Vector(prop,w_end,0)),False)
         if ii == 0:
-          sketch.addConstraint(Sketcher.Constraint('Coincident',3,1,0,2)) 
+          sketch.addConstraint(Sketcher.Constraint('Coincident',3,1,0,2))
         else:
-          sketch.addConstraint(Sketcher.Constraint('Coincident',int(ii+3),1,int(ii+2),2)) 
-        sketch.addConstraint(Sketcher.Constraint('Coincident',int(ii+3),2,2,2)) 
+          sketch.addConstraint(Sketcher.Constraint('Coincident',int(ii+3),1,int(ii+2),2))
+        sketch.addConstraint(Sketcher.Constraint('Coincident',int(ii+3),2,2,2))
         break
       else:
         sketch.addGeometry(Part.LineSegment(Vector(new_pos,new_w,0),Vector(new_pos+10,next_w,0)),False)
         if ii == 0:
-          sketch.addConstraint(Sketcher.Constraint('Coincident',3,1,0,2)) 
+          sketch.addConstraint(Sketcher.Constraint('Coincident',3,1,0,2))
         else:
-          sketch.addConstraint(Sketcher.Constraint('Coincident',int(ii+3),1,int(ii+2),2)) 
-        sketch.addConstraint(Sketcher.Constraint('DistanceX',int(ii+3),2,new_pos+10)) 
-        sketch.addConstraint(Sketcher.Constraint('DistanceY',int(ii+3),2,next_w)) 
-    
+          sketch.addConstraint(Sketcher.Constraint('Coincident',int(ii+3),1,int(ii+2),2))
+        sketch.addConstraint(Sketcher.Constraint('DistanceX',int(ii+3),2,new_pos+10))
+        sketch.addConstraint(Sketcher.Constraint('DistanceY',int(ii+3),2,next_w))
+
     rev = obj.newObject('PartDesign::Revolution',name+'_Revolution')
     rev.Profile = sketch
     rev.Angle = 360
@@ -509,28 +506,28 @@ def model_Gaussian_beam (name="Gaussian_beam",q_para=-100+200j,prop=200,waveleng
         # sketch.Support = (DOC.getObject('XY_Plane'),[''])
         sketch.MapMode = 'FlatFace'
         sketch.addGeometry(Part.LineSegment(Vector(0,0,0),Vector(0,-z_start/z0*w0,0)),False)
-        sketch.addConstraint(Sketcher.Constraint('Coincident',-1,1,0,1)) 
-        sketch.addConstraint(Sketcher.Constraint('PointOnObject',0,2,-2)) 
+        sketch.addConstraint(Sketcher.Constraint('Coincident',-1,1,0,1))
+        sketch.addConstraint(Sketcher.Constraint('PointOnObject',0,2,-2))
         sketch.addGeometry(Part.LineSegment(Vector(0,-z_start/z0*w0,0),Vector(-z_start-z0,w0,0)),False)
-        sketch.addConstraint(Sketcher.Constraint('Coincident',0,2,1,1)) 
+        sketch.addConstraint(Sketcher.Constraint('Coincident',0,2,1,1))
         sketch.addGeometry(Part.LineSegment(Vector(-z_start-z0,w0,0),Vector(z0-z_start,w0,0)),False)
-        sketch.addConstraint(Sketcher.Constraint('Coincident',1,2,2,1)) 
-        sketch.addConstraint(Sketcher.Constraint('Horizontal',2)) 
+        sketch.addConstraint(Sketcher.Constraint('Coincident',1,2,2,1))
+        sketch.addConstraint(Sketcher.Constraint('Horizontal',2))
         sketch.addGeometry(Part.LineSegment(Vector(z0-z_start,w0,0),Vector(prop,z_end/z0*w0,0)),False)
-        sketch.addConstraint(Sketcher.Constraint('Coincident',2,2,3,1)) 
+        sketch.addConstraint(Sketcher.Constraint('Coincident',2,2,3,1))
         sketch.addGeometry(Part.LineSegment(Vector(prop,z_end/z0*w0,0),Vector(prop,0,0)),False)
-        sketch.addConstraint(Sketcher.Constraint('Coincident',3,2,4,1)) 
-        sketch.addConstraint(Sketcher.Constraint('PointOnObject',4,2,-1)) 
-        sketch.addConstraint(Sketcher.Constraint('Vertical',4)) 
+        sketch.addConstraint(Sketcher.Constraint('Coincident',3,2,4,1))
+        sketch.addConstraint(Sketcher.Constraint('PointOnObject',4,2,-1))
+        sketch.addConstraint(Sketcher.Constraint('Vertical',4))
         sketch.addGeometry(Part.LineSegment(Vector(prop,0,0),Vector(0,0,0)),False)
-        sketch.addConstraint(Sketcher.Constraint('Coincident',4,2,5,1)) 
-        sketch.addConstraint(Sketcher.Constraint('Coincident',5,2,0,1)) 
-        sketch.addConstraint(Sketcher.Constraint('DistanceY',0,1,0,2,-z_start/z0*w0)) 
-        sketch.addConstraint(Sketcher.Constraint('DistanceY',4,2,4,1,z_end/z0*w0)) 
-        sketch.addConstraint(Sketcher.Constraint('DistanceX',5,2,5,1,prop)) 
-        sketch.addConstraint(Sketcher.Constraint('DistanceX',2,1,2,2,z0*2)) 
-        sketch.addConstraint(Sketcher.Constraint('DistanceX',1,2,-z_start-z0)) 
-        sketch.addConstraint(Sketcher.Constraint('DistanceY',1,2,w0)) 
+        sketch.addConstraint(Sketcher.Constraint('Coincident',4,2,5,1))
+        sketch.addConstraint(Sketcher.Constraint('Coincident',5,2,0,1))
+        sketch.addConstraint(Sketcher.Constraint('DistanceY',0,1,0,2,-z_start/z0*w0))
+        sketch.addConstraint(Sketcher.Constraint('DistanceY',4,2,4,1,z_end/z0*w0))
+        sketch.addConstraint(Sketcher.Constraint('DistanceX',5,2,5,1,prop))
+        sketch.addConstraint(Sketcher.Constraint('DistanceX',2,1,2,2,z0*2))
+        sketch.addConstraint(Sketcher.Constraint('DistanceX',1,2,-z_start-z0))
+        sketch.addConstraint(Sketcher.Constraint('DistanceY',1,2,w0))
         rev = obj.newObject('PartDesign::Revolution',name+'_Revolution')
         rev.Profile = sketch
         rev.Angle = 360
@@ -538,37 +535,37 @@ def model_Gaussian_beam (name="Gaussian_beam",q_para=-100+200j,prop=200,waveleng
         rev.Midplane = 0
         rev.Reversed = 1
         sketch.Visibility = False
-    
-    
+
+
     sketch.addGeometry(Part.ArcOfHyperbola(Part.Hyperbola(Vector(-z_start,w0,0),Vector(-z_start-z0,0,0),Vector(-z_start,0,0)),z_start/z0,z_end/z0),False)
     sketch.exposeInternalGeometry(0)
 
-    sketch.addConstraint(Sketcher.Constraint('DistanceX',-1,1,1,1,-z_start)) 
-    
-    sketch.addConstraint(Sketcher.Constraint('DistanceX',-1,1,0,1,prop)) 
-    sketch.addConstraint(Sketcher.Constraint('DistanceX',-1,1,0,2,0.0)) 
-    
+    sketch.addConstraint(Sketcher.Constraint('DistanceX',-1,1,1,1,-z_start))
+
+    sketch.addConstraint(Sketcher.Constraint('DistanceX',-1,1,0,1,prop))
+    sketch.addConstraint(Sketcher.Constraint('DistanceX',-1,1,0,2,0.0))
+
     # sketch.addGeometry(Part.Point(Vector(-z_start,w0,0)))
-    # sketch.addConstraint(Sketcher.Constraint('PointOnObject',1,1,0)) 
-    sketch.addConstraint(Sketcher.Constraint('DistanceY',-1,1,1,1,w0)) 
+    # sketch.addConstraint(Sketcher.Constraint('PointOnObject',1,1,0))
+    sketch.addConstraint(Sketcher.Constraint('DistanceY',-1,1,1,1,w0))
     sketch.addConstraint(Sketcher.Constraint('DistanceY',-1,1,0,2,w_start))
-    sketch.addConstraint(Sketcher.Constraint('DistanceY',-1,1,0,1,w_end)) 
-    # sketch.addConstraint(Sketcher.Constraint('DistanceY',0,3,-1,1,0.0)) 
-    
+    sketch.addConstraint(Sketcher.Constraint('DistanceY',-1,1,0,1,w_end))
+    # sketch.addConstraint(Sketcher.Constraint('DistanceY',0,3,-1,1,0.0))
+
     sketch.addGeometry(Part.LineSegment(Vector(0,w_start,0),Vector(0,0,0)),False)
     sketch.addConstraint(Sketcher.Constraint('Coincident',4,1,0,2))
     sketch.addConstraint(Sketcher.Constraint('Coincident',4,2,-1,1))
     # sketch.addConstraint(Sketcher.Constraint('Vertical',4))
-    
+
     sketch.addGeometry(Part.LineSegment(Vector(prop,w_end,0),Vector(prop,0,0)),False)
     sketch.addConstraint(Sketcher.Constraint('Coincident',5,1,0,1))
-    sketch.addConstraint(Sketcher.Constraint('PointOnObject',5,2,-1)) 
+    sketch.addConstraint(Sketcher.Constraint('PointOnObject',5,2,-1))
     sketch.addConstraint(Sketcher.Constraint('Vertical',5))
     sketch.addGeometry(Part.LineSegment(Vector(0,0,0),Vector(prop,0,0)),False)
     sketch.addConstraint(Sketcher.Constraint('Coincident',6,1,4,2))
     sketch.addConstraint(Sketcher.Constraint('Coincident',6,2,5,2))
     # sketch.addConstraint(Sketcher.Constraint('Horizontal',6))
-    
+
     rev = obj.newObject('PartDesign::Revolution',name+'_Revolution')
     rev.Profile = sketch
     rev.Angle = 360

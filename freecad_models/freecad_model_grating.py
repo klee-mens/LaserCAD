@@ -22,7 +22,7 @@ DEFUALT_COLOR = (170/255, 170/255, 1.0)
 # DEFALUT_MOUNT_COLOR = (0.75,0.75,0.75)
 
 def model_grating(name="grating", dimensions=DEFUALT_DIM, geom=GEOM0, 
-                  color=DEFUALT_COLOR):
+                  color=DEFUALT_COLOR, **kwargs):
   """
   kreiert das Model eines Gitters durch simples Erzeugen eines Quaders
   creates the model of a grid by simply creating a box
@@ -54,7 +54,7 @@ def model_grating(name="grating", dimensions=DEFUALT_DIM, geom=GEOM0,
   obj.Placement = Placement(offset, Rotation(0,0,0), Vector(0,0,0))
 
   update_geom_info(obj, geom, off0=offset)
-  DOC.recompute()
+  #DOC.recompute()
   return obj
 
 def grating_mount(name="grating_mount",height=50,thickness=8,drawing_post=True,base_exists=False,geom=None, **kwargs):
@@ -89,11 +89,13 @@ def grating_mount(name="grating_mount",height=50,thickness=8,drawing_post=True,b
   else:
     print("there is no suitable mount for this grating")
     return None
-  mount1 = draw_mount(name=grating_mount_name+"_base",height=height,thickness=thickness,geom=geom)
-  mount2 = draw_mount(name=grating_mount_name+"_buttom_half",height=height,thickness=thickness,geom=geom)
-  mount3 = draw_mount(name=grating_mount_name+"_top_half",height=height,thickness=thickness,geom=geom)
+  mount1 = draw_grating_mount(name=grating_mount_name+"_base",height=height,thickness=thickness,geom=geom)
+  mount2 = draw_grating_mount(name=grating_mount_name+"_buttom_half",height=height,thickness=thickness,geom=geom)
+  mount3 = draw_grating_mount(name=grating_mount_name+"_top_half",height=height,thickness=thickness,geom=geom)
   
   xshift=17
+  if height>24 and height<26:
+    xshift = 20
   shiftvec=Vector(xshift,0,0)
   default=Vector(1,0,0)
   default_axis=Vector(0,1,0)
@@ -116,16 +118,16 @@ def grating_mount(name="grating_mount",height=50,thickness=8,drawing_post=True,b
   newaxs[:,0] = new_normal
   geom = (new_pos, newaxs)
   xshift = 0
-  other_mount = mirror_mount(mount_name="mirror_mount",mount_type="default",drawing_post=drawing_post,base_exists=base_exists, geom=geom, dia=25.4)
+  # other_mount = mirror_mount(mount_name="mirror_mount",mount_type="default",drawing_post=drawing_post,base_exists=base_exists, geom=geom, dia=25.4)
   if drawing_post:
     part = initialize_composition_old(name="Grating mount, post and base")
   else:
     part = initialize_composition_old(name="Grating mount")
-  container = mount1,mount2,mount3,other_mount
+  container = mount1,mount2,mount3#,other_mount
   add_to_composition(part, container)
   return part
 
-def draw_mount(name="KGM60_base",height=50,thickness=8,geom=None):
+def draw_grating_mount(name="KGM60_base",height=50,thickness=8,geom=None):
   """
     Draw the part of the mount.
     Since the grating mount is divided into three parts, this function will 
@@ -156,7 +158,7 @@ def draw_mount(name="KGM60_base",height=50,thickness=8,geom=None):
     zshift = (height-30)/2
   elif "20" in name:
     zshift = (height-10)/2
-  datei = thisfolder + "mount_meshes\\Grating\\" + name
+  datei = thisfolder + "mount_meshes/Grating/" + name
   if mesh:
     DOC = get_DOC()
     obj = DOC.addObject("Mesh::Feature", name)
