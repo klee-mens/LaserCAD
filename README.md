@@ -31,7 +31,7 @@ when you open the exact same file in FreeCAD and execute it as a macro by
 pressing on the green arrow or F6 you get an new FreeCAD document with the 3D
 model looking like this:
 
-![Screenshot von 0_Opening.py in Spyder und in FreeCAD](manual/pictures/0_Opening.PNG)
+![Screenshot von 0_Opening.py in Spyder und in FreeCAD](manual/pictures/0_Opening.png)
 
 # Some notes and tips
 
