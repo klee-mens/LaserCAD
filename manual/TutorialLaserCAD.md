@@ -147,51 +147,44 @@ Here you can see a screenshot of the output in Spyder.
 
 
 ## 2_PositionAndAxes
-The following code creates a Mirror and plays around with its geometrical
+The following code creates a Lens and plays around with its geometrical
 properties position pos and normal. The default values are pos = (0,0,80)
 meaning a beam height of 80 mm and a normal = (1,0,0) so that any object points
 in x-Direction.
+Btw all lengths, even wavelengths, are always given in mm!
+All LaserCAD Objects have a draw() function that will print out some usefull 
+information about their position *pos*, *normal* and type. The object is very
+similar to the output of the print and reprint function.
+Each oject also posesses an inner orthonormal, right handed coordiante system 
+namend *_axes* that can be accessed with get_axes() as a matrix or with 
+get_coordinate_system() as the 3 x-,y- and z-axes in a list.
 
-Btw all lengths, even wavelengths, must be given in mm!
-
-If executed in FreeCAD, the draw() function will construct and load the
-appropriate 3D files. If executed in a "normal" shell, the draw() function will
-print out some useful information about the object (which works with nearly any object).
-Note that the coordinate system stays always orthonormal and right-handed. Also
-note that the normal has always a norm of 1.
-The draw_mount function in the end will draw the default mount and post of the
-mirror and adjust them to the right position and direction.
 
 ```python
-# =============================================================================
-# some usefull imports that should be copied to ANY project
-# =============================================================================
-import sys
-pfad = __file__
-pfad = pfad.replace("\\","/") #folder conventions windows linux stuff
-pfad = pfad.lower()
-ind = pfad.rfind("lasercad")
-pfad = pfad[0:ind-1]
-if not pfad in sys.path:
-  sys.path.append(pfad)
+lens1 = Lens()
+lens1.draw()
 
-from LaserCAD.basic_optics import Mirror
-from LaserCAD.freecad_models import freecad_da, clear_doc, setview
+print()
+print()
+print("Position of lens1:", lens1.pos)
+print("Normal of lens1:", lens1.normal)
+print("Coordinate system of lens1\nx-Vector, y-Vector, z-Vector:", lens1.get_coordinate_system())
+```
+In LaserCAD we call the unity of *(pos, axes)* a *geom*. The GeomObject 
+containes all the logic for it. You can set any object to the same position
+
+```pyhton
+print()
+geobj1 = Geom_Object()
+geobj1.set_geom(lens1.get_geom())
+geobj1.draw()
+```
+
+When executed in a normal pyhton shell, the output will look like this
 
 
-if freecad_da:
-  clear_doc()
-
+```python
 mir1 = Mirror()
-mir1.draw()
-
-print()
-print()
-print("Position of mir1:", mir1.pos)
-print("Normal of mir1:", mir1.normal)
-print("Coordinate system of mir1\nx-Vector, y-Vector, z-Vector:", mir1.get_coordinate_system())
-
-
 mir1.pos+= (10,50,30)
 
 print()
@@ -201,7 +194,7 @@ print("Normal of mir1:", mir1.normal)
 print("Coordinate system of mir1\nx-Vector, y-Vector, z-Vector:", mir1.get_coordinate_system())
 
 
-mir1.normal = (1,1,0)
+mir1.normal = (-1,2,0)
 
 print()
 print()
@@ -209,19 +202,49 @@ print("Position of mir1:", mir1.pos)
 print("Normal of mir1:", mir1.normal)
 print("Coordinate system of mir1\nx-Vector, y-Vector, z-Vector:", mir1.get_coordinate_system())
 
+
 print()
 print()
 mir1.draw()
 mir1.draw_mount()
-
-# =============================================================================
-# Playground End
-# =============================================================================
-if freecad_da:
-  setview()
+print()
+geobj2 = Geom_Object()
+geobj2.set_geom(mir1.get_geom())
+geobj2.draw()
 ```
 Here you can see a screenshot of the output in Spyder. Also this script causes
 no 3D objects to be drawn in FreeCAD.
+
+```
+The geometric object <Lens:NewLens> is drawn to the position[ 0.,  0., 80.] with the direction [1., 0., 0.]
+
+
+Position of lens1: [ 0.  0. 80.]
+Normal of lens1: [1. 0. 0.]
+Coordinate system of lens1
+x-Vector, y-Vector, z-Vector: (array([1., 0., 0.]), array([0., 1., 0.]), array([0., 0., 1.]))
+
+The geometric object <Geom_Object:unnamed> is drawn to the position[ 0.,  0., 80.] with the direction [1., 0., 0.]
+
+
+Position of mir1: [ 10.  50. 110.]
+Normal of mir1: [1. 0. 0.]
+Coordinate system of mir1
+x-Vector, y-Vector, z-Vector: (array([1., 0., 0.]), array([0., 1., 0.]), array([0., 0., 1.]))
+
+
+Position of mir1: [ 10.  50. 110.]
+Normal of mir1: [-0.4472136   0.89442719  0.        ]
+Coordinate system of mir1
+x-Vector, y-Vector, z-Vector: (array([-0.4472136 ,  0.89442719,  0.        ]), array([-0.89442719, -0.4472136 ,  0.        ]), array([0., 0., 1.]))
+
+
+The geometric object <Mirror:Component> is drawn to the position[ 10.,  50., 110.] with the direction [-0.44721,  0.89443,  0.     ]
+The geometric object <Composed_Mount:unnamed> is drawn to the position[ 10.,  50., 110.] with the direction [-0.44721,  0.89443,  0.     ]
+
+The geometric object <Geom_Object:unnamed> is drawn to the position[ 10.,  50., 110.] with the direction [-0.44721,  0.89443,  0.     ]
+```
+
 <img src="images/2_PositionAndAxes_1.png" alt="Alt-Text" title="" />
 
 
