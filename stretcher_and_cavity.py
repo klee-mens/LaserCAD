@@ -8,26 +8,30 @@ Created on Mon Jun 12 09:43:43 2023
 import sys
 import os
 
-# pfad = __file__
-# pfad = pfad.replace("\\", "/") #just in case
-# ind = pfad.rfind("/")
-# pfad = pfad[0:ind]
-# ind = pfad.rfind("/")
-# pfad = pfad[0:ind+1]
-# path_added = False
-# for path in sys.path:
-#   if path ==pfad:
-#     path_added = True
-# if not path_added:
-#   sys.path.append(pfad)
+pfad = __file__
+pfad = pfad.replace("\\", "/") #just in case
+ind = pfad.rfind("/")
+pfad = pfad[0:ind]
+ind = pfad.rfind("/")
+pfad = pfad[0:ind+1]
+path_added = False
+for path in sys.path:
+  if path ==pfad:
+    path_added = True
+if not path_added:
+  sys.path.append(pfad)
 # sys.path.append('C:\\ProgramData\\Anaconda3\\pkgs')
 # sys.path.append('C:\\Users\\12816\\Downloads')
+# sys.path.append("E:\Programme\Spyder\pkgs")
 from LaserCAD import basic_optics
 
-from LaserCAD.basic_optics import Mirror,Beam,Cylindrical_Mirror,Intersection_plane,Cylindrical_Mirror1,Curved_Mirror,Ray, Composition, Grating, Lam_Plane
+from LaserCAD.basic_optics import Mirror,Beam,Cylindrical_Mirror,Intersection_plane,Cylindrical_Mirror1,Curved_Mirror,Ray, Composition, Grating
+# from LaserCAD.basic_optics.mirror import 
+from LaserCAD.basic_optics import Unit_Mount,Composed_Mount
+from LaserCAD.non_interactings import Lambda_Plate
 
 from LaserCAD.freecad_models import clear_doc, setview, freecad_da,add_to_composition
-
+from LaserCAD.moduls import Make_RoofTop_Mirror
 # from basic_optics import Curved_Mirror
 # from basic_optics import Ray, Composition, Grating, Lam_Plane
 # from basic_optics import Refractive_plane
@@ -53,7 +57,8 @@ def cavity_and_stretcher(C_radius = 8000,vertical_mat=True,want_to_draw=True,rou
   # gamma = 8.3254033412311523321136 /180 *np.pi #AOI = 54
   grat_const = 1/1480 # Gitterkonstante in 1/mm
   seperation = 150 # Differenz zwischen Gratingposition und Radius
-  lam_mid = 1030e-9 * 1e3 # Zentralwellenlänge in mm
+  # lam_mid = 1030e-9 * 1e3 # Zentralwellenlänge in mm
+  lam_mid = centerlamda # Zentralwellenlänge in mm
   delta_lamda = 60e-9*1e3 # Bandbreite in mm
   number_of_rays = 15
   safety_to_StripeM = 5 #Abstand der eingehenden Strahlen zum Concav Spiegel in mm
@@ -105,7 +110,10 @@ def cavity_and_stretcher(C_radius = 8000,vertical_mat=True,want_to_draw=True,rou
   StripeM.aperture=50
   StripeM.draw_dict["height"]=9
   StripeM.draw_dict["thickness"]=25
-  StripeM.draw_dict["model_type"]="Stripe"
+  # StripeM.draw_dict["model_type"]="Stripe"
+  StripeM.Mount = Composed_Mount(unit_model_list=["Stripe_mirror_mount","POLARIS-K2","1inch_post"])
+  StripeM.Mount.set_geom(StripeM.get_geom())
+  StripeM.Mount.pos += StripeM.normal*25
   
   Grat = Grating(grat_const=grat_const, name="Gitter")
   Grat.pos = (Radius-seperation, 0, 0)
@@ -202,24 +210,30 @@ def cavity_and_stretcher(C_radius = 8000,vertical_mat=True,want_to_draw=True,rou
   
   nfm1 = - ray0.normal
   pfm1 = Grat.pos + 600 * nfm1 + (0,0,h_StripeM/2 + safety_to_StripeM + periscope_distance)
-  flip_mirror1 = Mirror()
-  flip_mirror1.pos = pfm1
-  flip_mirror1.normal = nfm1 - np.array((0,0,-1))
-  def useless():
-    return None
-  flip_mirror1.draw = useless
-  flip_mirror1.draw_dict["mount_type"] = "dont_draw"
-  flip_mirror2 = Mirror()
-  flip_mirror2.pos = pfm1 - np.array((0,0,periscope_distance))
-  flip_mirror2.normal = nfm1 - np.array((0,0,1))
-  flip_mirror2.draw = useless
-  flip_mirror2.draw_dict["mount_type"] = "dont_draw"
-  pure_cosmetic = Mirror(name="RoofTop_Mirror")
-  pure_cosmetic.draw_dict["model_type"]="Rooftop"
-  pure_cosmetic.draw_dict["mount_type"] = "rooftop_mirror_mount"
-  pure_cosmetic.pos = (flip_mirror1.pos + flip_mirror2.pos ) / 2
-  pure_cosmetic.normal = (flip_mirror1.normal + flip_mirror2.normal ) / 2
-  pure_cosmetic.aperture = periscope_distance
+  
+  roof = Make_RoofTop_Mirror(height=periscope_distance,up=False)
+  roof.pos = pfm1
+  roof.normal = nfm1
+  
+  # flip_mirror1 = Mirror()
+  # flip_mirror1.pos = pfm1
+  # flip_mirror1.normal = nfm1 - np.array((0,0,-1))
+  # def useless():
+  #   return None
+  # flip_mirror1.draw = useless
+  # flip_mirror1.Mount = Unit_Mount("dont_draw")
+  # flip_mirror2 = Mirror()
+  # flip_mirror2.pos = pfm1 - np.array((0,0,periscope_distance))
+  # flip_mirror2.normal = nfm1 - np.array((0,0,1))
+  # flip_mirror2.draw = useless
+  # flip_mirror2.Mount = Unit_Mount("dont_draw")
+  # pure_cosmetic = Rooftop_mirror(name="RoofTop_Mirror")
+  # pure_cosmetic.draw_dict["model_type"]="Rooftop"
+  # pure_cosmetic.draw_dict["mount_type"] = "rooftop_mirror_mount"
+  # pure_cosmetic.pos = (flip_mirror1.pos + flip_mirror2.pos ) / 2
+  # pure_cosmetic.normal = (flip_mirror1.normal + flip_mirror2.normal ) / 2
+  # pure_cosmetic.aperture = periscope_distance
+  # pure_cosmetic.set_mount_to_default()
   
   Stretcher_M1 = Mirror()
   Stretcher_M1.pos = pos0
@@ -228,6 +242,7 @@ def cavity_and_stretcher(C_radius = 8000,vertical_mat=True,want_to_draw=True,rou
   p1 = p_grat
   Stretcher_M1.set_normal_with_2_points(p0, p1)
   Stretcher_M1.aperture = 25.4/2
+  Stretcher_M1.set_mount_to_default()
   Stretcher_M0 = Mirror()
   Stretcher_M0.pos = (-150, Stretcher_M1.pos[1],Stretcher_M1.pos[2])
   p0 = Stretcher_M1.pos
@@ -240,7 +255,7 @@ def cavity_and_stretcher(C_radius = 8000,vertical_mat=True,want_to_draw=True,rou
   p1 = TFP2.pos - (100,0,0)
   point1 =p1
   TFP2.set_normal_with_2_points(p0, p1)
-  Lam_Plane2=Lam_Plane()
+  Lam_Plane2=Lambda_Plate()
   Lam_Plane2.pos=TFP2.pos-(50,0,0)
   Stretcher_M2 = Mirror()
   Stretcher_M2.pos = p_grat - vec*500 + (0,0,periscope_distance)
@@ -248,6 +263,7 @@ def cavity_and_stretcher(C_radius = 8000,vertical_mat=True,want_to_draw=True,rou
   p0 = Stretcher_M2.pos + (250,0,0)
   p1 = p_grat + (0,0,periscope_distance)
   Stretcher_M2.aperture = 25.4/2
+  Stretcher_M2.set_mount_to_default()
   Stretcher_M2.set_normal_with_2_points(p0, p1)
   
   TFP1 = Mirror()
@@ -255,7 +271,7 @@ def cavity_and_stretcher(C_radius = 8000,vertical_mat=True,want_to_draw=True,rou
   TFP1.normal = (-1,1,0)
   TFP1.draw_dict["model_type"] = "45_polarizer"
   TFP1.draw_dict["thickness"] = 2
-  Lam_Plane1=Lam_Plane()
+  Lam_Plane1=Lambda_Plate()
   Lam_Plane1.pos=TFP1.pos+(50,0,0)
   if vertical_mat:
     Matrix_fixing_Mirror1 = Cylindrical_Mirror(radius=Radius*3/2)
@@ -285,6 +301,7 @@ def cavity_and_stretcher(C_radius = 8000,vertical_mat=True,want_to_draw=True,rou
   Cavity_mirror.aperture = 2*25.4
   Cavity_mirror.pos = point1
   Cavity_mirror.normal = (-1,0,0)
+  Cavity_mirror.set_mount_to_default()
   # ---------------------------------------------------------------------------
   # p0=p_grat + (0,0,periscope_distance)
   # p1=cavity_mirror2.pos
@@ -293,7 +310,7 @@ def cavity_and_stretcher(C_radius = 8000,vertical_mat=True,want_to_draw=True,rou
   # p1=Cavity_mirror.pos
   # cavity_mirror2.set_normal_with_2_points(p0,p1)
   # ---------------------------------------------------------------------------
-  
+  cavity_mirror2.set_mount_to_default()
   ip = Intersection_plane(dia=100)
   # ip.pos = p_grat - vec*1000 + (0,0,periscope_distance)
   # ip.pos = TFP2.pos
@@ -323,8 +340,9 @@ def cavity_and_stretcher(C_radius = 8000,vertical_mat=True,want_to_draw=True,rou
   Comp.add_fixed_elm(Concav4)#4
   Comp.add_fixed_elm(StripeM)#5
   Comp.add_fixed_elm(Concav3)#6
-  Comp.add_fixed_elm(flip_mirror1)#7
-  Comp.add_fixed_elm(flip_mirror2)#8
+  Comp.add_supcomposition_fixed(roof)
+  # Comp.add_fixed_elm(flip_mirror1)#7
+  # Comp.add_fixed_elm(flip_mirror2)#8
   Comp.add_fixed_elm(Concav2)#9
   Comp.add_fixed_elm(Concav1)#10
   Comp.add_fixed_elm(Stretcher_M2)#11
@@ -336,9 +354,7 @@ def cavity_and_stretcher(C_radius = 8000,vertical_mat=True,want_to_draw=True,rou
   Comp.add_fixed_elm(Cavity_mirror)#17
   
   Comp.add_fixed_elm(ip)#18
-  
-  
-  Comp.add_fixed_elm(pure_cosmetic)
+  # Comp.add_fixed_elm(pure_cosmetic)
   Comp.add_fixed_elm(Lam_Plane1)
   Comp.add_fixed_elm(Lam_Plane2)
   seq = np.array([1,2,3,4,5,6,3,7,8,3,9,5,10,3,11,12,13,12,13,12,13,12,14,15,16,17])
@@ -517,12 +533,13 @@ roundtrip = 50
 centerlamda = 1030E-6
 C_radius = 6000
 StripeM_shift = 0.13
+StripeM_shift = 0
 # StripeM_shift = 0.115
 # StripeM_shift = 0
 # CB=CenterBeam CR=CenterRay 
 ls = "CB"
-mat1 = cavity_and_stretcher(C_radius=C_radius,vertical_mat=True,want_to_draw=False,roundtrip=roundtrip,centerlamda=centerlamda,s_shift=StripeM_shift,ls=ls)
-
+mat1 = cavity_and_stretcher(C_radius=C_radius,vertical_mat=True,want_to_draw=True,roundtrip=roundtrip,centerlamda=centerlamda,s_shift=StripeM_shift,ls=ls)
+print(mat1)
 # lam_mid = 1030E-6
 # delta_lamda = 60E-6
 # number_of_rays = 15

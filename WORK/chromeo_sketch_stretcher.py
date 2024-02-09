@@ -13,6 +13,8 @@ pfad = pfad.replace("\\","/") #folder conventions windows linux stuff
 ind = pfad.rfind("/")
 pfad = pfad[0:ind-1]
 ind = pfad.rfind("/")
+pfad = pfad[0:ind-1]
+ind = pfad.rfind("/")
 pfad = pfad[0:ind]
 if not pfad in sys.path:
   sys.path.append(pfad)
