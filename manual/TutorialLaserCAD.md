@@ -141,6 +141,7 @@ if freecad_da:
   setview()
 ```
 Here you can see a screenshot of the output in Spyder.
+
 <img src="images/1_import_test_1.png" alt="Alt-Text" title="" />
 
 
@@ -170,19 +171,32 @@ print("Position of lens1:", lens1.pos)
 print("Normal of lens1:", lens1.normal)
 print("Coordinate system of lens1\nx-Vector, y-Vector, z-Vector:", lens1.get_coordinate_system())
 ```
-In LaserCAD we call the unity of *(pos, axes)* a *geom*. The GeomObject 
-containes all the logic for it. You can set any object to the same position
+When executed in a normal pyhton shell, the output will look like this:
+```
+The geometric object <Lens:NewLens> is drawn to the position[ 0.,  0., 80.] with the direction [1., 0., 0.]
 
+
+Position of lens1: [ 0.  0. 80.]
+Normal of lens1: [1. 0. 0.]
+Coordinate system of lens1
+x-Vector, y-Vector, z-Vector: (array([1., 0., 0.]), array([0., 1., 0.]), array([0., 0., 1.]))
+```
+In LaserCAD we call the unity of *(pos, axes)* a *geom*. The GeomObject 
+containes all the logic for it. You can set any object to the same position and
+orientation as an other object2 by useing the *set_geom()* and *get_geom()* 
+function.
 ```pyhton
 print()
 geobj1 = Geom_Object()
 geobj1.set_geom(lens1.get_geom())
 geobj1.draw()
 ```
+In the picture at the end of this section you can see the FreeCAD output. The
+GeomObject appears as a small coordiante system using the same colours as the
+FreeCAD coordinate system.
 
-When executed in a normal pyhton shell, the output will look like this
-
-
+The following code now generates a mirror and changes its position and normal,
+prints the result and also sets a new GeomObject to be at the same position.
 ```python
 mir1 = Mirror()
 mir1.pos+= (10,50,30)
@@ -212,17 +226,11 @@ geobj2 = Geom_Object()
 geobj2.set_geom(mir1.get_geom())
 geobj2.draw()
 ```
-Here you can see a screenshot of the output in Spyder. Also this script causes
-no 3D objects to be drawn in FreeCAD.
-
+In the output you can see, that a change in posiiton of course does not change
+the axes, while a change of the normal does. If the normal is changed in the 
+xy-plane, the z-axis is not affected. Mounts and posts are adjusted 
+automatically. 
 ```
-The geometric object <Lens:NewLens> is drawn to the position[ 0.,  0., 80.] with the direction [1., 0., 0.]
-
-
-Position of lens1: [ 0.  0. 80.]
-Normal of lens1: [1. 0. 0.]
-Coordinate system of lens1
-x-Vector, y-Vector, z-Vector: (array([1., 0., 0.]), array([0., 1., 0.]), array([0., 0., 1.]))
 
 The geometric object <Geom_Object:unnamed> is drawn to the position[ 0.,  0., 80.] with the direction [1., 0., 0.]
 
@@ -244,6 +252,9 @@ The geometric object <Composed_Mount:unnamed> is drawn to the position[ 10.,  50
 
 The geometric object <Geom_Object:unnamed> is drawn to the position[ 10.,  50., 110.] with the direction [-0.44721,  0.89443,  0.     ]
 ```
+Here you can see the FreeCAD output. Note that the normal of the mirror in
+LaserCAD is defined in such a way, that it points in the mirror and not out of 
+its surface, what may differ from some other ray tracing programs. 
 
 <img src="images/2_PositionAndAxes_1.png" alt="Alt-Text" title="" />
 
@@ -251,10 +262,10 @@ The geometric object <Geom_Object:unnamed> is drawn to the position[ 10.,  50., 
 
 
 ## 3_RaysAndBeams
-Here, you can see the rays and beams setting.
-The class 'Ray' is the basic class of light source. Without considering the
-radius of the light ray, the ray only considers the position and direction of
-propagation of the ray. The class 'Beam' is the most common light source.
+Here, you can see a demonstration of the Ray and Beam class.
+The class 'Ray' describes the one dimensional ray and only considers the 
+position and direction. 
+The class 'Beam' is the most common light source and describes 3D light bundles.
 Beam has three distributions: Cone, square, and circular. As for the
 cone distribution (default setting of a beam) shows some cylinders and cones
 to represent light beams. The square and circular distributions are some ray
@@ -312,6 +323,12 @@ b4.draw()
 print()
 print()
 ```
+underneath you can see the output in the terminal and in FreeCAD. When you zoom
+in in FreeCAD, you will notice, that the yellow distributions consists of 1D rays
+(in FreeCAD called *edges*) while Gauss and standard beam are red and semi 
+transparent. The Gaussian_Beam has many segments that form the caustic, which 
+may take a while to be drawn.
+
 <img src="images/3_RaysAndBeams_1.png" alt="Alt-Text" title="" />
 <img src="images/3_RaysAndBeams_2.png" alt="Alt-Text" title="" />
 
@@ -596,7 +613,7 @@ reso.add_on_axis(Lambda_Plate())
 reso.propagate(100)
 ```
 
-Two flip mirrors will cause the beam to be turned by 180¡.
+Two flip mirrors will cause the beam to be turned by 180 degree.
 ```python
 reso.add_on_axis(Mirror(phi=90))
 reso.propagate(450)
