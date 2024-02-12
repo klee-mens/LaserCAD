@@ -17,7 +17,7 @@ pfad = pfad[0:ind-1]
 if not pfad in sys.path:
   sys.path.append(pfad)
 
-from LaserCAD.basic_optics import Mirror
+from LaserCAD.basic_optics import Mirror, Lens, Geom_Object
 from LaserCAD.freecad_models import freecad_da, clear_doc, setview
 
 
@@ -38,16 +38,21 @@ Btw ALL LENGTHS, EVEN WAVELENGTHS, MUST BE GIVEN IN mm!
 # Playground
 # =============================================================================
 
+lens1 = Lens()
+lens1.draw()
+
+print()
+print()
+print("Position of lens1:", lens1.pos)
+print("Normal of lens1:", lens1.normal)
+print("Coordinate system of lens1\nx-Vector, y-Vector, z-Vector:", lens1.get_coordinate_system())
+
+print()
+geobj1 = Geom_Object()
+geobj1.set_geom(lens1.get_geom())
+geobj1.draw()
+
 mir1 = Mirror()
-mir1.draw()
-
-print()
-print()
-print("Position of mir1:", mir1.pos)
-print("Normal of mir1:", mir1.normal)
-print("Coordinate system of mir1\nx-Vector, y-Vector, z-Vector:", mir1.get_coordinate_system())
-
-
 mir1.pos+= (10,50,30)
 
 print()
@@ -57,7 +62,7 @@ print("Normal of mir1:", mir1.normal)
 print("Coordinate system of mir1\nx-Vector, y-Vector, z-Vector:", mir1.get_coordinate_system())
 
 
-mir1.normal = (1,1,0)
+mir1.normal = (-1,2,0)
 
 print()
 print()
@@ -80,6 +85,10 @@ print()
 print()
 mir1.draw()
 mir1.draw_mount()
+print()
+geobj2 = Geom_Object()
+geobj2.set_geom(mir1.get_geom())
+geobj2.draw()
 
 # =============================================================================
 # Playground End

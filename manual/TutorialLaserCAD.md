@@ -1,26 +1,19 @@
+# The Tutorials
 
-Alle Tutorials befinden sich im gleichnamigen Ordner. Im Folgenden werden Quellcode und zugeh√∂rige Ausgabe gezeigt.
+In the folder tutorials you can find 10 little excercises trying to describe
+the most basic functions and objects. As always you can excecute the files in
+an arbitrary pathon terminal or in FreeCAD.
 
-# 1_ImportTest
+
+## Opening
+
+The 0_Opening.py script serves more as an quick presentation of a typical
+LaserCAD project and its powers. The output is the same as you can see in the
+README file.
+
+The first code block imports the necessary moduls. For an explanation see
+** ImportTest**.
 ```python
-# =============================================================================
-# Some useful imports that should be copied to ANY project
-# =============================================================================
-
-"""
-The following code does nothing other than import some useful LaserCAD functions
-The first block assures that the LaserCAD package location is added to the 
-sys.path list so that it can be imported AS LONG AS THE EXECUTED SCRIPT IS IN
-THE SMAE FOLDER AS LaserCAD OR ABOVE!
-
-Unfortunately most Python environments don't have the same default package 
-location as FreeCAD, so lines 22-29 are more or less mandatory in every project
-
-The clear_doc function creates a new document in FreeCAD and or deletes all 
-objects in it that you can start from blank any time, the set view function 
-sets the view after drawing the elements
-"""
-
 import sys
 pfad = __file__
 pfad = pfad.replace("\\","/") #folder conventions windows linux stuff
@@ -31,28 +24,101 @@ if not pfad in sys.path:
   sys.path.append(pfad)
 
 
-from LaserCAD.basic_optics import Mirror
+from LaserCAD.basic_optics import Mirror, Curved_Mirror, Lens, Beam
+from LaserCAD.basic_optics import Composition, Composed_Mount
 from LaserCAD.freecad_models import freecad_da, clear_doc, setview
+```
 
+In the follwoing we create a composition which serves as an container class
+and positions the components on the optical axis (see section **Composition**).
+We give it a light source, add several elements and draw the whole composition.
+Feel free to play around with the values. If you change the position of the
+compisition you change all the positions of the elements and beams as well.
+In the end you will get the red beam path assembly from the picture underneath.
 
+```python
 if freecad_da:
   clear_doc()
-  
 
+firsttry = Composition(name="BeamLine1")
+#firsttry.set_light_source(Beam(radius=2, angle=0.02))
+firsttry.propagate(200)
+firsttry.add_on_axis(Lens(f=150))
+firsttry.propagate(400)
+firsttry.add_on_axis(Lens(f=120))
+firsttry.propagate(110)
+firsttry.add_on_axis(Mirror(phi=110))
+firsttry.propagate(90)
+firsttry.add_on_axis(Mirror(phi=70))
+firsttry.propagate(150)
+firsttry.add_on_axis(Lens(f=200))
+firsttry.propagate(400)
+firsttry.add_on_axis(Mirror(phi=-90))
+firsttry.propagate(60)
+
+# firsttry.pos += (0,0,10)
+firsttry.draw()
+```
+
+The second code block shows the assembly of an two mirror telescope which uses
+the same angle of incident in the xy plane on first mirror as perpendicular to
+it on the second one and thus corrects its astigamtism (which you can't really
+see in LaserCAD because most beams will use only 2 rays for the raytracing).
+Although the important part here is, that we can change quickly the color of
+the beam in line 5 as well as the mount of one of the mirrors in line 13.
+For more details see **FunnyLooks**.
+
+```pyhton
+mirteles = Composition(name="MirrorTelescope")
+mirteles.pos += (0,200,0)
+
+lightsource = Beam(radius=2)
+lightsource.draw_dict["color"] = (1.0, 1.0, 0.0)
+
+mirteles.set_light_source(lightsource)
+mirteles.propagate(350)
+mirteles.add_on_axis(Curved_Mirror(radius=250, phi=180-15))
+mirteles.propagate(250)
+
+next_mirror = Curved_Mirror(radius=250, phi=0, theta=180-15)
+next_mirror.set_mount(Composed_Mount(unit_model_list=["KS1", "0.5inch_post"]))
+mirteles.add_on_axis(next_mirror)
+
+mirteles.propagate(350)
+
+mirteles.draw()
 
 
 if freecad_da:
   setview()
 ```
 
-<img src="images/1_import_test_1.png" alt="Alt-Text" title="" />
+<img src="images/0_Opening.png" alt="OpeningImage" title="" />
 
-# 2_PositionAndAxes
 
+
+
+## 1_ImportTest
+The following code does nothing other than import some useful LaserCAD functions
+The first block assures that the LaserCAD package location is added to the
+sys.path list so that it can be imported as long as the executed script is in
+the same folder as LaserCAD or above!
+A good way to achieve this is by copying the script and insert it in the work
+directory as a start of every project.
+Unfortunately most Python environments don't have the same default package
+location as FreeCAD, so the first lines are more or less mandatory in every
+project.
+The clear_doc function creates a new document in FreeCAD and or deletes all
+objects in it that you can start from blank any time, the set view function
+sets the view after drawing the elements, so that the whole assembly is shown
+in FreeCAD. Since this script does absolutely nothing besides importing stuff,
+you will only see an empty new document.
 ```python
 # =============================================================================
-# some usefull imports that should be copied to ANY project
+# Some useful imports that should be copied to ANY project
 # =============================================================================
+
+
 import sys
 pfad = __file__
 pfad = pfad.replace("\\","/") #folder conventions windows linux stuff
@@ -62,44 +128,63 @@ pfad = pfad[0:ind-1]
 if not pfad in sys.path:
   sys.path.append(pfad)
 
+
 from LaserCAD.basic_optics import Mirror
 from LaserCAD.freecad_models import freecad_da, clear_doc, setview
 
 
 if freecad_da:
   clear_doc()
-  
-"""
-The following code creates a Mirror and plays around with its geometrical 
-properties position <pos> and <normal>. The default values are pos = (0,0,80)
-meaning a beam height of 80 mm and a normal = (1,0,0) so that any object points 
+
+
+if freecad_da:
+  setview()
+```
+Here you can see a screenshot of the output in Spyder.
+<img src="images/1_import_test_1.png" alt="Alt-Text" title="" />
+
+
+
+
+## 2_PositionAndAxes
+The following code creates a Lens and plays around with its geometrical
+properties position pos and normal. The default values are pos = (0,0,80)
+meaning a beam height of 80 mm and a normal = (1,0,0) so that any object points
 in x-Direction.
+Btw all lengths, even wavelengths, are always given in mm!
+All LaserCAD Objects have a draw() function that will print out some usefull 
+information about their position *pos*, *normal* and type. The object is very
+similar to the output of the print and reprint function.
+Each oject also posesses an inner orthonormal, right handed coordiante system 
+namend *_axes* that can be accessed with get_axes() as a matrix or with 
+get_coordinate_system() as the 3 x-,y- and z-axes in a list.
 
-Btw ALL LENGTHS, EVEN WAVELENGTHS, MUST BE GIVEN IN mm!
 
-If executed in FreeCAD, the draw() function will construct and load the 
-appropriate 3D files. If executed in a "normal" shell, the draw() function will 
-print out some useful information about the object (which works with nearly any object).
-Note that the coordinate system stays always orthonormal and right-handed. Also
-note that the normal has always a norm of 1.
-The draw_mount function in the end will draw the default mount and post of the
-mirror and adjust them to the right position and direction.
-"""
+```python
+lens1 = Lens()
+lens1.draw()
 
-# =============================================================================
-# Playground
-# =============================================================================
+print()
+print()
+print("Position of lens1:", lens1.pos)
+print("Normal of lens1:", lens1.normal)
+print("Coordinate system of lens1\nx-Vector, y-Vector, z-Vector:", lens1.get_coordinate_system())
+```
+In LaserCAD we call the unity of *(pos, axes)* a *geom*. The GeomObject 
+containes all the logic for it. You can set any object to the same position
 
+```pyhton
+print()
+geobj1 = Geom_Object()
+geobj1.set_geom(lens1.get_geom())
+geobj1.draw()
+```
+
+When executed in a normal pyhton shell, the output will look like this
+
+
+```python
 mir1 = Mirror()
-mir1.draw()
-
-print()
-print()
-print("Position of mir1:", mir1.pos)
-print("Normal of mir1:", mir1.normal)
-print("Coordinate system of mir1\nx-Vector, y-Vector, z-Vector:", mir1.get_coordinate_system())
-
-
 mir1.pos+= (10,50,30)
 
 print()
@@ -109,7 +194,7 @@ print("Normal of mir1:", mir1.normal)
 print("Coordinate system of mir1\nx-Vector, y-Vector, z-Vector:", mir1.get_coordinate_system())
 
 
-mir1.normal = (1,1,0)
+mir1.normal = (-1,2,0)
 
 print()
 print()
@@ -117,20 +202,63 @@ print("Position of mir1:", mir1.pos)
 print("Normal of mir1:", mir1.normal)
 print("Coordinate system of mir1\nx-Vector, y-Vector, z-Vector:", mir1.get_coordinate_system())
 
+
 print()
 print()
 mir1.draw()
 mir1.draw_mount()
-
-# =============================================================================
-# Playground End
-# =============================================================================
-if freecad_da:
-  setview()
+print()
+geobj2 = Geom_Object()
+geobj2.set_geom(mir1.get_geom())
+geobj2.draw()
 ```
+Here you can see a screenshot of the output in Spyder. Also this script causes
+no 3D objects to be drawn in FreeCAD.
+
+```
+The geometric object <Lens:NewLens> is drawn to the position[ 0.,  0., 80.] with the direction [1., 0., 0.]
+
+
+Position of lens1: [ 0.  0. 80.]
+Normal of lens1: [1. 0. 0.]
+Coordinate system of lens1
+x-Vector, y-Vector, z-Vector: (array([1., 0., 0.]), array([0., 1., 0.]), array([0., 0., 1.]))
+
+The geometric object <Geom_Object:unnamed> is drawn to the position[ 0.,  0., 80.] with the direction [1., 0., 0.]
+
+
+Position of mir1: [ 10.  50. 110.]
+Normal of mir1: [1. 0. 0.]
+Coordinate system of mir1
+x-Vector, y-Vector, z-Vector: (array([1., 0., 0.]), array([0., 1., 0.]), array([0., 0., 1.]))
+
+
+Position of mir1: [ 10.  50. 110.]
+Normal of mir1: [-0.4472136   0.89442719  0.        ]
+Coordinate system of mir1
+x-Vector, y-Vector, z-Vector: (array([-0.4472136 ,  0.89442719,  0.        ]), array([-0.89442719, -0.4472136 ,  0.        ]), array([0., 0., 1.]))
+
+
+The geometric object <Mirror:Component> is drawn to the position[ 10.,  50., 110.] with the direction [-0.44721,  0.89443,  0.     ]
+The geometric object <Composed_Mount:unnamed> is drawn to the position[ 10.,  50., 110.] with the direction [-0.44721,  0.89443,  0.     ]
+
+The geometric object <Geom_Object:unnamed> is drawn to the position[ 10.,  50., 110.] with the direction [-0.44721,  0.89443,  0.     ]
+```
+
 <img src="images/2_PositionAndAxes_1.png" alt="Alt-Text" title="" />
 
-# 3_RaysAndBeams
+
+
+
+## 3_RaysAndBeams
+Here, you can see the rays and beams setting.
+The class 'Ray' is the basic class of light source. Without considering the
+radius of the light ray, the ray only considers the position and direction of
+propagation of the ray. The class 'Beam' is the most common light source.
+Beam has three distributions: Cone, square, and circular. As for the
+cone distribution (default setting of a beam) shows some cylinders and cones
+to represent light beams. The square and circular distributions are some ray
+groups that have different shapes.
 ```python
 # =============================================================================
 # some usefull imports that should be copied to ANY project
@@ -151,22 +279,9 @@ from LaserCAD.freecad_models import freecad_da, clear_doc, setview
 # about beams and rays
 # =============================================================================
 
-"""
-
-Here, you can see the rays and beams setting.
-The class 'Ray' is the basic class of light source. Without considering the 
-radius of the light ray, the ray only considers the position and direction of 
-propagation of the ray. The class 'Beam' is the most common light source.
-Beam has three distributions: Cone, square, and circular. As for the 
-cone distribution (default setting of a beam) shows some cylinders and cones 
-to represent light beams. The square and circular distributions are some ray 
-groups that have different shapes.
-
-"""
-
 if freecad_da:
   clear_doc()
-  
+
 r1 = Ray()
 r1.draw()
 
@@ -200,7 +315,32 @@ print()
 <img src="images/3_RaysAndBeams_1.png" alt="Alt-Text" title="" />
 <img src="images/3_RaysAndBeams_2.png" alt="Alt-Text" title="" />
 
-# 4_LensesAndMirrors
+
+
+
+## 4_LensesAndMirrors
+Here, you see some interaction of optical elements with Beams.
+
+Standard Beams (=cone distributed bemas with two rays, one inner and one outer)
+are defined with a radius and an opening angle in radiant; 0 means collimated.
+
+Lenses are defined directly by their focal length. Names are optional,
+they will appear in FreeCAD.
+
+Mirrors are defined with two deflection angles: phi gives the angle of
+deflection in the xy Plane, and theta the tilt in the z-direction. So, a normal Flip-
+Mirror would have phi = +- 90, theta=0. Phi=180 is the default and means total
+back reflection. You can use the formula phi = 180 - 2*AOI, where AOI is the
+angle of incidence. All angles are in degrees. The combination phi=0, theta=0
+raises an error (grazing incidence). The Curved mirror is a special mirror
+that has all mirror values. Besides, the curved mirror has some different
+values, like radius, which describes the curvature of the mirror. Here are some
+examples of how curved mirrors can focus beams. Another class called
+'Intersection_plane' can set up a plane and is primarily used to show a spot
+diagram of the beam on that plane. Besides, an anisotropic mirror named as
+'Cylindrical_Mirror' is a special mirror with a certain radius in one
+direction and a flat area in the other.
+
 ```python
 # =============================================================================
 # some usefull imports that should be copied to ANY project
@@ -222,36 +362,9 @@ from LaserCAD.freecad_models import freecad_da, clear_doc, setview
 # about lenses and mirrors
 # =============================================================================
 
-"""
-
-Here, you see some interaction of optical elements with Beams
-
-Standard Beams (=cone distributed bemas with two rays, one inner and one outer)
-are defined with a radius and an opening angle in radiant; 0 means collimated.
-
-Lenses are defined directly by their focal length. Names are optional, 
-they will appear in FreeCAD. 
-
-Mirrors are defined with two deflection angles: phi gives the angle of 
-deflection in the xy Plane, and theta the tilt in the z-direction. So, a normal Flip-
-Mirror would have phi = +- 90, theta=0. Phi=180 is the default and means total
-back reflection. You can use the formula phi = 180 - 2*AOI, where AOI is the
-angle of incidence. All angles are in degrees. The combination phi=0, theta=0 
-raises an error (grazing incidence). The Curved mirror is a special mirror 
-that has all mirror values. Besides, the curved mirror has some different 
-values, like radius, which describes the curvature of the mirror. Here are some 
-examples of how curved mirrors can focus beams. Another class called 
-'Intersection_plane' can set up a plane and is primarily used to show a spot 
-diagram of the beam on that plane. Besides, an anisotropic mirror named as
-'Cylindrical_Mirror' is a special mirror with a certain radius in one 
-direction and a flat area in the other.
-
-"""
-
-
 if freecad_da:
   clear_doc()
-  
+
 
 le1 = Lens(f=200, name="Lens1")
 le1.pos += (0,100,0)
@@ -339,7 +452,7 @@ print()
 print()
 
 # =============================================================================
-# ToDo: Curved Mirror aND sPOT dIAGRAMS -> He 
+# ToDo: Curved Mirror aND sPOT dIAGRAMS -> He
 # =============================================================================
 
 if freecad_da:
@@ -348,7 +461,21 @@ if freecad_da:
 <img src="images/4_LensesAndMirrors_1.png" alt="Alt-Text" title="" />
 <img src="images/4_LensesAndMirrors_2.png" alt="Alt-Text" title="" />
 
-# 5_Composition
+
+
+
+## 5_Composition
+"""
+A quick intro to compositions. Output is exactly the same, but as in
+LensesAndMirrors positioning is easier.
+
+You create the composition and add alternating propagations and elements. All
+elements will be automatically placed on the optical axes in the exact position.
+The draw() command is an abbreviation for draw_elements, draw_beams and draw_mounts
+
+The whole output is grouped in a "Part-Feature" in FreeCAD; you can, for
+example, blend mounts in and out.
+"""
 ```python
 # =============================================================================
 # some usefull imports that should be copied to ANY project
@@ -369,23 +496,11 @@ from LaserCAD.freecad_models import freecad_da, clear_doc, setview
 # like LensesAndMirrors but with Compositions
 # =============================================================================
 
-"""
-A quick intro to compositions. Output is exactly the same, but as in 
-LensesAndMirrors positioning is easier
-
-
-You create the composition and add alternating propagations and elements. All
-elements will be automatically placed on the optical axes in the exact position. 
-The draw() command is an abbreviation for draw_elements, draw_beams and draw_mounts
-
-The whole output is grouped in a "Part-Feature" in FreeCAD; you can, for
-example, blend mounts in and out.
-"""
 
 
 if freecad_da:
   clear_doc()
-  
+
 
 comp1 = Composition(name="FokusLens")
 b1 = Beam(radius=4, angle=0)
@@ -423,12 +538,14 @@ if freecad_da:
   setview()
 
 ```
-
 <img src="images/5_Composition_1.png" alt="Alt-Text" title="" />
-
 <img src="images/5_Composition_2.png" alt="Alt-Text" title="" />
 
-# 6_LinearResonator
+
+
+
+
+## 6_LinearResonator
 ```python
 import numpy as np
 import sys
@@ -440,8 +557,8 @@ ind = pfad.rfind("lasercad")
 pfad = pfad[0:ind-1]
 if not pfad in sys.path:
   sys.path.append(pfad)
-  
-  
+
+
 from LaserCAD.freecad_models import clear_doc, setview, freecad_da
 from LaserCAD.basic_optics import Mirror, Beam, Composition, inch
 from LaserCAD.basic_optics import Curved_Mirror, Ray, Component
@@ -453,56 +570,63 @@ from LaserCAD.non_interactings import Faraday_Isolator, Pockels_Cell, Lambda_Pla
 if freecad_da:
   clear_doc()
 
-# create a resonator, set position and wavelength
+```
+The first block creates a resonator, set its position and the wavelength, which
+is needed for the computation of the eigenmode.
+```python
 reso = LinearResonator()
 reso.pos += (0,0,30)
 reso.set_wavelength(1e-3)
+```
 
-# add the end mirror with certain aperture, propagate
+The end mirror is added with a certain aperture afterwards we propagate 100 mm
+on the optical axis.
+```python
 mir1 = Mirror()
 mir1.aperture = 2*inch
 mir1.set_mount_to_default()
 reso.add_on_axis(mir1)
 reso.propagate(100)
+```
 
-
-# add a Lambda Plate (no influence, polarisation is not included), propagate
+A Lambda plate from the non_interactings modul is inserted. Since LaserCAD has
+no polarisation included yet, the component does not influence the beam line.
+```python
 reso.add_on_axis(Lambda_Plate())
 reso.propagate(100)
+```
 
-# add a flip mirror, propagate
+Two flip mirrors will cause the beam to be turned by 180°.
+```python
 reso.add_on_axis(Mirror(phi=90))
 reso.propagate(450)
-
-
-# add a flip mirror, propagate
 reso.add_on_axis(Mirror(phi=90))
 reso.propagate(150)
+```
 
-# add a Pockels Cell (no influence, polarisation is not included), propagate
-# reso.add_on_axis(Pockels_Cell())
+We can add a Pockels Cell from the non_interactings module that also will not
+alter the light propagation, but makes the setup more realistically. Addtionally
+we can change its color with RGB values.
+```python
 pc = Pockels_Cell()
 pc.draw_dict["color"] = (0.3, 0.3, 0.4)
 reso.add_on_axis(pc)
 reso.propagate(250)
+```
 
-# Add a Curved End Mirror
+To get a stable resonator, we have to add at least one curved mirror at the end.
+After that we draw all components and their mounts, compute the eigenmode from
+the optical matrix of the system as a gaussian TEM00 mode and also show it.
+This may take a few seconds, because the model for gaussian beams is rather
+complex at the moment.
+```python
 reso.add_on_axis(Curved_Mirror(radius=2000))
 
-# Draw ALL components and their mounts, compute the eigenmode (TEM00)
-# and draws it aus gaussian beam (this may take some seconds)
 reso.draw()
-
-
-from LaserCAD.freecad_models.freecad_model_mirror import model_mirror
-
 
 if freecad_da:
   setview()
 ```
-
 <img src="images/6_LinearResonator_1.png" alt="Alt-Text" title="" />
-
 <img src="images/6_LinearResonator_2.png" alt="Alt-Text" title="" />
 
-# 7_FunnyLooks
