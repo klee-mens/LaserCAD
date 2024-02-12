@@ -20,7 +20,7 @@ if not pfad in sys.path:
 from scipy.interpolate import interp1d
 from scipy.misc import derivative
 
-from LaserCAD.freecad_models import clear_doc, freecad_da
+from LaserCAD.freecad_models import clear_doc, setview, freecad_da
 from LaserCAD.basic_optics import Mirror, Beam, Composition, inch
 from LaserCAD.basic_optics import Curved_Mirror, Ray, Lens
 from LaserCAD.basic_optics.mirror import Stripe_mirror
@@ -301,8 +301,6 @@ Grat2.Mount.add(PM1)
 Grat3.Mount.add(PM2)
 
 # print("setting pos=",(Grat1.pos+Grat2.pos+Grat3.pos+Grat4.pos)/4)
-ip = Intersection_plane()
-ip.pos -= (100,0,0)
 Stretcher.add_fixed_elm(Grat1)
 Stretcher.add_fixed_elm(Grat2)
 Stretcher.add_fixed_elm(Grat3)
@@ -323,10 +321,6 @@ Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0,6,7,8,9])#8,9,10,11]) #f
 Stretcher.recompute_optical_axis()
 Stretcher.pos += (0,0,24)
 Stretcher.propagate(500)
-# ip=Intersection_plane()
-# ip.set_geom(Stretcher.last_geom())
-# ip.spot_diagram(Stretcher._beams[-1],aberration_analysis=True)
-# ip.draw()
 
 from LaserCAD.basic_optics import Gaussian_Beam
 gb = Gaussian_Beam(radius=input_radius,angle=input_angle)
@@ -372,7 +366,7 @@ ip= Intersection_plane(name="the start of the Stretcher")
 ip_s.spot_diagram(Stretcher._beams[-1])
 ip.set_geom(Stretcher.get_geom())
 ip.spot_diagram(Stretcher._beams[0])
-# ip.spot_diagram(Stretcher._beams[14])
+# ip.spot_diagram(Stretcher._beams[14],aberration_analysis=True)
 ip.draw()
 ip_s.draw()
 # pathlength = {}
@@ -468,3 +462,5 @@ ip_s.draw()
 
 
 # # Stretcher.draw_beams()
+if freecad_da:
+  setview()
