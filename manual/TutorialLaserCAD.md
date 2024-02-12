@@ -153,11 +153,11 @@ properties position pos and normal. The default values are pos = (0,0,80)
 meaning a beam height of 80 mm and a normal = (1,0,0) so that any object points
 in x-Direction.
 Btw all lengths, even wavelengths, are always given in mm!
-All LaserCAD Objects have a draw() function that will print out some usefull 
+All LaserCAD Objects have a draw() function that will print out some usefull
 information about their position *pos*, *normal* and type. The object is very
 similar to the output of the print and reprint function.
-Each oject also posesses an inner orthonormal, right handed coordiante system 
-namend *_axes* that can be accessed with get_axes() as a matrix or with 
+Each oject also posesses an inner orthonormal, right handed coordiante system
+namend *_axes* that can be accessed with get_axes() as a matrix or with
 get_coordinate_system() as the 3 x-,y- and z-axes in a list.
 
 
@@ -181,9 +181,9 @@ Normal of lens1: [1. 0. 0.]
 Coordinate system of lens1
 x-Vector, y-Vector, z-Vector: (array([1., 0., 0.]), array([0., 1., 0.]), array([0., 0., 1.]))
 ```
-In LaserCAD we call the unity of *(pos, axes)* a *geom*. The GeomObject 
+In LaserCAD we call the unity of *(pos, axes)* a *geom*. The GeomObject
 containes all the logic for it. You can set any object to the same position and
-orientation as an other object2 by useing the *set_geom()* and *get_geom()* 
+orientation as an other object2 by useing the *set_geom()* and *get_geom()*
 function.
 ```pyhton
 print()
@@ -227,9 +227,9 @@ geobj2.set_geom(mir1.get_geom())
 geobj2.draw()
 ```
 In the output you can see, that a change in posiiton of course does not change
-the axes, while a change of the normal does. If the normal is changed in the 
-xy-plane, the z-axis is not affected. Mounts and posts are adjusted 
-automatically. 
+the axes, while a change of the normal does. If the normal is changed in the
+xy-plane, the z-axis is not affected. Mounts and posts are adjusted
+automatically.
 ```
 
 The geometric object <Geom_Object:unnamed> is drawn to the position[ 0.,  0., 80.] with the direction [1., 0., 0.]
@@ -253,8 +253,8 @@ The geometric object <Composed_Mount:unnamed> is drawn to the position[ 10.,  50
 The geometric object <Geom_Object:unnamed> is drawn to the position[ 10.,  50., 110.] with the direction [-0.44721,  0.89443,  0.     ]
 ```
 Here you can see the FreeCAD output. Note that the normal of the mirror in
-LaserCAD is defined in such a way, that it points in the mirror and not out of 
-its surface, what may differ from some other ray tracing programs. 
+LaserCAD is defined in such a way, that it points in the mirror and not out of
+its surface, what may differ from some other ray tracing programs.
 
 <img src="images/2_PositionAndAxes_1.png" alt="Alt-Text" title="" />
 
@@ -263,25 +263,14 @@ its surface, what may differ from some other ray tracing programs.
 
 ## 3_RaysAndBeams
 Here, you can see a demonstration of the Ray and Beam class.
-The class 'Ray' describes the one dimensional ray and only considers the 
-position and direction. 
+The class 'Ray' describes the one dimensional ray and only considers the
+position and direction.
 The class 'Beam' is the most common light source and describes 3D light bundles.
 Beam has three distributions: Cone, square, and circular. As for the
 cone distribution (default setting of a beam) shows some cylinders and cones
 to represent light beams. The square and circular distributions are some ray
 groups that have different shapes.
 ```python
-# =============================================================================
-# some usefull imports that should be copied to ANY project
-# =============================================================================
-import sys
-pfad = __file__
-pfad = pfad.replace("\\","/") #folder conventions windows linux stuff
-pfad = pfad.lower()
-ind = pfad.rfind("lasercad")
-pfad = pfad[0:ind-1]
-if not pfad in sys.path:
-  sys.path.append(pfad)
 
 from LaserCAD.basic_optics import Mirror, Curved_Mirror, Lens, Beam, Ray, Gaussian_Beam
 from LaserCAD.freecad_models import freecad_da, clear_doc, setview
@@ -295,8 +284,8 @@ if freecad_da:
 
 r1 = Ray()
 r1.draw()
-
 print()
+
 
 b1 = Beam()
 b1.pos += (0,100,0)
@@ -319,17 +308,63 @@ b3.draw()
 b4 = Gaussian_Beam()
 b4.pos += (0,-300,0)
 b4.draw()
-
-print()
-print()
 ```
-underneath you can see the output in the terminal and in FreeCAD. When you zoom
+
+Output:
+```
+The geometric object <Ray:unnamed> is drawn to the position[ 0.,  0., 80.] with the direction [1., 0., 0.]
+
+The geometric object <Beam:NewBeam> is drawn to the position[  0., 100.,  80.] with the direction [1., 0., 0.]
+
+
+The geometric object <Beam:NewBeam> is drawn to the position[   0., -100.,   80.] with the direction [1., 0., 0.]
+The geometric object <Beam:NewBeam> is drawn to the position[   0., -200.,   80.] with the direction [1., 0., 0.]
+The geometric object <Gaussian_Beam:NewGassian> is drawn to the position[   0., -300.,   80.] with the direction [1., 0., 0.]
+```
+
+Now let's have a look at the inner structure of the beam:
+
+```python
+b5 = Beam()
+rays = b5.get_all_rays()
+print("The standard beam has only", len(rays), "rays.")
+print(b5.inner_ray())
+print(b5.outer_rays())
+```
+
+Output:
+```
+The standard beam has only 2 rays.
+
+Ray(name="NewBeam_inner_Ray", pos=[ 0.,  0., 80.], normal=[1., 0., 0.])
+[Ray(name="NewBeam_outer_Ray0", pos=[ 0.,  0., 81.], normal=[1., 0., 0.])]
+```
+
+The standard beam has only 2 rays: One inner Ray for its position and
+direction and one outer ray for its divergence and waist.
+Inner ray is only one ray (element 0 of get all rays).
+The outer rays are a list of rays, containing only one element in this case.
+
+```python
+b5.pos += (7,-4,20)
+b5.normal = (1,1,0)
+print(b5)
+print(b5.get_all_rays())
+```
+Output:
+```
+Beam(radius=1.0, anlge=0.0, distribution='cone', ame="NewBeam", pos=[  7.,  -4., 100.], normal=[0.70711, 0.70711, 0.     ])
+[Ray(name="NewBeam_inner_Ray", pos=[  7.,  -4., 100.], normal=[0.70711, 0.70711, 0.     ]), Ray(name="NewBeam_outer_Ray0", pos=[  7.,  -4., 101.], normal=[0.70711, 0.70711, 0.     ])]
+```
+As you see, any change in position and axes of the beam will transform its
+rays accordingly.
+
+Underneath you can see the output in the terminal and in FreeCAD. When you zoom
 in in FreeCAD, you will notice, that the yellow distributions consists of 1D rays
-(in FreeCAD called *edges*) while Gauss and standard beam are red and semi 
-transparent. The Gaussian_Beam has many segments that form the caustic, which 
+(in FreeCAD called *edges*) while Gauss and standard beam are red and semi
+transparent. The Gaussian_Beam has many segments that form the caustic, which
 may take a while to be drawn.
 
-<img src="images/3_RaysAndBeams_1.png" alt="Alt-Text" title="" />
 <img src="images/3_RaysAndBeams_2.png" alt="Alt-Text" title="" />
 
 
