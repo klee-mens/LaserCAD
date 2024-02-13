@@ -19,7 +19,7 @@ if not pfad in sys.path:
   sys.path.append(pfad)
 
 
-from LaserCAD.freecad_models import clear_doc, setview, freecad_da
+from LaserCAD.freecad_models import clear_doc, setview, freecad_da,add_to_composition
 from LaserCAD.basic_optics import Mirror, Beam, Composition, Component, inch, Curved_Mirror, Ray, Geom_Object
 from LaserCAD.basic_optics import Grating, Opt_Element
 import matplotlib.pyplot as plt
@@ -49,6 +49,9 @@ M1_angle = 1
 PM_angle = 2
 TFP_angle = 66
 Glan_angle = 68
+# -----------------------------------------------------------------------------
+roundtrip = 2
+# -----------------------------------------------------------------------------
 
 glan_taylor_in = Component()
 stl_file = thisfolder+"\mount_meshes\A2_mounts\Glan_Taylor_reverced.stl"
@@ -77,6 +80,8 @@ M1 = Mirror(phi=-90+M1_angle)           # 2" mirror with two reflections per rou
 M2 = Mirror(phi=25)                     # 1" mirror in the small mount next to the Pockels cell
 M3 = Mirror(phi=180+2*56)               # mirror before Glan_in
 # -----------------------------------------------------------------------------
+# Added design
+# -----------------------------------------------------------------------------
 M2.Mount = Composed_Mount(unit_model_list=["Newport-9771-M","1inch_post"])
 M2.Mount.set_geom(M2.get_geom())
 # M3.Mount = Composed_Mount(unit_model_list=["Newport-9771-M","1inch_post"])
@@ -84,6 +89,8 @@ M2.Mount.set_geom(M2.get_geom())
 # -----------------------------------------------------------------------------
 Glan_in = Mirror(phi=180-Glan_angle)    # input coupling Glan polarizer             
 Glan_out = Mirror(phi=180+Glan_angle)   # output coupling Glan polarizer
+# -----------------------------------------------------------------------------
+# Added design
 # -----------------------------------------------------------------------------
 Glan_in.Mount.invisible = True
 Glan_out.Mount.invisible = True
@@ -93,6 +100,8 @@ PM1 = Mirror(phi=-180+PM_angle)         # pump mirror
 # Doesnt seem to work since newest pull!
 M1.aperture = 2 * inch
 TFP1.aperture = 2 * inch 
+# -----------------------------------------------------------------------------
+# Added design
 # -----------------------------------------------------------------------------
 M1.set_mount_to_default()
 TFP1.set_mount_to_default()
@@ -106,7 +115,7 @@ Setup = Composition()
 Setup.set_light_source(beam)
 
 # We start at the position of the Glan_in
-Setup.propagate(10)
+# Setup.propagate(10)
 Setup.add_on_axis(glan_taylor_in)
 Setup.propagate(185+80)
 Setup.add_on_axis(pockels_cell)
@@ -128,15 +137,27 @@ Setup.add_on_axis(PM1) #5
 Setup.set_sequence([0,1,2,3,4,5,4])
 Setup.recompute_optical_axis()  
 Setup.propagate(105)
-Setup.add_on_axis(M3)
+Setup.add_on_axis(M3) #6
 Setup.propagate(45)
-Setup.add_on_axis(Glan_in)
+Setup.add_on_axis(Glan_in) #7
+
 # -----------------------------------------------------------------------------
-a = Glan_in.pos
-glan_taylor_in.pos = a
+# Added design
 # -----------------------------------------------------------------------------
 
-Setup.propagate(10)
+Glan_in_pos = Glan_in.pos
+glan_taylor_in.pos = Glan_in_pos
+
+seq = np.array([0,1,2,3,4,5,4,6,7])
+sequence_loop = list(np.array([0,1,2,3,4,5,4,6,7]))
+for loop_i in range(roundtrip-1):
+  seq = np.append(seq,sequence_loop)
+seq=np.append(seq, [0,1])
+
+Setup.set_sequence(seq)
+Setup.propagate(750)
+# -----------------------------------------------------------------------------
+
 
 # glan_taylor_out.rotate(glan_taylor_out.get_axes()[0], phi=np.pi)
 glan_taylor_in.rotate(glan_taylor_in.get_axes()[2], phi=np.pi)
@@ -147,8 +168,23 @@ glan_taylor_in.rotate(glan_taylor_in.get_axes()[2], phi=np.pi)
 # Glan_out.draw = dont
 # Glan_out.mount.elm_type = "dont_draw"
 
+# -----------------------------------------------------------------------------
+# Setup.draw()
+Setup.draw_elements()
+Setup.draw_mounts()
 
-Setup.draw()
-
+# Setup.compute_beams()
+# container = []
+# for last_loop in range(-10,0):
+#   beam = Setup._beams[last_loop]
+#   obj = beam.draw()
+#   container.append(obj)
+# if freecad_da:
+#   part = add_to_composition(Setup._beams_part, container)
+# else:
+#   for x in container:
+#     Setup._beams_part.append(x)
+Setup.draw_beams()
+# -----------------------------------------------------------------------------
 if freecad_da:
   setview()
