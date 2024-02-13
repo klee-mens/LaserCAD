@@ -241,8 +241,10 @@ def cavity_and_stretcher(C_radius = 8000,vertical_mat=True,want_to_draw=True,rou
   point0 = p0
   p1 = p_grat
   Stretcher_M1.set_normal_with_2_points(p0, p1)
-  Stretcher_M1.aperture = 25.4/2
-  Stretcher_M1.set_mount_to_default()
+  # Stretcher_M1.aperture = 25.4/2
+  Stretcher_M1.Mount = Composed_Mount(unit_model_list=["MH25_KMSS","1inch_post"])
+  Stretcher_M1.Mount.set_geom(Stretcher_M1.get_geom())
+  # Stretcher_M1.set_mount_to_default()
   Stretcher_M0 = Mirror()
   Stretcher_M0.pos = (-150, Stretcher_M1.pos[1],Stretcher_M1.pos[2])
   p0 = Stretcher_M1.pos
@@ -262,8 +264,10 @@ def cavity_and_stretcher(C_radius = 8000,vertical_mat=True,want_to_draw=True,rou
   
   p0 = Stretcher_M2.pos + (250,0,0)
   p1 = p_grat + (0,0,periscope_distance)
-  Stretcher_M2.aperture = 25.4/2
-  Stretcher_M2.set_mount_to_default()
+  Stretcher_M2.Mount = Composed_Mount(unit_model_list=["MH25_KMSS","1inch_post"])
+  Stretcher_M2.Mount.set_geom(Stretcher_M2.get_geom())
+  # Stretcher_M2.aperture = 25.4/2
+  # Stretcher_M2.set_mount_to_default()
   Stretcher_M2.set_normal_with_2_points(p0, p1)
   
   TFP1 = Mirror()
@@ -533,7 +537,7 @@ roundtrip = 50
 centerlamda = 1030E-6
 C_radius = 6000
 StripeM_shift = 0.13
-StripeM_shift = 0
+# StripeM_shift = 0
 # StripeM_shift = 0.115
 # StripeM_shift = 0
 # CB=CenterBeam CR=CenterRay 
