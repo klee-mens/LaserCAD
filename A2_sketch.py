@@ -50,22 +50,25 @@ PM_angle = 2
 TFP_angle = 66
 Glan_angle = 68
 # -----------------------------------------------------------------------------
-roundtrip = 2
-# -----------------------------------------------------------------------------
-
+roundtrip = 20
+# Now the glan_taylor_in and glan_taylor_out will no longer be drawn due to the
+# "dont_draw" definition. I copied the "Glan_Taylor_reverced.stl" file into the
+# special mount folder and defined its docking_position so that I could easily 
+# draw its connected posts.
 glan_taylor_in = Component()
-stl_file = thisfolder+"\mount_meshes\A2_mounts\Glan_Taylor_reverced.stl"
+# stl_file = thisfolder+"\mount_meshes\A2_mounts\Glan_Taylor_reverced.stl"
 glan_taylor_in.draw_dict["stl_file"]="dont_draw"
 glan_taylor_in.freecad_model = load_STL
 
 glan_taylor_out = Component()
-stl_file = thisfolder+"\mount_meshes\A2_mounts\Glan_Taylor_reverced.stl"
+# stl_file = thisfolder+"\mount_meshes\A2_mounts\Glan_Taylor_reverced.stl"
 glan_taylor_out.draw_dict["stl_file"]="dont_draw"
 glan_taylor_out.freecad_model = load_STL
 
 glan_taylor_in.Mount = Composed_Mount(unit_model_list=["Glan_Taylor","1inch_post"])
 glan_taylor_out.Mount = Composed_Mount(unit_model_list=["Glan_Taylor","1inch_post"])
 
+# -----------------------------------------------------------------------------
 pockels_cell = Component()
 pockels_cell.draw_dict["stl_file"]= thisfolder+"\mount_meshes\A2_mounts\Pockels_cell.stl"
 pockels_cell.freecad_model = load_STL
@@ -80,28 +83,26 @@ M1 = Mirror(phi=-90+M1_angle)           # 2" mirror with two reflections per rou
 M2 = Mirror(phi=25)                     # 1" mirror in the small mount next to the Pockels cell
 M3 = Mirror(phi=180+2*56)               # mirror before Glan_in
 # -----------------------------------------------------------------------------
-# Added design
+# redefine M2 Mount
 # -----------------------------------------------------------------------------
 M2.Mount = Composed_Mount(unit_model_list=["Newport-9771-M","1inch_post"])
 M2.Mount.set_geom(M2.get_geom())
-# M3.Mount = Composed_Mount(unit_model_list=["Newport-9771-M","1inch_post"])
-# M3.Mount.set_geom(M3.get_geom())
 # -----------------------------------------------------------------------------
 Glan_in = Mirror(phi=180-Glan_angle)    # input coupling Glan polarizer             
 Glan_out = Mirror(phi=180+Glan_angle)   # output coupling Glan polarizer
 # -----------------------------------------------------------------------------
-# Added design
+# hide the Mounts. Their Mounts has already been drawn.
 # -----------------------------------------------------------------------------
 Glan_in.Mount.invisible = True
 Glan_out.Mount.invisible = True
 # -----------------------------------------------------------------------------
 PM1 = Mirror(phi=-180+PM_angle)         # pump mirror
 
-# Doesnt seem to work since newest pull!
 M1.aperture = 2 * inch
 TFP1.aperture = 2 * inch 
 # -----------------------------------------------------------------------------
-# Added design
+# After the update, elements need to set mount to default when the aperture 
+# changed.
 # -----------------------------------------------------------------------------
 M1.set_mount_to_default()
 TFP1.set_mount_to_default()
@@ -136,18 +137,32 @@ Setup.propagate(575)
 Setup.add_on_axis(PM1) #5
 Setup.set_sequence([0,1,2,3,4,5,4])
 Setup.recompute_optical_axis()  
+p0=Setup.last_geom()[0]
 Setup.propagate(105)
 Setup.add_on_axis(M3) #6
-Setup.propagate(45)
-Setup.add_on_axis(Glan_in) #7
-
+# Setup.propagate(45)
+# Setup.add_on_axis(Glan_in) #7
 # -----------------------------------------------------------------------------
-# Added design
+# Since there are some errors in the resonator. The following code is used to 
+# correct these errors.
 # -----------------------------------------------------------------------------
-
+# M3.pos = (16.07335963622269,39.782961125846896,80)
+# Setup.add_fixed_elm(M3) #6
+Glan_in.pos = (0,0,80)
+Setup.add_fixed_elm(Glan_in) #7
+p1 = (0,0,80)
+M3.set_normal_with_2_points(p0, p1)
+p0 = M3.pos
+p1 = TFP1.pos
+Glan_in.set_normal_with_2_points(p0, p1)
+print(Glan_in.phi)
+print(180-Glan_angle)
 Glan_in_pos = Glan_in.pos
 glan_taylor_in.pos = Glan_in_pos
 
+# -----------------------------------------------------------------------------
+# The following code is designed to enable light to circulate in the resonator.
+# -----------------------------------------------------------------------------
 seq = np.array([0,1,2,3,4,5,4,6,7])
 sequence_loop = list(np.array([0,1,2,3,4,5,4,6,7]))
 for loop_i in range(roundtrip-1):
@@ -168,14 +183,18 @@ glan_taylor_in.rotate(glan_taylor_in.get_axes()[2], phi=np.pi)
 # Glan_out.draw = dont
 # Glan_out.mount.elm_type = "dont_draw"
 
-# -----------------------------------------------------------------------------
 # Setup.draw()
 Setup.draw_elements()
 Setup.draw_mounts()
 
+# -----------------------------------------------------------------------------
+# Since modeling multiple loops takes too long, the following code is used to 
+# implement raytracing that only shows the last loop. Please note to comment 
+# out the draw_beams function when using it.
+# -----------------------------------------------------------------------------
 # Setup.compute_beams()
 # container = []
-# for last_loop in range(-10,0):
+# for last_loop in range(-12,0):
 #   beam = Setup._beams[last_loop]
 #   obj = beam.draw()
 #   container.append(obj)
