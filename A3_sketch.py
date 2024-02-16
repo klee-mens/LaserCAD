@@ -33,6 +33,10 @@ if freecad_da:
 def dont():
     return None
 
+pockels_cell = Component()
+pockels_cell.draw_dict["stl_file"]= thisfolder+"\mount_meshes\A2_mounts\Pockels_cell.stl"
+pockels_cell.freecad_model = load_STL
+
 focal_length = 125
 
 beam = Beam(radius=5,angle=0,wavelength=600E-6)
@@ -93,6 +97,9 @@ TFP_angle = 66
 TFP_ydist = 200
 TFP_xdist = TFP_ydist*np.tan((2*TFP_angle-90)*np.pi/180)
 TFP_dist = np.sqrt(TFP_ydist**2 + TFP_xdist**2)
+TFP_Lambda_Plate = 60
+Lam_Pockscell = 175
+Last_dist = TFP_dist - TFP_Lambda_Plate - Lam_Pockscell
 
 P1 = Mirror(phi=-90)
 P2 = Mirror(phi=90)
@@ -128,11 +135,22 @@ Setup.propagate(100)
 Setup.add_on_axis(M3)
 Setup.propagate(50)
 Setup.add_on_axis(TFP1)
-Setup.propagate(TFP_dist)
+Setup.propagate(TFP_Lambda_Plate)
+Setup.add_on_axis(Lambda_Plate())
+Setup.propagate(Lam_Pockscell)
+Setup.add_on_axis(pockels_cell)
+pockels_cell.rotate((0,0,1), np.pi)
+Setup.propagate(Last_dist)
+# Setup.propagate(TFP_dist)
 Setup.add_on_axis(TFP2)
 Setup.propagate(1370)
 Setup.add_on_axis(M4)
 Setup.propagate(40)
 Setup.rotate((0,0,1), np.pi/2)
 Setup.pos += (-50,-150,20)
+
+P1.aperture = P2.aperture = M1.aperture = M2.aperture = M3.aperture = M4.aperture = TFP1.aperture = TFP2.aperture = 25.4*2
+for elements in Setup._elements:
+  elements.set_mount_to_default()
+M2.Mount.mount_list[0].flip(90)
 Setup.draw()

@@ -50,7 +50,7 @@ PM_angle = 2
 TFP_angle = 66
 Glan_angle = 68
 # -----------------------------------------------------------------------------
-roundtrip = 20
+roundtrip = 2
 # Now the glan_taylor_in and glan_taylor_out will no longer be drawn due to the
 # "dont_draw" definition. I copied the "Glan_Taylor_reverced.stl" file into the
 # special mount folder and defined its docking_position so that I could easily 
