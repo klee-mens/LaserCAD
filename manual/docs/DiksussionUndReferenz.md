@@ -3,11 +3,11 @@
 ## Warum LaserCAD?
 
 Wie schon in Hes Berichten und in der Präsentation beschrieben, kann es ziemliche Vorteile mit sich bringen einen optischen Aufbau im Vorfeld einmal komplett in 3D am Computer darzustellen. Das erleichtert die Planung, Diskussionen mit Kollegen und Rückschläge und Kompromisse im Labor aufgrund von Platzproblemen und Klipping, wie sie fast immer zwangsläufig auftreten, wenn man von einer Bleistiftskizze zum realen Aufbau kommt. Speziell beim Aufbau von Lasersystemen, in denen verschachtelte Strahlengänge mit vielen Faltungen häufig vorkommen und grundsätzlich mit jeder Apertur gegeizt wird, stellt man immer wieder beim Experiment Probleme fest, die sich durch eine vorherige 3D Skizze bereits in der Planung hätten vermeiden lassen.
-Die meisten Software Pakete hierfür wie Zeemax und Co haben nun das Problem zwar super exakte Raytracing Berechnungen anzubieten, die man im Fall von paraxialen Laserstrahlen meist nicht braucht, im Gegenzug dafür aber aber eben auch Unmengen von unnötigen Informationen einzufordern und das meist mit einem sehr unflexiblen und nicht modularen Interface. Die hohen Kosten und Lizenzhürden kommen dann auch noch dazu. AuÃŸerdem sind die meisten Softwarepakte nicht in der Lage auf einfache Weise mechanische Peripherie wie Spiegelhalter, Pockelszellengehäuse, Posts und Ã„hnliches einzubinden, die aber meist genau die Objekte sind, die bei der Realisierung des Aufbaus Probleme berieten.
+Die meisten Software Pakete hierfür wie Zeemax und Co haben nun das Problem zwar super exakte Raytracing Berechnungen anzubieten, die man im Fall von paraxialen Laserstrahlen meist nicht braucht, im Gegenzug dafür aber aber eben auch Unmengen von unnötigen Informationen einzufordern und das meist mit einem sehr unflexiblen und nicht modularen Interface. Die hohen Kosten und Lizenzhürden kommen dann auch noch dazu. Außerdem sind die meisten Softwarepakte nicht in der Lage auf einfache Weise mechanische Peripherie wie Spiegelhalter, Pockelszellengehäuse, Posts und Ähnliches einzubinden, die aber meist genau die Objekte sind, die bei der Realisierung des Aufbaus Probleme berieten.
 Kurzum, das Ziel ist eine einfach zu handhabende, skriptbasierte, modulare Sofware zu entwickeln, die mit wenigen Zeilen Code einen Aufbau möglichst realistisch in 3D ausgeben soll, mit der Möglichkeit der manuellen Nachbearbeitung und des Exportierens. Die Grundsätze lauten:
 1. Make the common case simple.
 2. Der Nutzer sollte alles im Skript einstellen können, die Default Werte aber auch so gut gesetzt sein, dass man es nicht muss.
-3. Der Code sollte so nachvollziehbar gestaltet sein, dass man notfalls weiÃŸ, an welcher Stelle man etwas im Bedarfsfall umprogrammieren muss.
+3. Der Code sollte so nachvollziehbar gestaltet sein, dass man notfalls weiß, an welcher Stelle man etwas im Bedarfsfall umprogrammieren muss.
 
 Installation und Import
 
@@ -64,7 +64,7 @@ NORM0 = np.array((1,0,0)) #Strahl startet in x-Richtung
 TOLERANCE = 1e-9 #Wert ab dem zwei GröÃŸen (meist Winkel) als gleich angenommen werden
 ```
 
-TOLERANCE beschreibt den Wert, ab dem eine GröÃŸe als gleich null angenommen wird. Beispielsweise werden zwei Vektoren als parallel angenommen, wenn der Betrag ihres Kreuzproduktes kleiner als TOLERANCE ist.
+TOLERANCE beschreibt den Wert, ab dem eine Größe als gleich null angenommen wird. Beispielsweise werden zwei Vektoren als parallel angenommen, wenn der Betrag ihres Kreuzproduktes kleiner als TOLERANCE ist.
 
 
 

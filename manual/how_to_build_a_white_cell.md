@@ -1,9 +1,9 @@
-# How to build a Multi Pass White Cell
+# How to build a Multi-Pass White Cell
 
-The follwing example shows how to build multipass setups in LasrCAD. Spoiler:
-You do it with the set_sequence() function. As an example we will build a White
+The following example shows how to build multipass setups in LasrCAD. Spoiler:
+You do it with the set_sequence() function. As an example, we will build a White
 Cell as you can find for example under www....
-At the beginning we have to do our home work as an optics preofessional and ask:
+At the beginning we have to do our homework as optics professional and ask:
 Ok, how is the beam line set, and what are the distances again? Lukely we
 prepared something:
 A White Cell consist of 3 curved mirrors, All with the same radius of curvature
@@ -68,21 +68,21 @@ helper.draw()
 ```
 <img src="images/how-to-white-cell/white-cell-2.png" alt="Oopsie-NotFound" title="" />
 
-Nice, now we have so to say a closed White Cell. To come in and out we have to
+Nice, now we have to say a closed White Cell. To come in and out, we have to
 do the same trick with the 2 other mirrors. Let's quickly do the math: from the
 sketch here:
 
-you can see, that we can calculate the angle of incidence AOI from the desired
-seperation between two beams (a good number two start could be twice the input
+you can see that we can calculate the angle of incidence AOI from the desired
+separation between two beams (a good number two start could be twice the input
 beam diameter) by:
 
-FORMULAR
+FORMULA
 
 So the phi = 180 - 2*AOI for the first and plus for the last mirror. If you are
-not shure about this just see the Tutorial about mirrors or play around with
+not sure about this, just see the Tutorial about mirrors or play around with
 the phi.
 
-And like this I present you the one pass cell:
+And like this, I present you the one-pass cell:
 ```python
 import numpy as np
 from LaserCAD.basic_optics import Curved_Mirror, Composition
@@ -108,12 +108,12 @@ helper.draw()
 ```
 <img src="images/how-to-white-cell/white-cell-one-pass.png" alt="Oopsie-NotFound" title="" />
 
-Ok, this is not really a mulitpass cell, but it explaines the principle of the
-geometry. To build the real one we will do a trick: We will integrate the helper
+Ok, this is not really a multi-pass cell, but it explains the principle of the
+geometry. To build the real one, we will do the trick: We will integrate the helper
 in a shifted composition without changing the position. The shifting is again
-just one seperation down. Also we have to adjust the normal of the Composition
+just one separation down. Also, we have to adjust the normal of the Composition
 and the aperture of the second sphere.
-Here we used the add_supcomposition_fixed() function. The result looks like this:
+Here, we used the add_supcomposition_fixed() function. The result looks like this:
 ```python
 import numpy as np
 from LaserCAD.basic_optics import Curved_Mirror, Composition
@@ -150,8 +150,8 @@ white_cell.draw()
 Not bad, we can estimate how the whole thing goes on, but until now every optic
 is just touched ones. To change this we have to play with the sequence of the
 composition, which is nothing else than a list of the indices of the elements
-in the order they are hit. So let's see: We start with 0, than 1, than 2 than
-back to 1 and 0, than again 1 and 2 and than out. Ok, type this in and we get:
+in the order they are hit. So let's see: We start with 0, then 1, then 2 than
+back to 1 and 0, than again 1 and 2 and than out. Ok, type this in, and we get:
 ```python
 import numpy as np
 from LaserCAD.basic_optics import Curved_Mirror, Composition
@@ -188,7 +188,7 @@ white_cell.draw()
 ```
 <img src="images/how-to-white-cell/white-cell-final.png" alt="Oopsie-NotFound" title="" />
 
-And like this we got our white cell. Congratulations!
+And like this, we got our white cell. Congratulations!
 
 If you would like to see more examples of multipass cells, you can look in the
-amplifier moduls.
+amplifier modules.
