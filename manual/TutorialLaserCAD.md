@@ -93,7 +93,7 @@ if freecad_da:
   setview()
 ```
 
-<img src="images/0_Opening.png" alt="OpeningImage" title="" />
+<img src="images/Tutorial-images/0_Opening.png" alt="OpeningImage" title="" />
 
 
 
@@ -142,7 +142,7 @@ if freecad_da:
 ```
 Here you can see a screenshot of the output in Spyder.
 
-<img src="images/1_import_test_1.png" alt="Alt-Text" title="" />
+<img src="images/Tutorial-images/1_import_test_1.png" alt="Alt-Text" title="" />
 
 
 
@@ -256,7 +256,7 @@ Here you can see the FreeCAD output. Note that the normal of the mirror in
 LaserCAD is defined in such a way, that it points in the mirror and not out of
 its surface, what may differ from some other ray tracing programs.
 
-<img src="images/2_PositionAndAxes_1.png" alt="Alt-Text" title="" />
+<img src="images/Tutorial-images/2_PositionAndAxes_1.png" alt="Alt-Text" title="" />
 
 
 
@@ -365,7 +365,7 @@ in in FreeCAD, you will notice, that the yellow distributions consists of 1D ray
 transparent. The Gaussian_Beam has many segments that form the caustic, which
 may take a while to be drawn.
 
-<img src="images/3_RaysAndBeams_2.png" alt="Alt-Text" title="" />
+<img src="images/Tutorial-images/3_RaysAndBeams_2.png" alt="Alt-Text" title="" />
 
 
 
@@ -510,8 +510,8 @@ print()
 if freecad_da:
   setview()
 ```
-<img src="images/4_LensesAndMirrors_1.png" alt="Alt-Text" title="" />
-<img src="images/4_LensesAndMirrors_2.png" alt="Alt-Text" title="" />
+<img src="images/Tutorial-images/4_LensesAndMirrors_1.png" alt="Alt-Text" title="" />
+<img src="images/Tutorial-images/4_LensesAndMirrors_2.png" alt="Alt-Text" title="" />
 
 
 
@@ -590,8 +590,8 @@ if freecad_da:
   setview()
 
 ```
-<img src="images/5_Composition_1.png" alt="Alt-Text" title="" />
-<img src="images/5_Composition_2.png" alt="Alt-Text" title="" />
+<img src="images/Tutorial-images/5_Composition_1.png" alt="Alt-Text" title="" />
+<img src="images/Tutorial-images/5_Composition_2.png" alt="Alt-Text" title="" />
 
 
 
@@ -679,6 +679,6 @@ reso.draw()
 if freecad_da:
   setview()
 ```
-<img src="images/6_LinearResonator_1.png" alt="Alt-Text" title="" />
-<img src="images/6_LinearResonator_2.png" alt="Alt-Text" title="" />
+<img src="images/Tutorial-images/6_LinearResonator_1.png" alt="Alt-Text" title="" />
+<img src="images/Tutorial-images/6_LinearResonator_2.png" alt="Alt-Text" title="" />
 

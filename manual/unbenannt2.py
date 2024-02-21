@@ -14,12 +14,11 @@ pfad = pfad[0:ind-1]
 if not pfad in sys.path:
   sys.path.append(pfad)
 
-from LaserCAD.basic_optics import Beam, Composition, inch, Curved_Mirror, Ray
+from LaserCAD.basic_optics import Beam, Composition, inch, Curved_Mirror, Ray, Grating
 from LaserCAD.basic_optics.mirror import Stripe_mirror
 from LaserCAD.moduls.periscope import Make_RoofTop_Mirror
 import matplotlib.pyplot as plt
 import numpy as np
-
 from LaserCAD.freecad_models.utils import freecad_da, clear_doc, setview
 
 if freecad_da:
@@ -51,6 +50,15 @@ grating_normal = (np.sqrt(1-sinB**2), sinB, 0)
 Grat = Grating(grat_const=grating_const, name="Gitter", order=-1)
 Grat.normal = grating_normal
 
+# incident = Ray()
+# incident.wavelength = 800e-6
+# incident.pos += (-80,0,0)
+# outgoing = Grat.next_ray(incident)
+
+# Grat.draw()
+# incident.draw()
+# outgoing.draw()
+
 #set the big sphere
 Concav = Curved_Mirror(radius=radius_concave,name="Concav_Mirror")
 Concav.aperture = aperture_concave
@@ -72,6 +80,8 @@ helper.add_on_axis(Concav)
 helper.propagate(radius_concave/2)
 helper.add_on_axis(StripeM)
 
+# helper.draw()
+
 # setting the lightsource as an bundle of different coulered rays
 lightsource = Beam(radius=0, angle=0)
 wavels = np.linspace(lambda_mid-band_width/2, lambda_mid+band_width/2, number_of_rays)
@@ -86,6 +96,13 @@ for wavel in wavels:
 lightsource.override_rays(rays)
 lightsource.draw_dict['model'] = "ray_group"
 
+# lightsource.pos += (-80,0,0)
+# outgoing = Grat.next_beam(lightsource)
+
+# Grat.draw()
+# lightsource.draw()
+# outgoing.draw()
+
 # starting the real stretcher
 Stretcher = Composition(name="DerStrecker")
 Stretcher.set_light_source(lightsource)
@@ -99,10 +116,10 @@ Stretcher.add_supcomposition_fixed(helper)
 
 Stretcher.set_sequence([0,1,2,1,0])
 Stretcher.recompute_optical_axis()
+# Stretcher.draw()
 
 # adding the rooftop mirror and it's cosmetics
 Stretcher.propagate(distance_roof_top_grating)
-
 RoofTopMirror = Make_RoofTop_Mirror(height=periscope_height, up=False)
 
 Stretcher.add_supcomposition_on_axis(RoofTopMirror)
