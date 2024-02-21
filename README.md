@@ -5,7 +5,7 @@ Procrastination next level!
 
 In short: LaserCAD helps you quickly prototyping and scripting your optical
 setup with as few commands as possible in the language of geometric optics and
-a ton of default values. It approximates the raytracing and shows you a 3D
+a ton of default values. It approximates the ray tracing and shows you a 3D
 view of everything in FreeCAD.
 
 The creed is:
@@ -41,7 +41,7 @@ In the manual folder, you can find some more or less useful texts about the
 program and the ideas behind it. Some other documents may follow.
 
 In each executable script, the first lines import the location of LaserCAD in
-the sys.path list so that python and FreeCAd can find the package. While I am
+the sys.path list so that python and FreeCAD can find the package. While I am
 sure that there exists a better way of installing it, ... I have no clue how
 to do it. So for the moment, make sure that every executable script has these
 lines on top and is in the work directory or somewhere in the LaserCAD package
