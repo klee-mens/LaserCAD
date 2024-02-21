@@ -27,7 +27,7 @@ You should get some text output like
 ```
 The geometric object <Composed_Mount:unnamed> is drawn to the position[108.51854, 264.70476,  80.     ] with the direction [-0.95766,  0.2566 , -0.13053]
 ```
-when you open the exact same file in FreeCAD and execute it as a macro by
+and many more lines. When you open the exact same file in FreeCAD and execute it as a macro by
 pressing on the green arrow or F6 you get a new FreeCAD document with the 3D
 model looks like this:
 
