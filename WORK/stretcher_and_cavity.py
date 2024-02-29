@@ -13,6 +13,8 @@ pfad = pfad.replace("\\", "/") #just in case
 ind = pfad.rfind("/")
 pfad = pfad[0:ind]
 ind = pfad.rfind("/")
+pfad = pfad[0:ind]
+ind = pfad.rfind("/")
 pfad = pfad[0:ind+1]
 path_added = False
 for path in sys.path:
