@@ -1298,4 +1298,4 @@ def model_mirror_holder(name="mirror_holder",dia = 25.4,angle = 30,
   update_geom_info(obj_new,geom)
   DOC.recompute()
   return obj_new
-  
+

@@ -17,7 +17,7 @@ ind = pfad.rfind("/")
 pfad = pfad[0:ind]
 if not pfad in sys.path:
   sys.path.append(pfad)
-
+sys.path.append("D:/")
 
 from LaserCAD.freecad_models import clear_doc, setview, freecad_da,add_to_composition
 from LaserCAD.basic_optics import Mirror, Beam, Composition, Component, inch, Curved_Mirror, Ray, Geom_Object
