@@ -29,15 +29,15 @@ from copy import deepcopy
 
 if freecad_da:
   clear_doc()
-
+  
 def conv_to_rad(angle):
     return np.pi/180*angle
-
+    
 def dont():
     return None
 
 rotate_axis = np.pi
-offset_axis = (-250,-300,0)
+offset_axis = (-250,-590,0)
 
 pockels_cell = Component()
 pockels_cell.draw_dict["stl_file"]= thisfolder+"\mount_meshes\A2_mounts\Pockels_cell.stl"
@@ -129,22 +129,20 @@ TFP_ydist = 200
 TFP_xdist = TFP_ydist*np.tan((2*TFP_angle-90)*np.pi/180)
 TFP_dist = np.sqrt(TFP_ydist**2 + TFP_xdist**2)
 TFP_Lambda_Plate = 60
-Lam_Pockscell = 175
+Lam_Pockscell = 150
 Last_dist = TFP_dist - TFP_Lambda_Plate - Lam_Pockscell
-
 TFP_delta = TFP_dist - TFP_ydist - TFP_xdist
 
 delta = 100 # propagation difference to ideal imaging (after roundtrip)
 
 col_len = g + b + delta - TFP_delta
-xdist = f1 + f2
-correction = tele_cut_dist1 - tele_cut_d1 + tele_cut_dist2 - tele_cut_d2
-ydist = 0.5*(col_len - xdist - correction - tele_cut_y1 - tele_cut_y2)
+xdist = f1 + f2 + tele_cut_y2 - tele_cut_dist2 - tele_cut_d1
+ydist = 0.5*(col_len - xdist - (tele_cut_y1 + tele_cut_dist1) - tele_cut_d2)
 
 pump_dist = 100 # length of pump section
 d1 = g-tele_cut_dist1-pump_dist/2 # distance from DM to cut mirror
-d2 = 50 # x-distance from M3 to TFP1
-d3 = xdist - tele_cut_dist1 - tele_cut_dist2 - TFP_xdist - pump_dist - d2 # TFP2 to M4
+d2 = 200 # x-distance from M3 to TFP1
+d3 = xdist - TFP_xdist - pump_dist - d2 # TFP2 to M4
 d4 = ydist - d1 + tele_cut_y1
 
 P1 = Mirror(phi=-90)
@@ -152,19 +150,21 @@ P2 = Mirror(phi=90)
 PM1 = Mirror()  # pump mirror
 PM2 = Mirror()  # pump mirror 2
 M1 = Mirror(phi=-90-tele_angle1)
-M2 = Mirror(phi=-90-tele_angle2)
+M2 = Mirror(phi=-90+tele_angle2)
 M3 = Mirror(phi=90)
 M4 = Mirror(phi=90)
 R1 = Curved_Mirror(phi=-180+tele_angle1, radius=r1)
-R2 = Curved_Mirror(phi=-180+tele_angle2, radius=r2)
-TFP1 = Mirror(phi=-180+2*TFP_angle)
-TFP2 = Mirror(phi=180-2*TFP_angle)
+R2 = Curved_Mirror(phi=-180-tele_angle2, radius=r2)
+TFP1 = Mirror(phi=-180+2*66)
+TFP2 = Mirror(phi=180-2*66)
 
 Setup = Composition()
 Setup.set_light_source(beam)
 
 
+# Setup.rotate((0,0,1), rotate_axis)
 Setup.pos += offset_axis
+
 
 Setup.propagate(pump_dist/2)
 Setup.add_on_axis(P2)
@@ -172,11 +172,11 @@ Setup.propagate(d1)
 Setup.add_on_axis(M1)
 Setup.propagate(tele_cut_dist1)
 Setup.add_on_axis(R1)
-Setup.propagate(f1+f2)
-Setup.add_on_axis(R2)
-Setup.propagate(tele_cut_dist2)
+Setup.propagate(f1+f2-tele_cut_dist2)
 Setup.add_on_axis(M2)
-Setup.propagate(tele_cut_y2+ydist-TFP_ydist)
+Setup.propagate(tele_cut_dist2)
+Setup.add_on_axis(R2)
+Setup.propagate(tele_cut_d2+ydist-TFP_ydist)
 Setup.add_on_axis(M3)
 Setup.propagate(d2)
 Setup.add_on_axis(TFP1)
@@ -186,7 +186,6 @@ Setup.propagate(Lam_Pockscell)
 Setup.add_on_axis(pockels_cell)
 pockels_cell.rotate((0,0,1), np.pi)
 Setup.propagate(Last_dist)
-# Setup.propagate(TFP_dist)
 Setup.add_on_axis(TFP2)
 Setup.propagate(d3)
 Setup.add_on_axis(M4)
@@ -194,9 +193,37 @@ Setup.propagate(d4)
 Setup.add_on_axis(P1)
 Setup.propagate(pump_dist/2)
 
+# Setup.propagate(pump_dist/2)
+# Setup.add_on_axis(P2)
+# Setup.propagate(d1)
+# Setup.add_on_axis(M1)
+# Setup.propagate(tele_cut_dist1)
+# Setup.add_on_axis(R1)
+# Setup.propagate(f1+f2-400*(1+np.tan(conv_to_rad(tele_angle2))))
+# Setup.add_on_axis(M2)
+# Setup.propagate(400*(1+np.tan(conv_to_rad(tele_angle2))))
+# Setup.add_on_axis(R2)
+# Setup.propagate(75+400*(1+np.tan(conv_to_rad(tele_angle2)))/(np.cos(conv_to_rad(tele_angle2))))
+# Setup.add_on_axis(M3)
+# Setup.propagate(200)
+# Setup.add_on_axis(TFP1)
+# Setup.propagate(TFP_Lambda_Plate)
+# Setup.add_on_axis(Lambda_Plate())
+# Setup.propagate(Lam_Pockscell)
+# Setup.add_on_axis(pockels_cell)
+# pockels_cell.rotate((0,0,1), np.pi)
+# Setup.propagate(Last_dist)
+# Setup.add_on_axis(TFP2)
+# Setup.propagate(1370-126)
+# Setup.add_on_axis(M4)
+# Setup.propagate(40)
+# Setup.add_on_axis(P1)
+# Setup.propagate(pump_dist/2)
 
-P1.aperture = P2.aperture = M1.aperture = M2.aperture = M3.aperture = M4.aperture = TFP1.aperture = TFP2.aperture = 25.4*2
+P1.aperture = P2.aperture = TFP1.aperture = TFP2.aperture = 25.4*2
 for elements in Setup._elements:
   elements.set_mount_to_default()
 M2.Mount.mount_list[0].flip(90)
 Setup.draw()
+
+print(tele_cut_d2+ydist-TFP_ydist+d2+TFP_dist+d3+d4+pump_dist/2)
