@@ -283,8 +283,8 @@ Grat1.Mount.mount_list[1].flip(-90)
 Grat2.Mount.mount_list[1].flip(-90)
 Grat4.Mount.mount_list[-1]._lower_limit = Plane_height
 Grat1.Mount.mount_list[-1]._lower_limit = Plane_height
-Grat3.Mount.mount_list[-1]._lower_limit = Plane_height-23
-Grat2.Mount.mount_list[-1]._lower_limit = Plane_height-23
+Grat3.Mount.mount_list[-1]._lower_limit = Plane_height-23+25
+Grat2.Mount.mount_list[-1]._lower_limit = Plane_height-23+25
 Grat1.Mount.mount_list[1].model = "POLARIS-K1E3"
 Grat2.Mount.mount_list[1].model = "POLARIS-K1E3"
 Grat3.Mount.mount_list[1].model = "POLARIS-K1E3"

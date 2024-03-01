@@ -13,6 +13,8 @@ pfad = pfad.replace("\\", "/") #just in case
 ind = pfad.rfind("/")
 pfad = pfad[0:ind]
 ind = pfad.rfind("/")
+pfad = pfad[0:ind]
+ind = pfad.rfind("/")
 pfad = pfad[0:ind+1]
 path_added = False
 for path in sys.path:
@@ -246,12 +248,14 @@ def cavity_and_stretcher(C_radius = 8000,vertical_mat=True,want_to_draw=True,rou
   Stretcher_M1.Mount.set_geom(Stretcher_M1.get_geom())
   # Stretcher_M1.set_mount_to_default()
   Stretcher_M0 = Mirror()
+  Stretcher_M0.Mount = Composed_Mount(unit_model_list=["H45","POLARIS-K1","1inch_post"])
   Stretcher_M0.pos = (-150, Stretcher_M1.pos[1],Stretcher_M1.pos[2])
   p0 = Stretcher_M1.pos
   p1 = Stretcher_M0.pos - (0,200,0)
   Stretcher_M0.set_normal_with_2_points(p0, p1)
   TFP2 = Mirror()
-  TFP2.draw_dict["model_type"] = "45_polarizer"
+  # TFP2.draw_dict["model_type"] = "45_polarizer"
+  TFP2.Mount = Composed_Mount(unit_model_list=["H45","POLARIS-K1","1inch_post"])
   TFP2.pos = (-150,-300,Stretcher_M1.pos[2])
   p0 = Stretcher_M0.pos
   p1 = TFP2.pos - (100,0,0)
@@ -271,9 +275,10 @@ def cavity_and_stretcher(C_radius = 8000,vertical_mat=True,want_to_draw=True,rou
   Stretcher_M2.set_normal_with_2_points(p0, p1)
   
   TFP1 = Mirror()
+  TFP1.Mount = Composed_Mount(unit_model_list=["H45","POLARIS-K1","1inch_post"])
   TFP1.pos=p0
   TFP1.normal = (-1,1,0)
-  TFP1.draw_dict["model_type"] = "45_polarizer"
+  # TFP1.draw_dict["model_type"] = "45_polarizer"
   TFP1.draw_dict["thickness"] = 2
   Lam_Plane1=Lambda_Plate()
   Lam_Plane1.pos=TFP1.pos+(50,0,0)
@@ -287,9 +292,9 @@ def cavity_and_stretcher(C_radius = 8000,vertical_mat=True,want_to_draw=True,rou
   Matrix_fixing_Mirror1.rotate((1,0,0), np.pi/2)
   # Matrix_fixing_Mirror2 = Mirror(pos=Matrix_fixing_Mirror1.pos-(Radius*3/4-0.083,0,11))
   Matrix_fixing_Mirror2 = Mirror()
+  Matrix_fixing_Mirror2.Mount = Composed_Mount(unit_model_list=["KS1","1inch_post"])
   Matrix_fixing_Mirror2.pos=Matrix_fixing_Mirror1.pos-(Radius*3/4,0,10.5)
   Matrix_fixing_Mirror2.normal=(-1,0,0)
-  Matrix_fixing_Mirror2.draw_dict["mount_type"] = "KS1"
   cavity_mirror1 = Mirror()
   cavity_mirror1.pos = TFP1.pos -(0,50,0)
   p0 = TFP1.pos
@@ -377,7 +382,6 @@ def cavity_and_stretcher(C_radius = 8000,vertical_mat=True,want_to_draw=True,rou
     seq = np.append(seq,roundtrip_sequence)
     
   seq=np.append(seq, [0,18])
-  
   Comp.set_sequence(seq)
   Comp.propagate(0.1)
   Comp.pos = (0,0,100)
@@ -392,7 +396,7 @@ def cavity_and_stretcher(C_radius = 8000,vertical_mat=True,want_to_draw=True,rou
   # plt.close("all")
   if want_to_draw:
     container = []
-    for n in range(-27,1):
+    for n in range(-28,1):
     # for n in range(-19,1):
       beam = Comp._beams[n]
       beam.draw_dict["model"] = "ray_group"
@@ -417,7 +421,7 @@ def cavity_and_stretcher(C_radius = 8000,vertical_mat=True,want_to_draw=True,rou
       rayss=beam.get_all_rays()
       # for ray in rayss:
       #   intersection_point =  ray.intersection(ip)
-      ip.spot_diagram(beam)
+      # ip.spot_diagram(beam)
       intersection_point_ver = beam.get_all_rays()[1].intersection(ip)
       intersection_point_inner = beam.get_all_rays()[0].intersection(ip)
       intersection_point_hor = beam.get_all_rays()[4].intersection(ip)
@@ -437,25 +441,26 @@ def cavity_and_stretcher(C_radius = 8000,vertical_mat=True,want_to_draw=True,rou
         max_roundtrip = n//27+1
         # max_roundtrip = n//18+1
     
-    print(max_roundtrip)
-    fig=plt.figure(figsize=(25,15))
-    ax1=plt.subplot(2,2,1)
-    # plt.plot(roundtrip_group,diff)
-    plt.scatter(roundtrip_group,diff,s=10)
-    plt.ylabel("Center ray deviation (mm)")
-    plt.xlabel("roundtrip")
-    ax1=plt.subplot(2,2,2)
-    plt.scatter(roundtrip_group,diff_out,s=10)
-    # print(diff_out[0])
-    plt.ylabel("Outer ray deviation (vertial) (mm)")
-    plt.xlabel("roundtrip")
-    ax1=plt.subplot(2,2,3)
-    plt.scatter(roundtrip_group,diff_hor,s=10)
-    plt.ylabel("Outer ray deviation (horizontal) (mm)")
-    plt.xlabel("roundtrip")
-    fig_name="C_radius="+str(C_radius)+" s_shift="+str(s_shift)+" lamda="+str(centerlamda*1E6)+"nm"+".jpg"
+    # print(max_roundtrip)
+    # fig=plt.figure(figsize=(25,15))
+    # ax1=plt.subplot(2,2,1)
+    # # plt.plot(roundtrip_group,diff)
+    # plt.scatter(roundtrip_group,diff,s=10)
+    # plt.ylabel("Center ray deviation (mm)")
+    # plt.xlabel("roundtrip")
+    # ax1=plt.subplot(2,2,2)
+    # plt.scatter(roundtrip_group,diff_out,s=10)
+    # # print(diff_out[0])
+    # plt.ylabel("Outer ray deviation (vertial) (mm)")
+    # plt.xlabel("roundtrip")
+    # ax1=plt.subplot(2,2,3)
+    # plt.scatter(roundtrip_group,diff_hor,s=10)
+    # plt.ylabel("Outer ray deviation (horizontal) (mm)")
+    # plt.xlabel("roundtrip")
+    # fig_name="C_radius="+str(C_radius)+" s_shift="+str(s_shift)+" lamda="+str(centerlamda*1E6)+"nm"+".jpg"
+    
     # fig.savefig(os.path.join("C:/Users/12816/Desktop/research/Stretcher and Cavity1/another ip.pos/lsR=0.25",fig_name), bbox_inches='tight', dpi=150)
-    # plt.show()
+    plt.show()
     
     return max_diff
   elif Comp._lightsource == centerlightsource:
@@ -535,34 +540,33 @@ def Cal_matrix(Comp=Composition()):
 
 roundtrip = 50
 centerlamda = 1030E-6
-C_radius = 6000
+C_radius = 8000
 StripeM_shift = 0.13
 # StripeM_shift = 0
 # StripeM_shift = 0.115
-# StripeM_shift = 0
 # CB=CenterBeam CR=CenterRay 
 ls = "CB"
-mat1 = cavity_and_stretcher(C_radius=C_radius,vertical_mat=True,want_to_draw=True,roundtrip=roundtrip,centerlamda=centerlamda,s_shift=StripeM_shift,ls=ls)
-print(mat1)
-# lam_mid = 1030E-6
-# delta_lamda = 60E-6
-# number_of_rays = 15
-# wavels = np.linspace(lam_mid-delta_lamda/2, lam_mid+delta_lamda/2, number_of_rays)
-# plt.figure()
-# max_R = []
-# for wavel in wavels:
-#   max_R.append(cavity_and_stretcher(C_radius=C_radius,want_to_draw=False,roundtrip = roundtrip,centerlamda=wavel,s_shift=0))
-# legend = []
-# legend.append('maximun radius')
-# plt.plot(wavels*1E6,max_R)
+# mat1 = cavity_and_stretcher(C_radius=C_radius,vertical_mat=True,want_to_draw=True,roundtrip=roundtrip,centerlamda=centerlamda,s_shift=StripeM_shift,ls=ls)
+# print(mat1)
+lam_mid = 1030E-6
+delta_lamda = 120E-6
+number_of_rays = 5
+wavels = np.linspace(lam_mid-delta_lamda/2, lam_mid+delta_lamda/2, number_of_rays)
+plt.figure()
+max_R = []
+for wavel in wavels:
+  max_R.append(cavity_and_stretcher(C_radius=C_radius,want_to_draw=False,roundtrip = roundtrip,centerlamda=wavel,s_shift=0))
+legend = []
+legend.append('maximun radius')
+plt.plot(wavels*1E6,max_R)
 
-# # for i in range(-200,210,25):
-# #   max_R_S = []
-# #   for wavel in wavels:
-# #     # max_R_S.append(cavity_and_stretcher(want_to_draw=False,roundtrip = roundtrip,centerlamda=wavel,s_shift=0.1185))
-# #     max_R_S.append(cavity_and_stretcher(want_to_draw=False,roundtrip = roundtrip,centerlamda=wavel,s_shift=i/1000))
-# #   plt.plot(wavels*1E6,max_R_S)
-# #   legend.append('maximun deviation with small movement '+str(i/1000))
+for i in range(0,160,10):
+  max_R_S = []
+  for wavel in wavels:
+    # max_R_S.append(cavity_and_stretcher(want_to_draw=False,roundtrip = roundtrip,centerlamda=wavel,s_shift=0.1185))
+    max_R_S.append(cavity_and_stretcher(want_to_draw=False,roundtrip = roundtrip,centerlamda=wavel,s_shift=i/1000))
+  plt.plot(wavels*1E6,max_R_S)
+  legend.append('maximun deviation with small movement '+str(i/1000))
 
 # max_R_S = []
 # for wavel in wavels:
@@ -571,19 +575,19 @@ print(mat1)
 
 # plt.plot(wavels*1E6,max_R_S)
 # legend.append('maximun radius with small movement '+str(StripeM_shift)+ 'mm')
-# # max_R_S = []
-# # for wavel in wavels:
-# #   # max_R_S.append(cavity_and_stretcher(want_to_draw=False,roundtrip = roundtrip,centerlamda=wavel,s_shift=0.1185))
-# #   max_R_S.append(cavity_and_stretcher(C_radius=C_radius,want_to_draw=False,roundtrip = roundtrip,centerlamda=wavel,s_shift=0.14))
-# # plt.plot(wavels*1E6,max_R_S)
-# # legend.append('maximun deviation with small movement '+str(0.14)+ 'mm')
+# max_R_S = []
+# for wavel in wavels:
+#   # max_R_S.append(cavity_and_stretcher(want_to_draw=False,roundtrip = roundtrip,centerlamda=wavel,s_shift=0.1185))
+#   max_R_S.append(cavity_and_stretcher(C_radius=C_radius,want_to_draw=False,roundtrip = roundtrip,centerlamda=wavel,s_shift=0.14))
+# plt.plot(wavels*1E6,max_R_S)
+# legend.append('maximun deviation with small movement '+str(0.14)+ 'mm')
 
 
 # # plt.plot(wavels*1E6,max_R_S)
-# plt.legend(legend,loc = 'upper right')
-# plt.xlabel("wavelength (nm)")
-# plt.ylabel("maximun horizontal radius(mm)")
-# plt.show()
+plt.legend(legend,loc = 'upper right')
+plt.xlabel("wavelength (nm)")
+plt.ylabel("maximun horizontal radius(mm)")
+plt.show()
 
 # mat2 = cavity_and_stretcher(C_radius=C_radius,vertical_mat=False,want_to_draw=False,roundtrip=roundtrip,centerlamda=centerlamda,s_shift=StripeM_shift,ls=ls)
 # print(mat1,mat1[0][0]+mat1[1][1])

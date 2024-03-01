@@ -20,10 +20,11 @@ import os
 #     path_added = True
 # if not path_added:
 #   sys.path.append(pfad)
-sys.path.append('C:\\ProgramData\\Anaconda3')
+sys.path.append('C:\\Program Files\\Spyder\\pkgs')
 from LaserCAD import basic_optics
 
-from LaserCAD.basic_optics import Mirror,Beam,Cylindrical_Mirror,Intersection_plane,Cylindrical_Mirror1,Curved_Mirror,Ray, Composition, Grating, Lam_Plane
+from LaserCAD.basic_optics import Mirror,Beam,Cylindrical_Mirror,Intersection_plane,Cylindrical_Mirror1,Curved_Mirror,Ray, Composition, Grating
+from LaserCAD.non_interactings import Lambda_Plate
 
 from LaserCAD.freecad_models import clear_doc, setview, freecad_da,add_to_composition
 
@@ -172,7 +173,7 @@ def cavity_and_stretcher(C_radius = 8000,vertical_mat=True,want_to_draw=True,rou
   p1 = TFP2.pos - (100,0,0)
   point1 =p1
   TFP2.set_normal_with_2_points(p0, p1)
-  Lam_Plane2=Lam_Plane(pos=TFP2.pos-(50,0,0))
+  Lam_Plane2=Lambda_Plate(pos=TFP2.pos-(50,0,0))
   Stretcher_M2 = Mirror(pos = p_grat - vec*500 + (0,0,periscope_distance))
   p0 = Stretcher_M2.pos + (250,0,0)
   p1 = p_grat + (0,0,periscope_distance)
@@ -183,7 +184,7 @@ def cavity_and_stretcher(C_radius = 8000,vertical_mat=True,want_to_draw=True,rou
   TFP1.normal = (-1,1,0)
   TFP1.draw_dict["model_type"] = "45_polarizer"
   TFP1.draw_dict["thickness"] = 2
-  Lam_Plane1=Lam_Plane(pos=TFP1.pos+(50,0,0))
+  Lam_Plane1=Lambda_Plate(pos=TFP1.pos+(50,0,0))
   if vertical_mat:
     Matrix_fixing_Mirror1 = Cylindrical_Mirror(radius=Radius*3/2,pos=p0+(600,0,-10))
   else:
