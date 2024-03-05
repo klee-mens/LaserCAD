@@ -102,6 +102,41 @@ Laser_Head_out.normal = -Laser_Head_out.normal
 
 Comp.draw()
 
+
+"""
+Polarisationsdreher
+
+"""
+
+sep = 28.3
+PD_theta = 45*np.pi/180
+L = 80.3
+start_length = 14.496
+PD_length = sep + 2*start_length
+length_diff = 192.066 - PD_length
+
+Housing = Component()
+stl_file=thisfolder+"mount_meshes\special_mount\Polarization_rotator-Fusion.stl"
+Housing.draw_dict["stl_file"]=stl_file
+Housing.draw_dict["color"]=(239/255, 239/255, 239/255)
+Housing.freecad_model = load_STL
+
+PDM1 = Mirror()
+PDM2 = Mirror()
+PDM3 = Mirror()
+PDM2.pos += (start_length + sep/2, L*np.cos(PD_theta), L*np.sin(PD_theta))
+PDM3.pos += (start_length + sep,0,0)
+Pol_Rotater = Composition(name="Polarisationsdreher")
+Pol_Rotater.add_on_axis(Housing)
+Pol_Rotater.propagate(start_length)
+Pol_Rotater.add_on_axis(PDM1)
+PDM1.set_normal_with_2_points(Pol_Rotater.pos-(1,0,0), PDM2.pos)
+Pol_Rotater.add_fixed_elm(PDM2)
+PDM2.set_normal_with_2_points(PDM1.pos, PDM3.pos)
+Pol_Rotater.add_fixed_elm(PDM3)
+PDM3.set_normal_with_2_points(PDM2.pos, PDM3.pos + (1,0,0))
+Pol_Rotater.propagate(start_length)
+
 """
 Simulation of the amplifier cavity
 """
@@ -115,12 +150,12 @@ f2 = r2/2
 beam = Beam(radius=5, angle=0)
 beam.pos=[0,0,0]
 
-g = 350 # object distance
+g = 280 # object distance
 b = ((f1-g)*f2**2 + f1**2 * f2) / (f1**2)
 
 tele_angle1 = 8   # opening angle for coupling into telescope
-tele_angle2 = 3   # opening angle for couling into telescope
-tele_cut_d1 = 150 # cut mirror x-distance from spherical mirrors
+tele_angle2 = 4   # opening angle for couling into telescope
+tele_cut_d1 = 100 # cut mirror x-distance from spherical mirrors
 tele_cut_d2 = 400 # cut mirror y-distance from spherical mirrors
 
 tele_cut_dist1 = tele_cut_d1 / np.cos(rad(tele_angle1)) # propagation distance to first spherical mirror
@@ -130,15 +165,15 @@ tele_cut_y1 = np.sqrt(tele_cut_dist1**2 - tele_cut_d1**2);
 tele_cut_y2 = np.sqrt(tele_cut_dist2**2 - tele_cut_d2**2);
 
 TFP_angle = 66
-TFP_ydist = 200
+TFP_ydist = 175
 TFP_xdist = TFP_ydist*np.tan(rad(2*TFP_angle-90))
 TFP_dist = np.sqrt(TFP_ydist**2 + TFP_xdist**2)
-TFP_Lam = 60
-Lam_PC = 175
+TFP_Lam = 50
+Lam_PC = 150
 PC_TFP = TFP_dist - TFP_Lam - Lam_PC
 TFP_delta = TFP_dist - TFP_ydist - TFP_xdist
 
-delta = 100 # propagation difference to ideal imaging (after roundtrip)
+delta = 150 - length_diff # propagation difference to ideal imaging (after roundtrip)
 
 col_len = g + b + delta - TFP_delta
 
@@ -199,9 +234,12 @@ elif UseCompactDesign:
 Setup.add_on_axis(M3)
 Setup.propagate(d2)
 Setup.add_on_axis(TFP1)
+# Polarisationsdreher %%%%%%%%%%%
 Setup.propagate(TFP_Lam)
-Setup.add_on_axis(Lambda_Plate())
+Setup.add_supcomposition_on_axis(Pol_Rotater)
+# Setup.add_on_axis(Lambda_Plate())
 Setup.propagate(Lam_PC)
+# Polarisationsdreher Ende
 Setup.add_on_axis(pockels_cell)
 pockels_cell.rotate((0,0,1), np.pi)
 Setup.propagate(PC_TFP)
@@ -216,6 +254,10 @@ P1.aperture = P2.aperture = TFP1.aperture = TFP2.aperture = 25.4*2
 for elements in Setup._elements:
   elements.set_mount_to_default()
 M2.Mount.mount_list[0].flip(90)
+
+PDM1.set_mount(Unit_Mount())
+PDM2.set_mount(Unit_Mount())
+PDM3.set_mount(Unit_Mount())
 Setup.draw()
 
 print(tele_cut_d2+ydist-TFP_ydist+d2+TFP_dist+d3+d4+pump_dist/2)
