@@ -1,5 +1,12 @@
 # -*- coding: utf-8 -*-
 """
+Created on Tue Mar  5 12:54:46 2024
+
+@author: 12816
+"""
+
+# -*- coding: utf-8 -*-
+"""
 Created on Mon Jun 12 09:43:43 2023
 
 @author: He
@@ -74,85 +81,87 @@ def cavity_and_stretcher(C_radius = 8000,vertical_mat=True,want_to_draw=True,rou
   a = v/2
   b = np.sqrt(a**2 - (v**2 - s**2)/(2*(1+c)))
   sinB = a - b
-  # print("angle=",(gamma+np.arcsin(sinB))*180/np.pi)
-  if vertical_mat:
-    # Concav1 = Cylindrical_Mirror1(radius=np.sqrt(Radius**2-(h_StripeM/2 + safety_to_StripeM)**2), name="Concav_Mirror")
-    # Concav2 = Cylindrical_Mirror1(radius=np.sqrt(Radius**2-(h_StripeM/2 + safety_to_StripeM)**2), name="Concav_Mirror")
-    # Concav3 = Cylindrical_Mirror1(radius=np.sqrt(Radius**2-(h_StripeM/2 + safety_to_StripeM + periscope_distance)**2), name="Concav_Mirror")
-    # Concav4 = Cylindrical_Mirror1(radius=np.sqrt(Radius**2-(h_StripeM/2 + safety_to_StripeM + periscope_distance)**2), name="Concav_Mirror")
-    Concav1 = Cylindrical_Mirror1(radius=Radius,name="Concav_Mirror")
-    Concav2 = Cylindrical_Mirror1(radius=Radius,name="Concav_Mirror")
-    Concav3 = Cylindrical_Mirror1(radius=Radius,name="Concav_Mirror")
-    Concav4 = Cylindrical_Mirror1(radius=Radius,name="Concav_Mirror")
-    StripeM = Cylindrical_Mirror1(radius= -Radius/2, name="Stripe_Mirror")
-  else:
-    # Concav1 = Cylindrical_Mirror(radius=np.sqrt(Radius**2-(h_StripeM/2 + safety_to_StripeM)**2), name="Concav_Mirror")
-    # Concav2 = Cylindrical_Mirror(radius=np.sqrt(Radius**2-(h_StripeM/2 + safety_to_StripeM)**2), name="Concav_Mirror")
-    # Concav3 = Cylindrical_Mirror(radius=np.sqrt(Radius**2-(h_StripeM/2 + safety_to_StripeM + periscope_distance)**2), name="Concav_Mirror")
-    # Concav4 = Cylindrical_Mirror(radius=np.sqrt(Radius**2-(h_StripeM/2 + safety_to_StripeM + periscope_distance)**2), name="Concav_Mirror")
-    Concav1 = Cylindrical_Mirror(radius=Radius,name="Concav_Mirror")
-    Concav2 = Cylindrical_Mirror(radius=Radius,name="Concav_Mirror")
-    Concav3 = Cylindrical_Mirror(radius=Radius,name="Concav_Mirror")
-    Concav4 = Cylindrical_Mirror(radius=Radius,name="Concav_Mirror")
-    StripeM = Cylindrical_Mirror(radius= -Radius/2, name="Stripe_Mirror")
-  Concav1.pos = (Radius/2-np.sqrt((Radius**2)/4-(h_StripeM/2 + safety_to_StripeM)**2),0,-h_StripeM/2 - safety_to_StripeM)
-  # Concav1.pos = (0,0,-h_StripeM/2 - safety_to_StripeM)
-  Concav1.aperture = Aperture_concav
-  Concav1.normal = (-1,0,0)
-  Concav1.draw_dict["height"]=10
-  Concav1.draw_dict["thickness"]=25
-  point0 = (Radius-seperation, 0, -h_StripeM/2 - safety_to_StripeM)
-  point1 = (Radius/2, 0, 0)
-  Concav1.set_normal_with_2_points(point0, point1)
-  Concav1.draw_dict["mount_type"] = "dont_draw"
+  # Concav1 = Curved_Mirror(radius=Radius,name="Concav_Mirror")
+  # Concav2 = Curved_Mirror(radius=Radius,name="Concav_Mirror")
+  # Concav3 = Curved_Mirror(radius=Radius,name="Concav_Mirror")
+  # Concav4 = Curved_Mirror(radius=Radius,name="Concav_Mirror")
+  # StripeM = Curved_Mirror(radius= -Radius/2, name="Stripe_Mirror")
   
-  # StripeM = Cylindrical_Mirror1(radius= -Radius/2, name="Stripe_Mirror")
-  # StripeM.pos = (Radius/2+0.1185, 0, 0)
+  # Concav1.pos = (Radius/2-np.sqrt((Radius**2)/4-(h_StripeM/2 + safety_to_StripeM)**2),0,-h_StripeM/2 - safety_to_StripeM)
+  # # Concav1.pos = (0,0,-h_StripeM/2 - safety_to_StripeM)
+  # Concav1.aperture = Aperture_concav
+  # Concav1.normal = (-1,0,0)
+  # Concav1.draw_dict["height"]=10
+  # Concav1.draw_dict["thickness"]=25
+  # point0 = (Radius-seperation, 0, -h_StripeM/2 - safety_to_StripeM)
+  # point1 = (Radius/2, 0, 0)
+  # Concav1.set_normal_with_2_points(point0, point1)
+  # Concav1.draw_dict["mount_type"] = "dont_draw"
+  
+  # # StripeM = Cylindrical_Mirror1(radius= -Radius/2, name="Stripe_Mirror")
+  # # StripeM.pos = (Radius/2+0.1185, 0, 0)
+  # StripeM.pos = (Radius/2+s_shift, 0, 0)
+  # StripeM.aperture=50
+  # StripeM.draw_dict["height"]=9
+  # StripeM.draw_dict["thickness"]=25
+  # # StripeM.draw_dict["model_type"]="Stripe"
+  # StripeM.Mount = Composed_Mount(unit_model_list=["Stripe_mirror_mount","POLARIS-K2","1inch_post"])
+  # StripeM.Mount.set_geom(StripeM.get_geom())
+  # StripeM.Mount.pos += StripeM.normal*25
+  
+  # Grat = Grating(grat_const=grat_const, name="Gitter")
+  # Grat.pos = (Radius-seperation, 0, 0)
+  # Grat.normal = (np.sqrt(1-sinB**2), -sinB, 0)
+  
+  # Concav2.pos = (Radius/2-np.sqrt((Radius**2)/4-(h_StripeM/2 + safety_to_StripeM)**2), 0, h_StripeM/2 + safety_to_StripeM)
+  # # Concav2.pos = (0, 0, h_StripeM/2 + safety_to_StripeM)
+  # Concav2.aperture = Aperture_concav
+  # Concav2.normal = (-1,0,0)
+  # Concav2.draw_dict["height"]=10
+  # Concav2.draw_dict["thickness"]=25
+  # point0 = (Radius-seperation, 0, h_StripeM/2 + safety_to_StripeM)
+  # point1 = (Radius/2, 0, 0)
+  # Concav2.set_normal_with_2_points(point0, point1)
+  # Concav2.draw_dict["mount_type"] = "dont_draw"
+  
+  # Concav3.pos = (Radius/2-np.sqrt((Radius**2)/4-(h_StripeM/2 + safety_to_StripeM+periscope_distance)**2), 0, h_StripeM/2 + safety_to_StripeM + periscope_distance)
+  # # Concav3.pos = (0, 0, h_StripeM/2 + safety_to_StripeM + periscope_distance)
+  # Concav3.aperture = Aperture_concav
+  # Concav3.normal = (-1,0,0)
+  # Concav3.draw_dict["height"]=10
+  # Concav3.draw_dict["thickness"]=25
+  # point0 = (Radius-seperation, 0, h_StripeM/2 + safety_to_StripeM + periscope_distance)
+  # point1 = (Radius/2, 0, 0)
+  # Concav3.set_normal_with_2_points(point0, point1)
+  # Concav3.draw_dict["mount_type"] = "dont_draw"
+  
+  # Concav4.pos = (Radius/2-np.sqrt((Radius**2)/4-(h_StripeM/2 + safety_to_StripeM+periscope_distance)**2), 0, -h_StripeM/2 - safety_to_StripeM - periscope_distance)
+  # # Concav4.pos = (0, 0, -h_StripeM/2 - safety_to_StripeM - periscope_distance)
+  # Concav4.aperture = Aperture_concav
+  # Concav4.normal = (-1,0,0)
+  # Concav4.draw_dict["height"]=10
+  # Concav4.draw_dict["thickness"]=25
+  # point0 = (Radius-seperation, 0, -h_StripeM/2 - safety_to_StripeM - periscope_distance)
+  # point1 = (Radius/2, 0, 0)
+  # Concav4.set_normal_with_2_points(point0, point1)
+  # Concav4.draw_dict["mount_type"] = "dont_draw"
+  
+  Concav = Curved_Mirror(radius=Radius, name="Concav_Mirror")
+  Concav.pos = (0,0,0)
+  Concav.aperture = Aperture_concav
+  Concav.normal = (-1,0,0)
+
+  StripeM = Curved_Mirror(radius= -Radius/2, name="Stripe_Mirror")
+  # StripeM.pos = (Radius/2-0.155, 0, 0)
   StripeM.pos = (Radius/2+s_shift, 0, 0)
-  StripeM.aperture=50
-  StripeM.draw_dict["height"]=9
+  StripeM.aperture=75
+  StripeM.draw_dict["height"]=h_StripeM
   StripeM.draw_dict["thickness"]=25
-  # StripeM.draw_dict["model_type"]="Stripe"
-  StripeM.Mount = Composed_Mount(unit_model_list=["Stripe_mirror_mount","POLARIS-K2","1inch_post"])
-  StripeM.Mount.set_geom(StripeM.get_geom())
-  StripeM.Mount.pos += StripeM.normal*25
+  StripeM.draw_dict["model_type"]="Stripe"
   
   Grat = Grating(grat_const=grat_const, name="Gitter")
   Grat.pos = (Radius-seperation, 0, 0)
   Grat.normal = (np.sqrt(1-sinB**2), -sinB, 0)
-  
-  Concav2.pos = (Radius/2-np.sqrt((Radius**2)/4-(h_StripeM/2 + safety_to_StripeM)**2), 0, h_StripeM/2 + safety_to_StripeM)
-  # Concav2.pos = (0, 0, h_StripeM/2 + safety_to_StripeM)
-  Concav2.aperture = Aperture_concav
-  Concav2.normal = (-1,0,0)
-  Concav2.draw_dict["height"]=10
-  Concav2.draw_dict["thickness"]=25
-  point0 = (Radius-seperation, 0, h_StripeM/2 + safety_to_StripeM)
-  point1 = (Radius/2, 0, 0)
-  Concav2.set_normal_with_2_points(point0, point1)
-  Concav2.draw_dict["mount_type"] = "dont_draw"
-  
-  Concav3.pos = (Radius/2-np.sqrt((Radius**2)/4-(h_StripeM/2 + safety_to_StripeM+periscope_distance)**2), 0, h_StripeM/2 + safety_to_StripeM + periscope_distance)
-  # Concav3.pos = (0, 0, h_StripeM/2 + safety_to_StripeM + periscope_distance)
-  Concav3.aperture = Aperture_concav
-  Concav3.normal = (-1,0,0)
-  Concav3.draw_dict["height"]=10
-  Concav3.draw_dict["thickness"]=25
-  point0 = (Radius-seperation, 0, h_StripeM/2 + safety_to_StripeM + periscope_distance)
-  point1 = (Radius/2, 0, 0)
-  Concav3.set_normal_with_2_points(point0, point1)
-  Concav3.draw_dict["mount_type"] = "dont_draw"
-  
-  Concav4.pos = (Radius/2-np.sqrt((Radius**2)/4-(h_StripeM/2 + safety_to_StripeM+periscope_distance)**2), 0, -h_StripeM/2 - safety_to_StripeM - periscope_distance)
-  # Concav4.pos = (0, 0, -h_StripeM/2 - safety_to_StripeM - periscope_distance)
-  Concav4.aperture = Aperture_concav
-  Concav4.normal = (-1,0,0)
-  Concav4.draw_dict["height"]=10
-  Concav4.draw_dict["thickness"]=25
-  point0 = (Radius-seperation, 0, -h_StripeM/2 - safety_to_StripeM - periscope_distance)
-  point1 = (Radius/2, 0, 0)
-  Concav4.set_normal_with_2_points(point0, point1)
-  Concav4.draw_dict["mount_type"] = "dont_draw"
   
   ray0 = Ray()
   p_grat = np.array((Radius-seperation, 0, -h_StripeM/2 - safety_to_StripeM - periscope_distance))
@@ -283,10 +292,12 @@ def cavity_and_stretcher(C_radius = 8000,vertical_mat=True,want_to_draw=True,rou
   Lam_Plane1=Lambda_Plate()
   Lam_Plane1.pos=TFP1.pos+(50,0,0)
   if vertical_mat:
-    Matrix_fixing_Mirror1 = Cylindrical_Mirror(radius=Radius*3/2)
+    # Matrix_fixing_Mirror1 = Cylindrical_Mirror(radius=Radius*3/2)
+    Matrix_fixing_Mirror1 = Curved_Mirror(radius=Radius*3/2)
     Matrix_fixing_Mirror1.pos=p0+(600,0,-10)
   else:
-    Matrix_fixing_Mirror1 = Cylindrical_Mirror1(radius=Radius*3/2)
+    # Matrix_fixing_Mirror1 = Cylindrical_Mirror1(radius=Radius*3/2)
+    Matrix_fixing_Mirror1 = Curved_Mirror(radius=Radius*3/2)
     Matrix_fixing_Mirror1.pos=p0+(600,0,-10)
   # Matrix_fixing_Mirror1.normal=(1,0,0)
   Matrix_fixing_Mirror1.rotate((1,0,0), np.pi/2)
@@ -346,28 +357,23 @@ def cavity_and_stretcher(C_radius = 8000,vertical_mat=True,want_to_draw=True,rou
   Comp.add_fixed_elm(Stretcher_M0)#1
   Comp.add_fixed_elm(Stretcher_M1)#2
   Comp.add_fixed_elm(Grat)#3
-  Comp.add_fixed_elm(Concav4)#4
+  Comp.add_fixed_elm(Concav)#4
   Comp.add_fixed_elm(StripeM)#5
-  Comp.add_fixed_elm(Concav3)#6
-  Comp.add_supcomposition_fixed(roof)
-  # Comp.add_fixed_elm(flip_mirror1)#7
-  # Comp.add_fixed_elm(flip_mirror2)#8
-  Comp.add_fixed_elm(Concav2)#9
-  Comp.add_fixed_elm(Concav1)#10
-  Comp.add_fixed_elm(Stretcher_M2)#11
-  Comp.add_fixed_elm(Matrix_fixing_Mirror1)#12
-  Comp.add_fixed_elm(Matrix_fixing_Mirror2)#13
-  Comp.add_fixed_elm(TFP1)#14
-  Comp.add_fixed_elm(cavity_mirror1)#15
-  Comp.add_fixed_elm(cavity_mirror2)#16
-  Comp.add_fixed_elm(Cavity_mirror)#17
+  Comp.add_supcomposition_fixed(roof)#6,7
+  Comp.add_fixed_elm(Stretcher_M2)#8
+  Comp.add_fixed_elm(Matrix_fixing_Mirror1)#9
+  Comp.add_fixed_elm(Matrix_fixing_Mirror2)#10
+  Comp.add_fixed_elm(TFP1)#11
+  Comp.add_fixed_elm(cavity_mirror1)#12
+  Comp.add_fixed_elm(cavity_mirror2)#13
+  Comp.add_fixed_elm(Cavity_mirror)#14
   
-  Comp.add_fixed_elm(ip)#18
+  Comp.add_fixed_elm(ip)#15
   # Comp.add_fixed_elm(pure_cosmetic)
   Comp.add_fixed_elm(Lam_Plane1)
   Comp.add_fixed_elm(Lam_Plane2)
-  seq = np.array([1,2,3,4,5,6,3,7,8,3,9,5,10,3,11,12,13,12,13,12,13,12,14,15,16,17])
-  seq1 = np.array([0,1,2,3,4,5,6,3,7,8,3,9,5,10,3,11,12,13,12,13,12,13,12,14,15,16,17])
+  seq =    np.array([1,2,3,4,5,4,3,6,7,3,4,5,4,3,8,9,10,9,10,9,10,9,11,12,13,14])
+  seq1 = np.array([0,1,2,3,4,5,4,3,6,7,3,4,5,4,3,8,9,10,9,10,9,10,9,11,12,13,14])
   
   # seq = np.array([1,2,3,4,5,6,3,7,8,3,9,5,10,3,11,16,17])
   # seq1 = np.array([0,1,2,3,4,5,6,3,7,8,3,9,5,10,3,11,16,17])
@@ -381,7 +387,7 @@ def cavity_and_stretcher(C_radius = 8000,vertical_mat=True,want_to_draw=True,rou
   for n in range(roundtrip-1):
     seq = np.append(seq,roundtrip_sequence)
     
-  seq=np.append(seq, [0,18])
+  seq=np.append(seq, [0,15])
   Comp.set_sequence(seq)
   Comp.propagate(0.1)
   Comp.pos = (0,0,100)
@@ -436,8 +442,8 @@ def cavity_and_stretcher(C_radius = 8000,vertical_mat=True,want_to_draw=True,rou
       diff_hor.append(diff_R_hor)
       roundtrip_group.append(n//27+1)
       # roundtrip_group.append(n//18+1)
-      if max_diff<diff_R_ver: #and n>roundtrip/2:
-        max_diff = diff_R_ver
+      if max_diff<diff_R_hor: #and n>roundtrip/2:
+        max_diff = diff_R_hor
         max_roundtrip = n//27+1
         # max_roundtrip = n//18+1
     
@@ -542,15 +548,15 @@ roundtrip = 50
 centerlamda = 1030E-6
 C_radius = 8000
 StripeM_shift = 0.07
-# StripeM_shift = 0.13
-StripeM_shift = 0
+# StripeM_shift = 0
 # StripeM_shift = 0.115
+StripeM_shift = 0.13
 # CB=CenterBeam CR=CenterRay 
-ls = "CB"
+ls = "CR"
 # mat1 = cavity_and_stretcher(C_radius=C_radius,vertical_mat=True,want_to_draw=False,roundtrip=roundtrip,centerlamda=centerlamda,s_shift=StripeM_shift,ls=ls)
 # print(mat1)
 
-#   maximun deviation with different wavelength -------------------------------
+#  maximun deviation with different wavelength --------------------------------
 lam_mid = 1030E-6
 delta_lamda = 120E-6
 number_of_rays = 5
@@ -590,8 +596,8 @@ for i in range(10,110,10):
 # plt.plot(wavels*1E6,max_R_S)
 plt.legend(legend,loc = 'upper right')
 plt.xlabel("wavelength (nm)")
-# plt.ylabel("maximun horizontal radius(mm)")
-plt.ylabel("maximun vertical radius(mm)")
+plt.ylabel("maximun horizontal radius(mm)")
+# plt.ylabel("maximun vertial radius(mm)")
 plt.show()
 # -----------------------------------------------------------------------------
 
@@ -603,7 +609,7 @@ plt.show()
 # mat2 = cavity_and_stretcher(C_radius=C_radius,vertical_mat=False,want_to_draw=False,roundtrip=roundtrip,centerlamda=centerlamda,s_shift=StripeM_shift,ls=ls)
 
 # if roundtrip<10:
-#   mat2 = cavity_and_stretcher(C_radius=C_radius,vertical_mat=False,want_to_draw=False,roundtrip=roundtrip,centerlamda=centerlamda,s_shift=StripeM_shift,ls=ls)
+#   mat2 = cavity_and_stretcher(C_radius=C_radius,vertical_mat=False,roundtrip=roundtrip,centerlamda=centerlamda,s_shift=StripeM_shift)
 #   print(mat1)
 #   print(abs((mat1[0,0]+mat1[1,1])/2))
 #   print(mat2)

@@ -229,21 +229,21 @@ def cavity_and_stretcher(C_radius = 8000,vertical_mat=True,want_to_draw=True,rou
   else:
     Comp.set_light_source(lightsource)
   # Comp.set_light_source(centerray)
-  Comp.add_fixed_elm(TFP2)
-  Comp.add_fixed_elm(Stretcher_M0)
-  Comp.add_fixed_elm(Stretcher_M1)
-  Comp.add_fixed_elm(Grat)
-  Comp.add_fixed_elm(Concav)
-  Comp.add_fixed_elm(StripeM)
+  Comp.add_fixed_elm(TFP2) #0
+  Comp.add_fixed_elm(Stretcher_M0) #1
+  Comp.add_fixed_elm(Stretcher_M1) #2
+  Comp.add_fixed_elm(Grat) #3
+  Comp.add_fixed_elm(Concav) #4
+  Comp.add_fixed_elm(StripeM) #5
   Comp.add_fixed_elm(flip_mirror1)
   Comp.add_fixed_elm(flip_mirror2)
   Comp.add_fixed_elm(Stretcher_M2)
   Comp.add_fixed_elm(Matrix_fixing_Mirror1)
-  Comp.add_fixed_elm(Matrix_fixing_Mirror2)
+  Comp.add_fixed_elm(Matrix_fixing_Mirror2) #10
   Comp.add_fixed_elm(TFP1)
   Comp.add_fixed_elm(cavity_mirror1)
   Comp.add_fixed_elm(cavity_mirror2)
-  Comp.add_fixed_elm(Cavity_mirror)
+  Comp.add_fixed_elm(Cavity_mirror) 
   
   Comp.add_fixed_elm(ip)
   
@@ -266,7 +266,7 @@ def cavity_and_stretcher(C_radius = 8000,vertical_mat=True,want_to_draw=True,rou
     # print("step ", n, "of", roundtrip)
     seq = np.append(seq,roundtrip_sequence)
     
-  seq=np.append(seq, [18])
+  seq=np.append(seq, [15])
   
   Comp.set_sequence(seq)
   Comp.propagate(100)

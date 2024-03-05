@@ -124,6 +124,7 @@ def Make_Stretcher_chromeo():
   StripeM.draw_dict["model_type"] = "Stripe"
 
   Grat = Grating(grat_const=grating_const, name="Gitter", order=-1)
+
   Grat.normal = grating_normal
 
   helper = Composition()
@@ -309,7 +310,7 @@ mir1 = Mirror(phi=180)
 TFP1 = Mirror(phi= 180 - 2*tfp_angle, name="TFP1")
 TFP1.draw_dict["color"] = (1.0, 0.0, 2.0)
 TFP1.aperture = tfp_aperture
-TFP1.mount_dict["Flip90"]=True
+# TFP1.mount_dict["Flip90"]=True
 
 cm = Curved_Mirror(radius=focal*2, phi = 180)
 PockelsCell = Pockels_Cell(name="PockelZelleRes1")
@@ -446,15 +447,16 @@ BigPump.set_geom(amp2._elements[2].get_geom())
 # Draw Selection
 # =============================================================================
 
-Seed.draw()
-Stretcher.draw()
+# Seed.draw()
+# Stretcher.draw()
 PulsePicker.draw()
-Amplifier_I.draw()
-Pump.draw()
-amp2.draw()
-# BigPump.draw()
-t=Table()
-t.draw()
+PulsePicker.draw_alignment_posts()
+# Amplifier_I.draw()
+# Pump.draw()
+# amp2.draw()
+# # BigPump.draw()
+# t=Table()
+# t.draw()
 
 # =============================================================================
 # breadboards

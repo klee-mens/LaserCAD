@@ -45,12 +45,17 @@ def initialize_composition(name="compostion"):
   beams_part.adjustRelativeLinks(mainpart)
   mainpart.addObject(beams_part)
   
+  alignment_post_part = DOC.addObject('App::Part', name+"_alignment_post")
+  alignment_post_part.Label = name+"_alignment_post"
+  alignment_post_part.adjustRelativeLinks(mainpart)
+  mainpart.addObject(alignment_post_part)
+  
   # rays_part = DOC.addObject('App::Part', name+"_rays")
   # rays_part.Label = name+"_rays"
   # rays_part.adjustRelativeLinks(mainpart)
   # mainpart.addObject(rays_part)
   # return (mainpart, elements_part, mounts_part, beams_part, rays_part)
-  return (mainpart, elements_part, mounts_part, beams_part)
+  return (mainpart, elements_part, mounts_part, beams_part,alignment_post_part)
 
 
 def add_to_composition(part, container):

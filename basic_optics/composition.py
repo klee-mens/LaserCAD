@@ -9,7 +9,9 @@ Created on Sun Aug 21 20:47:17 2022
 from .ray import Ray
 from .beam import Beam
 from .geom_object import Geom_Object
+from .grating import Grating
 from ..freecad_models import warning, freecad_da, initialize_composition, add_to_composition
+from ..freecad_models.freecad_model_element_holder import Model_element_holder
 import numpy as np
 from copy import deepcopy
 
@@ -208,6 +210,24 @@ class Composition(Geom_Object):
       obj = elm.draw_mount()
       container.append(obj)
     return self.__container_to_part(self._mounts_part, container)
+  
+  def draw_alignment_posts(self):
+    self.__init_parts()
+    container = []
+    for elm in self._elements:
+      if freecad_da:
+        if type(elm) == Grating:
+          obj = Model_element_holder(post_distence=20,base_height=20,
+                                     geom=elm.get_geom(),thickness=elm.thickness,
+                                     width=elm.width,height=elm.height,
+                                     ele_type="Grating")
+        else:
+          obj = Model_element_holder(post_distence=20,base_height=20,
+                                     geom=elm.get_geom(),aperture=elm.aperture,
+                                     thickness=elm.thickness,
+                                     ele_type="Mirror")
+        container.append(obj)
+    return self.__container_to_part(self._alignment_post_part, container)
 
   def draw(self):
     self.draw_elements()
@@ -225,16 +245,19 @@ class Composition(Geom_Object):
   def __init_parts(self):
     if self._drawing_part == -1:
       if freecad_da:
-        d,e,m,b = initialize_composition(self.name)
+        d,e,m,b,a = initialize_composition(self.name)
         self._drawing_part = d
         self._elements_part = e
         self._mounts_part = m
         self._beams_part = b
+        self._alignment_post_part = a
       else:
         self._elements_part = []
         self._mounts_part = []
         self._beams_part = []
-        self._drawing_part = [self._elements_part, self._mounts_part, self._beams_part]
+        self._alignment_post_part = []
+        self._drawing_part = [self._elements_part, self._mounts_part, 
+                              self._beams_part, self._alignment_post_part]
 
 
   def set_light_source(self, ls):
