@@ -177,6 +177,8 @@ class Composition(Geom_Object):
       self._beams = beamlist
     return beamlist
 
+  def optical_path_length(self):
+    return sum([ray.length for ray in self._optical_axis])
 
   def draw_elements(self):
     self.__init_parts()
