@@ -188,7 +188,23 @@ according to the z-height of the detector. You can play araound with the detecto
 
 
 
-## Custom Mirror Mount
+## Custom Mirror Mount - The Spartan
+
+The goal of this section is to understand how to create a new mount and what 
+are its defining properties. For this we first chose a very random shape, that 
+we want to use as a mirror mount. In this case I looked on [Yeggi](https://www.yeggi.com)
+for a stl file and dragged it into FreeCAD. Thanks to the guys there designing
+these models and offer them for free!
+Next we have to align them. For any Mount, not matter if Composed or not, there 
+are 3 important positions:
+One is where the Mount should touch a mirror, the other is the docking position.
+The dokcing object is an geometrical object, describing where and in which 
+direction the next Mount or post shall dock on the previus Mount.
+To test and align this, we will create a mirrror at (0,0,0) and drag a little
+blue test sphere to the docking position.
+
+
+
 
 ToDo:
 Get to Component , make a custom mount?
