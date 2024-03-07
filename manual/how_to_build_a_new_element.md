@@ -18,14 +18,14 @@ FreeCAD like this:
 <img src="images/How-to-new-Element/Step_Alignment.png" alt="StretcherStuff" title="" />
 
 The rules for aligning are:
-1. The point where the object shall get hit by the beam is (0,0,0), see the 
+1. The point where the object shall get hit by the beam is (0,0,0), see the
 red sphere.
 2. The object shall face the -x direction.
 3. Its vertical direction shall be aligned with the z-axis.
 
 Now you can export the object from FreeCAD as step or stl file, in this case
 as "Diode.stl" and save it under freecad_models/misc_meshes.
-Now we have to bind our new shape to an object and for the beginning we choose 
+Now we have to bind our new shape to an object and for the beginning we choose
 a Geom_Obj.
 Here is the usual header:
 ```python
@@ -51,13 +51,13 @@ stl_file = thisfolder+"misc_meshes/pockels_cell_easy_steal-Body.stl"
 detector = Geom_Object()
 detector.freecad_model = load_STL
 detector.draw_dict["stl_file"]=stl_file
-detector.draw()  
-  
+detector.draw()
+
 if freecad_da:
   setview()
 ```
-First you need to set the *freecad_model* to *load_stl*. Be aware that this line 
-conects a function pointer to the *freecad_model*, so don't use brackets after 
+First you need to set the *freecad_model* to *load_stl*. Be aware that this line
+conects a function pointer to the *freecad_model*, so don't use brackets after
 the names, we really want to set the value *freecad_model* to a function, not to
 its result. Afterwards we set the *draw_dict* entry for *stl_file* to the path
 where we saved the stl file. You can see the result of this in the following
@@ -85,7 +85,7 @@ b.set_length(100)
 detector.pos += (100,0,0)
 b.draw()
 detector.draw()
-  
+
 if freecad_da:
   setview()
 ```
@@ -103,7 +103,7 @@ Et voila, the black detector:
 <img src="images/How-to-new-Element/Geom_Obj_stl_with_beam_BLACK.png" alt="StretcherStuff" title="" />
 
 Now that we have the shape bound to an Geom_Object, we can place it where ever
-we want via the *set_geom* funciton or with *pos* and *normal*. 
+we want via the *set_geom* funciton or with *pos* and *normal*.
 
 If we need multiple detectors, we can now of course copy paste these lines over
 and over, nevertheless more elegant would be to define an own class for this.
@@ -142,19 +142,57 @@ Resulting in a 3D model like this:
 To include our new element in a real setup (= a *composition*), we ave to give
 it a suitable mount and post, thus making it a *Component*. Only this would not
 change much, each Component has a standard *Unit_Mount*, but those are more like
-abstract templates of mounts, providing all the theoretical member variables and 
+abstract templates of mounts, providing all the theoretical member variables and
 functions, but no useful drawing function. For this we have to override the
-*set_mount
+*set_mount_to_default* function and define an invisble Unit_Mount to define the
+docking position of the half_inch_post. For more information about mounts and
+docking positions you can read the Custom Mirror Mount section. The code and
+output look now like this.
 ```pyhton
+from LaserCAD.basic_optics import Geom_Object, Beam, Component
+from LaserCAD.basic_optics import Composed_Mount, Unit_Mount, Post
+from LaserCAD.freecad_models.utils import freecad_da, clear_doc, setview, load_STL, thisfolder
+
+if freecad_da:
+  clear_doc()
+
+class Detector(Component):
+  def __init__(self, name="Det_PDA10A2", **kwargs):
+    super().__init__(name, **kwargs)
+    stl_file = thisfolder+"misc_meshes/Diode.stl"
+    self.draw_dict["stl_file"]=stl_file
+    self.draw_dict["color"]=(0.1, 0.1, 0.1)
+    self.freecad_model = load_STL
+    self.set_mount_to_default()
+
+  def set_mount_to_default(self):
+    invis_adapter = Unit_Mount()
+    invis_adapter.docking_obj.pos += (10.5, 0, -25)
+    comp = Composed_Mount(name=self.name + "_mount")
+    comp.add(invis_adapter)
+    comp.add(Post(model="0.5inch_post"))
+    # comp.add(Post())
+    comp.set_geom(self.get_geom())
+    self.Mount = comp
+
+detector = Detector()
+detector.draw()
+detector.draw_mount()
 ```
 
+The magic of the post drawing algorithms will nor care, that the post will grow
+according to the z-height of the detector. You can play araound with the detector
+*pos* to see how it works.
+
+<img src="images/How-to-new-Element/Detector_with_post.png" alt="StretcherStuff" title="" />
 
 
+
+## Custom Mirror Mount
 
 ToDo:
 Get to Component , make a custom mount?
 
-Custom Spartan Mount
 
 Custom Element: Fake Trippel_Mirror
 

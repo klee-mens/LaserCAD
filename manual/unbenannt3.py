@@ -28,7 +28,7 @@ class Detector(Component):
     self.draw_dict["color"]=(0.1, 0.1, 0.1)
     self.freecad_model = load_STL
     self.set_mount_to_default()
-  
+
   def set_mount_to_default(self):
     invis_adapter = Unit_Mount()
     invis_adapter.docking_obj.pos += (10.5, 0, -25)
@@ -40,14 +40,14 @@ class Detector(Component):
     self.Mount = comp
 
 detector = Detector()
+detector.draw()
+detector.draw_mount()
+# detector.pos += (100,0,0)
 
 
 # b = Beam()
 # b.set_length(100)
-# detector.pos += (100,0,0)
 # b.draw()
-detector.draw()
-detector.draw_mount()
 
 # detector2 = Detector()
 # detector2.pos += (0,50,0)
