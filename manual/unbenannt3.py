@@ -13,7 +13,7 @@ pfad = pfad[0:ind-1]
 if not pfad in sys.path:
   sys.path.append(pfad)
 
-from LaserCAD.basic_optics import Geom_Object, Beam, Component, Mirror
+from LaserCAD.basic_optics import Geom_Object, Beam, Component, Mirror, Composition
 from LaserCAD.basic_optics import Composed_Mount, Unit_Mount, Post
 from LaserCAD.freecad_models.utils import freecad_da, clear_doc, setview, load_STL, thisfolder
 
@@ -39,9 +39,9 @@ class Detector(Component):
     comp.set_geom(self.get_geom())
     self.Mount = comp
 
-detector = Detector()
-detector.draw()
-detector.draw_mount()
+# detector = Detector()
+# detector.draw()
+# detector.draw_mount()
 # detector.pos += (100,0,0)
 
 
@@ -60,7 +60,7 @@ class Spartan_Mount(Composed_Mount):
     super().__init__()
     um = Unit_Mount()
     um.model = "Spartan"
-    um.path = pfad + "misc_meshes/"
+    um.path = thisfolder + "misc_meshes/"
     um.docking_obj.pos += (24, 2, -35) # from manual adjustments in FreeCAD
     self.add(um)
     self.add(Post())
@@ -71,7 +71,7 @@ mir4 = Mirror(phi=-60)
 mir4.set_mount(Spartan_Mount())
 mir5 = Mirror(phi=90)
 mir5.set_mount(Spartan_Mount())
-    
+
 comp = Composition(name="MirrorAssembly")
 comp.pos += (-200, -300, 0)
 comp.propagate(200)
@@ -83,10 +83,6 @@ comp.add_on_axis(mir5)
 comp.propagate(200)
 
 comp.draw()
-# mir3.Mount = Spartan_Mount()
-# mir3.Mount.set_geom()
-# mir3.draw()
-# mir3.draw_mount()
 
 if freecad_da:
   setview()
