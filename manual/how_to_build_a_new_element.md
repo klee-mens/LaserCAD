@@ -321,10 +321,172 @@ And here is the result. An optical setup with style ;)
 
 ## Custom Optical Element and next ray function
 
-ToDo:
-Get to Component , make a custom mount?
+Here we are going to creat a new optical element and give it a functionality
+by overriding its *next_ray* funciton. As an example we will try a fake retro
+reflector. Fake, because in principle you can't simulate a 3 mirror retro
+reflector in sequential ray tracing, because at some point you have to detect,
+which of the 3 mirrors gets hit first, what is essential to non sequential ray
+tracing and collition detection, both not beeing covered by LaserCAD. But hey,
+what do we really need? Some kind of nice looking black box, throwing rays
+parallel back to were they came. This is definitly possible!
+
+First we need a model for our component. You can for example use the crystal
+model or creat your own FreeCAD funciton by copy past the code of the python
+panell after designing. Here we will simply take the [PS975M](https://www.thorlabs.com/thorproduct.cfm?partnumber=PS975M) model
+from Thorlabs and adjust it, that it looks like this:
+
+<img src="images/How-to-new-Element/retro_stl.png" alt="StretcherStuff" title="" />
+
+Good, now we will follow the steps of the last chapter to bind its shape to a
+new optical element.
+
+```python
+from LaserCAD.basic_optics import Opt_Element
+class Retro_Reflector(Opt_Element):
+  def __init__(self):
+    super().__init__()
+    stl_file = thisfolder+"misc_meshes/PS975M.stl"
+    self.draw_dict["stl_file"]=stl_file
+    self.draw_dict["color"]=(0.0, 1.0, 1.0)
+    self.draw_dict["transparency"]=50
+    self.freecad_model = load_STL
+
+ret = Retro_Reflector()
+ret.draw()
+```
+
+The output looks now pretty much the same, we defined a new color and set the
+transparency to 50% to get a glass like look, which is not really close to
+reality, but at least very unique and after all it is only an example.
+
+What is of course still missing is the mount function. As already mentioned,
+the default *Unit_Mount()* has no shape. To change our mount, we have to override
+the ojewgfqeikjngf function. In this case the LMR1_M mount for 1 inch lenses
+could be suitable. For an equivalent example you can also see the *lambda_plate*
+module in the *non_interactings* folder.
+
+```python
+  def set_mount_to_default(self):
+    self.Mount = Composed_Mount(unit_model_list=["LMR1_M", "0.5inch_post"])
+    self.Mount.set_geom(self.get_geom())
+```
+
+<img src="images/How-to-new-Element/retro_with_wrong_pos_mount.png" alt="StretcherStuff" title="" />
+
+Not bad, but not ideal, we have to change the pos of the hole thing. By playing
+around with the Placement in FreeCAD, we find 19 mm in -x direction to be a good
+choice.
+
+```python
+  def set_mount_to_default(self):
+    self.Mount = Composed_Mount(unit_model_list=["LMR1_M", "0.5inch_post"])
+    mount_pos = self.pos - 19 * self.normal
+    self.Mount.set_geom( (mount_pos, self.get_axes()) )
+```
+
+<img src="images/How-to-new-Element/retro_with_correct_mount.png" alt="StretcherStuff" title="" />
+
+It looks correct now. The first line of the function tells you, how to quickly
+set mount-post combinations: The constructor of the Composed_Mount class has
+a *unit_model_list* argument, which is just a list of (mostly 2) strings
+describing mount and post. The allowed names can be found in the
+*basic_optics/mount* module or in the tables deep in the freecad_model/meshes
+folder in the csv tables.
+
+OK, that's it for the cosmetics, but we still have now operational retro reflector,
+which can be seen by the following script:
+
+```python
+beam1 = Beam()
+
+ret = Retro_Reflector()
+ret.pos += (100,0,0)
+ret.normal = (-1,0,0)
+
+beam2 = ret.next_beam(beam1)
+
+ret.draw()
+ret.draw_mount()
+beam1.draw()
+beam2.draw()
+```
+
+<img src="images/How-to-new-Element/retro_wrong_beams.png" alt="StretcherStuff" title="" />
+
+This is caused by the fundamental ray tracing function, that each optical
+element posseses, the *next_ray* function. (Btw, you could get a pretty similar
+result, by exchanging *Beam*, with *Ray* in the above script.) The default is
+called the *just_pass_through* function, which produces a new, undeflected ray
+after the first one, as if the object has no influence at all.
+That is, what we want to change. A quick calculation on the paper leads to the
+following algorithm:
+
+```python
+  def next_ray(self, ray):
+    newray = deepcopy(ray)
+    intersection_point = ray.intersect_with(self) # gives point and sets length
+    difference_vec = self.pos - intersection_point
+    newray.pos = self.pos + difference_vec # retro reflection
+    newray.normal = - ray.normal #reflection
+    return newray
+```
+
+The start is always a deepcopy from the copy module, to get a new Ray with same
+color etc., than we set its point to be as far away from the center of the
+relfector as the incomming ray, but on the opposite side and finally we invert
+its normal. And here we go, the faked, custom made retro reflector!
+
+```python
+from copy import deepcopy
+from LaserCAD.basic_optics import Beam, Ray
+from LaserCAD.basic_optics import Composed_Mount
+from LaserCAD.freecad_models.utils import freecad_da, clear_doc, setview, load_STL, thisfolder
+
+from LaserCAD.basic_optics import Opt_Element
+class Retro_Reflector(Opt_Element):
+  def __init__(self):
+    super().__init__()
+    stl_file = thisfolder+"misc_meshes/PS975M.stl"
+    self.draw_dict["stl_file"]=stl_file
+    self.draw_dict["color"]=(0.0, 1.0, 1.0)
+    self.draw_dict["transparency"]=50
+    self.freecad_model = load_STL
+
+  def set_mount_to_default(self):
+    self.Mount = Composed_Mount(unit_model_list=["LMR1_M", "0.5inch_post"])
+    mount_pos = self.pos - 19 * self.normal
+    self.Mount.set_geom( (mount_pos, self.get_axes()) )
+
+  def next_ray(self, ray):
+    newray = deepcopy(ray)
+    intersection_point = ray.intersect_with(self) # gives point and sets length
+    difference_vec = self.pos - intersection_point
+    newray.pos = self.pos + difference_vec # retro reflection
+    newray.normal = - ray.normal #reflection
+    return newray
+
+beam1 = Beam()
+
+ret = Retro_Reflector()
+ret.pos += (100,3,0)
+ret.normal = (-1,0,0)
+
+beam2 = ret.next_beam(beam1)
+
+ret.draw()
+ret.draw_mount()
+beam1.draw()
+beam2.draw()
+```
+
+<img src="images/How-to-new-Element/retro_complete.png" alt="StretcherStuff" title="" />
 
 
-Custom Element: Fake Trippel_Mirror
+## Custom Composition
 
-Custom Composition: 3 Mirror Polarisation Rotator ?
+For this I would simply suggest to read the pericope and especially the
+roof top mirror module and check its code and freecad_models, it should give
+you a good start from where you can move on.
+
+<img src="images/How-to-new-Element/roof_top_custom_composition.png" alt="StretcherStuff" title="" />
+

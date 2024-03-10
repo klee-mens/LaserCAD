@@ -20,6 +20,9 @@ from LaserCAD.freecad_models.utils import freecad_da, clear_doc, setview, load_S
 if freecad_da:
   clear_doc()
 
+# =============================================================================
+# Chapter 1 - The Detector
+# =============================================================================
 class Detector(Component):
   def __init__(self, name="Det_PDA10A2", **kwargs):
     super().__init__(name, **kwargs)
@@ -54,6 +57,9 @@ class Detector(Component):
 # detector2.normal = (-3,1,0)
 # detector2.draw()
 
+# =============================================================================
+# Chapter 2 - The Spartan Mount
+# =============================================================================
 
 class Spartan_Mount(Composed_Mount):
   def __init__(self):
@@ -65,24 +71,68 @@ class Spartan_Mount(Composed_Mount):
     self.add(um)
     self.add(Post())
 
-mir3 = Mirror(phi=75)
-mir3.set_mount(Spartan_Mount())
-mir4 = Mirror(phi=-60)
-mir4.set_mount(Spartan_Mount())
-mir5 = Mirror(phi=90)
-mir5.set_mount(Spartan_Mount())
+# mir3 = Mirror(phi=75)
+# mir3.set_mount(Spartan_Mount())
+# mir4 = Mirror(phi=-60)
+# mir4.set_mount(Spartan_Mount())
+# mir5 = Mirror(phi=90)
+# mir5.set_mount(Spartan_Mount())
 
-comp = Composition(name="MirrorAssembly")
-comp.pos += (-200, -300, 0)
-comp.propagate(200)
-comp.add_on_axis(mir3)
-comp.propagate(200)
-comp.add_on_axis(mir4)
-comp.propagate(200)
-comp.add_on_axis(mir5)
-comp.propagate(200)
+# comp = Composition(name="MirrorAssembly")
+# comp.pos += (-200, -300, 0)
+# comp.propagate(200)
+# comp.add_on_axis(mir3)
+# comp.propagate(200)
+# comp.add_on_axis(mir4)
+# comp.propagate(200)
+# comp.add_on_axis(mir5)
+# comp.propagate(200)
+# comp.draw()
 
-comp.draw()
+# =============================================================================
+# Chapter 3 - The Retro Reflector
+# =============================================================================
+from copy import deepcopy
+from LaserCAD.basic_optics import Beam, Ray
+from LaserCAD.basic_optics import Composed_Mount
+from LaserCAD.freecad_models.utils import freecad_da, clear_doc, setview, load_STL, thisfolder
+
+from LaserCAD.basic_optics import Opt_Element
+class Retro_Reflector(Opt_Element):
+  def __init__(self):
+    super().__init__()
+    stl_file = thisfolder+"misc_meshes/PS975M.stl"
+    self.draw_dict["stl_file"]=stl_file
+    self.draw_dict["color"]=(0.0, 1.0, 1.0)
+    self.draw_dict["transparency"]=50
+    self.freecad_model = load_STL
+
+  def set_mount_to_default(self):
+    self.Mount = Composed_Mount(unit_model_list=["LMR1_M", "0.5inch_post"])
+    mount_pos = self.pos - 19 * self.normal
+    self.Mount.set_geom( (mount_pos, self.get_axes()) )
+
+  def next_ray(self, ray):
+    newray = deepcopy(ray)
+    intersection_point = ray.intersect_with(self) # gives point and sets length
+    difference_vec = self.pos - intersection_point
+    newray.pos = self.pos + difference_vec # retro reflection
+    newray.normal = - ray.normal #reflection
+    return newray
+
+beam1 = Beam()
+
+ret = Retro_Reflector()
+ret.pos += (100,3,0)
+ret.normal = (-1,0,0)
+
+beam2 = ret.next_beam(beam1)
+
+ret.draw()
+ret.draw_mount()
+beam1.draw()
+beam2.draw()
+
 
 if freecad_da:
   setview()
