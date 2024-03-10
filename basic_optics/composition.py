@@ -144,7 +144,7 @@ class Composition(Geom_Object):
     for ind in self._sequence:
       counter += 1
       B = self._optical_axis[counter].length
-      M = self._elements[ind]._matrix
+      M = self._elements[ind].matrix(inray = self._optical_axis[counter])
       self._matrix = np.matmul(np.array([[1,B], [0,1]]), self._matrix )
       self._matrix = np.matmul(M, self._matrix )
     self._matrix = np.matmul(np.array([[1,self._last_prop], [0,1]]), self._matrix ) #last propagation

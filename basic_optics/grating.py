@@ -64,7 +64,24 @@ class Grating(Opt_Element):
     smm.set_geom(self.get_geom())
     self.Mount = smm
 
-
+  def matrix(self, inray=Ray()):
+    omatrix = np.eye(2)
+    try:
+      outray = self.next_ray(inray)
+    except:
+      outray = Ray()
+      print("Irgendwas bei Matrix Gitter Berechnung falsch gelaufen")
+    A = np.sum(self.normal * inray.normal) / np.sum(self.normal * outray.normal)
+    A *= -1 #??? Steht so in den Folien    
+    omatrix[0,0] = A
+    omatrix[1,1] = 1/A
+    return omatrix
+  
+  def kostenbauder(self, inray=Ray()):
+    kmatrix = np.eye(4)
+    kmatrix[0:2, 0:2] = self.matrix(inray=inray)
+    #heute keinen Bock mehr
+    return kmatrix * 999
 
 def grating_test1():
   grat = Grating()

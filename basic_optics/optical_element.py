@@ -37,8 +37,13 @@ class Opt_Element(Component):
     self._matrix = np.eye(2)
     self.length = 0 #Länge in mm, die meisten opt Elemente sind 2D, also 0
 
-  def matrix(self):
+  def matrix(self, inray=Ray()):
     return np.array(self._matrix)
+
+  def kostenbauder(self, inray=Ray()):
+    kmatrix = np.eye(4)
+    kmatrix[0:2, 0:2] = self.matrix(inray=inray)
+    return np.array(kmatrix)
 
   def next_ray(self, ray):
     """
