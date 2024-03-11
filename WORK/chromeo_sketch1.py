@@ -598,17 +598,17 @@ Compressor.set_geom(amp2.last_geom())
 # Draw Selection
 # =============================================================================
 
-Seed.draw()
-Stretcher.draw()
+# Seed.draw()
+# Stretcher.draw()
 PulsePicker.draw()
-# PulsePicker.draw_alignment_posts()
-Amplifier_I.draw()
-Pump.draw()
-amp2.draw()
+PulsePicker.draw_alignment_posts()
+# Amplifier_I.draw()
+# Pump.draw()
+# amp2.draw()
 # # BigPump.draw()
 # t=Table()
 # t.draw()
-Compressor.draw()
+# Compressor.draw()
 
 # =============================================================================
 # breadboards
