@@ -43,7 +43,7 @@ distance_faraday_mirror = 100
 
 seed_laser = Component(name="IPG_Seed_Laser")
 
-stl_file=thisfolder+"\mount_meshes\special mount\Laser_Head-Body.stl"
+stl_file=thisfolder+"\misc_meshes\Laser_Head-Body.stl"
 seed_laser.draw_dict["stl_file"]=stl_file
 color = (170/255, 170/255, 127/255)
 seed_laser.draw_dict["color"]=color
@@ -72,6 +72,26 @@ seed_end_geom = Seed.last_geom()
 def dont():
   return None
 
+# =============================================================================
+# Stretcher parameter
+# =============================================================================
+radius_concave = 1000 #radius of the big concave sphere
+aperture_concave = 6 * inch
+height_stripe_mirror = 10 #height of the stripe mirror in mm
+width_stripe_mirror = 75 # in mm
+seperation_angle = 10 /180 *np.pi # sep between in and outgoing middle ray
+# incident_angle = seperation_angle + reflection_angle
+grating_const = 1/450 # in 1/mm
+seperation = 135 # difference grating position und radius_concave
+lambda_mid = 2400e-9 * 1e3 # central wave length in mm
+delta_lamda = 200e-9*1e3 # full bandwith in mm
+number_of_rays = 20
+safety_to_stripe_mirror = 5 #distance first incomming ray to stripe_mirror in mm
+periscope_height = 15
+first_propagation = 20 # legnth of the first ray_bundle to flip mirror1 mm
+distance_flip_mirror1_grating = 300
+distance_roof_top_grating = 600
+# 
 
 def Make_Stretcher_chromeo():
   """
@@ -92,14 +112,14 @@ def Make_Stretcher_chromeo():
   seperation_angle = 10 /180 *np.pi # sep between in and outgoing middle ray
   # incident_angle = seperation_angle + reflection_angle
   grating_const = 1/450 # in 1/mm
-  seperation = 50 # difference grating position und radius_concave
+  seperation = 135 # difference grating position und radius_concave
   lambda_mid = 2400e-9 * 1e3 # central wave length in mm
   delta_lamda = 200e-9*1e3 # full bandwith in mm
   number_of_rays = 20
   safety_to_stripe_mirror = 5 #distance first incomming ray to stripe_mirror in mm
   periscope_height = 15
   first_propagation = 20 # legnth of the first ray_bundle to flip mirror1 mm
-  distance_flip_mirror1_grating = 300
+  distance_flip_mirror1_grating = 300-85
   distance_roof_top_grating = 600
 
   # calculated parameters according to the grating equation
@@ -114,6 +134,7 @@ def Make_Stretcher_chromeo():
 
   Concav = Curved_Mirror(radius=radius_concave, name="Concav_Mirror")
   Concav.aperture = aperture_concave
+  Concav.set_mount_to_default()
 
   StripeM = Stripe_mirror(radius= -radius_concave/2,thickness=25,  name="Stripe_Mirror")
   #Cosmetics
@@ -161,7 +182,7 @@ def Make_Stretcher_chromeo():
   Stretcher.redefine_optical_axis(helper_light_source.inner_ray())
 
   Stretcher.propagate(first_propagation)
-  FlipMirror_In_Out = Mirror(phi=90, name="FlipMirrorInOut")
+  FlipMirror_In_Out = Mirror(phi=100, name="FlipMirrorInOut")
   
   mount=Composed_Mount()
   Mount1=Unit_Mount(model="MH25")
@@ -235,13 +256,15 @@ PulsePicker.set_light_source(lightsource_pp)
 PulsePicker.propagate(distance_seed_laser_stretcher*0.2)
 FlipMirror_pp = Mirror(phi=90)
 FlipMirror_pp_mount=Composed_Mount()
-FlipMirror_pp_mount_Mount1=Unit_Mount(model="MH25")
-FlipMirror_pp_mount_Mount1.docking_obj.pos = FlipMirror_pp_mount_Mount1.pos+(6.3,0,0)
-FlipMirror_pp_mount_Mount1.docking_obj.normal = FlipMirror_pp_mount_Mount1.normal
-FlipMirror_pp_mount_Mount2=Unit_Mount(model="KMSS")
-FlipMirror_pp_mount.add(FlipMirror_pp_mount_Mount1)
-FlipMirror_pp_mount.add(FlipMirror_pp_mount_Mount2)
-FlipMirror_pp.mount = FlipMirror_pp_mount
+# FlipMirror_pp_mount_Mount1=Unit_Mount(model="MH25")
+# FlipMirror_pp_mount_Mount1.docking_obj.pos = FlipMirror_pp_mount_Mount1.pos+(6.3,0,0)
+# FlipMirror_pp_mount_Mount1.docking_obj.normal = FlipMirror_pp_mount_Mount1.normal
+# FlipMirror_pp_mount_Mount2=Unit_Mount(model="KMSS")
+# FlipMirror_pp_mount.add(FlipMirror_pp_mount_Mount1)
+# FlipMirror_pp_mount.add(FlipMirror_pp_mount_Mount2)
+# FlipMirror_pp.mount = FlipMirror_pp_mount
+FlipMirror_pp.Mount = Composed_Mount(unit_model_list = ["MH25_KMSS","1inch_post"])
+FlipMirror_pp.Mount.set_geom(FlipMirror_pp.get_geom())
 # FlipMirror_pp.mount_dict["Flip90"]=False
 PulsePicker.add_on_axis(FlipMirror_pp)
 FlipMirror_pp.pos += (0,0,flip_mirror_push_down)
@@ -263,6 +286,7 @@ TFP_pp = Mirror(phi = 180-2*tfp_angle)
 TFP_pp.draw_dict["color"] = (1.0, 0.0, 2.0)
 TFP_pp.draw_dict["thickness"] = 4
 TFP_pp.aperture = 2*inch
+TFP_pp.set_mount_to_default()
 # TFP_pp.mount_dict["Flip90"]=True
 PulsePicker.add_on_axis(TFP_pp)
 TFP_pp.pos += -1 * TFP_pp.normal * tfp_push_forward
@@ -310,6 +334,7 @@ mir1 = Mirror(phi=180)
 TFP1 = Mirror(phi= 180 - 2*tfp_angle, name="TFP1")
 TFP1.draw_dict["color"] = (1.0, 0.0, 2.0)
 TFP1.aperture = tfp_aperture
+TFP1.set_mount_to_default()
 # TFP1.mount_dict["Flip90"]=True
 
 cm = Curved_Mirror(radius=focal*2, phi = 180)
@@ -414,7 +439,7 @@ amp2.set_sequence([0,1,2,3,2,4,5,6,2,3,2])
 amp2.recompute_optical_axis()
 amp2.propagate(650)
 amp2.add_on_axis(Mirror(phi=90))
-amp2.propagate(600)
+amp2.propagate(100)
 # amp2.set_sequence([0,1,2,3,4,5,2,6])
 # amp2.set_sequence([0,1,2,3,2,4,5,6,5,4,2,3,7])
 
@@ -441,22 +466,149 @@ BigPump.set_geom(amp2._elements[2].get_geom())
 # BigPump.set_geom(amp2.non_opticals[-1].get_geom())
 
 
+# =============================================================================
+# Compressor
+# =============================================================================
 
+lightsource = Beam(radius=0, angle=0)
+wavels = np.linspace(lambda_mid-delta_lamda/2, lambda_mid+delta_lamda/2, number_of_rays)
+rays = []
+cmap = plt.cm.gist_rainbow
+for wavel in wavels:
+  rn = Ray()
+  # rn.normal = vec
+  # rn.pos = pos0
+  rn.wavelength = wavel
+  x = 1-(wavel - lambda_mid + delta_lamda/2) / delta_lamda
+  rn.draw_dict["color"] = cmap( x )
+  rays.append(rn)
+lightsource.override_rays(rays)
+lightsource.draw_dict['model'] = "ray_group"
+
+Compressor= Composition()
+Compressor.set_light_source(lightsource)
+angle = 10
+SinS = np.sin(angle/180*np.pi)
+CosS = np.cos(angle/180*np.pi)
+
+v = lambda_mid/grating_const
+a = v/2
+B = np.sqrt(a**2 - (v**2 - SinS**2)/(2*(1+CosS)))
+sinB_new = a - B
+Grating_normal = (np.sqrt(1-sinB_new**2), sinB_new, 0)
+
+Grat1 = Grating(grat_const=grating_const, order=-1)
+Grat1.pos -=(500-10,0,0)
+Grat1.normal = Grating_normal
+Grat1.normal = -Grat1.normal
+Plane_height = 23+25.4
+Grat2 = Grating(grat_const=grating_const, order=-1)
+# propagation_length = 99.9995
+# propagation_length = seperation*2-0.0078
+propagation_length = seperation*2-0.008
+
+# propagation_length = 99.9949
+Grat2.pos -= (500-10-propagation_length*CosS,SinS*propagation_length,0)
+Grat2.normal = Grating_normal
+
+shift_direction = np.cross((0,0,1),Grat1.normal)
+Grat1.pos += shift_direction * -15
+Grat2.pos += shift_direction * 1
+
+Grat1.pos += (1000,0,0)
+Grat2.pos += (1000,0,0)
+
+"""
+# =============================================================================
+# Two Gratings Compressor
+# =============================================================================
+C_RoofTop1 = Mirror()
+C_RoofTop1.pos -= (700,SinS*propagation_length,periscope_height)
+C_RoofTop1.normal = (-1,0,-1)
+C_RoofTop2 = Mirror()
+C_RoofTop2.pos -= (700,SinS*propagation_length,0)
+C_RoofTop2.normal = (-1,0,1)
+
+C_RoofTop1.draw = dont
+C_RoofTop1.mount.elm_type = "dont_draw"
+C_RoofTop2.draw = dont
+C_RoofTop2.mount.elm_type = "dont_draw"
+pure_cosmetic1 = Rooftop_mirror(name="RoofTop_Mirror")
+pure_cosmetic1.draw_dict["mount_type"] = "rooftop_mirror_mount"
+pure_cosmetic1.pos = (C_RoofTop1.pos + C_RoofTop2.pos ) / 2
+pure_cosmetic1.normal = (C_RoofTop1.normal + C_RoofTop2.normal ) / 2
+pure_cosmetic1.draw_dict["model_type"] = "Rooftop"
+pure_cosmetic1.aperture = periscope_height
+"""
+# =============================================================================
+# Four Gratings Compressor
+# =============================================================================
+Grat3 =Grating(grat_const=grating_const,order=1)
+Grat3.pos = (Grat1.pos[0]-Grat2.pos[0]+Grat1.pos[0]-45-2*35*abs(Grat1.normal[0]),Grat2.pos[1],Grat2.pos[2])
+Grat3.normal = (Grat1.normal[0],-Grat1.normal[1],Grat1.normal[2])
+Grat4 =Grating(grat_const=grating_const,order=1)
+Grat4.pos = (Grat2.pos[0]-Grat2.pos[0]+Grat1.pos[0]-45-2*35*abs(Grat1.normal[0]),Grat1.pos[1],Grat2.pos[2])
+Grat4.normal = (Grat2.normal[0],-Grat2.normal[1],Grat2.normal[2])
+# Grat3.pos += (1,0,0)
+# Grat4.pos -= (1,0,0)
+
+# Grat3.rotate((0,0,1), 0.01)
+# Grat4.rotate((0,0,1), 0.01)
+
+Grat1.height=Grat2.height=Grat3.height=Grat4.height=25
+Grat1.thickness=Grat2.thickness=Grat3.thickness=Grat4.thickness=9.5
+Grat1.set_mount_to_default()
+Grat2.set_mount_to_default()
+Grat3.set_mount_to_default()
+Grat4.set_mount_to_default()
+Grat1.Mount.mount_list[1].flip(-90)
+Grat2.Mount.mount_list[1].flip(-90)
+Grat4.Mount.mount_list[-1]._lower_limit = Plane_height
+Grat1.Mount.mount_list[-1]._lower_limit = Plane_height
+Grat3.Mount.mount_list[-1]._lower_limit = Plane_height-23+25
+Grat2.Mount.mount_list[-1]._lower_limit = Plane_height-23+25
+Grat1.Mount.mount_list[1].model = "POLARIS-K1E3"
+Grat2.Mount.mount_list[1].model = "POLARIS-K1E3"
+Grat3.Mount.mount_list[1].model = "POLARIS-K1E3"
+Grat4.Mount.mount_list[1].model = "POLARIS-K1E3"
+Grat1.Mount.mount_list[1].docking_obj.pos = Grat1.Mount.mount_list[1].pos + Grat1.Mount.mount_list[1].normal*17.1-np.array((0,0,1))*25.4
+Grat1.Mount.mount_list[2].set_geom(Grat1.Mount.mount_list[1].docking_obj.get_geom())
+Grat2.Mount.mount_list[1].docking_obj.pos = Grat2.Mount.mount_list[1].pos + Grat2.Mount.mount_list[1].normal*17.1-np.array((0,0,1))*25.4
+Grat2.Mount.mount_list[2].set_geom(Grat2.Mount.mount_list[1].docking_obj.get_geom())
+Grat3.Mount.mount_list[1].docking_obj.pos = Grat3.Mount.mount_list[1].pos + Grat3.Mount.mount_list[1].normal*17.1-np.array((0,0,1))*25.4
+Grat3.Mount.mount_list[2].set_geom(Grat3.Mount.mount_list[1].docking_obj.get_geom())
+Grat4.Mount.mount_list[1].docking_obj.pos = Grat4.Mount.mount_list[1].pos + Grat4.Mount.mount_list[1].normal*17.1-np.array((0,0,1))*25.4
+Grat4.Mount.mount_list[2].set_geom(Grat4.Mount.mount_list[1].docking_obj.get_geom())
+# PM1=Post_Marker()
+# PM2=Post_Marker()
+# Grat2.Mount.add(PM1)
+# Grat3.Mount.add(PM2)
+
+# print("setting pos=",(Grat1.pos+Grat2.pos+Grat3.pos+Grat4.pos)/4)
+# ip = Intersection_plane()
+# ip.pos -= (100,0,0)
+Compressor.add_fixed_elm(Grat4)
+Compressor.add_fixed_elm(Grat3)
+Compressor.add_fixed_elm(Grat2)
+Compressor.add_fixed_elm(Grat1)
+Compressor.propagate(300)
+Compressor.set_geom(amp2.last_geom())
 
 # =============================================================================
 # Draw Selection
 # =============================================================================
 
-# Seed.draw()
-# Stretcher.draw()
+Seed.draw()
+Stretcher.draw()
 PulsePicker.draw()
-PulsePicker.draw_alignment_posts()
-# Amplifier_I.draw()
-# Pump.draw()
-# amp2.draw()
+# PulsePicker.draw_alignment_posts()
+Amplifier_I.draw()
+Pump.draw()
+amp2.draw()
 # # BigPump.draw()
 # t=Table()
 # t.draw()
+Compressor.draw()
 
 # =============================================================================
 # breadboards

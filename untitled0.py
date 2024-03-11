@@ -32,13 +32,15 @@ if freecad_da:
 def dont():
     return None
 
-a=Grating()
-a.height = 25
-a.set_mount_to_default()
-a.pos = (50,100,100)
-a.normal = (1.5,1.5,0)
+# a=Grating()
+# a.height = 25
+# a.set_mount_to_default()
+# a.pos = (50,100,100)
+# a.normal = (1.5,1.5,0)
+# a.draw()
+# a.draw_mount()
+# from LaserCAD.freecad_models.freecad_model_element_holder import Model_element_holder
+# if freecad_da:
+#   b=Model_element_holder(post_distence=20,base_height=20,geom=a.get_geom(),thickness=5,width=50,height=25,ele_type="Grating")
+a= Component()
 a.draw()
-a.draw_mount()
-from LaserCAD.freecad_models.freecad_model_element_holder import Model_element_holder
-if freecad_da:
-  b=Model_element_holder(post_distence=20,base_height=20,geom=a.get_geom(),thickness=5,width=50,height=25,ele_type="Grating")
