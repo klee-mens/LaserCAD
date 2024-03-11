@@ -32,8 +32,7 @@ if freecad_da:
   clear_doc()
   
 from LaserCAD.basic_optics.mount import Stripe_Mirror_Mount
-from LaserCAD.basic_optics.mirror import Stripe_mirror,Rooftop_mirror
-
+from LaserCAD.basic_optics.mirror import Stripe_mirror
 # sm = Curved_Mirror()
 # sm.aperture =25.4*6
 # # sm = Stripe_mirror()
@@ -78,14 +77,13 @@ from LaserCAD.non_interactings import Lambda_Plate
 
 from LaserCAD.freecad_models.freecad_model_geom_object import model_geom_object
 
+A=Mirror()
+A.pos = (0,0,0)
+A.draw()
+
 # if freecad_da:
   # model_geom_object()
 
-g = Geom_Object()
-# g.freecad_model = model_geom_object
-g.pos = (1,2,3)
-# g.normal = (1,1,0)
-g.draw()
 
 # comp = Composition()
 # comp.propagate(300)

@@ -13,6 +13,8 @@ pfad = pfad.replace("\\","/") #folder conventions windows linux stuff
 ind = pfad.rfind("/")
 pfad = pfad[0:ind-1]
 ind = pfad.rfind("/")
+pfad = pfad[0:ind-1]
+ind = pfad.rfind("/")
 pfad = pfad[0:ind]
 if not pfad in sys.path:
   sys.path.append(pfad)
@@ -84,7 +86,6 @@ a = v/2
 b = np.sqrt(a**2 - (v**2 - s**2)/(2*(1+c)))
 sinB = a - b
 grating_normal = (np.sqrt(1-sinB**2), sinB, 0)
-# print(np.arcsin(sinB)*180/np.pi)
 
 Concav = Curved_Mirror(radius=radius_concave, name="Concav_Mirror")
 Concav.aperture = aperture_concave
@@ -270,6 +271,11 @@ Grat3.normal = (Grat1.normal[0],-Grat1.normal[1],Grat1.normal[2])
 Grat4 =Grating(grat_const=grating_const,order=1)
 Grat4.pos = (Grat2.pos[0]-Grat2.pos[0]+Grat1.pos[0]-45-2*35*abs(Grat1.normal[0]),Grat1.pos[1],Grat2.pos[2])
 Grat4.normal = (Grat2.normal[0],-Grat2.normal[1],Grat2.normal[2])
+# Grat3.pos += (1,0,0)
+# Grat4.pos -= (1,0,0)
+
+# Grat3.rotate((0,0,1), 0.01)
+# Grat4.rotate((0,0,1), 0.01)
 
 Grat1.height=Grat2.height=Grat3.height=Grat4.height=25
 Grat1.thickness=Grat2.thickness=Grat3.thickness=Grat4.thickness=9.5
@@ -281,8 +287,8 @@ Grat1.Mount.mount_list[1].flip(-90)
 Grat2.Mount.mount_list[1].flip(-90)
 Grat4.Mount.mount_list[-1]._lower_limit = Plane_height
 Grat1.Mount.mount_list[-1]._lower_limit = Plane_height
-Grat3.Mount.mount_list[-1]._lower_limit = Plane_height-23
-Grat2.Mount.mount_list[-1]._lower_limit = Plane_height-23
+Grat3.Mount.mount_list[-1]._lower_limit = Plane_height-23+25
+Grat2.Mount.mount_list[-1]._lower_limit = Plane_height-23+25
 Grat1.Mount.mount_list[1].model = "POLARIS-K1E3"
 Grat2.Mount.mount_list[1].model = "POLARIS-K1E3"
 Grat3.Mount.mount_list[1].model = "POLARIS-K1E3"
@@ -369,14 +375,14 @@ ip.spot_diagram(Stretcher._beams[0])
 # ip.spot_diagram(Stretcher._beams[14],aberration_analysis=True)
 ip.draw()
 ip_s.draw()
-# pathlength = {}
-# for ii in range(Stretcher._beams[0]._ray_count):
-#   wavelength = Stretcher._beams[0].get_all_rays()[ii].wavelength
-#   pathlength[wavelength] = 0
-# for jj in range(len(Stretcher._beams)-1):
-#   for ii in Stretcher._beams[jj].get_all_rays():
-#     a=pathlength[ii.wavelength]
-#     pathlength[ii.wavelength] = a +ii.length
+pathlength = {}
+for ii in range(Stretcher._beams[0]._ray_count):
+  wavelength = Stretcher._beams[0].get_all_rays()[ii].wavelength
+  pathlength[wavelength] = 0
+for jj in range(len(Stretcher._beams)-1):
+  for ii in Stretcher._beams[jj].get_all_rays():
+    a=pathlength[ii.wavelength]
+    pathlength[ii.wavelength] = a +ii.length
     
 # """
 # add the optical path length in crystal
@@ -393,72 +399,72 @@ ip_s.draw()
 # """
 # calculate the GDD,TOD
 # """
-# ray_lam = [ray.wavelength for ray in Stretcher._beams[0].get_all_rays()]
-# path = [pathlength[ii] for ii in ray_lam]
-# path_diff = [ii-path[int(len(path)/2)] for ii in path]
-# fai = [path_diff[ii]/ray_lam[ii]*2*np.pi for ii in range(len(path))]
-# omega = [c0/ii*2*np.pi for ii in ray_lam]
-# omega = [ii - c0/lambda_mid*2*np.pi for ii in omega]
-# para = np.polyfit(omega, fai, 6)
-# fai = [para[0]*ii**6 + para[1]*ii**5 + para[2]*ii**4 + para[3]*ii**3 + para[4]*ii**2 for ii in omega]
-# fai2 = [30*para[0]*ii**4 + 20*para[1]*ii**3 + 12*para[2]*ii**2 + 6*para[3]*ii + 2*para[4] for ii in omega] # Taylor Expantion
-# fai3 = [120*para[0]*ii**3 + 60*para[1]*ii**2 + 24*para[2]*ii + 6*para[3] for ii in omega]
+ray_lam = [ray.wavelength for ray in Stretcher._beams[0].get_all_rays()]
+path = [pathlength[ii] for ii in ray_lam]
+path_diff = [ii-path[int(len(path)/2)] for ii in path]
+fai = [path_diff[ii]/ray_lam[ii]*2*np.pi for ii in range(len(path))]
+omega = [c0/ii*2*np.pi for ii in ray_lam]
+omega = [ii - c0/lambda_mid*2*np.pi for ii in omega]
+para = np.polyfit(omega, fai, 6)
+fai = [para[0]*ii**6 + para[1]*ii**5 + para[2]*ii**4 + para[3]*ii**3 + para[4]*ii**2 for ii in omega]
+fai2 = [30*para[0]*ii**4 + 20*para[1]*ii**3 + 12*para[2]*ii**2 + 6*para[3]*ii + 2*para[4] for ii in omega] # Taylor Expantion
+fai3 = [120*para[0]*ii**3 + 60*para[1]*ii**2 + 24*para[2]*ii + 6*para[3] for ii in omega]
 
 # # para = np.polyfit(omega, fai, 5)
 # # fai2 = [20*para[0]*ii**3 + 12*para[1]*ii**2 + 6*para[2]*ii + 2*para[3] for ii in omega] # Taylor Expantion
 # # fai3 = [60*para[0]*ii**2 + 24*para[1]*ii + 6*para[2] for ii in omega]
 
-# fai_function = interp1d(omega, fai)
-# fai_new = fai_function(omega)
+fai_function = interp1d(omega, fai)
+fai_new = fai_function(omega)
 
 # # fai2_new=[derivative(fai_function, omega[ii],dx=1,n=2,order=5) for ii in range(1,len(omega)-1)]
 # # fai3_new=[derivative(fai_function, omega[ii],dx=1,n=3,order=5) for ii in range(1,len(omega)-1)]
 
-# delay_mid = path[int(len(path)/2)]/c0
-# delay = [(pa/c0-delay_mid)*1E9 for pa in path]
-# # plt.figure()
-# # ax1=plt.subplot(1,2,1)
-# # plt.plot(ray_lam,path)
-# # plt.ylabel("pathlength (mm)")
-# # plt.xlabel("wavelength (mm)")
-# # plt.title("Pathlength at different wavelength")
-# # plt.axhline(path[int(len(path)/2)], color = 'black', linewidth = 1)
-# # ax2=plt.subplot(1,2,2)
-# # plt.plot(ray_lam,delay)
-# # plt.ylabel("delay (ns)")
-# # plt.xlabel("wavelength (mm)")
-# # plt.title("Delay at different wavelength")
-# # plt.axhline(0, color = 'black', linewidth = 1)
-# # plt.show()
-
+delay_mid = path[int(len(path)/2)]/c0
+delay = [(pa/c0-delay_mid)*1E9 for pa in path]
 # plt.figure()
-# ax1=plt.subplot(1,3,1)
-# plt.scatter(omega,fai,label="φ(ω)")
-# plt.plot(omega,fai_new,label="φ(ω)")
-# plt.title("Relationship of phase with angular frequency φ(ω)")
-# plt.xlabel("angular frequency ω (rad/s)")
-# plt.ylabel("wave phase φ (rad)")
-# plt.axhline(fai[int(len(fai)/2)], color = 'black', linewidth = 1)
-# ax2=plt.subplot(1,3,2)
-# plt.plot(omega,fai2)
-# # omega_d = omega
-# # del omega_d[0]
-# # del omega_d[-1]
-# # plt.plot(omega_d,fai2_new)
-# plt.title("Group delay dispersion")
-# plt.xlabel("angular frequency ω (rad/s)")
-# plt.ylabel("The second order derivative of φ(ω)")
-# plt.axhline(fai2[int(len(fai2)/2)], color = 'black', linewidth = 1)
-# print("Group delay dispersion at the center wavelength:",fai2[int(len(fai2)/2)])
+# ax1=plt.subplot(1,2,1)
+# plt.plot(ray_lam,path)
+# plt.ylabel("pathlength (mm)")
+# plt.xlabel("wavelength (mm)")
+# plt.title("Pathlength at different wavelength")
+# plt.axhline(path[int(len(path)/2)], color = 'black', linewidth = 1)
+# ax2=plt.subplot(1,2,2)
+# plt.plot(ray_lam,delay)
+# plt.ylabel("delay (ns)")
+# plt.xlabel("wavelength (mm)")
+# plt.title("Delay at different wavelength")
+# plt.axhline(0, color = 'black', linewidth = 1)
+# plt.show()
 
-# ax3=plt.subplot(1,3,3)
-# plt.plot(omega,fai3)
-# # plt.plot(omega_d,fai3_new)
-# plt.title("Third order dispersion")
-# plt.xlabel("angular frequency ω (rad/s)")
-# plt.ylabel("The third order derivative of φ(ω)")
-# plt.axhline(fai3[int(len(fai3)/2)], color = 'black', linewidth = 1)
-# print("3rd order dispersion at the center wavelength:",fai3[int(len(fai3)/2)])
+plt.figure()
+ax1=plt.subplot(1,3,1)
+plt.scatter(omega,fai,label="φ(ω)")
+plt.plot(omega,fai_new,label="φ(ω)")
+plt.title("Relationship of phase with angular frequency φ(ω)")
+plt.xlabel("angular frequency ω (rad/s)")
+plt.ylabel("wave phase φ (rad)")
+plt.axhline(fai[int(len(fai)/2)], color = 'black', linewidth = 1)
+ax2=plt.subplot(1,3,2)
+plt.plot(omega,fai2)
+# omega_d = omega
+# del omega_d[0]
+# del omega_d[-1]
+# plt.plot(omega_d,fai2_new)
+plt.title("Group delay dispersion")
+plt.xlabel("angular frequency ω (rad/s)")
+plt.ylabel("The second order derivative of φ(ω)")
+plt.axhline(fai2[int(len(fai2)/2)], color = 'black', linewidth = 1)
+print("Group delay dispersion at the center wavelength:",fai2[int(len(fai2)/2)])
+
+ax3=plt.subplot(1,3,3)
+plt.plot(omega,fai3)
+# plt.plot(omega_d,fai3_new)
+plt.title("Third order dispersion")
+plt.xlabel("angular frequency ω (rad/s)")
+plt.ylabel("The third order derivative of φ(ω)")
+plt.axhline(fai3[int(len(fai3)/2)], color = 'black', linewidth = 1)
+print("3rd order dispersion at the center wavelength:",fai3[int(len(fai3)/2)])
 
 
 # # Stretcher.draw_beams()

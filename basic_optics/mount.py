@@ -12,6 +12,7 @@ from ..freecad_models.freecad_model_grating import grating_mount
 from .geom_object import Geom_Object, rotation_matrix
 from .post import Post_and_holder
 from ..freecad_models.freecad_model_mounts import draw_post,draw_post_holder,draw_post_base,draw_1inch_post,draw_large_post,model_mirror_holder
+# from .mirror import Mirror
 
 DEFALUT_POST_COLOR = (0.8,0.8,0.8)
 DEFALUT_HOLDER_COLOR = (0.2,0.2,0.2)
@@ -496,8 +497,8 @@ class Post_Marker(Unit_Mount):
   def update_draw_dict(self):
     super().update_draw_dict()
     self.draw_dict["h1"] = self.h1
-    self.draw_dict["h2"] = (self.h1[0]+75,self.h1[1])
-    self.draw_dict["h3"] = (self.h1[0]+75,self.h1[1]+75)
+    self.draw_dict["h2"] = (self.h1[0]+(25*self.size),self.h1[1])
+    self.draw_dict["h3"] = (self.h1[0]+(25*self.size),self.h1[1]+(25*self.size))
     self.draw_dict["h4"] = (self.h1[0],self.h1[1]+75)
     print(self.name," holes' pos=",self.h1,(self.h1[0]+(25*self.size),self.h1[1]),
           (self.h1[0]+(25*self.size),self.h1[1]+(25*self.size)),
@@ -541,16 +542,11 @@ class Adaptive_Angular_Mount(Unit_Mount):
       self.docking_obj.normal = self.normal
     super().set_axes(new_axes)
     
-  # def _pos_changed(self, old_pos, new_pos):
-  #   self._rearange_subobjects_pos( old_pos, new_pos, [self.docking_obj])
-  
-  # def _axes_changed(self, old_axes, new_axes):
-  #   self._rearange_subobjects_axes( old_axes, new_axes, [self.docking_obj])
-  
   # def reverse(self):
   #   x,y,z = self.get_coordinate_system()
   #   self.rotate(z, np.pi)
   #   self.pos += x * self.element_thickness
+    
 
 # class Special_mount(Unit_Mount):
 #   """
