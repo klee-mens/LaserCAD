@@ -63,8 +63,64 @@ class Grating(Opt_Element):
     smm = Grating_Mount(height=self.height,thickness=self.thickness)
     smm.set_geom(self.get_geom())
     self.Mount = smm
+  
+  def angle_of_incidence(self, ray=Ray()):
+    """
+    calulates the AOI of an incident or outgoing ray
+    The angle is defined as the angle to the normal of the grating, the ray
+    is projected in a plane of the grating normal and the grating vector 
+    (which is perpendicular to its lines/grooves)
 
+    Parameters
+    ----------
+    ray : Ray
+      incident or outgoing ray
 
+    Returns
+    -------
+    anlge in radiants, can be between -pi/2 to plus pi/2
+    """
+    xvec, yvec, zvec = self.get_coordinate_system()
+    rx = np.sum( ray.normal * xvec )
+    ry = np.sum( ray.normal * yvec )
+    # rz = np.sum( ray.normal * zvec )
+    return np.arctan(ry / rx) # only in plane with normal and grat vector (perp to lines)
+
+  def matrix(self, inray=Ray()):
+    # optical matrix, see https://www.brown.edu/research/labs/mittleman/sites/brown.edu.research.labs.mittleman/files/uploads/lecture11.pdf
+    omatrix = np.eye(2)
+    angleIN = self.angle_of_incidence(inray)
+    try:
+      outray = self.next_ray(inray)
+    except:
+      outray = Ray()
+      print("Irgendwas bei Matrix Gitter Berechnung falsch gelaufen")
+    angleOUT = self.angle_of_incidence(outray)
+    A = np.cos(angleOUT) / np.cos(angleIN)
+    A *= -1 #??? Steht so in den Folien    
+    omatrix[0,0] = A
+    omatrix[1,1] = 1/A
+    return omatrix
+  
+  def kostenbauder(self, inray=Ray()):
+    # kostenbauder matrix, see https://www.brown.edu/research/labs/mittleman/sites/brown.edu.research.labs.mittleman/files/uploads/lecture11.pdf
+    kmatrix = np.eye(4)
+    angleIN = self.angle_of_incidence(inray)
+    try:
+      outray = self.next_ray(inray)
+    except:
+      outray = Ray()
+      print("Irgendwas bei Matrix Gitter Berechnung falsch gelaufen")
+    angleOUT = self.angle_of_incidence(outray)
+    A = np.cos(angleOUT) / np.cos(angleIN)
+    A *= -1 #??? Steht so in den Folien
+    c = 3e8 * 1e3 # speed of light in mm / s
+    
+    kmatrix[0,0] = A
+    kmatrix[1,1] = 1/A
+    kmatrix[1,3] = inray.wavelength * (np.sin(angleOUT) - np.sin(angleIN)) / (c * np.cos(angleOUT))
+    kmatrix[2,0] = (np.sin(angleIN) - np.sin(angleOUT)) / (c * np.cos(angleIN))
+    return kmatrix
 
 def grating_test1():
   grat = Grating()

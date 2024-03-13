@@ -146,12 +146,39 @@ class Composition(Geom_Object):
     for ind in self._sequence:
       counter += 1
       B = self._optical_axis[counter].length
-      M = self._elements[ind]._matrix
+      M = self._elements[ind].matrix(inray = self._optical_axis[counter])
       self._matrix = np.matmul(np.array([[1,B], [0,1]]), self._matrix )
       self._matrix = np.matmul(M, self._matrix )
+      
     self._matrix = np.matmul(np.array([[1,self._last_prop], [0,1]]), self._matrix ) #last propagation
-
     return np.array(self._matrix)
+  
+  def kostenbauder(self):
+    """
+    computes the optical matrix of the system
+    each iteration consists of a propagation given by the length of the nth
+    ray of the optical_axis followed by the matrix multiplication with the
+    seq[n] element
+
+    Returns the ABCD-matrix
+    """
+    self._kostenbauder = np.eye(4)
+    self.recompute_optical_axis()
+    counter = -1
+    for ind in self._sequence:
+      counter += 1
+      B = self._optical_axis[counter].length
+      moment_propa = np.eye(4)
+      moment_propa[0,1] = B
+      M = self._elements[ind].kostenbauder(inray = self._optical_axis[counter])
+      
+      self._kostenbauder = np.matmul( moment_propa, self._kostenbauder )
+      self._kostenbauder = np.matmul( M, self._kostenbauder )
+      
+    last_propa = np.eye(4)
+    last_propa[0,1] = self._last_prop
+    self._kostenbauder = np.matmul( last_propa, self._kostenbauder ) #last propagation
+    return np.array(self._kostenbauder)
 
   def get_sequence(self):
     return list(self._sequence)
@@ -179,6 +206,8 @@ class Composition(Geom_Object):
       self._beams = beamlist
     return beamlist
 
+  def optical_path_length(self):
+    return sum([ray.length for ray in self._optical_axis])
 
   def draw_elements(self):
     self.__init_parts()
