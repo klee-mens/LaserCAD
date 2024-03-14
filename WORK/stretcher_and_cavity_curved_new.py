@@ -292,20 +292,21 @@ def cavity_and_stretcher(C_radius = 8000,vertical_mat=True,want_to_draw=True,rou
   TFP1.draw_dict["thickness"] = 2
   Lam_Plane1=Lambda_Plate()
   Lam_Plane1.pos=TFP1.pos+(50,0,0)
+  relative_radius = 2/3
   if vertical_mat:
     # Matrix_fixing_Mirror1 = Cylindrical_Mirror(radius=Radius*3/2)
-    Matrix_fixing_Mirror1 = Curved_Mirror(radius=Radius*3/2)
+    Matrix_fixing_Mirror1 = Curved_Mirror(radius=Radius*relative_radius)
     Matrix_fixing_Mirror1.pos=p0+(600,0,-10)
   else:
     # Matrix_fixing_Mirror1 = Cylindrical_Mirror1(radius=Radius*3/2)
-    Matrix_fixing_Mirror1 = Curved_Mirror(radius=Radius*3/2)
+    Matrix_fixing_Mirror1 = Curved_Mirror(radius=Radius*relative_radius)
     Matrix_fixing_Mirror1.pos=p0+(600,0,-10)
   # Matrix_fixing_Mirror1.normal=(1,0,0)
   Matrix_fixing_Mirror1.rotate((1,0,0), np.pi/2)
   # Matrix_fixing_Mirror2 = Mirror(pos=Matrix_fixing_Mirror1.pos-(Radius*3/4-0.083,0,11))
   Matrix_fixing_Mirror2 = Mirror()
   Matrix_fixing_Mirror2.Mount = Composed_Mount(unit_model_list=["KS1","1inch_post"])
-  Matrix_fixing_Mirror2.pos=Matrix_fixing_Mirror1.pos-(Radius*3/4,0,10.5)
+  Matrix_fixing_Mirror2.pos=Matrix_fixing_Mirror1.pos-(Radius*relative_radius/2,0,10.5)
   Matrix_fixing_Mirror2.normal=(-1,0,0)
   cavity_mirror1 = Mirror()
   cavity_mirror1.pos = TFP1.pos -(0,50,0)
@@ -442,8 +443,8 @@ def cavity_and_stretcher(C_radius = 8000,vertical_mat=True,want_to_draw=True,rou
       diff_hor.append(diff_R_hor)
       roundtrip_group.append(n//27+1)
       # roundtrip_group.append(n//18+1)
-      if max_diff<diff_R_hor: #and n>roundtrip/2:
-        max_diff = diff_R_hor
+      if max_diff<diff_R_ver: #and n>roundtrip/2:
+        max_diff = diff_R_ver
         max_roundtrip = n//27+1
         # max_roundtrip = n//18+1
     
@@ -537,6 +538,9 @@ def Cal_matrix(Comp=Composition()):
     # print(counter)
     # print(B)
     # print(M)
+    if type(Comp._elements[ind]) == Grating:
+      M = Comp._elements[ind].matrix(inray=Comp._beams[counter].get_all_rays()[0])
+      # print(M)
     Comp._matrix = np.matmul(np.array([[1,B], [0,1]]), Comp._matrix )
     Comp._matrix = np.matmul(M, Comp._matrix )
     # print(Comp._matrix)
@@ -596,8 +600,8 @@ for i in range(-100,-210,-10):
 # plt.plot(wavels*1E6,max_R_S)
 plt.legend(legend,loc = 'upper right')
 plt.xlabel("wavelength (nm)")
-plt.ylabel("maximun horizontal radius(mm)")
-# plt.ylabel("maximun vertial radius(mm)")
+# plt.ylabel("maximun horizontal radius(mm)")
+plt.ylabel("maximun vertial radius(mm)")
 plt.show()
 # -----------------------------------------------------------------------------
 
