@@ -97,6 +97,7 @@ class Grating(Opt_Element):
       print("Irgendwas bei Matrix Gitter Berechnung falsch gelaufen")
     angleOUT = self.angle_of_incidence(outray)
     A = np.cos(angleOUT) / np.cos(angleIN)
+    # A = np.sin(angleOUT) / np.sin(angleIN)
     A *= 1 #??? Steht so in den Folien    
     omatrix[0,0] = A
     omatrix[1,1] = 1/A
