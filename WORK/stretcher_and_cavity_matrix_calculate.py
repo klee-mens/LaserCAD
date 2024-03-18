@@ -288,7 +288,10 @@ def cavity_and_stretcher(C_radius = 8000,vertical_mat=True,want_to_draw=True,rou
   TFP1.draw_dict["thickness"] = 2
   Lam_Plane1=Lambda_Plate()
   Lam_Plane1.pos=TFP1.pos+(50,0,0)
-  relative_radius = 2/3
+  # relative_radius = 2/3
+  relative_radius = 1.36
+  # relative_radius = 1.37
+  # relative_radius = 0.6801591070918601
   if vertical_mat:
     Matrix_fixing_Mirror1 = Cylindrical_Mirror(radius=Radius*relative_radius)
     Matrix_fixing_Mirror1.pos=p0+(600,0,-10)
@@ -296,8 +299,9 @@ def cavity_and_stretcher(C_radius = 8000,vertical_mat=True,want_to_draw=True,rou
     Matrix_fixing_Mirror1 = Cylindrical_Mirror1(radius=Radius*relative_radius)
     Matrix_fixing_Mirror1.pos=p0+(600,0,-10)
   Matrix_fixing_Mirror1.normal=(1,0,0)
-  Matrix_fixing_Mirror1 = Mirror()
-  Matrix_fixing_Mirror1.pos=p0+(600,0,-10)
+  # Matrix_fixing_Mirror1 = Mirror()
+  # Matrix_fixing_Mirror1.pos=p0+(600,0,-10)
+  
   Matrix_fixing_Mirror1.rotate((1,0,0), np.pi/2)
   # Matrix_fixing_Mirror2 = Mirror(pos=Matrix_fixing_Mirror1.pos-(Radius*3/4-0.083,0,11))
   Matrix_fixing_Mirror2 = Mirror()
@@ -521,10 +525,10 @@ def cavity_and_stretcher(C_radius = 8000,vertical_mat=True,want_to_draw=True,rou
     ip.spot_diagram(Comp._beams[-1],aberration_analysis=False)
   if freecad_da:
     setview()
-  return Cal_matrix(Comp=Comp)
+  return Cal_matrix(Comp=Comp,vertical_mat=vertical_mat)
   # return Comp.matrix()
 
-def Cal_matrix(Comp=Composition()):
+def Cal_matrix(Comp=Composition(),vertical_mat = True):
   """
   computes the optical matrix of the system
   each iteration consists of a propagation given by the length of the nth
@@ -544,7 +548,10 @@ def Cal_matrix(Comp=Composition()):
     # print(counter)
     # print(B)
     if type(Comp._elements[ind]) == Grating:
-      M = Comp._elements[ind].matrix(inray=Comp._beams[counter].get_all_rays()[0])
+      if not vertical_mat:
+        M = Comp._elements[ind].matrix(inray=Comp._beams[counter].get_all_rays()[0])
+      else:
+        M = np.eye(2)
       # print(M)
     Comp._matrix = np.matmul(np.array([[1,B], [0,1]]), Comp._matrix )
     Comp._matrix = np.matmul(M, Comp._matrix )
