@@ -338,7 +338,7 @@ a.pos = (Grat1.pos+Grat4.pos)/2
 a.pos-= (0,15,a.pos[2]-Plane_height+23)
 a.normal = (0,1,0)
 a.draw_dict["stl_file"]=thisfolder+"misc_meshes/XR25C.stl"
-a.draw()
+# a.draw()
 b = Table()
 b.pos = (Grat1.pos+Grat4.pos)/2
 b.pos-= (0,0,b.pos[2])
@@ -347,7 +347,7 @@ b.width = 150
 b.height = Plane_height-23
 b.pos -= (b.length/2-10,b.width/2,0)
 b.draw_dict["color"]= (0.2,0.2,0.2)
-b.draw()
+# b.draw()
 
 # c = Table()
 # c.pos = (Grat1.pos+Grat4.pos)/2
@@ -373,8 +373,8 @@ ip_s.spot_diagram(Stretcher._beams[-1])
 ip.set_geom(Stretcher.get_geom())
 ip.spot_diagram(Stretcher._beams[0])
 # ip.spot_diagram(Stretcher._beams[14],aberration_analysis=True)
-ip.draw()
-ip_s.draw()
+# ip.draw()
+# ip_s.draw()
 pathlength = {}
 for ii in range(Stretcher._beams[0]._ray_count):
   wavelength = Stretcher._beams[0].get_all_rays()[ii].wavelength

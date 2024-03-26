@@ -31,7 +31,7 @@ def Make_Stretcher_chromeo():
   seperation_angle = 10 /180 *np.pi # sep between in and outgoing middle ray
   # incident_angle = seperation_angle + reflection_angle
   grating_const = 1/450 # in 1/mm
-  seperation = 50 # difference grating position und radius_concave
+  seperation = 135 # difference grating position und radius_concave
   lambda_mid = 2400e-9 * 1e3 # central wave length in mm
   delta_lamda = 200e-9*1e3 # full bandwith in mm
   number_of_rays = 20
