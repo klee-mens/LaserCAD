@@ -433,18 +433,18 @@ def cavity_and_stretcher(C_radius = 8000,vertical_mat=True,want_to_draw=True,rou
       intersection_point_inner = beam.get_all_rays()[0].intersection(ip)
       intersection_point_hor = beam.get_all_rays()[4].intersection(ip)
       diff_new = intersection_point_ver - ip.pos
-      diff_R_ver = np.sqrt(diff_new[1]**2+diff_new[2]**2)
+      diff_R_ver = np.sqrt(diff_new[0]**2+diff_new[2]**2)
       diff_out.append(diff_R_ver)
       diff_new = intersection_point_inner - ip.pos
-      diff_R = np.sqrt(diff_new[1]**2+diff_new[2]**2)
+      diff_R = np.sqrt(diff_new[0]**2+diff_new[2]**2)
       diff.append(diff_R)
       diff_new = intersection_point_hor - ip.pos
-      diff_R_hor = np.sqrt(diff_new[1]**2+diff_new[2]**2)
+      diff_R_hor = np.sqrt(diff_new[0]**2+diff_new[2]**2)
       diff_hor.append(diff_R_hor)
       roundtrip_group.append(n//27+1)
       # roundtrip_group.append(n//18+1)
-      if max_diff<diff_R_ver: #and n>roundtrip/2:
-        max_diff = diff_R_ver
+      if max_diff<diff_R_hor: #and n>roundtrip/2:
+        max_diff = diff_R_hor
         max_roundtrip = n//27+1
         # max_roundtrip = n//18+1
     
@@ -469,7 +469,7 @@ def cavity_and_stretcher(C_radius = 8000,vertical_mat=True,want_to_draw=True,rou
     # fig.savefig(os.path.join("C:/Users/12816/Desktop/research/Stretcher and Cavity1/another ip.pos/lsR=0.25",fig_name), bbox_inches='tight', dpi=150)
     plt.show()
     
-    # return max_diff
+    return max_diff
   elif Comp._lightsource == centerlightsource:
     # ip.spot_diagram(Comp._beams[-1],aberration_analysis=True)
     ip.spot_diagram(Comp._beams[-1],aberration_analysis=True)
@@ -548,7 +548,7 @@ def Cal_matrix(Comp=Composition()):
   # Comp._matrix = np.matmul(np.array([[1,Comp._last_prop], [0,1]]), Comp._matrix ) #last propagation
   return np.array(Comp._matrix)
 
-roundtrip = 1
+roundtrip = 50
 centerlamda = 1030E-6
 C_radius = 8000
 StripeM_shift = 0.07
@@ -561,26 +561,26 @@ ls = "CB"
 # print(mat1)
 
 #  maximun deviation with different wavelength --------------------------------
-# lam_mid = 1030E-6
-# delta_lamda = 120E-6
-# number_of_rays = 5
-# wavels = np.linspace(lam_mid-delta_lamda/2, lam_mid+delta_lamda/2, number_of_rays)
-# plt.figure()
-# max_R = []
-# for wavel in wavels:
-#   max_R.append(cavity_and_stretcher(C_radius=C_radius,want_to_draw=False,roundtrip = roundtrip,centerlamda=wavel,s_shift=0))
-# legend = []
-# legend.append('maximun radius')
-# plt.plot(wavels*1E6,max_R)
+lam_mid = 1030E-6
+delta_lamda = 60E-6
+number_of_rays = 5
+wavels = np.linspace(lam_mid-delta_lamda/2, lam_mid+delta_lamda/2, number_of_rays)
+plt.figure()
+max_R = []
+for wavel in wavels:
+  max_R.append(cavity_and_stretcher(C_radius=C_radius,want_to_draw=False,roundtrip = roundtrip,centerlamda=wavel,s_shift=0))
+legend = []
+legend.append('maximun radius')
+plt.plot(wavels*1E6,max_R)
 # -----------------------------------------------------------------------------
 
 # maximun deviation with small movement ---------------------------------------
-# for i in range(-100,-210,-10):
-#   max_R_S = []
-#   for wavel in wavels:
-#     max_R_S.append(cavity_and_stretcher(want_to_draw=False,roundtrip = roundtrip,centerlamda=wavel,s_shift=i/1000))
-#   plt.plot(wavels*1E6,max_R_S)
-#   legend.append('maximun deviation with small movement '+str(i/1000))
+for i in range(-110,-210,-10):
+  max_R_S = []
+  for wavel in wavels:
+    max_R_S.append(cavity_and_stretcher(want_to_draw=False,roundtrip = roundtrip,centerlamda=wavel,s_shift=i/1000))
+  plt.plot(wavels*1E6,max_R_S)
+  legend.append('maximun deviation with small movement '+str(i/1000))
 
 # # max_R_S = []
 # # for wavel in wavels:
@@ -597,12 +597,12 @@ ls = "CB"
 # # legend.append('maximun deviation with small movement '+str(0.14)+ 'mm')
 
 
-# # plt.plot(wavels*1E6,max_R_S)
-# plt.legend(legend,loc = 'upper right')
-# plt.xlabel("wavelength (nm)")
-# # plt.ylabel("maximun horizontal radius(mm)")
+# plt.plot(wavels*1E6,max_R_S)
+plt.legend(legend,loc = 'upper right')
+plt.xlabel("wavelength (nm)")
+plt.ylabel("maximun horizontal radius(mm)")
 # plt.ylabel("maximun vertial radius(mm)")
-# plt.show()
+plt.show()
 # -----------------------------------------------------------------------------
 
 # mat2 = cavity_and_stretcher(C_radius=C_radius,vertical_mat=False,want_to_draw=False,roundtrip=roundtrip,centerlamda=centerlamda,s_shift=StripeM_shift,ls=ls)

@@ -61,8 +61,9 @@ Radius = 1000
 Aperture_concav = 6*25.4
 h_StripeM = 5
 gamma = 7.475916410316995 /180 *np.pi #AOI = 36.5
+gamma = 0 /180 *np.pi #AOI = 36.5
 grat_const = 1/450
-seperation = 100 
+seperation = 100
 lam_mid = 2400e-9 * 1e3 
 delta_lamda = 250e-9*1e3 
 number_of_rays = 20

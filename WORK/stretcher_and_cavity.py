@@ -413,11 +413,10 @@ def cavity_and_stretcher(C_radius = 8000,vertical_mat=True,want_to_draw=True,rou
     diff_hor = []
     roundtrip_group = []
     max_diff = 0
-    for n in range(0,27*roundtrip,27):
+    for n in range(0,27*roundtrip+1,27):
     # for n in range(18,27*roundtrip,27):
     # for n in range(17,18*roundtrip,18):
       beam = Comp._beams[n]
-      # print(beam)
       rayss=beam.get_all_rays()
       # for ray in rayss:
       #   intersection_point =  ray.intersection(ip)
@@ -426,18 +425,18 @@ def cavity_and_stretcher(C_radius = 8000,vertical_mat=True,want_to_draw=True,rou
       intersection_point_inner = beam.get_all_rays()[0].intersection(ip)
       intersection_point_hor = beam.get_all_rays()[4].intersection(ip)
       diff_new = intersection_point_ver - ip.pos
-      diff_R_ver = np.sqrt(diff_new[1]**2+diff_new[2]**2)
+      diff_R_ver = np.sqrt(diff_new[0]**2+diff_new[2]**2)
       diff_out.append(diff_R_ver)
       diff_new = intersection_point_inner - ip.pos
-      diff_R = np.sqrt(diff_new[1]**2+diff_new[2]**2)
+      diff_R = np.sqrt(diff_new[0]**2+diff_new[2]**2)
       diff.append(diff_R)
       diff_new = intersection_point_hor - ip.pos
-      diff_R_hor = np.sqrt(diff_new[1]**2+diff_new[2]**2)
+      diff_R_hor = np.sqrt(diff_new[0]**2+diff_new[2]**2)
       diff_hor.append(diff_R_hor)
       roundtrip_group.append(n//27+1)
       # roundtrip_group.append(n//18+1)
-      if max_diff<diff_R_ver: #and n>roundtrip/2:
-        max_diff = diff_R_ver
+      if max_diff<diff_R_hor: #and n>roundtrip/2:
+        max_diff = diff_R_hor
         max_roundtrip = n//27+1
         # max_roundtrip = n//18+1
     
@@ -593,8 +592,8 @@ for i in range(10,110,10):
 # plt.plot(wavels*1E6,max_R_S)
 plt.legend(legend,loc = 'upper right')
 plt.xlabel("wavelength (nm)")
-# plt.ylabel("maximun horizontal radius(mm)")
-plt.ylabel("maximun vertical radius(mm)")
+plt.ylabel("maximun horizontal radius(mm)")
+# plt.ylabel("maximun vertical radius(mm)")
 plt.show()
 # -----------------------------------------------------------------------------
 
