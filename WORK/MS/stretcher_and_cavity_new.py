@@ -49,10 +49,10 @@ Radius = 600 #Radius des großen Konkavspiegels
 Aperture_concav = 100
 h_StripeM = 10 #Höhe des Streifenspiegels
 # gamma = 33.4906043205826 /180 *np.pi # Seperationswinkel zwischen einfallenden und Mittelpunktsstrahl; Alpha = Gamma + Beta
-# gamma = 18.8239722389914963 /180 *np.pi #AOI = 60
-gamma = 8.3254033412311523321136 /180 *np.pi #AOI = 54
+gamma = 18.8239722389914963 /180 *np.pi #AOI = 60
+# gamma = 8.3254033412311523321136 /180 *np.pi #AOI = 54
 grat_const = 1/1480 # Gitterkonstante in 1/mm
-seperation = 75 # Differenz zwischen Gratingposition und Radius
+seperation = 143.75 # Differenz zwischen Gratingposition und Radius
 # lam_mid = 1030e-9 * 1e3 # Zentralwellenlänge in mm
 lam_mid = centerlamda # Zentralwellenlänge in mm
 lam_mid_grating = 1030E-6 # Zentralwellenlänge in mm
@@ -69,7 +69,7 @@ c = np.cos(gamma)
 a = v/2
 b = np.sqrt(a**2 - (v**2 - s**2)/(2*(1+c)))
 sinB = a - b
-print("angle=",np.arcsin(np.sin(gamma+np.arcsin(sinB)))*180/np.pi)
+print("angle=",(gamma+np.arcsin(sinB))*180/np.pi)
 
 if vertical_mat:
   Concav1 = Cylindrical_Mirror1(radius=Radius,name="Concav_Mirror")
@@ -191,7 +191,7 @@ rays = []
 rays.append(ray1)
 
 nfm1 = - ray0.normal
-pfm1 = Grat.pos + 300 * nfm1 + (0,0,h_StripeM/2 + safety_to_StripeM + periscope_distance)
+pfm1 = Grat.pos + 150 * nfm1 + (0,0,h_StripeM/2 + safety_to_StripeM + periscope_distance)
 
 # roof = Make_RoofTop_Mirror(height=periscope_distance,up=False)
 roof = Make_Periscope(height=periscope_distance, up=False, backwards=True)
@@ -206,7 +206,7 @@ pure_cosmetic.pos = (m1.pos+m2.pos)/2
 pure_cosmetic.normal = (m1.normal+m2.normal)/2
 pure_cosmetic.draw_dict["model_type"] = "Rooftop"
 pure_cosmetic.Mount= Unit_Mount("dont_draw")
-pure_cosmetic.draw_dict["length"] = 24
+pure_cosmetic.draw_dict["length"] = 28
 pure_cosmetic.draw_dict["l_height"] = 15
 
 
@@ -227,7 +227,7 @@ Stretcher.add_fixed_elm(Concav3)#3
 Stretcher.add_supcomposition_fixed(roof) #4,5
 Stretcher.add_fixed_elm(Concav2)#6
 Stretcher.add_fixed_elm(Concav1)#7
-Stretcher.add_fixed_elm(pure_cosmetic)#8
+# Stretcher.add_fixed_elm(pure_cosmetic)#8
 seq = [0,1,2,3,0,4,5,0,6,2,7,0]
 Stretcher.set_sequence(seq)
 Stretcher.recompute_optical_axis()
@@ -235,7 +235,6 @@ Stretcher.propagate(250+44)
 
 Stretcher.pos += (0,0,Plane_height+100)
 for ii in Stretcher._elements:
-  print(ii)
   if type(ii.Mount) != Unit_Mount:
     ii.Mount.mount_list[-1]._lower_limit = Plane_height
 
@@ -277,6 +276,8 @@ CM = Curved_Mirror(phi=178,radius=R_CM)
 Amp.add_on_axis(CM) #2
 Amp.propagate(d_CM_M2)
 M2 = Mirror(phi = 92)
+M2.Mount = Composed_Mount(unit_model_list=["MH25_KMSS","1inch_post"])
+M2.Mount.set_geom(M2.get_geom())
 Amp.add_on_axis(M2) #3
 Amp.propagate(d_M2_p)
 Amp.recompute_optical_axis()
@@ -288,7 +289,7 @@ peri1.set_geom(peri_geom)
 # Amp.add_supcomposition_on_axis(peri1)
 
 Amp.propagate(d_p)
-Amp.recompute_optical_axis()
+# Amp.recompute_optical_axis()
 print(Amp.last_geom())
 peri4 = Mirror()
 peri4.set_geom(Amp.last_geom())
@@ -299,13 +300,13 @@ peri4.set_geom(Amp.last_geom())
 # Amp.add_on_axis(M_peri1) #4
 # Amp.propagate(Plane_height-2)
 
-# M_peri2 = Mirror()
-# M_peri2.set_geom(M_peri1.get_geom())
-# M_peri2.pos += (0, 0, Plane_height-2)
-# M_peri2.normal = -M_peri1.normal
-# Amp.add_fixed_elm(M_peri2) #5
-# Amp.propagate(d_p/2)
-# Amp.recompute_optical_axis()
+# M_peri2 = Mirror(theta=-90)
+# # M_peri2.set_geom(M_peri1.get_geom())
+# # M_peri2.pos += (0, 0, Plane_height-2)
+# # M_peri2.normal = -M_peri1.normal
+# Amp.add_on_axis(M_peri2) #5
+# Amp.propagate(d_p)
+# # Amp.recompute_optical_axis()
 # M_peri3 = Mirror(theta=-90)
 # Amp.add_on_axis(M_peri3) #6
 
@@ -317,6 +318,8 @@ peri4.set_geom(Amp.last_geom())
 Amp.propagate(d_M2_p)
 M3 = Mirror(phi = 92)
 Amp.add_on_axis(M3) #8
+M3.Mount = Composed_Mount(unit_model_list=["MH25_KMSS","1inch_post"])
+M3.Mount.set_geom(M3.get_geom())
 Crys = Crystal(width=7.5,model="round",thickness=12.5,n=1.5)
 Amp.propagate(d_M3_Crys)
 Amp.add_on_axis(Crys) #9
@@ -342,29 +345,61 @@ Stretcher.set_geom(peri_geom)
 Stretcher.pos += (0,0,Plane_height)
 Stretcher.normal = -Stretcher.normal
 
-Amp.draw()
-Stretcher.draw()
-
 peri2 = Mirror()
 peri2.aperture = 25.4/2
 peri2.set_geom(Stretcher.get_geom())
 peri3 = Mirror()
-peri3.pos = peri4.pos +(0,0,Plane_height+10)
-
+peri3.pos = peri4.pos +(0,0,Plane_height+12)
+# peri3.pos = Stretcher.last_geom()[0]
 
 p0=M2.pos
 p1=peri2.pos
 peri1.set_normal_with_2_points(p0, p1)
 p0=peri1.pos 
-p1=Grat.pos
+p1=Grat.pos +(0, 0, -h_StripeM/2 - safety_to_StripeM - periscope_distance)
 peri2.set_normal_with_2_points(p0, p1)
-p0 = Grat.pos + (0,0,periscope_distance)
+p0 = Grat.pos + (0, 0, -h_StripeM/2 - safety_to_StripeM)
 p1 = peri4.pos
 peri3.set_normal_with_2_points(p0, p1)
 p0 = peri3.pos
 p1 = M3.pos
 peri4.set_normal_with_2_points(p0, p1)
-peri1.draw()
-peri2.draw()
-peri3.draw()
-peri4.draw()
+peri1.Mount = peri2.Mount = peri3.Mount = peri4.Mount = Unit_Mount("dont_draw")
+# Amp.draw()
+# Stretcher.draw()
+# peri1.draw()
+# peri2.draw()
+# peri3.draw()
+# peri4.draw()
+
+Comp= Composition()
+if ls == "CB":
+  Comp.set_light_source(centerlightsource)
+elif ls == "CR":
+  Comp.set_light_source(centerray)
+else:
+  Comp.set_light_source(lightsource)
+Comp.add_fixed_elm(Lam1)
+Comp.add_fixed_elm(PC)
+Comp.add_fixed_elm(TFP2) #0
+Comp.add_fixed_elm(M1) #1
+Comp.add_fixed_elm(CM) #2
+Comp.add_fixed_elm(M2) #3
+Comp.add_fixed_elm(peri1) #4
+Comp.add_fixed_elm(peri2) #5
+for element in Stretcher._elements:
+  Comp.add_fixed_elm(element) #6-13
+Comp.add_fixed_elm(peri3) #14
+Comp.add_fixed_elm(peri4) #15
+Comp.add_fixed_elm(M3) #16
+Comp.add_fixed_elm(Crys) #17
+Comp.add_fixed_elm(M4) #18
+Comp.add_fixed_elm(TFP1) #19
+pure_cosmetic.pos = (m1.pos+m2.pos)/2
+pure_cosmetic.normal = (m1.normal+m2.normal)/2
+Comp.add_fixed_elm(pure_cosmetic) #20
+seq = [0,1,2,3,4,5, 6,7,8,9,6,10,11,6,12,8,13,6, 14,15,16,18,19]
+Comp.set_sequence(seq)
+Comp.recompute_optical_axis()
+Comp.propagate(500)
+Comp.draw()

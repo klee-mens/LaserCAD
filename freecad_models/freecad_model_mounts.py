@@ -1248,12 +1248,12 @@ def model_Post_Marker(name="marker", h1 = (0,0), h2 = (75,0), h3 = (75,75),
 def model_mirror_holder(name="mirror_holder",dia = 25.4,angle = 30,
                         color=DEFAULT_MOUNT_COLOR, geom = None,**kwargs):
   DOC = get_DOC()
-  print(angle)
+  # print(angle)
   reverse= False
   if angle<0:
     angle= -angle
     reverse=True
-  print(angle)
+  # print(angle)
   dia_l = int(dia/10+1)*10
   obj1 = DOC.addObject("Part::Cylinder", "Cylinder")
   obj1.Label = "Cylinder"
