@@ -75,13 +75,26 @@ def dont():
 # =============================================================================
 # Stretcher parameter
 # =============================================================================
+
+# def Make_Stretcher_chromeo():
+"""
+constructs an Offner Stretcher with an on axis helper composition
+Note: When drawing a rooftop mirror, we will draw apure_cosmetic mirror to
+confirm the position of the mount. The mirror's geom is the average of two
+flip mirror. And its aperture is the periscope_height.
+Returns
+-------
+TYPE Composition
+  den gesamten, geraytracten Strecker...
+"""
+# defining parameters
 radius_concave = 1000 #radius of the big concave sphere
 aperture_concave = 6 * inch
 height_stripe_mirror = 10 #height of the stripe mirror in mm
 width_stripe_mirror = 75 # in mm
 seperation_angle = 10 /180 *np.pi # sep between in and outgoing middle ray
 # incident_angle = seperation_angle + reflection_angle
-grating_const = 1/450 # in 1/mm
+grating_const = 1/450 # in mm (450 lines per mm)
 seperation = 135 # difference grating position und radius_concave
 lambda_mid = 2400e-9 * 1e3 # central wave length in mm
 delta_lamda = 200e-9*1e3 # full bandwith in mm
@@ -89,154 +102,108 @@ number_of_rays = 20
 safety_to_stripe_mirror = 5 #distance first incomming ray to stripe_mirror in mm
 periscope_height = 15
 first_propagation = 20 # legnth of the first ray_bundle to flip mirror1 mm
-distance_flip_mirror1_grating = 300
+distance_flip_mirror1_grating = 300-85
 distance_roof_top_grating = 600
-#
 
-def Make_Stretcher_chromeo():
-  """
-  constructs an Offner Stretcher with an on axis helper composition
-  Note: When drawing a rooftop mirror, we will draw apure_cosmetic mirror to
-  confirm the position of the mount. The mirror's geom is the average of two
-  flip mirror. And its aperture is the periscope_height.
-  Returns
-  -------
-  TYPE Composition
-    den gesamten, geraytracten Strecker...
-  """
-  # defining parameters
-  radius_concave = 1000 #radius of the big concave sphere
-  aperture_concave = 6 * inch
-  height_stripe_mirror = 10 #height of the stripe mirror in mm
-  width_stripe_mirror = 75 # in mm
-  seperation_angle = 10 /180 *np.pi # sep between in and outgoing middle ray
-  # incident_angle = seperation_angle + reflection_angle
-  grating_const = 1/450 # in 1/mm
-  seperation = 135 # difference grating position und radius_concave
-  lambda_mid = 2400e-9 * 1e3 # central wave length in mm
-  delta_lamda = 200e-9*1e3 # full bandwith in mm
-  number_of_rays = 20
-  safety_to_stripe_mirror = 5 #distance first incomming ray to stripe_mirror in mm
-  periscope_height = 15
-  first_propagation = 20 # legnth of the first ray_bundle to flip mirror1 mm
-  distance_flip_mirror1_grating = 300-85
-  distance_roof_top_grating = 600
+# calculated parameters according to the grating equation
+v = lambda_mid/grating_const
+s = np.sin(seperation_angle)
+c = np.cos(seperation_angle)
+a = v/2
+b = np.sqrt(a**2 - (v**2 - s**2)/(2*(1+c)))
+sinB = a - b
+print(sinB)
+grating_normal = (np.sqrt(1-sinB**2), sinB, 0)
 
-  # calculated parameters according to the grating equation
-  v = lambda_mid/grating_const
-  s = np.sin(seperation_angle)
-  c = np.cos(seperation_angle)
-  a = v/2
-  b = np.sqrt(a**2 - (v**2 - s**2)/(2*(1+c)))
-  sinB = a - b
-  print(sinB)
-  grating_normal = (np.sqrt(1-sinB**2), sinB, 0)
+Concav = Curved_Mirror(radius=radius_concave, name="Concav_Mirror")
+Concav.aperture = aperture_concave
+Concav.set_mount_to_default()
 
-  Concav = Curved_Mirror(radius=radius_concave, name="Concav_Mirror")
-  Concav.aperture = aperture_concave
-  Concav.set_mount_to_default()
+StripeM = Stripe_mirror(radius= -radius_concave/2,thickness=25,  name="Stripe_Mirror")
+#Cosmetics
+StripeM.aperture = width_stripe_mirror
+StripeM.draw_dict["height"] = height_stripe_mirror
+StripeM.draw_dict["thickness"] = 25 # arbitrary
+# StripeM.thickness = 25
+StripeM.draw_dict["model_type"] = "Stripe"
 
-  StripeM = Stripe_mirror(radius= -radius_concave/2,thickness=25,  name="Stripe_Mirror")
-  #Cosmetics
-  StripeM.aperture = width_stripe_mirror
-  StripeM.draw_dict["height"] = height_stripe_mirror
-  StripeM.draw_dict["thickness"] = 25 # arbitrary
-  # StripeM.thickness = 25
-  StripeM.draw_dict["model_type"] = "Stripe"
+Grat = Grating(grat_const=grating_const, name="Gitter", order=-1)
 
-  Grat = Grating(grat_const=grating_const, name="Gitter", order=-1)
+Grat.normal = grating_normal
 
-  Grat.normal = grating_normal
+helper = Composition()
+helper_light_source = Beam(angle=0, wavelength=lambda_mid)
+helper.set_light_source(helper_light_source)
+#to adjust the wavelength of the oA
+helper.redefine_optical_axis(helper_light_source.inner_ray())
+helper.add_fixed_elm(Grat)
+helper.recompute_optical_axis()
+helper.propagate(radius_concave - seperation)
+helper.add_on_axis(Concav)
+helper.propagate(radius_concave/2)
+helper.add_on_axis(StripeM)
 
-  helper = Composition()
-  helper_light_source = Beam(angle=0, wavelength=lambda_mid)
-  helper.set_light_source(helper_light_source)
-  #to adjust the wavelength of the oA
-  helper.redefine_optical_axis(helper_light_source.inner_ray())
-  helper.add_fixed_elm(Grat)
-  helper.recompute_optical_axis()
-  helper.propagate(radius_concave - seperation)
-  helper.add_on_axis(Concav)
-  helper.propagate(radius_concave/2)
-  helper.add_on_axis(StripeM)
+# setting the lightsource as an bundle of different coulered rays
+lightsource = Beam(radius=0, angle=0)
+wavels = np.linspace(lambda_mid-delta_lamda/2, lambda_mid+delta_lamda/2, number_of_rays)
+rays = []
+cmap = plt.cm.gist_rainbow
+for wavel in wavels:
+  rn = Ray()
+  # rn.normal = vec
+  # rn.pos = pos0
+  rn.wavelength = wavel
+  x = 1-(wavel - lambda_mid + delta_lamda/2) / delta_lamda
+  rn.draw_dict["color"] = cmap( x )
+  rays.append(rn)
+mid_ray = Ray()
+mid_ray.wavelength = lambda_mid
+rays = [mid_ray] + rays
+lightsource.override_rays(rays)
+lightsource.draw_dict['model'] = "ray_group"
 
-  # setting the lightsource as an bundle of different coulered rays
-  lightsource = Beam(radius=0, angle=0)
-  wavels = np.linspace(lambda_mid-delta_lamda/2, lambda_mid+delta_lamda/2, number_of_rays)
-  rays = []
-  cmap = plt.cm.gist_rainbow
-  for wavel in wavels:
-    rn = Ray()
-    # rn.normal = vec
-    # rn.pos = pos0
-    rn.wavelength = wavel
-    x = 1-(wavel - lambda_mid + delta_lamda/2) / delta_lamda
-    rn.draw_dict["color"] = cmap( x )
-    rays.append(rn)
-  lightsource.override_rays(rays)
-  lightsource.draw_dict['model'] = "ray_group"
+# starting the real stretcher
+Stretcher = Composition(name="DerStrecker")
+Stretcher.set_light_source(lightsource)
+Stretcher.redefine_optical_axis(helper_light_source.inner_ray())
 
-  # starting the real stretcher
-  Stretcher = Composition(name="DerStrecker")
-  Stretcher.set_light_source(lightsource)
-  Stretcher.redefine_optical_axis(helper_light_source.inner_ray())
+Stretcher.propagate(first_propagation)
+FlipMirror_In_Out = Mirror(phi=100, name="FlipMirrorInOut")
 
-  Stretcher.propagate(first_propagation)
-  FlipMirror_In_Out = Mirror(phi=100, name="FlipMirrorInOut")
+mount=Composed_Mount()
+Mount1=Unit_Mount(model="MH25")
+Mount1.docking_obj.pos = Mount1.pos+(6.3,0,0)
+Mount1.docking_obj.normal = Mount1.normal
+Mount2=Unit_Mount(model="KMSS")
+mount.add(Mount1)
+mount.add(Mount2)
+FlipMirror_In_Out.mount = mount
+Stretcher.add_on_axis(FlipMirror_In_Out)
+FlipMirror_In_Out.pos += (0,0,-periscope_height/2)
+Stretcher.propagate(distance_flip_mirror1_grating)
 
-  mount=Composed_Mount()
-  Mount1=Unit_Mount(model="MH25")
-  Mount1.docking_obj.pos = Mount1.pos+(6.3,0,0)
-  Mount1.docking_obj.normal = Mount1.normal
-  Mount2=Unit_Mount(model="KMSS")
-  mount.add(Mount1)
-  mount.add(Mount2)
-  FlipMirror_In_Out.mount = mount
-  Stretcher.add_on_axis(FlipMirror_In_Out)
-  FlipMirror_In_Out.pos += (0,0,-periscope_height/2)
-  Stretcher.propagate(distance_flip_mirror1_grating)
+#adding the helper
+helper.set_geom(Stretcher.last_geom())
+helper.pos += (0,0, height_stripe_mirror/2 + safety_to_stripe_mirror)
+for element in helper._elements:
+  Stretcher.add_fixed_elm(element)
 
-  #adding the helper
-  helper.set_geom(Stretcher.last_geom())
-  helper.pos += (0,0, height_stripe_mirror/2 + safety_to_stripe_mirror)
-  for element in helper._elements:
-    Stretcher.add_fixed_elm(element)
+Stretcher.set_sequence([0,1,2,3,2,1])
+Stretcher.recompute_optical_axis()
 
-  Stretcher.set_sequence([0,1,2,3,2,1])
-  Stretcher.recompute_optical_axis()
+# adding the rooftop mirror and it's cosmetics
+Stretcher.propagate(distance_roof_top_grating)
+Stretcher.add_supcomposition_on_axis(Make_RoofTop_Mirror(height=periscope_height, up=False))
 
-  # adding the rooftop mirror and it's cosmetics
-  Stretcher.propagate(distance_roof_top_grating)
-  Stretcher.add_supcomposition_on_axis(Make_RoofTop_Mirror(height=periscope_height, up=False))
-  # RoofTop1 = Mirror(phi=0, theta=90)
-  # Stretcher.add_on_axis(RoofTop1)
-  # Stretcher.propagate(periscope_height)
-  # RoofTop2 = Mirror(phi=0, theta=90)
-  # Stretcher.add_on_axis(RoofTop2)
+# setting the final sequence and the last propagation for visualization
+# note that pure cosmetic (pos6) is not in the sequence
+Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0])
+Stretcher.recompute_optical_axis()
+Stretcher.propagate(100)
 
-  # RoofTop1.draw = dont
-  # RoofTop1.mount.elm_type = "dont_draw"
-  # RoofTop2.draw = dont
-  # RoofTop2.mount.elm_type = "dont_draw"
+  # return Stretcher
 
-  # pure_cosmetic = Rooftop_mirror(name="RoofTop_Mirror")
-  # pure_cosmetic.draw_dict["mount_type"] = "rooftop_mirror_mount"
-  # pure_cosmetic.pos = (RoofTop1.pos + RoofTop2.pos ) / 2
-  # pure_cosmetic.normal = (RoofTop1.normal + RoofTop2.normal ) / 2
-  # pure_cosmetic.aperture = periscope_height
-  # pure_cosmetic.draw_dict["model_type"] = "Rooftop"
-  # # pure_cosmetic.draw = dont
-  # Stretcher.add_fixed_elm(pure_cosmetic)
-
-  # setting the final sequence and the last propagation for visualization
-  # note that pure cosmetic (pos6) is not in the sequence
-  Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0])
-  Stretcher.recompute_optical_axis()
-  Stretcher.propagate(100)
-
-  return Stretcher
-
-Stretcher = Make_Stretcher_chromeo()
+# Stretcher = Make_Stretcher_chromeo()
 Stretcher.set_geom(seed_end_geom)
 
 
@@ -604,16 +571,27 @@ PulsePicker.draw()
 PulsePicker.draw_alignment_posts()
 Amplifier_I.draw()
 Pump.draw()
-# amp2.draw()
-# # BigPump.draw()
-# t=Table()
-# t.draw()
-# Compressor.draw()
+amp2.draw()
+BigPump.draw()
+t=Table()
+t.draw()
+Compressor.draw()
+
+
+# =============================================================================
+# Measured Coordinates on the Table (approx to unity m6 holes)
+# =============================================================================
+POS_SEED = np.array((25, 8, 0)) * 25
+POS_STRETCHER_END_MIRROR = np.array((33, 15, 0)) * 25
+POS_THULIUM_BIG_OUT = np.array((96, 11, 0)) * 25
+POS_THULIUM_SMALL_OUT = np.array((104, 49, 0)) * 25
+
+TABLE_MAX_COORDINATES = np.array((158, 58)) * 25
 
 # =============================================================================
 # breadboards
 # =============================================================================
-from LaserCAD.non_interactings import Breadboard
+# from LaserCAD.non_interactings import Breadboard
 # StartPos = (-700, -450, 0)
 # b1 = Breadboard()
 # b1.pos += StartPos
