@@ -200,7 +200,7 @@ def model_stripe_mirror(name="Stripe_Mirror", dia=75, Radius=250, thickness=25,
   return obj
 
 
-def model_rooftop_mirror(name="rooftop_mirror",dia=0, geom=None,l_height=35,length=90, **kwargs):
+def model_rooftop_mirror(name="rooftop_mirror",dia=0, geom=None,l_height=35,length=90,rotate90=False, **kwargs):
   """
   draw a rooftop mirror
 
@@ -262,7 +262,11 @@ def model_rooftop_mirror(name="rooftop_mirror",dia=0, geom=None,l_height=35,leng
   else:
     obj.ViewObject.Transparency = DEFAULT_TRANSPARENCY+20
   offset=Vector(dia/2,0,0)
-  obj.Placement = Placement(offset, Rotation(0,-180,90), Vector(0,0,0))
+  if rotate90:
+    offset=Vector(dia,0,0)
+    obj.Placement = Placement(offset, Rotation(0,-180,0), Vector(0,0,0))
+  else:
+    obj.Placement = Placement(offset, Rotation(0,-180,90), Vector(0,0,0))
   update_geom_info(obj, geom, off0=offset)
   DOC.recompute()
 

@@ -15,7 +15,7 @@ ind = pfad.rfind("lasercad")
 pfad = pfad[0:ind-1]
 if not pfad in sys.path:
   sys.path.append(pfad)
-
+from copy import deepcopy
 
 from LaserCAD.freecad_models import clear_doc, setview, freecad_da
 from LaserCAD.basic_optics import Mirror, Beam, Composition, inch
@@ -32,13 +32,14 @@ from LaserCAD.non_interactings.table import Table
 if freecad_da:
   clear_doc()
   
-grating_const = 1/450 # in 1/mm
-seperation = 135 # difference grating position und radius_concave
-lambda_mid = 2400e-9 * 1e3 # central wave length in mm
-delta_lamda = 200e-9*1e3 # full bandwith in mm
+grating_const = 1/1480 # in 1/mm
+seperation = 5750 # difference grating position und radius_concave
+lambda_mid = 1030e-9 * 1e3 # central wave length in mm
+delta_lamda = 60e-9*1e3 # full bandwith in mm
 number_of_rays = 15
-safety_to_stripe_mirror = 5 #distance first incomming ray to stripe_mirror in mm
-periscope_height = 15
+# safety_to_stripe_mirror = 5 #distance first incomming ray to stripe_mirror in mm
+periscope_height = 12
+c0 = 299792458*1000 #mm/s
 
 lightsource = Beam(radius=0, angle=0)
 wavels = np.linspace(lambda_mid-delta_lamda/2, lambda_mid+delta_lamda/2, number_of_rays)
@@ -60,9 +61,9 @@ Compressor= Composition()
 Compressor.set_light_source(lightsource)
 Compressor.redefine_optical_axis(helper_light_source.inner_ray())
 
-angle = 10
-SinS = np.sin(angle/180*np.pi)
-CosS = np.cos(angle/180*np.pi)
+angle = gamma = 8.3254033412311523321136 /180*np.pi
+SinS = np.sin(angle)
+CosS = np.cos(angle)
 
 v = lambda_mid/grating_const
 a = v/2
@@ -78,7 +79,7 @@ Plane_height = 23+25.4
 Grat2 = Grating(grat_const=grating_const, order=-1)
 # propagation_length = 99.9995
 # propagation_length = seperation*2-0.0078
-propagation_length = seperation*2-0.008
+propagation_length = seperation
 
 # propagation_length = 99.9949
 Grat2.pos -= (500-10-propagation_length*CosS,SinS*propagation_length,0)
@@ -150,3 +151,66 @@ Compressor.recompute_optical_axis()
 # Compressor.add_fixed_elm(Grat1)
 Compressor.propagate(300)
 Compressor.draw()
+
+pathlength = {}
+for ii in range(Compressor._beams[0]._ray_count):
+  wavelength = Compressor._beams[0].get_all_rays()[ii].wavelength
+  pathlength[wavelength] = 0
+for jj in range(len(Compressor._beams)-1):
+  for ii in Compressor._beams[jj].get_all_rays():
+    a=pathlength[ii.wavelength]
+    pathlength[ii.wavelength] = a +ii.length
+ray_lam = [ray.wavelength for ray in Compressor._beams[0].get_all_rays()]
+path = [pathlength[ii] for ii in ray_lam]
+path_diff = [ii-path[int(len(path)/2)] for ii in path]
+fai = [path_diff[ii]/ray_lam[ii]*2*np.pi for ii in range(len(path))]
+delay = [path_diff[ii]/c0 for ii in range(len(path))]
+omega = [c0/ii*2*np.pi for ii in ray_lam]
+omega = [(ii - c0/lambda_mid*2*np.pi) for ii in omega]
+fai_new = deepcopy(fai)
+delay_new = deepcopy(delay)
+para_order = 9
+para = np.polyfit(omega, fai, 6)
+fai = [para[0]*(ii**6) + para[1]*(ii**5) + para[2]*(ii**4) + para[3]*(ii**3) + para[4]*(ii**2) + para[5]*(ii) + para[6] for ii in omega]
+fai1 = [6  *para[0]*(ii**5) + 5 *para[1]*(ii**4) + 4 *para[2]*(ii**3) + 3*para[3]*(ii**2) + 2*para[4]*(ii) + para[5] for ii in omega]
+fai2 = [30 *para[0]*(ii**4) + 20*para[1]*(ii**3) + 12*para[2]*(ii**2) + 6*para[3]*ii + 2*para[4] for ii in omega] # Taylor Expantion
+fai3 = [120*para[0]*(ii**3) + 60*para[1]*(ii**2) + 24*para[2]*ii      + 6*para[3] for ii in omega]
+para = np.polyfit(omega, delay, para_order)
+fai2 = []
+fai3 = []
+i_count = 0
+for ii in omega:
+  fai_add = 0
+  fai_add2 = 0
+  fai_add3 = 0
+  for jj in range(para_order,-1,-1):
+    fai_add += para[para_order-jj]* ((ii)**jj)
+    if jj-1>=0:
+      fai_add2 += para[para_order-jj] * jj * (ii**(jj-1))
+    if jj-2>=0:
+      fai_add3 += para[para_order-jj] * jj * (jj-1) * (ii**(jj-2))
+  fai2.append(fai_add2)
+  fai3.append(fai_add3)
+plt.figure()
+ax1=plt.subplot(1,3,1)
+plt.scatter(omega,delay,label="delay")
+plt.plot(omega,delay_new,label="delay")
+plt.title("Relationship of delay with angular frequency")
+plt.xlabel("angular frequency ω (rad/s)")
+plt.ylabel("delay (s)")
+plt.axhline(delay[int(len(delay)/2)], color = 'black', linewidth = 1)
+ax2=plt.subplot(1,3,2)
+plt.plot(omega,fai2)
+plt.title("Group delay dispersion")
+plt.xlabel("angular frequency ω (rad/s)")
+plt.ylabel("The second order derivative of φ(ω)")
+plt.axhline(fai2[int(len(fai2)/2)], color = 'black', linewidth = 1)
+print("Group delay dispersion at the center wavelength:",fai2[int(len(fai2)/2)])
+ax3=plt.subplot(1,3,3)
+plt.plot(omega,fai3)
+# plt.plot(omega_d,fai3_new)
+plt.title("Third order dispersion")
+plt.xlabel("angular frequency ω (rad/s)")
+plt.ylabel("The third order derivative of φ(ω)")
+plt.axhline(fai3[int(len(fai3)/2)], color = 'black', linewidth = 1)
+print("3rd order dispersion at the center wavelength:",fai3[int(len(fai2)/2)])
