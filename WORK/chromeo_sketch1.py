@@ -91,7 +91,7 @@ periscope_height = 15
 first_propagation = 20 # legnth of the first ray_bundle to flip mirror1 mm
 distance_flip_mirror1_grating = 300
 distance_roof_top_grating = 600
-# 
+#
 
 def Make_Stretcher_chromeo():
   """
@@ -183,7 +183,7 @@ def Make_Stretcher_chromeo():
 
   Stretcher.propagate(first_propagation)
   FlipMirror_In_Out = Mirror(phi=100, name="FlipMirrorInOut")
-  
+
   mount=Composed_Mount()
   Mount1=Unit_Mount(model="MH25")
   Mount1.docking_obj.pos = Mount1.pos+(6.3,0,0)
@@ -246,7 +246,7 @@ Stretcher.set_geom(seed_end_geom)
 # =============================================================================
 # from LaserCAD.basic_optics.mirror import Lam_Plane
 
-tfp_angle = 65 #tfp angle of incidence in degree
+tfp_angle = -65 #tfp angle of incidence in degree
 flip_mirror_push_down = 8 # distance to push the first mirror out ouf the seed beam
 tfp_push_forward = 1 # distance to push the TFP forward, so that the beam can pass through
 
@@ -268,7 +268,7 @@ FlipMirror_pp.Mount.set_geom(FlipMirror_pp.get_geom())
 # FlipMirror_pp.mount_dict["Flip90"]=False
 PulsePicker.add_on_axis(FlipMirror_pp)
 FlipMirror_pp.pos += (0,0,flip_mirror_push_down)
-PulsePicker.propagate(100)
+PulsePicker.propagate(400)
 Lambda2 = Lambda_Plate()
 PulsePicker.add_on_axis(Lambda2)
 PulsePicker.propagate(390)
@@ -292,7 +292,7 @@ PulsePicker.add_on_axis(TFP_pp)
 TFP_pp.pos += -1 * TFP_pp.normal * tfp_push_forward
 PulsePicker.recompute_optical_axis()
 PulsePicker.propagate(250)
-FlipMirror2_pp = Mirror(phi=90)
+FlipMirror2_pp = Mirror(phi=-90)
 PulsePicker.add_on_axis(FlipMirror2_pp)
 PulsePicker.propagate(100)
 FaradPP = Faraday_Isolator()
@@ -598,12 +598,12 @@ Compressor.set_geom(amp2.last_geom())
 # Draw Selection
 # =============================================================================
 
-# Seed.draw()
-# Stretcher.draw()
+Seed.draw()
+Stretcher.draw()
 PulsePicker.draw()
 PulsePicker.draw_alignment_posts()
-# Amplifier_I.draw()
-# Pump.draw()
+Amplifier_I.draw()
+Pump.draw()
 # amp2.draw()
 # # BigPump.draw()
 # t=Table()
