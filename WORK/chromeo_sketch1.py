@@ -32,10 +32,34 @@ from LaserCAD.non_interactings.table import Table
 if freecad_da:
   clear_doc()
 
+
+# =============================================================================
+# Measured Coordinates on the Table (approx to unity m6 holes)
+# =============================================================================
+POS_SEED = np.array((25, 59-8, 0)) * 25
+POS_STRETCHER_END_MIRROR = np.array((33, 59-15, 0)) * 25
+POS_THULIUM_BIG_OUT = np.array((96, 59-11, 0)) * 25
+POS_THULIUM_SMALL_OUT = np.array((104, 59-49, 0)) * 25
+
+TABLE_MAX_COORDINATES = np.array((158, 58)) * 25
+
+stretcher_out_obj = Lens()
+stretcher_out_obj.pos = POS_STRETCHER_END_MIRROR + np.array((0,0,100))
+stretcher_out_obj.draw()
+
+tm_big_obj = Lens()
+tm_big_obj.pos = POS_THULIUM_BIG_OUT + np.array((0,0,100))
+tm_big_obj.draw()
+
+
+tm_small_obj = Lens()
+tm_small_obj.pos = POS_THULIUM_SMALL_OUT + np.array((0,0,100))
+tm_small_obj.draw()
+
 # =============================================================================
 # Draw the seed laser and seed beam
 # =============================================================================
-start_point = (0,0,104) #see CLPF-2400-10-60-0_8 sn2111348_Manual
+start_point = np.array((0,0,104)) + POS_SEED #see CLPF-2400-10-60-0_8 sn2111348_Manual
 seed_beam_radius = 2.5/2 #see CLPF-2400-10-60-0_8 sn2111348_Manual
 distance_seed_laser_stretcher = 400 #the complete distance
 distance_6_mm_faraday = 45
@@ -344,6 +368,9 @@ Amplifier_I.set_geom(PulsePicker.last_geom())
 
 
 
+
+
+
 # =============================================================================
 # Pump Amp1
 # =============================================================================
@@ -578,15 +605,7 @@ t.draw()
 Compressor.draw()
 
 
-# =============================================================================
-# Measured Coordinates on the Table (approx to unity m6 holes)
-# =============================================================================
-POS_SEED = np.array((25, 8, 0)) * 25
-POS_STRETCHER_END_MIRROR = np.array((33, 15, 0)) * 25
-POS_THULIUM_BIG_OUT = np.array((96, 11, 0)) * 25
-POS_THULIUM_SMALL_OUT = np.array((104, 49, 0)) * 25
 
-TABLE_MAX_COORDINATES = np.array((158, 58)) * 25
 
 # =============================================================================
 # breadboards
