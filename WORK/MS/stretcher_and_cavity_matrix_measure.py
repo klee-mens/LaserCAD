@@ -45,7 +45,7 @@ vertical_mat = True
 s_shift = 0
 ls="CB"
 Plane_height = 150
-focal_length = 428.0733746200338
+# focal_length = 428.0733746200338
 # focal_length = 200
 angle =1
 para_d = 10
@@ -59,14 +59,15 @@ def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,rou
   gamma = 8.3254033412311523321136 /180 *np.pi #AOI = 54
   grat_const = 1/1480 # Gitterkonstante in 1/mm
   # seperation = 203 # Differenz zwischen Gratingposition und Radius
+  focal_length = (12*300-4*seperation*(1-np.cos(54/180*np.pi)**2/np.cos(54/180*np.pi-gamma)**2))/8
   lam_mid = centerlamda # Zentralwellenlänge in mm
-  # lam_mid_grating = 1030E-6 # Zentralwellenlänge in mm
+  lam_mid_grating = 1030E-6 # Zentralwellenlänge in mm
   delta_lamda = 60e-9*1e3 # Bandbreite in mm
   number_of_rays = 15
   safety_to_StripeM = 5 #Abstand der eingehenden Strahlen zum Concav Spiegel in mm
   periscope_distance = 12
   c0 = 299792458*1000 #mm/s
-  v = lam_mid/grat_const
+  v = lam_mid_grating/grat_const
   s = np.sin(gamma)
   c = np.cos(gamma)
   a = v/2
@@ -302,13 +303,13 @@ def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,rou
   d_TFP1_Lam1 = 200
   d_lam1_PC =50
   d_PC_TFP2 = 150
-  a_TFP = 65
+  a_TFP = 50
   d_TFP2_M1 = 150
-  d_M1_CM = 450
+  d_M1_CM = 620
   R_CM = C_radius
   d_CM_M2 = 300
-  d_M2_M3 = 544
-  d_M2_p = 250
+  d_M2_M3 = 515
+  d_M2_p = 200
   d_p = d_M2_M3-d_M2_p*2
   d_M3_Crys = 300
   
@@ -333,7 +334,7 @@ def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,rou
   TFP2.Mount.set_geom(TFP2.get_geom())
   Amp.add_on_axis(TFP2) #0
   Amp.propagate(d_TFP2_M1)
-  M1 = Mirror(phi=-50)
+  M1 = Mirror(phi=-(180-2*a_TFP))
   Amp.add_on_axis(M1) #1
   Amp.propagate(d_M1_CM)
   CM = Curved_Mirror(phi=178,radius=R_CM)
@@ -559,29 +560,29 @@ def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,rou
           fai_add3 += para[para_order-jj] * jj * (jj-1) * (ii**(jj-2))
       fai2.append(fai_add2)
       fai3.append(fai_add3)
-    plt.figure()
-    ax1=plt.subplot(1,3,1)
-    plt.scatter(omega,delay,label="delay")
-    plt.plot(omega,delay_new,label="delay")
-    plt.title("Relationship of delay with angular frequency")
-    plt.xlabel("angular frequency ω (rad/s)")
-    plt.ylabel("delay (s)")
-    plt.axhline(delay[int(len(delay)/2)], color = 'black', linewidth = 1)
-    ax2=plt.subplot(1,3,2)
-    plt.plot(omega,fai2)
-    plt.title("Group delay dispersion")
-    plt.xlabel("angular frequency ω (rad/s)")
-    plt.ylabel("The second order derivative of φ(ω)")
-    plt.axhline(fai2[int(len(fai2)/2)], color = 'black', linewidth = 1)
-    print("Group delay dispersion at the center wavelength:",fai2[int(len(fai2)/2)])
-    ax3=plt.subplot(1,3,3)
-    plt.plot(omega,fai3)
-    # plt.plot(omega_d,fai3_new)
-    plt.title("Third order dispersion")
-    plt.xlabel("angular frequency ω (rad/s)")
-    plt.ylabel("The third order derivative of φ(ω)")
-    plt.axhline(fai3[int(len(fai3)/2)], color = 'black', linewidth = 1)
-    print("3rd order dispersion at the center wavelength:",fai3[int(len(fai2)/2)])
+    # plt.figure()
+    # ax1=plt.subplot(1,3,1)
+    # plt.scatter(omega,delay,label="delay")
+    # plt.plot(omega,delay_new,label="delay")
+    # plt.title("Relationship of delay with angular frequency")
+    # plt.xlabel("angular frequency ω (rad/s)")
+    # plt.ylabel("delay (s)")
+    # plt.axhline(delay[int(len(delay)/2)], color = 'black', linewidth = 1)
+    # ax2=plt.subplot(1,3,2)
+    # plt.plot(omega,fai2)
+    # plt.title("Group delay dispersion")
+    # plt.xlabel("angular frequency ω (rad/s)")
+    # plt.ylabel("The second order derivative of φ(ω)")
+    # plt.axhline(fai2[int(len(fai2)/2)], color = 'black', linewidth = 1)
+    # print("Group delay dispersion at the center wavelength:",fai2[int(len(fai2)/2)])
+    # ax3=plt.subplot(1,3,3)
+    # plt.plot(omega,fai3)
+    # # plt.plot(omega_d,fai3_new)
+    # plt.title("Third order dispersion")
+    # plt.xlabel("angular frequency ω (rad/s)")
+    # plt.ylabel("The third order derivative of φ(ω)")
+    # plt.axhline(fai3[int(len(fai3)/2)], color = 'black', linewidth = 1)
+    # print("3rd order dispersion at the center wavelength:",fai3[int(len(fai2)/2)])
   else:
     ip.spot_diagram(Comp._beams[-1],aberration_analysis=False)
   if freecad_da:

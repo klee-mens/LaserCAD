@@ -60,13 +60,13 @@ def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,rou
   grat_const = 1/1480 # Gitterkonstante in 1/mm
   # seperation = 203 # Differenz zwischen Gratingposition und Radius
   lam_mid = centerlamda # Zentralwellenlänge in mm
-  # lam_mid_grating = 1030E-6 # Zentralwellenlänge in mm
+  lam_mid_grating = 1030E-6 # Zentralwellenlänge in mm
   delta_lamda = 60e-9*1e3 # Bandbreite in mm
   number_of_rays = 15
   safety_to_StripeM = 5 #Abstand der eingehenden Strahlen zum Concav Spiegel in mm
   periscope_distance = 12
   c0 = 299792458*1000 #mm/s
-  v = lam_mid/grat_const
+  v = lam_mid_grating/grat_const
   s = np.sin(gamma)
   c = np.cos(gamma)
   a = v/2
@@ -302,13 +302,13 @@ def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,rou
   d_TFP1_Lam1 = 200
   d_lam1_PC =50
   d_PC_TFP2 = 150
-  a_TFP = 65
+  a_TFP = 50
   d_TFP2_M1 = 150
-  d_M1_CM = 450
+  d_M1_CM = 620
   R_CM = C_radius
   d_CM_M2 = 300
-  d_M2_M3 = 544
-  d_M2_p = 250
+  d_M2_M3 = 515
+  d_M2_p = 200
   d_p = d_M2_M3-d_M2_p*2
   d_M3_Crys = 300
   
@@ -333,7 +333,7 @@ def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,rou
   TFP2.Mount.set_geom(TFP2.get_geom())
   Amp.add_on_axis(TFP2) #0
   Amp.propagate(d_TFP2_M1)
-  M1 = Mirror(phi=-50)
+  M1 = Mirror(phi=-(180-2*a_TFP))
   Amp.add_on_axis(M1) #1
   Amp.propagate(d_M1_CM)
   CM = Curved_Mirror(phi=178,radius=R_CM)

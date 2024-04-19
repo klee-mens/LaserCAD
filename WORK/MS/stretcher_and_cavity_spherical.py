@@ -19,7 +19,7 @@ from copy import deepcopy
 
 from LaserCAD.basic_optics import Mirror,Beam,Cylindrical_Mirror,Grating,Ray
 from LaserCAD.basic_optics import Intersection_plane,Cylindrical_Mirror1
-from LaserCAD.basic_optics import Curved_Mirror, Composition
+from LaserCAD.basic_optics import Curved_Mirror, Composition,Stripe_mirror
 
 from LaserCAD.basic_optics import Unit_Mount,Composed_Mount, Crystal
 from LaserCAD.non_interactings import Pockels_Cell
@@ -45,7 +45,7 @@ focal_length = 428.0733746200338 # The focal length of the telescope
 angle =1
 para_d = 10
 
-def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,
+def cavity_and_stretcher(C_radius = 7000,want_to_draw=True,
                          roundtrip=20,centerlamda=1030e-9*1e3,s_shift=0,
                          ls="CR",seperation=150):
   """
@@ -86,9 +86,9 @@ def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,
   # gamma = 33.4906043205826 /180 *np.pi
   # gamma = 18.8239722389914963 /180 *np.pi #AOI = 60
   gamma = 8.3254033412311523321136 /180 *np.pi #AOI = 54
+  focal_length = (12*300-4*seperation*(1-np.cos(54/180*np.pi)**2/np.cos(54/180*np.pi-gamma)**2))/8
   grat_const = 1/1480 # Gitterkonstante in 1/mm
   # seperation = 203 # Differenz zwischen Gratingposition und Radius
-  focal_length = (12*300-4*seperation*(1-np.cos(54/180*np.pi)**2/np.cos(54/180*np.pi-gamma)**2))/8
   lam_mid = centerlamda # Zentralwellenlänge in mm
   lam_mid_grating = 1030E-6 # Zentralwellenlänge in mm
   delta_lamda = 60e-9*1e3 # Bandbreite in mm
@@ -96,7 +96,7 @@ def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,
   safety_to_StripeM = 5 
   periscope_distance = 12
   c0 = 299792458*1000 #mm/s
-  v = lam_mid_grating/grat_const
+  v = lam_mid/grat_const
   s = np.sin(gamma)
   c = np.cos(gamma)
   a = v/2
@@ -151,30 +151,7 @@ def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,
   rays = []
   rays.append(ray1)
   
-  if vertical_mat:
-    Concav1 = Cylindrical_Mirror1(radius=Radius,name="Concav_Mirror")
-    Concav2 = Cylindrical_Mirror1(radius=Radius,name="Concav_Mirror")
-    Concav3 = Cylindrical_Mirror1(radius=Radius,name="Concav_Mirror")
-    Concav4 = Cylindrical_Mirror1(radius=Radius,name="Concav_Mirror")
-    StripeM = Cylindrical_Mirror1(radius= -Radius/2, name="Stripe_Mirror")
-  else:
-    Concav1 = Cylindrical_Mirror(radius=Radius,name="Concav_Mirror")
-    Concav2 = Cylindrical_Mirror(radius=Radius,name="Concav_Mirror")
-    Concav3 = Cylindrical_Mirror(radius=Radius,name="Concav_Mirror")
-    Concav4 = Cylindrical_Mirror(radius=Radius,name="Concav_Mirror")
-    StripeM = Cylindrical_Mirror(radius= -Radius/2, name="Stripe_Mirror")
-  Concav1.pos = (Radius/2-np.sqrt((Radius**2)/4-(h_StripeM/2 + safety_to_StripeM)**2),
-                 0,-h_StripeM/2 - safety_to_StripeM)
-  # Concav1.pos = (0,0,-h_StripeM/2 - safety_to_StripeM)
-  Concav1.aperture = Aperture_concav
-  Concav1.normal = (-1,0,0)
-  Concav1.draw_dict["height"]=10
-  Concav1.draw_dict["thickness"]=25
-  point0 = (Radius-seperation, 0, -h_StripeM/2 - safety_to_StripeM)
-  point1 = (Radius/2, 0, 0)
-  Concav1.set_normal_with_2_points(point0, point1)
-  Concav1.draw_dict["mount_type"] = "dont_draw"
-  
+  StripeM = Stripe_mirror(radius= -Radius/2, name="Stripe_Mirror")
   StripeM.pos = (Radius/2+s_shift, 0, 0)
   StripeM.aperture=50
   StripeM.draw_dict["height"]=9
@@ -188,36 +165,12 @@ def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,
   Grat.pos = (Radius-seperation, 0, 0)
   Grat.normal = (np.sqrt(1-sinB**2), -sinB, 0)
   
-  Concav2.pos = (Radius/2-np.sqrt((Radius**2)/4-(h_StripeM/2 + safety_to_StripeM)**2), 
-                 0, h_StripeM/2 + safety_to_StripeM)
-  Concav2.aperture = Aperture_concav
-  Concav2.normal = (-1,0,0)
-  Concav2.draw_dict["height"]=10
-  Concav2.draw_dict["thickness"]=25
-  point0 = (Radius-seperation, 0, h_StripeM/2 + safety_to_StripeM)
-  point1 = (Radius/2, 0, 0)
-  Concav2.set_normal_with_2_points(point0, point1)
-  Concav2.draw_dict["mount_type"] = "dont_draw"
-  Concav3.pos = (Radius/2-np.sqrt((Radius**2)/4-(h_StripeM/2 + safety_to_StripeM+periscope_distance)**2), 
-                 0, h_StripeM/2 + safety_to_StripeM + periscope_distance)
-  Concav3.aperture = Aperture_concav
-  Concav3.normal = (-1,0,0)
-  Concav3.draw_dict["height"]=10
-  Concav3.draw_dict["thickness"]=25
-  point0 = (Radius-seperation, 0, h_StripeM/2 + safety_to_StripeM + periscope_distance)
-  point1 = (Radius/2, 0, 0)
-  Concav3.set_normal_with_2_points(point0, point1)
-  Concav3.draw_dict["mount_type"] = "dont_draw"
-  Concav4.pos = (Radius/2-np.sqrt((Radius**2)/4-(h_StripeM/2 + safety_to_StripeM+periscope_distance)**2), 
-                 0, -h_StripeM/2 - safety_to_StripeM - periscope_distance)
-  Concav4.aperture = Aperture_concav
-  Concav4.normal = (-1,0,0)
-  Concav4.draw_dict["height"]=10
-  Concav4.draw_dict["thickness"]=25
-  point0 = (Radius-seperation, 0, -h_StripeM/2 - safety_to_StripeM - periscope_distance)
-  point1 = (Radius/2, 0, 0)
-  Concav4.set_normal_with_2_points(point0, point1)
-  Concav4.draw_dict["mount_type"] = "dont_draw"
+  Concav = Curved_Mirror(radius=Radius, name="Concav_Mirror")
+  Concav.pos = (0,0,0)
+  Concav.aperture = Aperture_concav
+  Concav.normal = (-1,0,0)
+  Concav.set_mount_to_default()
+  
   ray0 = Ray()
   p_grat = np.array((Radius-seperation, 0, -h_StripeM/2 - safety_to_StripeM - periscope_distance))
   vec = np.array((c, s, 0))
@@ -257,17 +210,19 @@ def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,
     Stretcher.set_light_source(lightsource)
   
   Stretcher.add_fixed_elm(Grat)#0
-  Stretcher.add_fixed_elm(Concav4)#1
+  Stretcher.add_fixed_elm(Concav)#1
   Stretcher.add_fixed_elm(StripeM)#2
-  Stretcher.add_fixed_elm(Concav3)#3
-  Stretcher.add_supcomposition_fixed(roof) #4,5
-  Stretcher.add_fixed_elm(Concav2)#6
-  Stretcher.add_fixed_elm(Concav1)#7
+  # Stretcher.add_fixed_elm(Concav3)
+  Stretcher.add_supcomposition_fixed(roof) #3,4
+  # Stretcher.add_fixed_elm(Concav2)
+  # Stretcher.add_fixed_elm(Concav1)
   # Stretcher.add_fixed_elm(pure_cosmetic)#8
-  seq = [0,1,2,3,0,4,5,0,6,2,7,0]
+  seq = [0,1,2,1,0,3,4,0,1,2,1,0]
   Stretcher.set_sequence(seq)
   Stretcher.recompute_optical_axis()
-  Stretcher.propagate(250+44)
+  Stretcher.propagate(200+54)
+  # Stretcher.draw()
+  # print(Stretcher._elements)
   
   Stretcher.pos += (0,0,Plane_height+100)
   for ii in Stretcher._elements:
@@ -285,12 +240,15 @@ def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,
   Tele_M1.normal = (1,-1,0)
   Tele_M1.aperture = 25.4/2
   Tele_M1.set_mount_to_default()
-  if vertical_mat:  
-    Tele_CM1 = Cylindrical_Mirror(radius=focal_length*2,height=20,thickness=10)
-    Tele_CM2 = Cylindrical_Mirror(radius=focal_length*2,height=20,thickness=10)
-  else:
-    Tele_CM1 = Cylindrical_Mirror1(radius=focal_length*2,height=20,thickness=10)
-    Tele_CM2 = Cylindrical_Mirror1(radius=focal_length*2,height=20,thickness=10)    
+  # if vertical_mat:  
+  #   Tele_CM1 = Cylindrical_Mirror(radius=focal_length*2,height=20,thickness=10)
+  #   Tele_CM2 = Cylindrical_Mirror(radius=focal_length*2,height=20,thickness=10)
+  # else:
+  #   Tele_CM1 = Cylindrical_Mirror1(radius=focal_length*2,height=20,thickness=10)
+  #   Tele_CM2 = Cylindrical_Mirror1(radius=focal_length*2,height=20,thickness=10)    
+  Tele_CM1 = Mirror()
+  Tele_CM2 = Mirror()
+  Tele_CM1.Mount = Tele_CM2.Mount = Unit_Mount("dont_draw")
   
   Tele_CM1.pos = (50+para_d/2,focal_length*2,80)
   Tele_CM1.normal = (0,1,0)
@@ -369,7 +327,7 @@ def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,
   PC.rotate(vec=PC.normal, phi=np.pi)
   Amp.propagate(d_PC_TFP2)
   TFP2 = Mirror(phi=-a_TFP)
-  TFP2.Mount = Composed_Mount(["56_degree_mounts","POLARIS-K1","1inch_post"])
+  TFP2.Mount = Composed_Mount(["65_degree_mounts","POLARIS-K1","1inch_post"])
   TFP2.Mount.set_geom(TFP2.get_geom())
   Amp.add_on_axis(TFP2) #0
   Amp.propagate(d_TFP2_M1)
@@ -489,25 +447,27 @@ def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,
   Comp.add_fixed_elm(peri1) #4
   Comp.add_fixed_elm(peri2) #5
   for element in Stretcher._elements:
-    Comp.add_fixed_elm(element) #6-13
+    Comp.add_fixed_elm(element) #6-10
+    # [0,1,2,1,0,3,4,0,1,2,1,0]
+    # [6,7,8,7,6,9,10,6,7,8,7,6]
   for element in Tele._elements:
-    Comp.add_fixed_elm(element) #14-19
-  Comp.add_fixed_elm(peri3) #20
-  Comp.add_fixed_elm(peri4) #21
-  Comp.add_fixed_elm(M3) #22
-  Comp.add_fixed_elm(Crys) #23
-  Comp.add_fixed_elm(M4) #24
-  Comp.add_fixed_elm(TFP1) #25
+    Comp.add_fixed_elm(element) #11-16
+  Comp.add_fixed_elm(peri3) #17
+  Comp.add_fixed_elm(peri4) #18
+  Comp.add_fixed_elm(M3) #19
+  Comp.add_fixed_elm(Crys) #20
+  Comp.add_fixed_elm(M4) #21
+  Comp.add_fixed_elm(TFP1) #22
   pure_cosmetic.pos = (m1.pos+m2.pos)/2
   pure_cosmetic.normal = (m1.normal+m2.normal)/2
   ip = Intersection_plane()
   ip.pos = Comp.pos + (600,0,0)
-  Comp.add_fixed_elm(ip) #26
+  Comp.add_fixed_elm(ip) #23
   Comp.add_fixed_elm(pure_cosmetic) #27
   Comp.add_fixed_elm(pure_cosmetic1) #28
   Comp.add_fixed_elm(pure_cosmetic2) #29
-  seq = [0,1,2,3,4,5, 6,7,8,9,6,10,11,6,12,8,13,6,14,15,16,17,18,16,15,19, 
-         20,21,22,24,25,26]
+  seq = [0,1,2,3,4,5, 6,7,8,7,6,9,10,6,7,8,7,6, 11,12,13,14,15,13,12,16, 
+         17,18,19,21,22,23]
   seq1 = deepcopy(seq)
   roundtrip_sequence = (list(seq1))
   for n in range(roundtrip-1):
@@ -562,7 +522,7 @@ def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,
         max_diff = diff_R_ver
         max_roundtrip = n//32+1
     
-    # return max_diff
+    return max_diff
   elif Comp._lightsource == centerlightsource:
     ip.spot_diagram(Comp._beams[-1],aberration_analysis=True)
     pathlength = {}
@@ -627,7 +587,7 @@ def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,
     ip.spot_diagram(Comp._beams[-1],aberration_analysis=False)
   if freecad_da:
     setview()
-  return Cal_matrix(Comp=Comp,vertical_mat=vertical_mat)
+  return Cal_matrix(Comp=Comp)
 
 def Cal_matrix(Comp=Composition(),vertical_mat = True):
   """
@@ -670,7 +630,7 @@ StripeM_shift = 0
 # StripeM_shift = 0.115
 # CB=CenterBeam CR=CenterRay 
 ls = "CB"
-mat1 = cavity_and_stretcher(C_radius=C_radius,vertical_mat=True,want_to_draw=True,
+mat1 = cavity_and_stretcher(C_radius=C_radius,want_to_draw=True,
                             roundtrip=roundtrip,centerlamda=centerlamda,
                             s_shift=StripeM_shift,ls=ls,seperation=150)
   
@@ -717,53 +677,3 @@ mat1 = cavity_and_stretcher(C_radius=C_radius,vertical_mat=True,want_to_draw=Tru
 # plt.ylabel("maximun vertical radius(mm)")
 # plt.show()
 # -----------------------------------------------------------------------------
-
-delta_lamda = 60E-6
-number_of_rays = 15
-wavels = np.linspace(centerlamda-delta_lamda/2, centerlamda+delta_lamda/2, number_of_rays)
-matA = []
-matB = []
-matC = []
-matD = []
-matA_h = []
-matB_h = []
-matC_h = []
-matD_h = []
-for wavel in wavels:
-    a =(cavity_and_stretcher(C_radius=C_radius,vertical_mat=True,want_to_draw=False,
-                              roundtrip = roundtrip,centerlamda=wavel,s_shift=StripeM_shift))
-    matA.append(a[0][0])
-    matB.append(a[0][1])
-    matC.append(a[1][0])
-    matD.append(a[1][1])
-    a =(cavity_and_stretcher(C_radius=C_radius,vertical_mat=False,want_to_draw=False,
-                              roundtrip = roundtrip,centerlamda=wavel,s_shift=StripeM_shift))
-    matA_h.append(a[0][0])
-    matB_h.append(a[0][1])
-    matC_h.append(a[1][0])
-    matD_h.append(a[1][1])
-plt.figure()
-a1 =plt.subplot(2,2,1)
-plt.plot(wavels*1E6,matA)
-plt.plot(wavels*1E6,matA_h)
-plt.xlabel("wavelength (nm)")
-plt.ylabel("matrix number A")
-plt.legend(['vertical','horizontal'],loc = 'upper left')
-a1 =plt.subplot(2,2,2)
-plt.plot(wavels*1E6,matB)
-plt.plot(wavels*1E6,matB_h)
-plt.xlabel("wavelength (nm)")
-plt.ylabel("matrix number B")
-plt.legend(['vertical','horizontal'],loc = 'upper right')
-a1 =plt.subplot(2,2,3)
-plt.plot(wavels*1E6,matC)
-plt.plot(wavels*1E6,matC_h)
-plt.xlabel("wavelength (nm)")
-plt.ylabel("matrix number C")
-plt.legend(['vertical','horizontal'],loc = 'upper right')
-a1 =plt.subplot(2,2,4)
-plt.plot(wavels*1E6,matD)
-plt.plot(wavels*1E6,matD_h)
-plt.xlabel("wavelength (nm)")
-plt.ylabel("matrix number D")
-plt.legend(['vertical','horizontal'],loc = 'upper left')
