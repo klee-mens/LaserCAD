@@ -57,7 +57,8 @@ tm_small_obj = Lens()
 tm_small_obj.pos = POS_THULIUM_SMALL_OUT
 tm_small_obj.draw()
 
-
+X_ADDITIONAL = 80
+Y_ADDITIONAL = 80
 
 
 
@@ -67,9 +68,9 @@ tm_small_obj.draw()
 f1 = -100
 f2 = 300
 
-pump_first_prop = 150 #in -x 
-pump_second_prop = 300 # in +y
-pump_third_prop = 300 # in -x
+pump_first_prop = 100 + X_ADDITIONAL #in -x 
+pump_second_prop = 100 + Y_ADDITIONAL # in +y
+pump_third_prop = 100 # in -x
 
 # pump_geom = Amplifier_I._elements[-2].get_geom()
 Pump = Composition(name="Pump")
@@ -93,7 +94,6 @@ Pump.propagate(f1+f2*0.5)
 Pump.add_on_axis(Lens(f=f2))
 Pump.propagate(190)
 
-Pump.draw()
 
 # =============================================================================
 # even simpler Res
@@ -105,6 +105,7 @@ lam_mid = 2.4e-3
 # A_natural = lam_mid * focal
 # geometrie_factor = A_target / A_natural
 total_length = focal / 2
+tfp_push_aside = 5 # distance in mm to push the TFP aside, so that the beam can pass through
 
 # design params
 width_pz = 80
@@ -124,13 +125,13 @@ mir1 = Mirror(phi=180)
 mir1.aperture = 0.5 * inch
 mir1.set_mount_to_default()
 
-TFP1 = Mirror(phi= 180 - 2*tfp_angle, name="TFP1")
-TFP1.draw_dict["color"] = (1.0, 0.0, 2.0)
-TFP1.aperture = tfp_aperture
-TFP1.set_mount_to_default()
-pol_mount = TFP1.Mount.mount_list[0]
+TFP_Amp1 = Mirror(phi= 180 - 2*tfp_angle, name="TFP_Amp1")
+TFP_Amp1.draw_dict["color"] = (1.0, 0.0, 2.0)
+TFP_Amp1.aperture = tfp_aperture
+TFP_Amp1.set_mount_to_default()
+pol_mount = TFP_Amp1.Mount.mount_list[0]
 pol_mount.flip()
-# TFP1.mount_dict["Flip90"]=True
+# TFP_Amp1.mount_dict["Flip90"]=True
 
 cm = Curved_Mirror(radius=focal*2, phi = 180)
 PockelsCell = Pockels_Cell(name="PockelZelleRes1")
@@ -153,7 +154,9 @@ simres.add_on_axis(fold1)
 
 simres.propagate(dist_tfp_fold1)
 
-simres.add_on_axis(TFP1)
+simres.add_on_axis(TFP_Amp1)
+# x,y,z = TFP_Amp1.get_coordinate_system()
+# TFP_Amp1.pos += y * tfp_push_aside
 
 simres.propagate(dist_lambda_tfp)
 
@@ -178,10 +181,142 @@ Amplifier_I = simres
 ppos, paxes = Pump.last_geom()
 Amplifier_I.pos = ppos
 
+
+
+
+# print()
+# print("TFP Position", TFP_Amp1.pos)
+# print()
+
+
+# =============================================================================
+# The pulse picker
+# =============================================================================
+
+
+tfp_angle = 65 #tfp angle of incidence in degree
+flip_mirror_push_down = 8 # distance to push the first mirror out ouf the seed beam
+tfp_push_aside = 5 # distance in mm to push the TFP aside, so that the beam can pass through
+
+
+PulsePicker = Composition(name="PulsePicker")
+PulsePicker.pos = POS_STRETCHER_END_MIRROR
+PulsePicker.normal = (0, -1, 0)
+
+# lightsource_pp = Beam(angle=0, radius=seed_beam_radius)
+# PulsePicker.set_light_source(lightsource_pp)
+# PulsePicker.propagate(distance_seed_laser_stretcher*0.2)
+
+# first small flip mirror from stretcher with cosmetics
+FlipMirror_pp = Mirror(phi=90)
+FlipMirror_pp_mount=Composed_Mount()
+FlipMirror_pp.Mount = Composed_Mount(unit_model_list = ["MH25_KMSS","1inch_post"])
+FlipMirror_pp.Mount.set_geom(FlipMirror_pp.get_geom())
+PulsePicker.add_on_axis(FlipMirror_pp)
+FlipMirror_pp.pos += (0,0,flip_mirror_push_down)
+
+# polarisation optics upt to pockels cell
+PulsePicker.propagate(90)
+Lambda2 = Lambda_Plate()
+PulsePicker.add_on_axis(Lambda2)
+PulsePicker.propagate(390)
+Back_Mirror_PP = Mirror()
+PulsePicker.add_on_axis(Back_Mirror_PP)
+PulsePicker.propagate(30)
+Lambda4 = Lambda_Plate()
+PulsePicker.add_on_axis(Lambda4)
+PulsePicker.propagate(30)
+pockelscell = Pockels_Cell()
+PulsePicker.add_on_axis( pockelscell)
+pockelscell.rotate(vec=pockelscell.normal,phi=np.pi*0)
+PulsePicker.propagate(210)
+
+# Splitting TFP
+TFP_pp = Mirror(phi = 180-2*tfp_angle)
+TFP_pp.draw_dict["color"] = (1.0, 0.0, 2.0)
+TFP_pp.draw_dict["thickness"] = 4
+TFP_pp.aperture = 2*inch
+TFP_pp.set_mount_to_default()
+# TFP_out.mount_dict["Flip90"]=True
+PulsePicker.add_on_axis(TFP_pp)
+x,y,z = TFP_pp.get_coordinate_system()
+TFP_pp.pos += y * tfp_push_aside
+
+
+PulsePicker.propagate(80)
+PulsePicker.add_on_axis(Lambda_Plate())
+PulsePicker.propagate(100)
+
+# Output TFP to sedn the beam to Amp2
+TFP_out = Mirror(phi = 180-2*tfp_angle, name="Output_to_Amp2")
+TFP_out.draw_dict["color"] = (1.0, 0.0, 2.0)
+TFP_out.draw_dict["thickness"] = 4
+TFP_out.aperture = 2*inch
+TFP_out.set_mount_to_default()
+TFP_out.Mount.mount_list[0].flip()
+TFP_out.next_ray = TFP_out.just_pass_through
+PulsePicker.add_on_axis(TFP_out)
+TFP_out.normal = TFP_pp.normal
+x,y,z = TFP_out.get_coordinate_system()
+TFP_out.pos += - y * tfp_push_aside
+PulsePicker.propagate(90) # maybe just use the thickness of the energy detector everytime instead ...
+
+# zick zack beam line to adjust the beam into Amp1
+FlipMirror2_pp = Mirror(phi=90)
+PulsePicker.add_on_axis(FlipMirror2_pp)
+PulsePicker.propagate(80)
+FaradPP = Faraday_Isolator()
+PulsePicker.add_on_axis(FaradPP)
+PulsePicker.propagate(120)
+Lambda2_2_pp = Lambda_Plate()
+PulsePicker.add_on_axis(Lambda2_2_pp)
+#last knee for adjustment
+PulsePicker.propagate(80)
+
+second_last_flip_pp = Mirror(phi=-90)
+PulsePicker.add_on_axis(second_last_flip_pp)
+
+#geometrical considerations regarding 2 perpendicular rays that should 
+#zick zack meet in Regen TFP
+p,a = PulsePicker.last_geom()
+n1 = a[:,0]
+Lslfp = np.sum(TFP_Amp1.pos*n1) - np.sum(second_last_flip_pp.pos*n1) 
+
+PulsePicker.propagate(Lslfp)
+last_flip_pp = Mirror(phi=90)
+PulsePicker.add_on_axis(last_flip_pp)
+PulsePicker.propagate(np.linalg.norm(last_flip_pp.pos - TFP_Amp1.pos))
+
+# =============================================================================
+# Output Beam to Amp2
+# =============================================================================
+bs = PulsePicker.compute_beams()
+b5 = bs[5]
+b4 = bs[4]
+Out_Beam0 = Beam(radius=2)
+Out_Beam0.draw_dict["color"] = (1.0, 0.5, 0.5)
+Out_Beam0.pos = b5.pos
+Out_Beam0.normal = -b4.normal
+helper_mirror = Mirror()
+helper_mirror.set_geom(TFP_out.get_geom())
+Out_Beam1 = helper_mirror.next_beam(Out_Beam0)
+
+Out_Beam0.draw()
+Out_Beam1.draw()
+
+# =============================================================================
+# Last Minute Cosmetics
+# =============================================================================
+# x,y,z = TFP_Amp1.get_coordinate_system()
+# TFP_Amp1.pos += -y * tfp_push_aside
+
+# =============================================================================
+# Draw Section and Selection
+# =============================================================================
+
 Amplifier_I.draw()
-
-
-
+PulsePicker.draw()
+Pump.draw()
 
 if freecad_da:
   setview()
