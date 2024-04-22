@@ -43,20 +43,20 @@ POS_THULIUM_SMALL_OUT = np.array((104, 59-49, 0)) * 25 + np.array((0,0,100))
 
 TABLE_MAX_COORDINATES = np.array((158, 58)) * 25
 
-stretcher_out_obj = Lens()
+stretcher_out_obj = Lens(name="Stretcher_Output")
 stretcher_out_obj.pos = POS_STRETCHER_END_MIRROR
 stretcher_out_obj.draw()
 
-tm_big_obj = Lens()
+tm_big_obj = Lens(name="TmLaser_Big_Output")
 tm_big_obj.pos = POS_THULIUM_BIG_OUT
 tm_big_obj.draw()
 
 
-tm_small_obj = Lens()
+tm_small_obj = Lens(name="TmOszillator_Output")
 tm_small_obj.pos = POS_THULIUM_SMALL_OUT
 tm_small_obj.draw()
 
-X_ADDITIONAL = 80
+X_ADDITIONAL = 0
 Y_ADDITIONAL = 80
 
 # =============================================================================
@@ -241,7 +241,7 @@ Stretcher.set_geom(seed_end_geom)
 f1 = -100
 f2 = 300
 
-pump_first_prop = 100 + X_ADDITIONAL #in -x 
+pump_first_prop = 100 + X_ADDITIONAL #in -x
 pump_second_prop = 100 + Y_ADDITIONAL # in +y
 pump_third_prop = 100 # in -x
 
@@ -261,10 +261,10 @@ Pump.propagate(pump_second_prop)
 Pump.add_on_axis(Mirror(phi=+90))
 Pump.propagate(pump_third_prop)
 
-Pump.add_on_axis(Lens(f=f1))
+# Pump.add_on_axis(Lens(f=f1))
 Pump.propagate(f1+f2*0.5)
 Pump.propagate(f1+f2*0.5)
-Pump.add_on_axis(Lens(f=f2))
+# Pump.add_on_axis(Lens(f=f2))
 Pump.propagate(190)
 
 
@@ -373,15 +373,16 @@ tfp_push_aside = 5 # distance in mm to push the TFP aside, so that the beam can 
 
 
 PulsePicker = Composition(name="PulsePicker")
-PulsePicker.pos = POS_STRETCHER_END_MIRROR
-PulsePicker.normal = (0, -1, 0)
+PulsePicker.pos = POS_STRETCHER_END_MIRROR - (0, 12, 0)
+PulsePicker.normal = (0, 1, 0)
+PulsePicker.propagate(12)
 
 # lightsource_pp = Beam(angle=0, radius=seed_beam_radius)
 # PulsePicker.set_light_source(lightsource_pp)
 # PulsePicker.propagate(distance_seed_laser_stretcher*0.2)
 
 # first small flip mirror from stretcher with cosmetics
-FlipMirror_pp = Mirror(phi=90)
+FlipMirror_pp = Mirror(phi=-90)
 FlipMirror_pp_mount=Composed_Mount()
 FlipMirror_pp.Mount = Composed_Mount(unit_model_list = ["MH25_KMSS","1inch_post"])
 FlipMirror_pp.Mount.set_geom(FlipMirror_pp.get_geom())
@@ -389,7 +390,7 @@ PulsePicker.add_on_axis(FlipMirror_pp)
 FlipMirror_pp.pos += (0,0,flip_mirror_push_down)
 
 # polarisation optics upt to pockels cell
-PulsePicker.propagate(90)
+PulsePicker.propagate(280)
 Lambda2 = Lambda_Plate()
 PulsePicker.add_on_axis(Lambda2)
 PulsePicker.propagate(390)
@@ -449,16 +450,17 @@ PulsePicker.propagate(80)
 second_last_flip_pp = Mirror(phi=-90)
 PulsePicker.add_on_axis(second_last_flip_pp)
 
-#geometrical considerations regarding 2 perpendicular rays that should 
+#geometrical considerations regarding 2 perpendicular rays that should
 #zick zack meet in Regen TFP
 p,a = PulsePicker.last_geom()
 n1 = a[:,0]
-Lslfp = np.sum(TFP_Amp1.pos*n1) - np.sum(second_last_flip_pp.pos*n1) 
+Lslfp = np.sum(TFP_Amp1.pos*n1) - np.sum(second_last_flip_pp.pos*n1)
 
 PulsePicker.propagate(Lslfp)
 last_flip_pp = Mirror(phi=90)
 PulsePicker.add_on_axis(last_flip_pp)
 PulsePicker.propagate(np.linalg.norm(last_flip_pp.pos - TFP_Amp1.pos))
+
 
 # =============================================================================
 # Output Beam to Amp2
@@ -466,7 +468,7 @@ PulsePicker.propagate(np.linalg.norm(last_flip_pp.pos - TFP_Amp1.pos))
 bs = PulsePicker.compute_beams()
 b5 = bs[5]
 b4 = bs[4]
-Out_Beam0 = Beam(radius=2)
+Out_Beam0 = Beam(radius=2, name="Beam_to_Amp2")
 Out_Beam0.draw_dict["color"] = (1.0, 0.5, 0.5)
 Out_Beam0.pos = b5.pos
 Out_Beam0.normal = -b4.normal
@@ -682,9 +684,11 @@ Compressor.set_geom(amp2.last_geom())
 
 Seed.draw()
 Stretcher.draw()
+# Stretcher.draw_elements()
 PulsePicker.draw()
 # PulsePicker.draw_alignment_posts()
 Amplifier_I.draw()
+# Amplifier_I.draw_elements()
 Pump.draw()
 # amp2.draw()
 # BigPump.draw()
