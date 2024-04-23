@@ -50,7 +50,9 @@ focal_length = 428.0733746200338
 angle =1
 para_d = 10
 
-def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,roundtrip=20,centerlamda=1030e-9*1e3,s_shift=0,ls="CR",seperation=150):
+def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,
+                         roundtrip=20,centerlamda=1030e-9*1e3,s_shift=0,
+                         ls="CR",seperation=150,Tele_added=True):
   Radius = 600 #Radius des großen Konkavspiegels
   Aperture_concav = 100
   h_StripeM = 10 #Höhe des Streifenspiegels
@@ -244,44 +246,44 @@ def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,rou
   Tele = Composition()
   Tele.set_light_source(Beam())
   Tele_M1 = Mirror()
-  Tele_M1.pos = (50,0,80)
+  Tele_M1.pos = (120,0,80)
   Tele_M1.normal = (1,-1,0)
   Tele_M1.aperture = 25.4/2
   Tele_M1.set_mount_to_default()
-  if vertical_mat:  
-    Tele_CM1 = Cylindrical_Mirror(radius=focal_length*2,height=20,thickness=10)
-    Tele_CM2 = Cylindrical_Mirror(radius=focal_length*2,height=20,thickness=10)
+  if Tele_added:
+    if vertical_mat:  
+      Tele_CM1 = Cylindrical_Mirror(radius=focal_length*2,height=20,thickness=10)
+      Tele_CM2 = Cylindrical_Mirror(radius=focal_length*2,height=20,thickness=10)
+    else:
+      Tele_CM1 = Cylindrical_Mirror1(radius=focal_length*2,height=20,thickness=10)
+      Tele_CM2 = Cylindrical_Mirror1(radius=focal_length*2,height=20,thickness=10)    
   else:
-    Tele_CM1 = Cylindrical_Mirror1(radius=focal_length*2,height=20,thickness=10)
-    Tele_CM2 = Cylindrical_Mirror1(radius=focal_length*2,height=20,thickness=10)    
-  
-  Tele_CM1.pos = (50+para_d/2,focal_length*2,80)
+    Tele_CM1 = Mirror()
+    Tele_CM2 = Mirror()
+  Tele_CM1.pos = (120+para_d/2,focal_length/2,80)
   Tele_CM1.normal = (0,1,0)
   Tele_CM1.rotate((1,0,0), -angle/180*np.pi)
-  Tele_CM2.pos = (50+para_d/2,focal_length*2*(1-np.cos(angle*2/180*np.pi)),np.sin(angle*2/180*np.pi)*focal_length*2+80)
+  Tele_CM2.pos = (120+para_d/2,focal_length*2*(1-np.cos(angle*2/180*np.pi))-3/2*focal_length,
+                  np.sin(angle*2/180*np.pi)*focal_length*2+80)
   Tele_CM2.normal = (0,-1,0)
   Tele_CM2.rotate((1,0,0), -angle/180*np.pi)
   Tele_CM1.rotate(Tele_CM1.normal, np.pi/2)
   Tele_CM2.rotate(Tele_CM2.normal, np.pi/2)
   Tele_CM1.aperture = Tele_CM2.aperture = 30
-  
+
   Tele_pm1 = Mirror()
   Tele_pm2 = Mirror()
-  Tele_pm1.pos = Tele_CM2.pos + (-para_d/2,focal_length*2-para_d/2,0)
+  Tele_pm1.pos = Tele_CM2.pos + (-para_d/2,focal_length/2-para_d/2,0)
   Tele_pm1.normal = (-1,1,0)
   Tele_pm2.pos = Tele_pm1.pos + (para_d,0,0)
   Tele_pm2.normal = (1,1,0)
   Tele_pm2.invisible = True
   Tele_pm1.invisible = True
-  
-  
-  
+
   Tele_M2 = Mirror()
-  Tele_M2.pos = (50+para_d,0,80)
+  Tele_M2.pos = (120+para_d,0,80)
   Tele_M2.normal = (-1,-1,0)
   Tele_M2.aperture = 25.4/2
-  
-  
   
   Tele_M1.invisible = Tele_M2.invisible = True
   Tele_pm2.Mount = Tele_pm1.Mount = Tele_M1.Mount = Tele_M2.Mount = Unit_Mount("dont_draw")
@@ -621,7 +623,7 @@ def Cal_matrix(Comp=Composition(),vertical_mat = True):
   # Comp._matrix = np.matmul(np.array([[1,Comp._last_prop], [0,1]]), Comp._matrix ) #last propagation
   return np.array(Comp._matrix)
 
-roundtrip = 20
+roundtrip = 40
 centerlamda = 1030E-6
 C_radius = 7000
 # StripeM_shift = 0.07
@@ -631,7 +633,7 @@ StripeM_shift = 0
 # CB=CenterBeam CR=CenterRay 
 ls = "CB"
 # mat1 = cavity_and_stretcher(C_radius=C_radius,vertical_mat=True,want_to_draw=True,roundtrip=roundtrip,centerlamda=centerlamda,s_shift=StripeM_shift,ls=ls)
-seperation_list = [ii for ii in range(150,250,10)]
+seperation_list = [ii for ii in range(50,101,10)]
 GDD_list = []
 for seperation in seperation_list:
   GDD_list.append(cavity_and_stretcher(C_radius=C_radius,want_to_draw=False,
@@ -645,9 +647,10 @@ plt.tick_params(labelsize=20)
 plt.xlabel("seperation length of the stretcher(mm)",fontsize=20)
 plt.ylabel("Group delay disperation(s^2)",fontsize=20)
 plt.title("Group delay disperation in different seperation length",fontsize=20)
-plt.axhline(1.4108287432982885e-22, color = 'black', linewidth = 1)
-plt.text(208, 1.42e-22, "The absolute value of Compressor's",fontsize=20)
-plt.text(208, 1.37e-22, "Group delay disperation(1.41E-22s^2)",fontsize=20)
+# plt.axhline(1.4108287432982885e-22, color = 'black', linewidth = 1)
+plt.axhline(9.983659018150005e-23, color = 'black', linewidth = 1)
+# plt.text(208, 1.42e-22, "The absolute value of Compressor's",fontsize=20)
+# plt.text(208, 1.37e-22, "Group delay disperation(1.41E-22s^2)",fontsize=20)
   
 #   maximun deviation with different wavelength -------------------------------
 # lam_mid = 1030E-6

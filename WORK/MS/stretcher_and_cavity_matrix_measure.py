@@ -40,17 +40,19 @@ import numpy as np
 if freecad_da:
   clear_doc()
 
-centerlamda =1030e-9*1e3
-vertical_mat = True
-s_shift = 0
-ls="CB"
+# centerlamda =1030e-9*1e3
+# vertical_mat = True
+# s_shift = 0
+# ls="CB"
 Plane_height = 150
 # focal_length = 428.0733746200338
 # focal_length = 200
 angle =1
 para_d = 10
 
-def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,roundtrip=20,centerlamda=1030e-9*1e3,s_shift=0,ls="CR",seperation=150):
+def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,
+                         roundtrip=20,centerlamda=1030e-9*1e3,s_shift=0,
+                         ls="CR",seperation=150,Tele_added=True):
   Radius = 600 #Radius des großen Konkavspiegels
   Aperture_concav = 100
   h_StripeM = 10 #Höhe des Streifenspiegels
@@ -245,40 +247,42 @@ def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,rou
   Tele = Composition()
   Tele.set_light_source(Beam())
   Tele_M1 = Mirror()
-  Tele_M1.pos = (50,0,80)
+  Tele_M1.pos = (120,0,80)
   Tele_M1.normal = (1,-1,0)
   Tele_M1.aperture = 25.4/2
   Tele_M1.set_mount_to_default()
-  if vertical_mat:  
-    Tele_CM1 = Cylindrical_Mirror(radius=focal_length*2,height=20,thickness=10)
-    Tele_CM2 = Cylindrical_Mirror(radius=focal_length*2,height=20,thickness=10)
+  if Tele_added:
+    if vertical_mat:  
+      Tele_CM1 = Cylindrical_Mirror(radius=focal_length*2,height=20,thickness=10)
+      Tele_CM2 = Cylindrical_Mirror(radius=focal_length*2,height=20,thickness=10)
+    else:
+      Tele_CM1 = Cylindrical_Mirror1(radius=focal_length*2,height=20,thickness=10)
+      Tele_CM2 = Cylindrical_Mirror1(radius=focal_length*2,height=20,thickness=10)    
   else:
-    Tele_CM1 = Cylindrical_Mirror1(radius=focal_length*2,height=20,thickness=10)
-    Tele_CM2 = Cylindrical_Mirror1(radius=focal_length*2,height=20,thickness=10)    
-  
-  Tele_CM1.pos = (50+para_d/2,focal_length*2,80)
+    Tele_CM1 = Mirror()
+    Tele_CM2 = Mirror()
+  Tele_CM1.pos = (120+para_d/2,focal_length/2,80)
   Tele_CM1.normal = (0,1,0)
   Tele_CM1.rotate((1,0,0), -angle/180*np.pi)
-  Tele_CM2.pos = (50+para_d/2,focal_length*2*(1-np.cos(angle*2/180*np.pi)),np.sin(angle*2/180*np.pi)*focal_length*2+80)
+  Tele_CM2.pos = (120+para_d/2,focal_length*2*(1-np.cos(angle*2/180*np.pi))-3/2*focal_length,
+                  np.sin(angle*2/180*np.pi)*focal_length*2+80)
   Tele_CM2.normal = (0,-1,0)
   Tele_CM2.rotate((1,0,0), -angle/180*np.pi)
   Tele_CM1.rotate(Tele_CM1.normal, np.pi/2)
   Tele_CM2.rotate(Tele_CM2.normal, np.pi/2)
   Tele_CM1.aperture = Tele_CM2.aperture = 30
-  
+
   Tele_pm1 = Mirror()
   Tele_pm2 = Mirror()
-  Tele_pm1.pos = Tele_CM2.pos + (-para_d/2,focal_length*2-para_d/2,0)
+  Tele_pm1.pos = Tele_CM2.pos + (-para_d/2,focal_length/2-para_d/2,0)
   Tele_pm1.normal = (-1,1,0)
   Tele_pm2.pos = Tele_pm1.pos + (para_d,0,0)
   Tele_pm2.normal = (1,1,0)
   Tele_pm2.invisible = True
   Tele_pm1.invisible = True
-  
-  
-  
+
   Tele_M2 = Mirror()
-  Tele_M2.pos = (50+para_d,0,80)
+  Tele_M2.pos = (120+para_d,0,80)
   Tele_M2.normal = (-1,-1,0)
   Tele_M2.aperture = 25.4/2
   
@@ -630,7 +634,9 @@ StripeM_shift = 0
 # StripeM_shift = 0.115
 # CB=CenterBeam CR=CenterRay 
 ls = "CB"
-mat1 = cavity_and_stretcher(C_radius=C_radius,vertical_mat=True,want_to_draw=True,roundtrip=roundtrip,centerlamda=centerlamda,s_shift=StripeM_shift,ls=ls)
+mat1 = cavity_and_stretcher(C_radius=C_radius,vertical_mat=True,want_to_draw=True,
+                            roundtrip=roundtrip,centerlamda=centerlamda,
+                            s_shift=StripeM_shift,ls=ls,seperation=71.38171)
 
 #   maximun deviation with different wavelength -------------------------------
 # lam_mid = 1030E-6

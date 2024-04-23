@@ -42,7 +42,7 @@ class Intersection_plane(Opt_Element):
     # return model_intersection_plane(**self.draw_dict)
   
   
-  def spot_diagram(self, beam, aberration_analysis=False):
+  def spot_diagram(self, beam, aberration_analysis=False,default_diagram_size=0):
     """
       Draw the Spot diagram at the intersection plane
 
@@ -161,6 +161,10 @@ class Intersection_plane(Opt_Element):
     a=plt.scatter(point_x,point_y,s=10,c=point_c)
     plt.xticks(fontsize=fs)
     plt.yticks(fontsize=fs)
+    if default_diagram_size!=0:
+      print(default_diagram_size)
+      plt.xlim(-default_diagram_size,default_diagram_size)
+      plt.ylim(-5,5)
     # plt.xlim(-0.0015,0.0015)
     # plt.ylim(-0.0015,0.0015)
     plt.xlabel("x-axis (mm)",fontsize=fs)

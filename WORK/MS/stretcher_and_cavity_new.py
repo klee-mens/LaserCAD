@@ -41,13 +41,13 @@ if freecad_da:
 # s_shift = 0
 # ls="CB"
 Plane_height = 150 # The height of the second floor.
-focal_length = 428.0733746200338 # The focal length of the telescope
+# focal_length = 428.0733746200338 # The focal length of the telescope
 angle =1
 para_d = 10
 
 def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,
                          roundtrip=20,centerlamda=1030e-9*1e3,s_shift=0,
-                         ls="CR",seperation=150):
+                         ls="CR",seperation=150,Tele_added = True):
   """
   build the stretcher and cavity.
   Parameters
@@ -105,7 +105,7 @@ def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,
   print("angle=",(gamma+np.arcsin(sinB))*180/np.pi)
   
   Ring_number = 2
-  Beam_radius = 0.5
+  Beam_radius = 1
   lightsource = Beam(radius=0, angle=0)
   wavels = np.linspace(lam_mid-delta_lamda/2, lam_mid+delta_lamda/2, 
                        number_of_rays)
@@ -281,45 +281,44 @@ def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,
   Tele = Composition()
   Tele.set_light_source(Beam())
   Tele_M1 = Mirror()
-  Tele_M1.pos = (50,0,80)
+  Tele_M1.pos = (120,0,80)
   Tele_M1.normal = (1,-1,0)
   Tele_M1.aperture = 25.4/2
   Tele_M1.set_mount_to_default()
-  if vertical_mat:  
-    Tele_CM1 = Cylindrical_Mirror(radius=focal_length*2,height=20,thickness=10)
-    Tele_CM2 = Cylindrical_Mirror(radius=focal_length*2,height=20,thickness=10)
+  if Tele_added:
+    if vertical_mat:  
+      Tele_CM1 = Cylindrical_Mirror(radius=focal_length*2,height=20,thickness=10)
+      Tele_CM2 = Cylindrical_Mirror(radius=focal_length*2,height=20,thickness=10)
+    else:
+      Tele_CM1 = Cylindrical_Mirror1(radius=focal_length*2,height=20,thickness=10)
+      Tele_CM2 = Cylindrical_Mirror1(radius=focal_length*2,height=20,thickness=10)    
   else:
-    Tele_CM1 = Cylindrical_Mirror1(radius=focal_length*2,height=20,thickness=10)
-    Tele_CM2 = Cylindrical_Mirror1(radius=focal_length*2,height=20,thickness=10)    
-  
-  Tele_CM1.pos = (50+para_d/2,focal_length*2,80)
+    Tele_CM1 = Mirror()
+    Tele_CM2 = Mirror()
+  Tele_CM1.pos = (120+para_d/2,focal_length/2,80)
   Tele_CM1.normal = (0,1,0)
   Tele_CM1.rotate((1,0,0), -angle/180*np.pi)
-  Tele_CM2.pos = (50+para_d/2,focal_length*2*(1-np.cos(angle*2/180*np.pi)),
+  Tele_CM2.pos = (120+para_d/2,focal_length*2*(1-np.cos(angle*2/180*np.pi))-3/2*focal_length,
                   np.sin(angle*2/180*np.pi)*focal_length*2+80)
   Tele_CM2.normal = (0,-1,0)
   Tele_CM2.rotate((1,0,0), -angle/180*np.pi)
   Tele_CM1.rotate(Tele_CM1.normal, np.pi/2)
   Tele_CM2.rotate(Tele_CM2.normal, np.pi/2)
   Tele_CM1.aperture = Tele_CM2.aperture = 30
-  
+
   Tele_pm1 = Mirror()
   Tele_pm2 = Mirror()
-  Tele_pm1.pos = Tele_CM2.pos + (-para_d/2,focal_length*2-para_d/2,0)
+  Tele_pm1.pos = Tele_CM2.pos + (-para_d/2,focal_length/2-para_d/2,0)
   Tele_pm1.normal = (-1,1,0)
   Tele_pm2.pos = Tele_pm1.pos + (para_d,0,0)
   Tele_pm2.normal = (1,1,0)
   Tele_pm2.invisible = True
   Tele_pm1.invisible = True
-  
-  
-  
+
   Tele_M2 = Mirror()
-  Tele_M2.pos = (50+para_d,0,80)
+  Tele_M2.pos = (120+para_d,0,80)
   Tele_M2.normal = (-1,-1,0)
   Tele_M2.aperture = 25.4/2
-  
-  
   
   Tele_M1.invisible = Tele_M2.invisible = True
   Tele_pm2.Mount = Tele_pm1.Mount = Tele_M1.Mount = Tele_M2.Mount = Unit_Mount("dont_draw")
@@ -537,6 +536,23 @@ def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,
         Comp._beams_part.append(x)
   # print(Comp._beams[-5].normal)
   if Comp._lightsource == centerray:
+    ip_stripe = Intersection_plane()
+    ip_stripe.set_geom(StripeM.get_geom())
+    rays_0 = Comp._beams[-25].get_all_rays()
+    for ray in Comp._beams[-24].get_all_rays():
+      rays_0.append(ray)
+    for ray in Comp._beams[-18].get_all_rays():
+      rays_0.append(ray)
+    for ray in Comp._beams[-17].get_all_rays():
+      rays_0.append(ray)
+    B0 = Beam()
+    B0.override_rays(rays_0)
+    ip_stripe.spot_diagram(B0,aberration_analysis=False)
+    # ip_stripe.spot_diagram(Comp._beams[-25],aberration_analysis=False)
+    # ip_stripe.spot_diagram(Comp._beams[-24],aberration_analysis=False)
+    # ip_stripe.spot_diagram(Comp._beams[-18],aberration_analysis=False)
+    # ip_stripe.spot_diagram(Comp._beams[-17],aberration_analysis=False)
+    ip_stripe.draw()
     diff = []
     diff_out = []
     diff_hor = []
@@ -562,9 +578,30 @@ def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,
         max_diff = diff_R_ver
         max_roundtrip = n//32+1
     
-    # return max_diff
+    return max_diff
   elif Comp._lightsource == centerlightsource:
     ip.spot_diagram(Comp._beams[-1],aberration_analysis=True)
+    
+    ip_stripe = Intersection_plane()
+    ip_stripe.set_geom(StripeM.get_geom())
+    
+    rays_0 = Comp._beams[-25].get_all_rays()
+    for ray in Comp._beams[-24].get_all_rays():
+      rays_0.append(ray)
+    for ray in Comp._beams[-18].get_all_rays():
+      rays_0.append(ray)
+    for ray in Comp._beams[-17].get_all_rays():
+      rays_0.append(ray)
+    
+    B0 = Beam()
+    B0.override_rays(rays_0)
+    ip_stripe.spot_diagram(B0,aberration_analysis=False)
+    # ip_stripe.spot_diagram(Comp._beams[-25],aberration_analysis=False)
+    # ip_stripe.spot_diagram(Comp._beams[-24],aberration_analysis=False)
+    # ip_stripe.spot_diagram(Comp._beams[-18],aberration_analysis=False)
+    # ip_stripe.spot_diagram(Comp._beams[-17],aberration_analysis=False)
+    ip_stripe.draw()
+    
     pathlength = {}
     for ii in range(Comp._beams[0]._ray_count):
       wavelength = Comp._beams[0].get_all_rays()[ii].wavelength
@@ -599,32 +636,50 @@ def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,
           fai_add3 += para[para_order-jj] * jj * (jj-1) * (ii**(jj-2))
       fai2.append(fai_add2)
       fai3.append(fai_add3)
-    # plt.figure()
-    # ax1=plt.subplot(1,3,1)
-    # plt.scatter(omega,delay,label="delay")
-    # plt.plot(omega,delay_new,label="delay")
-    # plt.title("Relationship of delay with angular frequency")
-    # plt.xlabel("angular frequency ω (rad/s)")
-    # plt.ylabel("delay (s)")
-    # plt.axhline(delay[int(len(delay)/2)], color = 'black', linewidth = 1)
-    # ax2=plt.subplot(1,3,2)
-    # plt.plot(omega,fai2)
-    # plt.title("Group delay dispersion")
-    # plt.xlabel("angular frequency ω (rad/s)")
-    # plt.ylabel("The second order derivative of φ(ω)")
-    # plt.axhline(fai2[int(len(fai2)/2)], color = 'black', linewidth = 1)
-    # print("Group delay dispersion at the center wavelength:",fai2[int(len(fai2)/2)])
-    # ax3=plt.subplot(1,3,3)
-    # plt.plot(omega,fai3)
-    # # plt.plot(omega_d,fai3_new)
-    # plt.title("Third order dispersion")
-    # plt.xlabel("angular frequency ω (rad/s)")
-    # plt.ylabel("The third order derivative of φ(ω)")
-    # plt.axhline(fai3[int(len(fai3)/2)], color = 'black', linewidth = 1)
-    # print("3rd order dispersion at the center wavelength:",fai3[int(len(fai3)/2)])
-    # return fai2[int(len(fai2)/2)]
+    plt.figure()
+    ax1=plt.subplot(1,3,1)
+    plt.scatter(omega,delay,label="delay")
+    plt.plot(omega,delay_new,label="delay")
+    plt.title("Relationship of delay with angular frequency")
+    plt.xlabel("angular frequency ω (rad/s)")
+    plt.ylabel("delay (s)")
+    plt.axhline(delay[int(len(delay)/2)], color = 'black', linewidth = 1)
+    ax2=plt.subplot(1,3,2)
+    plt.plot(omega,fai2)
+    plt.title("Group delay dispersion")
+    plt.xlabel("angular frequency ω (rad/s)")
+    plt.ylabel("The second order derivative of φ(ω)")
+    plt.axhline(fai2[int(len(fai2)/2)], color = 'black', linewidth = 1)
+    print("Group delay dispersion at the center wavelength:",fai2[int(len(fai2)/2)])
+    ax3=plt.subplot(1,3,3)
+    plt.plot(omega,fai3)
+    # plt.plot(omega_d,fai3_new)
+    plt.title("Third order dispersion")
+    plt.xlabel("angular frequency ω (rad/s)")
+    plt.ylabel("The third order derivative of φ(ω)")
+    plt.axhline(fai3[int(len(fai3)/2)], color = 'black', linewidth = 1)
+    print("3rd order dispersion at the center wavelength:",fai3[int(len(fai3)/2)])
+    return fai2[int(len(fai2)/2)]
   else:
     ip.spot_diagram(Comp._beams[-1],aberration_analysis=False)
+    ip_stripe = Intersection_plane()
+    ip_stripe.set_geom(StripeM.get_geom())
+    rays_0 = Comp._beams[-25].get_all_rays()
+    for ray in Comp._beams[-24].get_all_rays():
+      rays_0.append(ray)
+    for ray in Comp._beams[-18].get_all_rays():
+      rays_0.append(ray)
+    for ray in Comp._beams[-17].get_all_rays():
+      rays_0.append(ray)
+    B0 = Beam()
+    B0.override_rays(rays_0)
+    ip_stripe.spot_diagram(B0,aberration_analysis=False,default_diagram_size=22)
+    # ip_stripe.spot_diagram(Comp._beams[-25],aberration_analysis=False)
+    # ip_stripe.spot_diagram(Comp._beams[-24],aberration_analysis=False)
+    # ip_stripe.spot_diagram(Comp._beams[-18],aberration_analysis=False)
+    # ip_stripe.spot_diagram(Comp._beams[-17],aberration_analysis=False)
+    ip_stripe.draw()
+    # print(ip_stripe.get_geom())
   if freecad_da:
     setview()
   return Cal_matrix(Comp=Comp,vertical_mat=vertical_mat)
@@ -661,18 +716,19 @@ def Cal_matrix(Comp=Composition(),vertical_mat = True):
   # Comp._matrix = np.matmul(np.array([[1,Comp._last_prop], [0,1]]), Comp._matrix ) #last propagation
   return np.array(Comp._matrix)
 
-roundtrip = 20
+roundtrip = 1
 centerlamda = 1030E-6
 C_radius = 7000
 # StripeM_shift = 0.07
 # StripeM_shift = 0.13
 StripeM_shift = 0
 # StripeM_shift = 0.115
-# CB=CenterBeam CR=CenterRay 
+# CB=CenterBeam CR=CenterRay B=Beamwithradius
 ls = "CB"
-mat1 = cavity_and_stretcher(C_radius=C_radius,vertical_mat=True,want_to_draw=True,
+mat1 = cavity_and_stretcher(C_radius=C_radius,vertical_mat=True,want_to_draw=False,
                             roundtrip=roundtrip,centerlamda=centerlamda,
-                            s_shift=StripeM_shift,ls=ls,seperation=150)
+                            s_shift=StripeM_shift,ls=ls,seperation=71.38147,
+                            Tele_added = True)
   
 #   maximun deviation with different wavelength -------------------------------
 # lam_mid = 1030E-6
@@ -718,52 +774,52 @@ mat1 = cavity_and_stretcher(C_radius=C_radius,vertical_mat=True,want_to_draw=Tru
 # plt.show()
 # -----------------------------------------------------------------------------
 
-delta_lamda = 60E-6
-number_of_rays = 15
-wavels = np.linspace(centerlamda-delta_lamda/2, centerlamda+delta_lamda/2, number_of_rays)
-matA = []
-matB = []
-matC = []
-matD = []
-matA_h = []
-matB_h = []
-matC_h = []
-matD_h = []
-for wavel in wavels:
-    a =(cavity_and_stretcher(C_radius=C_radius,vertical_mat=True,want_to_draw=False,
-                              roundtrip = roundtrip,centerlamda=wavel,s_shift=StripeM_shift))
-    matA.append(a[0][0])
-    matB.append(a[0][1])
-    matC.append(a[1][0])
-    matD.append(a[1][1])
-    a =(cavity_and_stretcher(C_radius=C_radius,vertical_mat=False,want_to_draw=False,
-                              roundtrip = roundtrip,centerlamda=wavel,s_shift=StripeM_shift))
-    matA_h.append(a[0][0])
-    matB_h.append(a[0][1])
-    matC_h.append(a[1][0])
-    matD_h.append(a[1][1])
-plt.figure()
-a1 =plt.subplot(2,2,1)
-plt.plot(wavels*1E6,matA)
-plt.plot(wavels*1E6,matA_h)
-plt.xlabel("wavelength (nm)")
-plt.ylabel("matrix number A")
-plt.legend(['vertical','horizontal'],loc = 'upper left')
-a1 =plt.subplot(2,2,2)
-plt.plot(wavels*1E6,matB)
-plt.plot(wavels*1E6,matB_h)
-plt.xlabel("wavelength (nm)")
-plt.ylabel("matrix number B")
-plt.legend(['vertical','horizontal'],loc = 'upper right')
-a1 =plt.subplot(2,2,3)
-plt.plot(wavels*1E6,matC)
-plt.plot(wavels*1E6,matC_h)
-plt.xlabel("wavelength (nm)")
-plt.ylabel("matrix number C")
-plt.legend(['vertical','horizontal'],loc = 'upper right')
-a1 =plt.subplot(2,2,4)
-plt.plot(wavels*1E6,matD)
-plt.plot(wavels*1E6,matD_h)
-plt.xlabel("wavelength (nm)")
-plt.ylabel("matrix number D")
-plt.legend(['vertical','horizontal'],loc = 'upper left')
+# delta_lamda = 60E-6
+# number_of_rays = 15
+# wavels = np.linspace(centerlamda-delta_lamda/2, centerlamda+delta_lamda/2, number_of_rays)
+# matA = []
+# matB = []
+# matC = []
+# matD = []
+# matA_h = []
+# matB_h = []
+# matC_h = []
+# matD_h = []
+# for wavel in wavels:
+#     a =(cavity_and_stretcher(C_radius=C_radius,vertical_mat=True,want_to_draw=False,
+#                               roundtrip = roundtrip,centerlamda=wavel,s_shift=StripeM_shift))
+#     matA.append(a[0][0])
+#     matB.append(a[0][1])
+#     matC.append(a[1][0])
+#     matD.append(a[1][1])
+#     a =(cavity_and_stretcher(C_radius=C_radius,vertical_mat=False,want_to_draw=False,
+#                               roundtrip = roundtrip,centerlamda=wavel,s_shift=StripeM_shift))
+#     matA_h.append(a[0][0])
+#     matB_h.append(a[0][1])
+#     matC_h.append(a[1][0])
+#     matD_h.append(a[1][1])
+# plt.figure()
+# a1 =plt.subplot(2,2,1)
+# plt.plot(wavels*1E6,matA)
+# plt.plot(wavels*1E6,matA_h)
+# plt.xlabel("wavelength (nm)")
+# plt.ylabel("matrix number A")
+# plt.legend(['vertical','horizontal'],loc = 'upper left')
+# a1 =plt.subplot(2,2,2)
+# plt.plot(wavels*1E6,matB)
+# plt.plot(wavels*1E6,matB_h)
+# plt.xlabel("wavelength (nm)")
+# plt.ylabel("matrix number B")
+# plt.legend(['vertical','horizontal'],loc = 'upper right')
+# a1 =plt.subplot(2,2,3)
+# plt.plot(wavels*1E6,matC)
+# plt.plot(wavels*1E6,matC_h)
+# plt.xlabel("wavelength (nm)")
+# plt.ylabel("matrix number C")
+# plt.legend(['vertical','horizontal'],loc = 'upper right')
+# a1 =plt.subplot(2,2,4)
+# plt.plot(wavels*1E6,matD)
+# plt.plot(wavels*1E6,matD_h)
+# plt.xlabel("wavelength (nm)")
+# plt.ylabel("matrix number D")
+# plt.legend(['vertical','horizontal'],loc = 'upper left')

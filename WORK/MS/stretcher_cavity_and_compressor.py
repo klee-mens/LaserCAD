@@ -50,7 +50,9 @@ Plane_height = 150
 angle =1
 para_d = 10
 
-def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,roundtrip=20,centerlamda=1030e-9*1e3,s_shift=0,ls="CR",seperation=150):
+def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,
+                         roundtrip=20,centerlamda=1030e-9*1e3,s_shift=0,
+                         ls="CR",seperation=150,Tele_added = True):
   """
   build the stretcher and cavity.
   Parameters
@@ -273,38 +275,42 @@ def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,rou
   Tele = Composition()
   Tele.set_light_source(Beam())
   Tele_M1 = Mirror()
-  Tele_M1.pos = (50,0,80)
+  Tele_M1.pos = (120,0,80)
   Tele_M1.normal = (1,-1,0)
   Tele_M1.aperture = 25.4/2
   Tele_M1.set_mount_to_default()
-  if vertical_mat:  
-    Tele_CM1 = Cylindrical_Mirror(radius=focal_length*2,height=20,thickness=10)
-    Tele_CM2 = Cylindrical_Mirror(radius=focal_length*2,height=20,thickness=10)
+  if Tele_added:
+    if vertical_mat:  
+      Tele_CM1 = Cylindrical_Mirror(radius=focal_length*2,height=20,thickness=10)
+      Tele_CM2 = Cylindrical_Mirror(radius=focal_length*2,height=20,thickness=10)
+    else:
+      Tele_CM1 = Cylindrical_Mirror1(radius=focal_length*2,height=20,thickness=10)
+      Tele_CM2 = Cylindrical_Mirror1(radius=focal_length*2,height=20,thickness=10)    
   else:
-    Tele_CM1 = Cylindrical_Mirror1(radius=focal_length*2,height=20,thickness=10)
-    Tele_CM2 = Cylindrical_Mirror1(radius=focal_length*2,height=20,thickness=10)    
-  
-  Tele_CM1.pos = (50+para_d/2,focal_length*2,80)
+    Tele_CM1 = Mirror()
+    Tele_CM2 = Mirror()
+  Tele_CM1.pos = (120+para_d/2,focal_length/2,80)
   Tele_CM1.normal = (0,1,0)
   Tele_CM1.rotate((1,0,0), -angle/180*np.pi)
-  Tele_CM2.pos = (50+para_d/2,focal_length*2*(1-np.cos(angle*2/180*np.pi)),np.sin(angle*2/180*np.pi)*focal_length*2+80)
+  Tele_CM2.pos = (120+para_d/2,focal_length*2*(1-np.cos(angle*2/180*np.pi))-3/2*focal_length,
+                  np.sin(angle*2/180*np.pi)*focal_length*2+80)
   Tele_CM2.normal = (0,-1,0)
   Tele_CM2.rotate((1,0,0), -angle/180*np.pi)
   Tele_CM1.rotate(Tele_CM1.normal, np.pi/2)
   Tele_CM2.rotate(Tele_CM2.normal, np.pi/2)
   Tele_CM1.aperture = Tele_CM2.aperture = 30
-  
+
   Tele_pm1 = Mirror()
   Tele_pm2 = Mirror()
-  Tele_pm1.pos = Tele_CM2.pos + (-para_d/2,focal_length*2-para_d/2,0)
+  Tele_pm1.pos = Tele_CM2.pos + (-para_d/2,focal_length/2-para_d/2,0)
   Tele_pm1.normal = (-1,1,0)
   Tele_pm2.pos = Tele_pm1.pos + (para_d,0,0)
   Tele_pm2.normal = (1,1,0)
   Tele_pm2.invisible = True
   Tele_pm1.invisible = True
-  
+
   Tele_M2 = Mirror()
-  Tele_M2.pos = (50+para_d,0,80)
+  Tele_M2.pos = (120+para_d,0,80)
   Tele_M2.normal = (-1,-1,0)
   Tele_M2.aperture = 25.4/2
   
@@ -561,21 +567,21 @@ def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,rou
     ray_lam = [ray.wavelength for ray in Comp._beams[0].get_all_rays()]
     path = [pathlength[ii] for ii in ray_lam]
     path_diff = [ii-path[int(len(path)/2)] for ii in path]
-    path_diff_compressor = [-1930.41906516581,
-     -1688.6110946750669,
-     -1436.8229727028593,
-     -1174.3319238140466,
-     -900.3394906413032,
-     -613.9610201910964,
-     -314.2133071914104,
+    path_diff_compressor = [-1435.8095802620082,
+     -1248.181251718779,
+     -1055.2088534933555,
+     -856.6221172036312,
+     -652.1311852145445,
+     -441.4247434452027,
+     -224.16793177010913,
      0.0,
-     329.9057261752314,
-     676.8818549646694,
-     1042.4823713242367,
-     1428.4672857478836,
-     1836.8391682836718,
-     2269.8879293969403,
-     2730.2461425494585]
+     231.4683280119316,
+     470.6578261032846,
+     718.0241251653115,
+     974.0615213667734,
+     1239.3073059115104,
+     1514.3467029298517,
+     1799.8185191341927]
     path_diff1 = deepcopy(path_diff)
     path_diff =[path_diff1[ii] +path_diff_compressor[ii] for ii in range(len(path_diff))]
     fai = [path_diff[ii]/ray_lam[ii]*2*np.pi for ii in range(len(path))]
@@ -663,7 +669,7 @@ def Cal_matrix(Comp=Composition(),vertical_mat = True):
   # Comp._matrix = np.matmul(np.array([[1,Comp._last_prop], [0,1]]), Comp._matrix ) #last propagation
   return np.array(Comp._matrix)
 
-roundtrip = 20
+roundtrip = 40
 centerlamda = 1030E-6
 C_radius = 7000
 # StripeM_shift = 0.07
@@ -672,9 +678,9 @@ StripeM_shift = 0
 # StripeM_shift = 0.115
 # CB=CenterBeam CR=CenterRay 
 ls = "CB"
-mat1 = cavity_and_stretcher(C_radius=C_radius,vertical_mat=True,want_to_draw=True,
+mat1 = cavity_and_stretcher(C_radius=C_radius,vertical_mat=True,want_to_draw=False,
                             roundtrip=roundtrip,centerlamda=centerlamda,
-                            s_shift=StripeM_shift,ls=ls,seperation=203)
+                            s_shift=StripeM_shift,ls=ls,seperation=71.38147)
   
 #   maximun deviation with different wavelength -------------------------------
 # lam_mid = 1030E-6

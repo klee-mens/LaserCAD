@@ -46,9 +46,10 @@ import numpy as np
 
 if freecad_da:
   clear_doc()
-
-focal_length = 150
-angle =4
+Tele_added = True
+vertical_mat = True
+focal_length = 430
+angle =1
 para_d = 10
 Tele = Composition()
 Tele.set_light_source(Beam())
@@ -57,33 +58,49 @@ Tele_M1.pos = (50,0,80)
 Tele_M1.normal = (1,-1,0)
 Tele_M1.aperture = 25.4/2
 Tele_M1.set_mount_to_default()
-Tele_CM1 = Cylindrical_Mirror(radius=focal_length*2,height=20,thickness=10)
-Tele_CM1.pos = (50+para_d/2,focal_length*2,80)
+if Tele_added:
+  if vertical_mat:  
+    Tele_CM1 = Cylindrical_Mirror(radius=focal_length*2,height=20,thickness=10)
+    Tele_CM2 = Cylindrical_Mirror(radius=focal_length*2,height=20,thickness=10)
+  else:
+    Tele_CM1 = Cylindrical_Mirror1(radius=focal_length*2,height=20,thickness=10)
+    Tele_CM2 = Cylindrical_Mirror1(radius=focal_length*2,height=20,thickness=10)    
+else:
+  Tele_CM1 = Mirror()
+  Tele_CM2 = Mirror()
+Tele_CM1.pos = (50+para_d/2,focal_length/2,80)
 Tele_CM1.normal = (0,1,0)
 Tele_CM1.rotate((1,0,0), -angle/180*np.pi)
-Tele_CM2 = Cylindrical_Mirror(radius=focal_length*2,height=20,thickness=10)
-Tele_CM2.pos = (50+para_d/2,focal_length*2*(1-np.cos(angle*2/180*np.pi)),np.sin(angle*2/180*np.pi)*focal_length*2+80)
+Tele_CM2.pos = (50+para_d/2,focal_length*2*(1-np.cos(angle*2/180*np.pi))-3/2*focal_length,
+                np.sin(angle*2/180*np.pi)*focal_length*2+80)
 Tele_CM2.normal = (0,-1,0)
 Tele_CM2.rotate((1,0,0), -angle/180*np.pi)
 Tele_CM1.rotate(Tele_CM1.normal, np.pi/2)
 Tele_CM2.rotate(Tele_CM2.normal, np.pi/2)
-Tele_CM1.aperture = Tele_CM2.aperture = 40
+Tele_CM1.aperture = Tele_CM2.aperture = 30
 
 Tele_pm1 = Mirror()
 Tele_pm2 = Mirror()
-Tele_pm1.pos = Tele_CM2.pos + (-para_d/2,focal_length*2-para_d/2,0)
+Tele_pm1.pos = Tele_CM2.pos + (-para_d/2,focal_length/2-para_d/2,0)
 Tele_pm1.normal = (-1,1,0)
 Tele_pm2.pos = Tele_pm1.pos + (para_d,0,0)
 Tele_pm2.normal = (1,1,0)
 Tele_pm2.invisible = True
 Tele_pm1.invisible = True
 
+
+
+Tele_M2 = Mirror()
+Tele_M2.pos = (50+para_d,0,80)
+Tele_M2.normal = (-1,-1,0)
+Tele_M2.aperture = 25.4/2
+
 pure_cosmetic = Rooftop_Mirror_Component(name="RoofTop_Mirror",aperture=5)
 pure_cosmetic.pos = (Tele_pm1.pos+Tele_pm2.pos)/2
 pure_cosmetic.normal = (Tele_pm1.normal+Tele_pm2.normal)/2
 pure_cosmetic.draw_dict["model_type"] = "Rooftop"
 pure_cosmetic.Mount= Unit_Mount("dont_draw")
-pure_cosmetic.draw_dict["length"] = 20
+pure_cosmetic.draw_dict["length"] = 10
 pure_cosmetic.draw_dict["l_height"] = 15
 pure_cosmetic.draw_dict["rotate90"] =True
 
@@ -97,7 +114,7 @@ pure_cosmetic1.pos = (Tele_M1.pos+Tele_M2.pos)/2
 pure_cosmetic1.normal = -(Tele_M1.normal+Tele_M2.normal)/2
 pure_cosmetic1.draw_dict["model_type"] = "Rooftop"
 pure_cosmetic1.Mount= Unit_Mount("dont_draw")
-pure_cosmetic1.draw_dict["length"] = 20
+pure_cosmetic1.draw_dict["length"] = 10
 pure_cosmetic1.draw_dict["l_height"] = 15
 pure_cosmetic1.draw_dict["rotate90"] =True
 

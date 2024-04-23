@@ -499,7 +499,7 @@ def cavity_and_stretcher(C_radius = 7000,want_to_draw=True,
       rays_0.append(ray)
     B0 = Beam()
     B0.override_rays(rays_0)
-    ip_stripe.spot_diagram(B0,aberration_analysis=False)
+    # ip_stripe.spot_diagram(B0,aberration_analysis=False)
     diff = []
     diff_out = []
     diff_hor = []
@@ -527,65 +527,20 @@ def cavity_and_stretcher(C_radius = 7000,want_to_draw=True,
     
     return max_diff
   elif Comp._lightsource == centerlightsource:
-    ip.spot_diagram(Comp._beams[-1],aberration_analysis=True)
-    pathlength = {}
-    for ii in range(Comp._beams[0]._ray_count):
-      wavelength = Comp._beams[0].get_all_rays()[ii].wavelength
-      pathlength[wavelength] = 0
-    for jj in range(len(Comp._beams)-1):
-      for ii in Comp._beams[jj].get_all_rays():
-        a=pathlength[ii.wavelength]
-        pathlength[ii.wavelength] = a +ii.length
-    ray_lam = [ray.wavelength for ray in Comp._beams[0].get_all_rays()]
-    path = [pathlength[ii] for ii in ray_lam]
-    path_diff = [ii-path[int(len(path)/2)] for ii in path]
-    fai = [path_diff[ii]/ray_lam[ii]*2*np.pi for ii in range(len(path))]
-    delay = [path_diff[ii]/c0 for ii in range(len(path))]
-    omega = [c0/ii*2*np.pi for ii in ray_lam]
-    omega = [(ii - c0/lam_mid*2*np.pi) for ii in omega]
-    fai_new = deepcopy(fai)
-    delay_new = deepcopy(delay)
-    para_order = 9
-    para = np.polyfit(omega, delay, para_order)
-    fai2 = []
-    fai3 = []
-    i_count = 0
-    for ii in omega:
-      fai_add = 0
-      fai_add2 = 0
-      fai_add3 = 0
-      for jj in range(para_order,-1,-1):
-        fai_add += para[para_order-jj]* ((ii)**jj)
-        if jj-1>=0:
-          fai_add2 += para[para_order-jj] * jj * (ii**(jj-1))
-        if jj-2>=0:
-          fai_add3 += para[para_order-jj] * jj * (jj-1) * (ii**(jj-2))
-      fai2.append(fai_add2)
-      fai3.append(fai_add3)
-    plt.figure()
-    ax1=plt.subplot(1,3,1)
-    plt.scatter(omega,delay,label="delay")
-    plt.plot(omega,delay_new,label="delay")
-    plt.title("Relationship of delay with angular frequency")
-    plt.xlabel("angular frequency ω (rad/s)")
-    plt.ylabel("delay (s)")
-    plt.axhline(delay[int(len(delay)/2)], color = 'black', linewidth = 1)
-    ax2=plt.subplot(1,3,2)
-    plt.plot(omega,fai2)
-    plt.title("Group delay dispersion")
-    plt.xlabel("angular frequency ω (rad/s)")
-    plt.ylabel("The second order derivative of φ(ω)")
-    plt.axhline(fai2[int(len(fai2)/2)], color = 'black', linewidth = 1)
-    print("Group delay dispersion at the center wavelength:",fai2[int(len(fai2)/2)])
-    ax3=plt.subplot(1,3,3)
-    plt.plot(omega,fai3)
-    # plt.plot(omega_d,fai3_new)
-    plt.title("Third order dispersion")
-    plt.xlabel("angular frequency ω (rad/s)")
-    plt.ylabel("The third order derivative of φ(ω)")
-    plt.axhline(fai3[int(len(fai3)/2)], color = 'black', linewidth = 1)
-    print("3rd order dispersion at the center wavelength:",fai3[int(len(fai3)/2)])
-    return fai2[int(len(fai2)/2)]
+    ip.spot_diagram(Comp._beams[-1],aberration_analysis=False)
+    rays_end = Comp._beams[-1].get_all_rays()
+    max_pos_diff = 0
+    pos_diff = []
+    for point_i in rays_end:
+      intersection_point = point_i.intersection(ip)
+      # print(intersection_point)
+      # pos_diff = intersection_point - ip.pos
+      pos_diff.append(intersection_point)
+    pos_center = pos_diff[int(len(pos_diff)/2)]
+    for ii in pos_diff:
+      if max_pos_diff < np.linalg.norm(ii-pos_center):
+        max_pos_diff = np.linalg.norm(ii-pos_center)
+    return (max_pos_diff)
   else:
     ip.spot_diagram(Comp._beams[-1],aberration_analysis=False)
     ip_stripe = Intersection_plane()
@@ -640,16 +595,25 @@ def Cal_matrix(Comp=Composition(),vertical_mat = True):
 roundtrip = 1
 centerlamda = 1030E-6
 C_radius = 7000
-# StripeM_shift = 0.07
-# StripeM_shift = 0.13
+# StripeM_shift = -0.13
 StripeM_shift = 0
-# StripeM_shift = 0.115
 # CB=CenterBeam CR=CenterRay 
-ls = "CB"
-mat1 = cavity_and_stretcher(C_radius=C_radius,want_to_draw=True,
+ls = "B"
+min_S_shift = 0
+min_spot = 10
+# for StripeM_shift in range(-15,-10,1):
+#   mat1 = cavity_and_stretcher(C_radius=C_radius,want_to_draw=False,
+#                             roundtrip=roundtrip,centerlamda=centerlamda,
+#                             s_shift=StripeM_shift/100,ls=ls,seperation=71.38147)
+#   if min_spot > mat1:
+#     min_spot = mat1
+#     min_S_shift = StripeM_shift/100
+# print(min_spot,min_S_shift)
+
+mat1 = cavity_and_stretcher(C_radius=C_radius,want_to_draw=False,
                             roundtrip=roundtrip,centerlamda=centerlamda,
-                            s_shift=StripeM_shift,ls=ls,seperation=71.38147)
-  
+                            s_shift=-0.13,ls=ls,seperation=71.38147)
+
 #   maximun deviation with different wavelength -------------------------------
 # lam_mid = 1030E-6
 # delta_lamda = 60E-6

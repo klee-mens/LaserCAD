@@ -69,7 +69,8 @@ v = lambda_mid/grating_const
 a = v/2
 B = np.sqrt(a**2 - (v**2 - SinS**2)/(2*(1+CosS)))
 sinB_new = a - B
-Grating_normal = (np.sqrt(1-sinB_new**2), sinB_new, 0)
+sinA = np.sin((gamma+np.arcsin(sinB_new)))
+Grating_normal = (np.sqrt(1-sinA**2), sinA, 0)
 
 Grat1 = Grating(grat_const=grating_const, order=-1)
 Grat1.pos -=(500-10,0,0)
@@ -82,7 +83,7 @@ Grat2 = Grating(grat_const=grating_const, order=-1)
 propagation_length = seperation
 
 # propagation_length = 99.9949
-Grat2.pos -= (500-10-propagation_length*CosS,SinS*propagation_length,0)
+Grat2.pos -= (500-10-propagation_length*CosS,-SinS*propagation_length,0)
 Grat2.normal = Grating_normal
 
 shift_direction = np.cross((0,0,1),Grat1.normal)
