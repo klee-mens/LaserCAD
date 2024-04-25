@@ -180,7 +180,7 @@ def cavity_and_stretcher(C_radius = 7000,want_to_draw=True,
   ray0.wavelength = lam_mid
   
   nfm1 = - ray0.normal
-  pfm1 = Grat.pos + 150 * nfm1 + (0,0,h_StripeM/2 + safety_to_StripeM + periscope_distance)
+  pfm1 = Grat.pos + 300 * nfm1 + (0,0,h_StripeM/2 + safety_to_StripeM + periscope_distance)
   
   # roof = Make_RoofTop_Mirror(height=periscope_distance,up=False)
   roof = Make_Periscope(height=periscope_distance, up=False, backwards=True)
@@ -612,7 +612,7 @@ min_spot = 10
 
 mat1 = cavity_and_stretcher(C_radius=C_radius,want_to_draw=False,
                             roundtrip=roundtrip,centerlamda=centerlamda,
-                            s_shift=-0.13,ls=ls,seperation=71.38147)
+                            s_shift=-0.13,ls=ls,seperation=71.381485)
 
 #   maximun deviation with different wavelength -------------------------------
 # lam_mid = 1030E-6

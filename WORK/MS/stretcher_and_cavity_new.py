@@ -47,7 +47,8 @@ para_d = 10
 
 def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,
                          roundtrip=20,centerlamda=1030e-9*1e3,s_shift=0,
-                         ls="CR",seperation=150,Tele_added = True):
+                         ls="CR",seperation=150,Tele_added = True,
+                         Concav_shift= [0,0,0,0]):
   """
   build the stretcher and cavity.
   Parameters
@@ -163,7 +164,7 @@ def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,
     Concav3 = Cylindrical_Mirror(radius=Radius,name="Concav_Mirror")
     Concav4 = Cylindrical_Mirror(radius=Radius,name="Concav_Mirror")
     StripeM = Cylindrical_Mirror(radius= -Radius/2, name="Stripe_Mirror")
-  Concav1.pos = (Radius/2-np.sqrt((Radius**2)/4-(h_StripeM/2 + safety_to_StripeM)**2),
+  Concav1.pos = (Radius/2-np.sqrt(((Radius/2+Concav_shift[0])**2)-(h_StripeM/2 + safety_to_StripeM)**2),
                  0,-h_StripeM/2 - safety_to_StripeM)
   # Concav1.pos = (0,0,-h_StripeM/2 - safety_to_StripeM)
   Concav1.aperture = Aperture_concav
@@ -188,7 +189,7 @@ def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,
   Grat.pos = (Radius-seperation, 0, 0)
   Grat.normal = (np.sqrt(1-sinB**2), -sinB, 0)
   
-  Concav2.pos = (Radius/2-np.sqrt((Radius**2)/4-(h_StripeM/2 + safety_to_StripeM)**2), 
+  Concav2.pos = (Radius/2-np.sqrt(((Radius/2+Concav_shift[1])**2)-(h_StripeM/2 + safety_to_StripeM)**2), 
                  0, h_StripeM/2 + safety_to_StripeM)
   Concav2.aperture = Aperture_concav
   Concav2.normal = (-1,0,0)
@@ -198,7 +199,7 @@ def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,
   point1 = (Radius/2, 0, 0)
   Concav2.set_normal_with_2_points(point0, point1)
   Concav2.draw_dict["mount_type"] = "dont_draw"
-  Concav3.pos = (Radius/2-np.sqrt((Radius**2)/4-(h_StripeM/2 + safety_to_StripeM+periscope_distance)**2), 
+  Concav3.pos = (Radius/2-np.sqrt(((Radius/2+Concav_shift[2])**2)-(h_StripeM/2 + safety_to_StripeM+periscope_distance)**2), 
                  0, h_StripeM/2 + safety_to_StripeM + periscope_distance)
   Concav3.aperture = Aperture_concav
   Concav3.normal = (-1,0,0)
@@ -208,7 +209,7 @@ def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,
   point1 = (Radius/2, 0, 0)
   Concav3.set_normal_with_2_points(point0, point1)
   Concav3.draw_dict["mount_type"] = "dont_draw"
-  Concav4.pos = (Radius/2-np.sqrt((Radius**2)/4-(h_StripeM/2 + safety_to_StripeM+periscope_distance)**2), 
+  Concav4.pos = (Radius/2-np.sqrt(((Radius/2+Concav_shift[3])**2)-(h_StripeM/2 + safety_to_StripeM+periscope_distance)**2), 
                  0, -h_StripeM/2 - safety_to_StripeM - periscope_distance)
   Concav4.aperture = Aperture_concav
   Concav4.normal = (-1,0,0)
@@ -227,7 +228,7 @@ def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,
   ray0.wavelength = lam_mid
   
   nfm1 = - ray0.normal
-  pfm1 = Grat.pos + 150 * nfm1 + (0,0,h_StripeM/2 + safety_to_StripeM + periscope_distance)
+  pfm1 = Grat.pos + 300 * nfm1 + (0,0,h_StripeM/2 + safety_to_StripeM + periscope_distance)
   
   # roof = Make_RoofTop_Mirror(height=periscope_distance,up=False)
   roof = Make_Periscope(height=periscope_distance, up=False, backwards=True)
@@ -719,16 +720,16 @@ def Cal_matrix(Comp=Composition(),vertical_mat = True):
 roundtrip = 1
 centerlamda = 1030E-6
 C_radius = 7000
-# StripeM_shift = 0.07
-# StripeM_shift = 0.13
 StripeM_shift = 0
-# StripeM_shift = 0.115
+Concav_shift = [-0.1, -0.05, 0.05, -0.1]
+# Concav_shift = [0, 0, 0, 0]
+seperation = 71.381485
 # CB=CenterBeam CR=CenterRay B=Beamwithradius
-ls = "CB"
+ls = "B"
 mat1 = cavity_and_stretcher(C_radius=C_radius,vertical_mat=True,want_to_draw=False,
                             roundtrip=roundtrip,centerlamda=centerlamda,
-                            s_shift=StripeM_shift,ls=ls,seperation=71.38147,
-                            Tele_added = True)
+                            s_shift=StripeM_shift,ls=ls,seperation=seperation,
+                            Tele_added = True,Concav_shift=Concav_shift)
   
 #   maximun deviation with different wavelength -------------------------------
 # lam_mid = 1030E-6

@@ -47,7 +47,8 @@ para_d = 10
 
 def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,
                          roundtrip=20,centerlamda=1030e-9*1e3,s_shift=0,
-                         ls="CR",seperation=150,Tele_added = True,Concav_shift= [0,0,0,0]):
+                         ls="CR",seperation=150,Tele_added = True,
+                         Concav_shift= [0,0,0,0],tele_shift=0):
   """
   build the stretcher and cavity.
   Parameters
@@ -163,7 +164,7 @@ def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,
     Concav3 = Cylindrical_Mirror(radius=Radius,name="Concav_Mirror")
     Concav4 = Cylindrical_Mirror(radius=Radius,name="Concav_Mirror")
     StripeM = Cylindrical_Mirror(radius= -Radius/2, name="Stripe_Mirror")
-  Concav1.pos = (Radius/2-np.sqrt(((Radius+Concav_shift[0])**2)/4-(h_StripeM/2 + safety_to_StripeM)**2),
+  Concav1.pos = (Radius/2-np.sqrt(((Radius/2+Concav_shift[0])**2)-(h_StripeM/2 + safety_to_StripeM)**2),
                  0,-h_StripeM/2 - safety_to_StripeM)
   # Concav1.pos = (0,0,-h_StripeM/2 - safety_to_StripeM)
   Concav1.aperture = Aperture_concav
@@ -188,7 +189,7 @@ def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,
   Grat.pos = (Radius-seperation, 0, 0)
   Grat.normal = (np.sqrt(1-sinB**2), -sinB, 0)
   
-  Concav2.pos = (Radius/2-np.sqrt(((Radius+Concav_shift[1])**2)/4-(h_StripeM/2 + safety_to_StripeM)**2), 
+  Concav2.pos = (Radius/2-np.sqrt(((Radius/2+Concav_shift[1])**2)-(h_StripeM/2 + safety_to_StripeM)**2), 
                  0, h_StripeM/2 + safety_to_StripeM)
   Concav2.aperture = Aperture_concav
   Concav2.normal = (-1,0,0)
@@ -198,7 +199,7 @@ def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,
   point1 = (Radius/2, 0, 0)
   Concav2.set_normal_with_2_points(point0, point1)
   Concav2.draw_dict["mount_type"] = "dont_draw"
-  Concav3.pos = (Radius/2-np.sqrt(((Radius+Concav_shift[2])**2)/4-(h_StripeM/2 + safety_to_StripeM+periscope_distance)**2), 
+  Concav3.pos = (Radius/2-np.sqrt(((Radius/2+Concav_shift[2])**2)-(h_StripeM/2 + safety_to_StripeM+periscope_distance)**2), 
                  0, h_StripeM/2 + safety_to_StripeM + periscope_distance)
   Concav3.aperture = Aperture_concav
   Concav3.normal = (-1,0,0)
@@ -208,7 +209,7 @@ def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,
   point1 = (Radius/2, 0, 0)
   Concav3.set_normal_with_2_points(point0, point1)
   Concav3.draw_dict["mount_type"] = "dont_draw"
-  Concav4.pos = (Radius/2-np.sqrt(((Radius+Concav_shift[3])**2)/4-(h_StripeM/2 + safety_to_StripeM+periscope_distance)**2), 
+  Concav4.pos = (Radius/2-np.sqrt(((Radius/2+Concav_shift[3])**2)-(h_StripeM/2 + safety_to_StripeM+periscope_distance)**2), 
                  0, -h_StripeM/2 - safety_to_StripeM - periscope_distance)
   Concav4.aperture = Aperture_concav
   Concav4.normal = (-1,0,0)
@@ -227,7 +228,7 @@ def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,
   ray0.wavelength = lam_mid
   
   nfm1 = - ray0.normal
-  pfm1 = Grat.pos + 150 * nfm1 + (0,0,h_StripeM/2 + safety_to_StripeM + periscope_distance)
+  pfm1 = Grat.pos + 300 * nfm1 + (0,0,h_StripeM/2 + safety_to_StripeM + periscope_distance)
   
   # roof = Make_RoofTop_Mirror(height=periscope_distance,up=False)
   roof = Make_Periscope(height=periscope_distance, up=False, backwards=True)
@@ -298,8 +299,8 @@ def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,
   Tele_CM1.pos = (120+para_d/2,focal_length/2,80)
   Tele_CM1.normal = (0,1,0)
   Tele_CM1.rotate((1,0,0), -angle/180*np.pi)
-  Tele_CM2.pos = (120+para_d/2,focal_length*2*(1-np.cos(angle*2/180*np.pi))-3/2*focal_length,
-                  np.sin(angle*2/180*np.pi)*focal_length*2+80)
+  Tele_CM2.pos = (120+para_d/2,(focal_length*2+tele_shift)*(1-np.cos(angle*2/180*np.pi))-3/2*focal_length,
+                  np.sin(angle*2/180*np.pi)*(focal_length*2+tele_shift)+80)
   Tele_CM2.normal = (0,-1,0)
   Tele_CM2.rotate((1,0,0), -angle/180*np.pi)
   Tele_CM1.rotate(Tele_CM1.normal, np.pi/2)
@@ -595,85 +596,7 @@ def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,
       if max_pos_diff < np.linalg.norm(ii-pos_center):
         max_pos_diff = np.linalg.norm(ii-pos_center)
     return (max_pos_diff)
-    
-    # ip_stripe = Intersection_plane()
-    # ip_stripe.set_geom(StripeM.get_geom())
-    
-    # rays_0 = Comp._beams[-25].get_all_rays()
-    # for ray in Comp._beams[-24].get_all_rays():
-    #   rays_0.append(ray)
-    # for ray in Comp._beams[-18].get_all_rays():
-    #   rays_0.append(ray)
-    # for ray in Comp._beams[-17].get_all_rays():
-    #   rays_0.append(ray)
-    
-    # B0 = Beam()
-    # B0.override_rays(rays_0)
-    # ip_stripe.spot_diagram(B0,aberration_analysis=False)
-    # ip_stripe.spot_diagram(Comp._beams[-25],aberration_analysis=False)
-    # ip_stripe.spot_diagram(Comp._beams[-24],aberration_analysis=False)
-    # ip_stripe.spot_diagram(Comp._beams[-18],aberration_analysis=False)
-    # ip_stripe.spot_diagram(Comp._beams[-17],aberration_analysis=False)
-    # ip_stripe.draw()
-    
-    # pathlength = {}
-    # for ii in range(Comp._beams[0]._ray_count):
-    #   wavelength = Comp._beams[0].get_all_rays()[ii].wavelength
-    #   pathlength[wavelength] = 0
-    # for jj in range(len(Comp._beams)-1):
-    #   for ii in Comp._beams[jj].get_all_rays():
-    #     a=pathlength[ii.wavelength]
-    #     pathlength[ii.wavelength] = a +ii.length
-    # ray_lam = [ray.wavelength for ray in Comp._beams[0].get_all_rays()]
-    # path = [pathlength[ii] for ii in ray_lam]
-    # path_diff = [ii-path[int(len(path)/2)] for ii in path]
-    # fai = [path_diff[ii]/ray_lam[ii]*2*np.pi for ii in range(len(path))]
-    # delay = [path_diff[ii]/c0 for ii in range(len(path))]
-    # omega = [c0/ii*2*np.pi for ii in ray_lam]
-    # omega = [(ii - c0/lam_mid*2*np.pi) for ii in omega]
-    # fai_new = deepcopy(fai)
-    # delay_new = deepcopy(delay)
-    # para_order = 9
-    # para = np.polyfit(omega, delay, para_order)
-    # fai2 = []
-    # fai3 = []
-    # i_count = 0
-    # for ii in omega:
-    #   fai_add = 0
-    #   fai_add2 = 0
-    #   fai_add3 = 0
-    #   for jj in range(para_order,-1,-1):
-    #     fai_add += para[para_order-jj]* ((ii)**jj)
-    #     if jj-1>=0:
-    #       fai_add2 += para[para_order-jj] * jj * (ii**(jj-1))
-    #     if jj-2>=0:
-    #       fai_add3 += para[para_order-jj] * jj * (jj-1) * (ii**(jj-2))
-    #   fai2.append(fai_add2)
-    #   fai3.append(fai_add3)
-    # plt.figure()
-    # ax1=plt.subplot(1,3,1)
-    # plt.scatter(omega,delay,label="delay")
-    # plt.plot(omega,delay_new,label="delay")
-    # plt.title("Relationship of delay with angular frequency")
-    # plt.xlabel("angular frequency ω (rad/s)")
-    # plt.ylabel("delay (s)")
-    # plt.axhline(delay[int(len(delay)/2)], color = 'black', linewidth = 1)
-    # ax2=plt.subplot(1,3,2)
-    # plt.plot(omega,fai2)
-    # plt.title("Group delay dispersion")
-    # plt.xlabel("angular frequency ω (rad/s)")
-    # plt.ylabel("The second order derivative of φ(ω)")
-    # plt.axhline(fai2[int(len(fai2)/2)], color = 'black', linewidth = 1)
-    # print("Group delay dispersion at the center wavelength:",fai2[int(len(fai2)/2)])
-    # ax3=plt.subplot(1,3,3)
-    # plt.plot(omega,fai3)
-    # # plt.plot(omega_d,fai3_new)
-    # plt.title("Third order dispersion")
-    # plt.xlabel("angular frequency ω (rad/s)")
-    # plt.ylabel("The third order derivative of φ(ω)")
-    # plt.axhline(fai3[int(len(fai3)/2)], color = 'black', linewidth = 1)
-    # print("3rd order dispersion at the center wavelength:",fai3[int(len(fai3)/2)])
-    # return fai2[int(len(fai2)/2)]
+
   else:
     ip.spot_diagram(Comp._beams[-1],aberration_analysis=False)
     ip_stripe = Intersection_plane()
@@ -741,120 +664,41 @@ StripeM_shift = 0
 ls = "CB"
 min_Concav_shift = []
 min_spot = 10
-# ii_test = [-0.4,-0.35,-0.3]
-# jj_test = [-0.2,-0.15,-0.1]
-# kk_test = [-0.1,-0.05, 0  ]
-# ll_test = [-0.4,-0.35,-0.3]
-for ii in range(-10,10,1):
-  for jj in range(-10,10,1):
-    for kk in range(-10,10,1):
-      for ll in range(-10,10,1):
-        Concav_shift = [ii/10,jj/10,kk/10,ll/10]
-        mat1 = cavity_and_stretcher(C_radius=C_radius,vertical_mat=True,want_to_draw=False,
-                                    roundtrip=roundtrip,centerlamda=centerlamda,
-                                    s_shift=StripeM_shift,ls=ls,seperation=71.38147,
-                                    Tele_added = True,Concav_shift=Concav_shift)
-        if min_spot>mat1:
-          min_spot = mat1
-          min_Concav_shift=Concav_shift
-print(min_spot,min_Concav_shift)
+ii_test = [-0.4,-0.35,-0.3]
+jj_test = [-0.2,-0.15,-0.1]
+kk_test = [-0.1,-0.05, 0  ]
+ll_test = [-0.4,-0.35,-0.3]
+# for ii in range(-10,10,1):
+#   for jj in range(-10,10,1):
+#     for kk in range(-10,10,1):
+#       for ll in range(-10,10,1):
+#         Concav_shift = [ii/10,jj/10,kk/10,ll/10]
+#         mat1 = cavity_and_stretcher(C_radius=C_radius,vertical_mat=True,want_to_draw=False,
+#                                     roundtrip=roundtrip,centerlamda=centerlamda,
+#                                     s_shift=StripeM_shift,ls=ls,seperation=71.38147,
+#                                     Tele_added = True,Concav_shift=Concav_shift)
+#         if min_spot>mat1:
+#           min_spot = mat1
+#           min_Concav_shift=Concav_shift
+# print(min_spot,min_Concav_shift)
 # [-0.3, -0.1, 0, -0.3]
 # [-0.35, -0.2, 0, -0.4]
-# mat1 = cavity_and_stretcher(C_radius=C_radius,vertical_mat=True,want_to_draw=False,
-#                             roundtrip=roundtrip,centerlamda=centerlamda,
-#                             s_shift=StripeM_shift,ls=ls,seperation=71.38147,
-#                             Tele_added = True,Concav_shift=[-0.35, -0.2, 0, -0.4])
-  
-#   maximun deviation with different wavelength -------------------------------
-# lam_mid = 1030E-6
-# delta_lamda = 60E-6
-# number_of_rays = 5
-# wavels = np.linspace(lam_mid-delta_lamda/2, lam_mid+delta_lamda/2, number_of_rays)
-# plt.figure()
-# max_R = []
-# for wavel in wavels:
-#   max_R.append(cavity_and_stretcher(C_radius=C_radius,want_to_draw=False,
-#                                     roundtrip = roundtrip,centerlamda=wavel,s_shift=0))
-# legend = []
-# legend.append('maximun radius')
-# plt.plot(wavels*1E6,max_R)
-# # -----------------------------------------------------------------------------
+# min_tele_shift = 0
+# min_spot = 10
+# for ii in range(-500,-490,1):
+#   mat1 = cavity_and_stretcher(C_radius=C_radius,vertical_mat=True,want_to_draw=False,
+#                               roundtrip=roundtrip,centerlamda=centerlamda,
+#                               s_shift=StripeM_shift,ls=ls,seperation=71.38147,
+#                               Tele_added = True,Concav_shift=[-0.1, -0.05, 0.05, -0.1],tele_shift=ii/10)
+#   if min_spot>mat1:
+#     min_spot = mat1
+#     min_tele_shift = ii/10
+# print(min_spot,min_tele_shift)
 
-# # maximun deviation with small movement ---------------------------------------
-# for i in range(110,210,30):
-#   max_R_S = []
-#   for wavel in wavels:
-#     max_R_S.append(cavity_and_stretcher(C_radius=C_radius,want_to_draw=False,
-#                                         roundtrip = roundtrip,centerlamda=wavel,
-#                                         s_shift=i/1000))
-#   plt.plot(wavels*1E6,max_R_S)
-#   legend.append('maximun deviation with small movement '+str(i/1000))
-
-# plt.plot(wavels*1E6,max_R_S)
-# legend.append('maximun radius with small movement '+str(StripeM_shift)+ 'mm')
-# max_R_S = []
-# for wavel in wavels:
-#   max_R_S.append(cavity_and_stretcher(C_radius=C_radius,want_to_draw=False,
-#                                       roundtrip = roundtrip,centerlamda=wavel,
-#                                       s_shift=0.14))
-# plt.plot(wavels*1E6,max_R_S)
-# legend.append('maximun deviation with small movement '+str(0.14)+ 'mm')
-
-
-# plt.plot(wavels*1E6,max_R_S)
-# plt.legend(legend,loc = 'upper right')
-# plt.xlabel("wavelength (nm)")
-# # plt.ylabel("maximun horizontal radius(mm)")
-# plt.ylabel("maximun vertical radius(mm)")
-# plt.show()
-# -----------------------------------------------------------------------------
-
-# delta_lamda = 60E-6
-# number_of_rays = 15
-# wavels = np.linspace(centerlamda-delta_lamda/2, centerlamda+delta_lamda/2, number_of_rays)
-# matA = []
-# matB = []
-# matC = []
-# matD = []
-# matA_h = []
-# matB_h = []
-# matC_h = []
-# matD_h = []
-# for wavel in wavels:
-#     a =(cavity_and_stretcher(C_radius=C_radius,vertical_mat=True,want_to_draw=False,
-#                               roundtrip = roundtrip,centerlamda=wavel,s_shift=StripeM_shift))
-#     matA.append(a[0][0])
-#     matB.append(a[0][1])
-#     matC.append(a[1][0])
-#     matD.append(a[1][1])
-#     a =(cavity_and_stretcher(C_radius=C_radius,vertical_mat=False,want_to_draw=False,
-#                               roundtrip = roundtrip,centerlamda=wavel,s_shift=StripeM_shift))
-#     matA_h.append(a[0][0])
-#     matB_h.append(a[0][1])
-#     matC_h.append(a[1][0])
-#     matD_h.append(a[1][1])
-# plt.figure()
-# a1 =plt.subplot(2,2,1)
-# plt.plot(wavels*1E6,matA)
-# plt.plot(wavels*1E6,matA_h)
-# plt.xlabel("wavelength (nm)")
-# plt.ylabel("matrix number A")
-# plt.legend(['vertical','horizontal'],loc = 'upper left')
-# a1 =plt.subplot(2,2,2)
-# plt.plot(wavels*1E6,matB)
-# plt.plot(wavels*1E6,matB_h)
-# plt.xlabel("wavelength (nm)")
-# plt.ylabel("matrix number B")
-# plt.legend(['vertical','horizontal'],loc = 'upper right')
-# a1 =plt.subplot(2,2,3)
-# plt.plot(wavels*1E6,matC)
-# plt.plot(wavels*1E6,matC_h)
-# plt.xlabel("wavelength (nm)")
-# plt.ylabel("matrix number C")
-# plt.legend(['vertical','horizontal'],loc = 'upper right')
-# a1 =plt.subplot(2,2,4)
-# plt.plot(wavels*1E6,matD)
-# plt.plot(wavels*1E6,matD_h)
-# plt.xlabel("wavelength (nm)")
-# plt.ylabel("matrix number D")
-# plt.legend(['vertical','horizontal'],loc = 'upper left')
+mat1 = cavity_and_stretcher(C_radius=C_radius,vertical_mat=True,want_to_draw=False,
+                            roundtrip=roundtrip,centerlamda=centerlamda,
+                            s_shift=StripeM_shift,ls=ls,seperation=71.381485,
+                            Tele_added = True,
+                            Concav_shift=[-0.1, -0.05, 0.05, -0.1],tele_shift=-0)
+print(mat1)
+# [-0.1, -0.05, 0.05, -0.1]

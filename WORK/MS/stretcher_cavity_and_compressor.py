@@ -86,12 +86,16 @@ def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,
   h_StripeM = 10 #Höhe des Streifenspiegels
   # gamma = 33.4906043205826 /180 *np.pi # Seperationswinkel zwischen einfallenden und Mittelpunktsstrahl; Alpha = Gamma + Beta
   # gamma = 18.8239722389914963 /180 *np.pi #AOI = 60
-  gamma = 8.3254033412311523321136 /180 *np.pi #AOI = 54
   grat_const = 1/1480 # Gitterkonstante in 1/mm
   # seperation = 143.75 # Differenz zwischen Gratingposition und Radius
-  focal_length = (12*300-4*seperation*(1-np.cos(54/180*np.pi)**2/np.cos(54/180*np.pi-gamma)**2))/8
   lam_mid = centerlamda # Zentralwellenlänge in mm
   lam_mid_grating = 1030E-6 # Zentralwellenlänge in mm
+  # AOI = 54.000031/180*np.pi
+  AOI = 54/180*np.pi
+  gamma = AOI-np.arcsin(-np.sin(AOI)+lam_mid_grating/grat_const)
+  # print(gamma*180/np.pi)
+  # gamma = 8.3254033412311523321136 /180 *np.pi #AOI = 54
+  focal_length = (12*300-4*seperation*(1-np.cos(54/180*np.pi)**2/np.cos(54/180*np.pi-gamma)**2))/8
   delta_lamda = 60e-9*1e3 # Bandbreite in mm
   number_of_rays = 15
   safety_to_StripeM = 5 #Abstand der eingehenden Strahlen zum Concav Spiegel in mm
@@ -222,7 +226,7 @@ def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,
   ray0.wavelength = lam_mid
   
   nfm1 = - ray0.normal
-  pfm1 = Grat.pos + 150 * nfm1 + (0,0,h_StripeM/2 + safety_to_StripeM + periscope_distance)
+  pfm1 = Grat.pos + 300 * nfm1 + (0,0,h_StripeM/2 + safety_to_StripeM + periscope_distance)
   
   # roof = Make_RoofTop_Mirror(height=periscope_distance,up=False)
   roof = Make_Periscope(height=periscope_distance, up=False, backwards=True)
@@ -594,35 +598,40 @@ def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,
     para = np.polyfit(omega, delay, para_order)
     fai2 = []
     fai3 = []
+    fai4 = []
     i_count = 0
     for ii in omega:
       fai_add = 0
       fai_add2 = 0
       fai_add3 = 0
+      fai_add4 = 0
       for jj in range(para_order,-1,-1):
         fai_add += para[para_order-jj]* ((ii)**jj)
         if jj-1>=0:
           fai_add2 += para[para_order-jj] * jj * (ii**(jj-1))
         if jj-2>=0:
           fai_add3 += para[para_order-jj] * jj * (jj-1) * (ii**(jj-2))
+        if jj-3>=0:
+          fai_add4 += para[para_order-jj] * jj * (jj-1) * (jj-2) * (ii**(jj-3))
       fai2.append(fai_add2)
       fai3.append(fai_add3)
+      fai4.append(fai_add4)
     plt.figure()
-    ax1=plt.subplot(1,3,1)
+    ax1=plt.subplot(1,4,1)
     plt.scatter(omega,delay,label="delay")
     plt.plot(omega,delay_new,label="delay")
     plt.title("Relationship of delay with angular frequency")
     plt.xlabel("angular frequency ω (rad/s)")
     plt.ylabel("delay (s)")
     plt.axhline(delay[int(len(delay)/2)], color = 'black', linewidth = 1)
-    ax2=plt.subplot(1,3,2)
+    ax2=plt.subplot(1,4,2)
     plt.plot(omega,fai2)
     plt.title("Group delay dispersion")
     plt.xlabel("angular frequency ω (rad/s)")
     plt.ylabel("The second order derivative of φ(ω)")
     plt.axhline(fai2[int(len(fai2)/2)], color = 'black', linewidth = 1)
     print("Group delay dispersion at the center wavelength:",fai2[int(len(fai2)/2)])
-    ax3=plt.subplot(1,3,3)
+    ax3=plt.subplot(1,4,3)
     plt.plot(omega,fai3)
     # plt.plot(omega_d,fai3_new)
     plt.title("Third order dispersion")
@@ -630,6 +639,14 @@ def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,
     plt.ylabel("The third order derivative of φ(ω)")
     plt.axhline(fai3[int(len(fai3)/2)], color = 'black', linewidth = 1)
     print("3rd order dispersion at the center wavelength:",fai3[int(len(fai3)/2)])
+    ax3=plt.subplot(1,4,4)
+    plt.plot(omega,fai4)
+    # plt.plot(omega_d,fai3_new)
+    plt.title("Fourth order dispersion")
+    plt.xlabel("angular frequency ω (rad/s)")
+    plt.ylabel("The fourth order derivative of φ(ω)")
+    plt.axhline(fai4[int(len(fai4)/2)], color = 'black', linewidth = 1)
+    print("4th order dispersion at the center wavelength:",fai4[int(len(fai4)/2)])
     # return fai2[int(len(fai2)/2)]
   else:
     ip.spot_diagram(Comp._beams[-1],aberration_analysis=False)
@@ -680,8 +697,10 @@ StripeM_shift = 0
 ls = "CB"
 mat1 = cavity_and_stretcher(C_radius=C_radius,vertical_mat=True,want_to_draw=False,
                             roundtrip=roundtrip,centerlamda=centerlamda,
-                            s_shift=StripeM_shift,ls=ls,seperation=71.38147)
-  
+                            s_shift=StripeM_shift,ls=ls,seperation=71.381485)
+  # 71.38147
+# 71.381485
+# 71.38155 angle fixed
 #   maximun deviation with different wavelength -------------------------------
 # lam_mid = 1030E-6
 # delta_lamda = 60E-6
