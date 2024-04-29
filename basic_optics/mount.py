@@ -329,7 +329,7 @@ class Post(Geom_Object):
     else:
       post1 = None
     # print(name,"'s height=",POS[2]+post_length)
-    print(name,"'s height=",POS[2])
+    # print(name,"'s height=",POS[2])
     part = initialize_composition_old(name=name)
     container = post,post1,post2
     add_to_composition(part, container)
@@ -347,7 +347,7 @@ class Post(Geom_Object):
     self.draw_dict["name"] = self.name 
     if self.model == "dont_draw":
       return None
-    print(self.name,"'s position = ",self.pos)
+    # print(self.name,"'s position = ",self.pos)
     if self.model == "1inch_post":
       return self.find_1inch_post()
     elif self.model == "0.5inch_post":

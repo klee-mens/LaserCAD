@@ -29,9 +29,9 @@ from LaserCAD.basic_optics.mirror import Stripe_mirror
 from LaserCAD.moduls import Make_RoofTop_Mirror
 from LaserCAD.basic_optics.mount import Unit_Mount, Composed_Mount
 from LaserCAD.non_interactings.table import Table
+
 if freecad_da:
   clear_doc()
-
 
 # =============================================================================
 # Measured Coordinates on the Table (approx to unity m6 holes)
@@ -56,16 +56,12 @@ tm_small_obj = Lens(name="TmOszillator_Output")
 tm_small_obj.pos = POS_THULIUM_SMALL_OUT
 tm_small_obj.draw()
 
-X_ADDITIONAL = 0
-Y_ADDITIONAL = 80
-
 # =============================================================================
 # Draw the seed laser and seed beam
 # =============================================================================
 start_point = np.array((0,0,4)) + POS_SEED #see CLPF-2400-10-60-0_8 sn2111348_Manual
 seed_beam_radius = 2.5/2 #see CLPF-2400-10-60-0_8 sn2111348_Manual
-distance_seed_laser_stretcher = 400 #the complete distance
-distance_6_mm_faraday = 45
+distance_6_mm_faraday = 45 + 55
 distance_faraday_mirror = 100
 
 seed_laser = Component(name="IPG_Seed_Laser")
@@ -88,7 +84,9 @@ Seed.add_on_axis(faraday_isolator_6mm)
 Flip0 = Mirror(phi=-90)
 Seed.propagate(distance_faraday_mirror)
 Seed.add_on_axis(Flip0)
-Seed.propagate(distance_seed_laser_stretcher-distance_6_mm_faraday-distance_faraday_mirror)
+Seed.propagate(75)
+Seed.add_on_axis(Lambda_Plate())
+Seed.propagate(200)
 seed_end_geom = Seed.last_geom()
 # print(faraday_isolator_6mm.pos)
 # =============================================================================
@@ -96,8 +94,8 @@ seed_end_geom = Seed.last_geom()
 # =============================================================================
 
 
-def dont():
-  return None
+# def dont():
+#   return None
 
 # =============================================================================
 # Stretcher parameter
@@ -142,7 +140,7 @@ sinB = a - b
 print(sinB)
 grating_normal = (np.sqrt(1-sinB**2), sinB, 0)
 
-Concav = Curved_Mirror(radius=radius_concave, name="Concav_Mirror")
+Concav = Curved_Mirror(radius=radius_concave, name="Big_Concav_Mirror")
 Concav.aperture = aperture_concave
 Concav.set_mount_to_default()
 
@@ -183,7 +181,7 @@ for wavel in wavels:
   x = 1-(wavel - lambda_mid + delta_lamda/2) / delta_lamda
   rn.draw_dict["color"] = cmap( x )
   rays.append(rn)
-mid_ray = Ray()
+mid_ray = Ray() # add additionally the 2400 nm mid lambda beam to be the inner ray, just cause
 mid_ray.wavelength = lambda_mid
 rays = [mid_ray] + rays
 lightsource.override_rays(rays)
@@ -196,6 +194,7 @@ Stretcher.redefine_optical_axis(helper_light_source.inner_ray())
 
 Stretcher.propagate(first_propagation)
 FlipMirror_In_Out = Mirror(phi=100, name="FlipMirrorInOut")
+FlipMirror_In_Out.set_mount(Composed_Mount(unit_model_list = ["MH25_KMSS","1inch_post"]))
 
 mount=Composed_Mount()
 Mount1=Unit_Mount(model="MH25")
@@ -226,11 +225,17 @@ Stretcher.add_supcomposition_on_axis(Make_RoofTop_Mirror(height=periscope_height
 # note that pure cosmetic (pos6) is not in the sequence
 Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0])
 Stretcher.recompute_optical_axis()
-Stretcher.propagate(100)
+Stretcher.propagate(120)
 
-  # return Stretcher
 
-# Stretcher = Make_Stretcher_chromeo()
+# last small flip mirror from stretcher with cosmetics
+FlipMirror_pp = Mirror(phi=-90, name="Small_Output_Flip")
+FlipMirror_pp.set_mount(Composed_Mount(unit_model_list = ["MH25_KMSS","1inch_post"]))
+flip_mirror_push_down = - 5 # distance to push the first mirror out ouf the seed beam
+Stretcher.add_on_axis(FlipMirror_pp)
+FlipMirror_pp.pos += (0,0,flip_mirror_push_down)
+Stretcher.propagate(13)
+
 Stretcher.set_geom(seed_end_geom)
 
 
@@ -238,8 +243,11 @@ Stretcher.set_geom(seed_end_geom)
 # =============================================================================
 # Pump Amp1
 # =============================================================================
+
+X_ADDITIONAL = 0
+Y_ADDITIONAL = 80
 f1 = -100
-f2 = 300
+f2 = 150
 
 pump_first_prop = 100 + X_ADDITIONAL #in -x
 pump_second_prop = 100 + Y_ADDITIONAL # in +y
@@ -294,7 +302,8 @@ tfp_angle = 65
 
 # optics
 
-mir1 = Mirror(phi=180)
+cm0 = Curved_Mirror(radius=focal*2, phi = 180, name="Curved_Far")
+mir1 = Mirror(phi=180 + 10, name="Dichroit")
 mir1.aperture = 0.5 * inch
 mir1.set_mount_to_default()
 
@@ -306,14 +315,17 @@ pol_mount = TFP_Amp1.Mount.mount_list[0]
 pol_mount.flip()
 # TFP_Amp1.mount_dict["Flip90"]=True
 
-cm = Curved_Mirror(radius=focal*2, phi = 180)
+cm = Curved_Mirror(radius=focal*2, phi = 180, name="Curved_PZ")
 PockelsCell = Pockels_Cell(name="PockelZelleRes1")
 Lambda_Regen = Lambda_Plate()
 fold1 = Mirror(phi=90)
 
 
-simres = LinearResonator(name="simple_Resonator1")
+simres = LinearResonator(name="Regen")
 simres.set_wavelength(lam_mid)
+
+simres.add_on_axis(cm0)
+simres.propagate(total_length)
 
 simres.add_on_axis(mir1)
 
@@ -352,14 +364,10 @@ simres.compute_eigenmode()
 Amplifier_I = simres
 # Amplifier_I.set_input_coupler_index(1, False)
 ppos, paxes = Pump.last_geom()
-Amplifier_I.pos = ppos
 
-
-
-
-# print()
-# print("TFP Position", TFP_Amp1.pos)
-# print()
+Amplifier_I.set_input_coupler_index(1)
+Amplifier_I.set_geom(Pump.last_geom())
+# Amplifier_I.pos = ppos
 
 
 # =============================================================================
@@ -373,27 +381,29 @@ tfp_push_aside = 5 # distance in mm to push the TFP aside, so that the beam can 
 
 
 PulsePicker = Composition(name="PulsePicker")
-PulsePicker.pos = POS_STRETCHER_END_MIRROR - (0, 12, 0)
-PulsePicker.normal = (0, 1, 0)
-PulsePicker.propagate(12)
+PulsePicker.set_geom(Stretcher.last_geom())
+
+# PulsePicker.pos = POS_STRETCHER_END_MIRROR - (0, 12, 0)
+# PulsePicker.normal = (0, 1, 0)
+# PulsePicker.propagate(12)
 
 # lightsource_pp = Beam(angle=0, radius=seed_beam_radius)
 # PulsePicker.set_light_source(lightsource_pp)
 # PulsePicker.propagate(distance_seed_laser_stretcher*0.2)
 
 # first small flip mirror from stretcher with cosmetics
-FlipMirror_pp = Mirror(phi=-90)
-FlipMirror_pp_mount=Composed_Mount()
-FlipMirror_pp.Mount = Composed_Mount(unit_model_list = ["MH25_KMSS","1inch_post"])
-FlipMirror_pp.Mount.set_geom(FlipMirror_pp.get_geom())
-PulsePicker.add_on_axis(FlipMirror_pp)
-FlipMirror_pp.pos += (0,0,flip_mirror_push_down)
+# FlipMirror_pp = Mirror(phi=-90)
+# FlipMirror_pp_mount=Composed_Mount()
+# FlipMirror_pp.set_mount(Composed_Mount(unit_model_list = ["MH25_KMSS","1inch_post"]))
+# FlipMirror_pp.Mount.set_geom(FlipMirror_pp.get_geom())
+# PulsePicker.add_on_axis(FlipMirror_pp)
+# FlipMirror_pp.pos += (0,0,flip_mirror_push_down)
 
 # polarisation optics upt to pockels cell
-PulsePicker.propagate(280)
+PulsePicker.propagate(320)
 Lambda2 = Lambda_Plate()
 PulsePicker.add_on_axis(Lambda2)
-PulsePicker.propagate(390)
+PulsePicker.propagate(330)
 Back_Mirror_PP = Mirror()
 PulsePicker.add_on_axis(Back_Mirror_PP)
 PulsePicker.propagate(30)
@@ -402,8 +412,8 @@ PulsePicker.add_on_axis(Lambda4)
 PulsePicker.propagate(30)
 pockelscell = Pockels_Cell()
 PulsePicker.add_on_axis( pockelscell)
-pockelscell.rotate(vec=pockelscell.normal,phi=np.pi*0)
-PulsePicker.propagate(210)
+pockelscell.rotate(vec=pockelscell.normal,phi=np.pi*-0.5)
+PulsePicker.propagate(150)
 
 # Splitting TFP
 TFP_pp = Mirror(phi = 180-2*tfp_angle)
@@ -466,12 +476,12 @@ PulsePicker.propagate(np.linalg.norm(last_flip_pp.pos - TFP_Amp1.pos))
 # Output Beam to Amp2
 # =============================================================================
 bs = PulsePicker.compute_beams()
-b5 = bs[5]
 b4 = bs[4]
+b3 = bs[3]
 Out_Beam0 = Beam(radius=2, name="Beam_to_Amp2")
 Out_Beam0.draw_dict["color"] = (1.0, 0.5, 0.5)
-Out_Beam0.pos = b5.pos
-Out_Beam0.normal = -b4.normal
+Out_Beam0.pos = b4.pos
+Out_Beam0.normal = -b3.normal
 helper_mirror = Mirror()
 helper_mirror.set_geom(TFP_out.get_geom())
 Out_Beam1 = helper_mirror.next_beam(Out_Beam0)
@@ -484,58 +494,74 @@ Out_Beam1.draw()
 
 
 # =============================================================================
-# simple AMP2
+# 4pass Relay Imaging Amp2
 # =============================================================================
 
-
 focal = 300
-sep_angle = 5
+sep_angle_A2 = -5
 bigcrys = Crystal(width=20, thickness=15, n=2.45)
 source = Beam(radius=1.4, angle=0)
 telesf1 = -75
 telesf2 = 270
+knee_shift_amp2 = -220
+# knee_shift_amp2 = 150
 
-amp2 = Composition(name="herbert")
-amp2.set_light_source(source)
-amp2.propagate(100)
+#Telescope for beam widening
+Amp2 = Composition(name="RelayTyp2")
+Amp2.set_light_source(source)
+Amp2.propagate(100)
 teles_lens1 = Lens(f=telesf1)
-amp2.add_on_axis(teles_lens1)
-amp2.propagate(telesf1 + telesf2)
+Amp2.add_on_axis(teles_lens1)
+Amp2.propagate(telesf1 + telesf2)
 teles_lens2 = Lens(f=telesf2)
-amp2.add_on_axis(teles_lens2)
-amp2.propagate(800)
-amp2.add_on_axis(bigcrys)
-amp2.propagate(20)
-active_mir = Mirror(phi=180-sep_angle)
-amp2.add_on_axis(active_mir)
-amp2.propagate(focal*2)
-concave1 = Curved_Mirror(radius=focal*2, phi=180+sep_angle)
-amp2.add_on_axis(concave1)
-amp2.propagate(2*focal)
-end_concave= Curved_Mirror(radius=focal, phi=180-sep_angle)
-amp2.add_on_axis(end_concave)
-amp2.propagate(2*focal)
-concave2 = Curved_Mirror(radius=focal*2, phi=180+sep_angle)
-amp2.add_on_axis(concave2)
+Amp2.add_on_axis(teles_lens2)
+
+# Knee for adjustments
+Amp2.propagate(90)
+Amp2.add_on_axis(Mirror(phi=90*np.sign(knee_shift_amp2)))
+Amp2.propagate(np.abs(knee_shift_amp2))
+Amp2.add_on_axis(Mirror(phi=-90*np.sign(knee_shift_amp2)))
+Amp2.propagate(680)
+
+# AmpTyp2 with for passes, that will definitely fail
+Amp2.add_on_axis(bigcrys)
+Amp2.propagate(20)
+active_mir = Mirror(phi=180-sep_angle_A2)
+Amp2.add_on_axis(active_mir)
+Amp2.propagate(focal*2)
+concave1 = Curved_Mirror(radius=focal*2, phi=180+sep_angle_A2)
+# concave1 = Mirror(phi=180+sep_angle_A2)
+Amp2.add_on_axis(concave1)
+Amp2.propagate(2*focal)
+end_concave= Curved_Mirror(radius=focal, phi=180-sep_angle_A2)
+# end_concave= Mirror(phi=180-sep_angle_A2)
+Amp2.add_on_axis(end_concave)
+Amp2.propagate(2*focal)
+concave2 = Curved_Mirror(radius=focal*2, phi=180+sep_angle_A2)
+# concave2 = Mirror(phi=180+sep_angle_A2)
+Amp2.add_on_axis(concave2)
 concave2.set_normal_with_2_points(end_concave.pos, active_mir.pos)
-# amp2.set_sequence([0,1,2,3,4,5,2])
-amp2.set_sequence([0,1,2,3,2,4,5,6,2,3,2])
-amp2.recompute_optical_axis()
-amp2.propagate(650)
-amp2.add_on_axis(Mirror(phi=90))
-amp2.propagate(100)
-# amp2.set_sequence([0,1,2,3,4,5,2,6])
-# amp2.set_sequence([0,1,2,3,2,4,5,6,5,4,2,3,7])
+Amp2.set_sequence([0, 1, 2, 3, 4, 5, 4, 6, 7, 8, 4, 5, 4])
+Amp2.recompute_optical_axis()
+
+a2_safe_angle_for_non_colliding_with_crystal = 2
+Amp2.propagate(580)
+Amp2.add_on_axis(Mirror(phi=180 - sep_angle_A2 + a2_safe_angle_for_non_colliding_with_crystal))
+Amp2.propagate(580)
+
+Amp2.add_on_axis(Mirror(phi=90 - a2_safe_angle_for_non_colliding_with_crystal))
+Amp2.propagate(500)
+Beam_Splitter = Mirror(phi=90, name="BeamSplitter")
+Beam_Splitter.aperture= 2*inch
+Beam_Splitter.set_mount_to_default() # should really automatize this...
+Beam_Splitter.draw_dict["color"] = (100/255, 200/255, 240/255)
+Amp2.add_on_axis(Beam_Splitter)
+Amp2.propagate(20)
+
+Amp2.set_geom(Out_Beam1.get_geom())
 
 
 
-
-
-back_beam = PulsePicker.compute_beams()[3]
-back_pos = back_beam.pos
-back_normal = back_beam.normal * -1
-amp2.pos = back_pos
-amp2.normal = back_normal
 
 # =============================================================================
 # big_pump
@@ -544,10 +570,19 @@ big_pump_ls = Beam(radius=6, angle=0)
 big_pump_ls.draw_dict["color"] = (1.0,1.0,0.0)
 BigPump = Composition("Big_Pump")
 BigPump.set_light_source(big_pump_ls)
-BigPump.propagate(200)
+BigPump.pos = bigcrys.pos
 
-BigPump.set_geom(amp2._elements[2].get_geom())
-# BigPump.set_geom(amp2.non_opticals[-1].get_geom())
+dx, dy, dz = POS_THULIUM_BIG_OUT - bigcrys.pos
+
+BigPump.propagate(dx - 50)
+BigPump.add_on_axis(Mirror(phi=90))
+BigPump.propagate(dy)
+BigPump.add_on_axis(Mirror(phi=-90))
+BigPump.propagate(50)
+
+
+
+
 
 
 # =============================================================================
@@ -676,7 +711,7 @@ Compressor.add_fixed_elm(Grat3)
 Compressor.add_fixed_elm(Grat2)
 Compressor.add_fixed_elm(Grat1)
 Compressor.propagate(300)
-Compressor.set_geom(amp2.last_geom())
+Compressor.set_geom(Amp2.last_geom())
 
 # =============================================================================
 # Draw Selection
@@ -684,17 +719,15 @@ Compressor.set_geom(amp2.last_geom())
 
 Seed.draw()
 Stretcher.draw()
-# Stretcher.draw_elements()
 PulsePicker.draw()
-# PulsePicker.draw_alignment_posts()
 Amplifier_I.draw()
-# Amplifier_I.draw_elements()
 Pump.draw()
-# amp2.draw()
-# BigPump.draw()
+Amp2.draw()
+BigPump.draw()
 t=Table()
 t.draw()
-# Compressor.draw()
+Compressor.draw()
+# PulsePicker.draw_alignment_posts()
 
 
 

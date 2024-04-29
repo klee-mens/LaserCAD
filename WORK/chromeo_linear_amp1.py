@@ -121,7 +121,8 @@ tfp_angle = 65
 
 # optics
 
-mir1 = Mirror(phi=180)
+cm0 = Curved_Mirror(radius=focal*2, phi = 180, name="Curved_Far")
+mir1 = Mirror(phi=180 + 10, name="Dichroit")
 mir1.aperture = 0.5 * inch
 mir1.set_mount_to_default()
 
@@ -133,14 +134,17 @@ pol_mount = TFP_Amp1.Mount.mount_list[0]
 pol_mount.flip()
 # TFP_Amp1.mount_dict["Flip90"]=True
 
-cm = Curved_Mirror(radius=focal*2, phi = 180)
+cm = Curved_Mirror(radius=focal*2, phi = 180, name="Curved_PZ")
 PockelsCell = Pockels_Cell(name="PockelZelleRes1")
 Lambda_Regen = Lambda_Plate()
 fold1 = Mirror(phi=90)
 
 
-simres = LinearResonator(name="simple_Resonator1")
+simres = LinearResonator(name="Regen")
 simres.set_wavelength(lam_mid)
+
+simres.add_on_axis(cm0)
+simres.propagate(total_length)
 
 simres.add_on_axis(mir1)
 
@@ -179,7 +183,10 @@ simres.compute_eigenmode()
 Amplifier_I = simres
 # Amplifier_I.set_input_coupler_index(1, False)
 ppos, paxes = Pump.last_geom()
-Amplifier_I.pos = ppos
+
+Amplifier_I.set_input_coupler_index(1)
+Amplifier_I.set_geom(Pump.last_geom())
+# Amplifier_I.pos = ppos
 
 
 
@@ -200,15 +207,16 @@ tfp_push_aside = 5 # distance in mm to push the TFP aside, so that the beam can 
 
 
 PulsePicker = Composition(name="PulsePicker")
-PulsePicker.pos = POS_STRETCHER_END_MIRROR
+PulsePicker.pos = POS_STRETCHER_END_MIRROR + (0, 7, 0)
 PulsePicker.normal = (0, -1, 0)
+PulsePicker.propagate(7)
 
 # lightsource_pp = Beam(angle=0, radius=seed_beam_radius)
 # PulsePicker.set_light_source(lightsource_pp)
 # PulsePicker.propagate(distance_seed_laser_stretcher*0.2)
 
 # first small flip mirror from stretcher with cosmetics
-FlipMirror_pp = Mirror(phi=90)
+FlipMirror_pp = Mirror(phi=90, name="Small_Flip")
 FlipMirror_pp_mount=Composed_Mount()
 FlipMirror_pp.Mount = Composed_Mount(unit_model_list = ["MH25_KMSS","1inch_post"])
 FlipMirror_pp.Mount.set_geom(FlipMirror_pp.get_geom())
@@ -220,10 +228,10 @@ PulsePicker.propagate(90)
 Lambda2 = Lambda_Plate()
 PulsePicker.add_on_axis(Lambda2)
 PulsePicker.propagate(390)
-Back_Mirror_PP = Mirror()
+Back_Mirror_PP = Mirror(name="Back_Mirror")
 PulsePicker.add_on_axis(Back_Mirror_PP)
 PulsePicker.propagate(30)
-Lambda4 = Lambda_Plate()
+Lambda4 = Lambda_Plate(name="Compensation_for_PZ")
 PulsePicker.add_on_axis(Lambda4)
 PulsePicker.propagate(30)
 pockelscell = Pockels_Cell()
@@ -232,7 +240,7 @@ pockelscell.rotate(vec=pockelscell.normal,phi=np.pi*0)
 PulsePicker.propagate(210)
 
 # Splitting TFP
-TFP_pp = Mirror(phi = 180-2*tfp_angle)
+TFP_pp = Mirror(phi = 180-2*tfp_angle, name="TPF_to_Regen")
 TFP_pp.draw_dict["color"] = (1.0, 0.0, 2.0)
 TFP_pp.draw_dict["thickness"] = 4
 TFP_pp.aperture = 2*inch
@@ -268,7 +276,7 @@ PulsePicker.propagate(80)
 FaradPP = Faraday_Isolator()
 PulsePicker.add_on_axis(FaradPP)
 PulsePicker.propagate(120)
-Lambda2_2_pp = Lambda_Plate()
+Lambda2_2_pp = Lambda_Plate(name="Compensation_for_FR")
 PulsePicker.add_on_axis(Lambda2_2_pp)
 #last knee for adjustment
 PulsePicker.propagate(80)

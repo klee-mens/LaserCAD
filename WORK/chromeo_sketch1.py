@@ -631,5 +631,72 @@ Compressor.draw()
 # b6.pos += b1.pos + (b2.Xdimension, -b2.Ydimension, 0)
 # b6.draw()
 
+# =============================================================================
+# deprecated
+# =============================================================================
+# # =============================================================================
+# # simple Amp2
+# # =============================================================================
+
+
+# focal = 300
+# sep_angle = 5
+# bigcrys = Crystal(width=20, thickness=15, n=2.45)
+# source = Beam(radius=1.4, angle=0)
+# telesf1 = -75
+# telesf2 = 270
+# knee_shift_amp2 = -200
+
+
+# Amp2 = Composition(name="herbert")
+# Amp2.set_light_source(source)
+# Amp2.propagate(100)
+# teles_lens1 = Lens(f=telesf1)
+# Amp2.add_on_axis(teles_lens1)
+# Amp2.propagate(telesf1 + telesf2)
+# teles_lens2 = Lens(f=telesf2)
+# Amp2.add_on_axis(teles_lens2)
+# # Amp2.propagate(800)
+# Amp2.propagate(120)
+# Amp2.add_on_axis(Mirror(phi=90*np.sign(knee_shift_amp2)))
+# Amp2.propagate(np.abs(knee_shift_amp2))
+# Amp2.add_on_axis(Mirror(phi=-90*np.sign(knee_shift_amp2)))
+# Amp2.propagate(680)
+# Amp2.add_on_axis(bigcrys)
+# Amp2.propagate(20)
+# active_mir = Mirror(phi=180-sep_angle)
+# Amp2.add_on_axis(active_mir)
+# Amp2.propagate(focal*2)
+# # concave1 = Curved_Mirror(radius=focal*2, phi=180+sep_angle)
+# concave1 = Curved_Mirror(radius=focal*2, phi=180+sep_angle)
+# Amp2.add_on_axis(concave1)
+# Amp2.propagate(2*focal)
+# # end_concave= Curved_Mirror(radius=focal, phi=180-sep_angle)
+# end_concave= Curved_Mirror(radius=focal, phi=180-sep_angle)
+# Amp2.add_on_axis(end_concave)
+# Amp2.propagate(2*focal)
+# # concave2 = Curved_Mirror(radius=focal*2, phi=180+sep_angle)
+# concave2 = Curved_Mirror(radius=focal*2, phi=180+sep_angle)
+# Amp2.add_on_axis(concave2)
+# concave2.set_normal_with_2_points(end_concave.pos, active_mir.pos)
+# # Amp2.set_sequence([0,1,2,3,4,5,2])
+# Amp2.set_sequence([0, 1, 2, 3, 4, 5, 4, 6, 7, 8, 4, 5, 4])
+# Amp2.recompute_optical_axis()
+# Amp2.propagate(650)
+# Amp2.add_on_axis(Mirror(phi=90))
+# Amp2.propagate(100)
+# # Amp2.set_sequence([0,1,2,3,4,5,2,6])
+# # Amp2.set_sequence([0,1,2,3,2,4,5,6,5,4,2,3,7])
+
+
+
+
+# Amp2.set_geom(Out_Beam1.get_geom())
+# # back_beam = PulsePicker.compute_beams()[3]
+# # back_pos = back_beam.pos
+# # back_normal = back_beam.normal * -1
+# # Amp2.pos = back_pos
+# # Amp2.normal = back_normal
+
 if freecad_da:
   setview()

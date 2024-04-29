@@ -37,7 +37,7 @@ class Composition(Geom_Object):
     self._lightsource.set_geom(self.get_geom())
     self._lightsource.name = self.name + "_Lighsource"
     self._beams = [self._lightsource]
-    self._catalogue = {}
+    # self._catalogue = {}
     self._drawing_part = -1
     self.non_opticals = []
 
@@ -64,7 +64,8 @@ class Composition(Geom_Object):
     # #checken ob Elm schon mal eingefügt
     self.__no_double_integration_check(item)
     # # Namen ändern, geom setzen, hinzufügen
-    item.name = self.new_catalogue_entry(item)
+    # item.name = self.new_catalogue_entry(item)
+    item.name = self.name + "_" + item.name
     self._elements.append(item)
     self._sequence.append(len(self._elements)-1) #neues <item> am Ende der seq
     self._last_prop = 0 #endet mit Element
@@ -307,7 +308,8 @@ class Composition(Geom_Object):
 
   def new_catalogue_entry(self, item):
     #gibt jedem neuen Element einen Namen entsprechend seiner Klasse
-    key = item.class_name()
+    # key = item.class_name()
+    key = item.name
     if key in self._catalogue:
          anz, names = self._catalogue[key]
          anz += 1
