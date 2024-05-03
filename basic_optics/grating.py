@@ -58,17 +58,17 @@ class Grating(Opt_Element):
   def update_draw_dict(self):
     super().update_draw_dict()
     self.draw_dict["dimensions"] = (self.width, self.height, self.thickness)
-  
+
   def set_mount_to_default(self):
     smm = Grating_Mount(height=self.height,thickness=self.thickness)
     smm.set_geom(self.get_geom())
     self.Mount = smm
-  
+
   def angle_of_incidence(self, ray=Ray()):
     """
     calulates the AOI of an incident or outgoing ray
     The angle is defined as the angle to the normal of the grating, the ray
-    is projected in a plane of the grating normal and the grating vector 
+    is projected in a plane of the grating normal and the grating vector
     (which is perpendicular to its lines/grooves)
 
     Parameters
@@ -84,8 +84,8 @@ class Grating(Opt_Element):
     rx = np.sum( ray.normal * xvec )
     ry = np.sum( ray.normal * yvec )
     # rz = np.sum( ray.normal * zvec )
-    # return np.arctan(ry / rx) # only in plane with normal and grat vector (perp to lines)
-    return np.arctan(np.abs(rx / ry)) # only in plane with normal and grat vector (perp to lines)
+    return np.arctan(ry / rx) # only in plane with normal and grat vector (perp to lines)
+    # return np.arctan(np.abs(rx / ry)) # only in plane with normal and grat vector (perp to lines)
 
   def matrix(self, inray=Ray()):
     # optical matrix, see https://www.brown.edu/research/labs/mittleman/sites/brown.edu.research.labs.mittleman/files/uploads/lecture11.pdf
@@ -98,50 +98,56 @@ class Grating(Opt_Element):
       print("Irgendwas bei Matrix Gitter Berechnung falsch gelaufen")
     angleOUT = self.angle_of_incidence(outray)
     A = np.cos(angleOUT) / np.cos(angleIN)
-    # A *= -1 #??? Steht so in den Folien    
+    # A *= -1 #??? Steht so in den Folien
     omatrix[0,0] = A
     omatrix[1,1] = 1/A
     return omatrix
-  
+
+
+
   def kostenbauder(self, inray=Ray()):
     # kostenbauder matrix, see https://www.brown.edu/research/labs/mittleman/sites/brown.edu.research.labs.mittleman/files/uploads/lecture11.pdf
     kmatrix = np.eye(4)
-    # angleIN = self.angle_of_incidence(inray)
-    
-    aoi = inray.angle_to(self)
+    aoi = self.angle_of_incidence(inray)
+    angleIN = aoi + np.pi/2 if aoi < 0 else aoi
+    # angleIN = np.pi - angleIN
+
+    # aoi = self.angle_to(inray)
     # angleIN = np.pi/2 - aoi if aoi > 0 else aoi
-    angleIN = aoi
+    # angleIN = np.pi/2 - aoi
     # angleIN = np.abs(angleIN)
     try:
       outray = self.next_ray(inray)
     except:
       outray = Ray()
       print("Irgendwas bei Matrix Gitter Berechnung falsch gelaufen")
-    aoo = outray.angle_to(self)
+    # aoo = outray.angle_to(self)
     # angleOUT = np.pi/2 + aoo if aoo > 0 else aoo #?1
-    angleOUT = aoo
+    # angleOUT = 90 + aoo
     # angleOUT = np.abs(angleOUT)
     # angleOUT = np.pi - angleOUT
-    
+    theta = inray.wavelength/self.grating_constant
+    angleOUT = np.arccos(np.cos(angleIN)-theta)
+
     # angleOUT = self.angle_of_incidence(outray)
     # A = np.cos(angleOUT) / np.cos(angleIN)
     A = np.sin(angleOUT) / np.sin(angleIN)
     A *= -1 #??? Steht so in den Folien
     c = 299792458 * 1e3 # speed of light in mm / s
     print("C:", c)
-    
+
     kmatrix[0,0] = A
     kmatrix[1,1] = 1/A
     kmatrix[1,3] = inray.wavelength * (np.cos(angleOUT) - np.cos(angleIN)) / (c * np.sin(angleOUT))
     kmatrix[2,0] = (np.cos(angleIN) - np.cos(angleOUT)) / (c * np.sin(angleIN))
-    
+
     print()
     print("sinIN =", np.sin(angleIN),"AlphaIN =", angleIN*180/np.pi)
     print("sinOUT =", np.sin(angleOUT), "AlphaOUT =", angleOUT*180/np.pi)
     print("cosIN =", np.cos(angleIN))
     print("cosOUT =", np.cos(angleOUT))
     print()
-    
+
     return kmatrix
 
 def grating_test1():
