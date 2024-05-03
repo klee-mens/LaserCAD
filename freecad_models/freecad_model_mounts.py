@@ -388,7 +388,7 @@ def mirror_mount(mount_name="mirror_mount",model_type="DEFAULT",
   container = post_part,obj,additional_mount
   add_to_composition(part, container)
   DOC.recompute()
-  print(mount_name,"'s post postiton=",np.array(POS)+xshift*np.array(NORMAL))
+  # print(mount_name,"'s post postiton=",np.array(POS)+xshift*np.array(NORMAL))
   return part
 
 def model_lambda_plate(name = "lamuda_plane",drawing_post=True,base_exists=False,
@@ -438,7 +438,7 @@ def model_lambda_plate(name = "lamuda_plane",drawing_post=True,base_exists=False
   part = initialize_composition_old(name="mount, post and base")
   container = post_part,obj
   add_to_composition(part, container)
-  print(name,"'s mount postiton=",np.array(POS)+xshift*np.array(NORMAL))
+  # print(name,"'s mount postiton=",np.array(POS)+xshift*np.array(NORMAL))
   return part
   
 def draw_post_part(name="post_part", base_exists=False, height=0,xshift=0, geom=None):
@@ -520,7 +520,7 @@ def draw_post_part(name="post_part", base_exists=False, height=0,xshift=0, geom=
         post1 = draw_post_base(name="BA1L", height=0,xshift=xshift, geom=geom)
   else:
     post1 = None
-  print(name,"'s height=",POS[2]-height)
+  # print(name,"'s height=",POS[2]-height)
   part = initialize_composition_old(name=name)
   container = post,post1,post2
   add_to_composition(part, container)
@@ -583,7 +583,7 @@ def draw_1inch_post(name="TR50_M",h_diff=5,ll=0,color=DEFAULT_POST_COLOR,
   offset1 = Vector(0,0,0)
   obj1.Placement = Placement(offset1, Rotation(0,0,0), Vector(0,0,0))
   update_geom_info(obj1, Geom_diff)
-  print(name+"'s Spacer height = ",h_diff)
+  # print(name+"'s Spacer height = ",h_diff)
   part = initialize_composition_old(name="1 inch post")
   container = obj,obj1
   add_to_composition(part, container)
@@ -913,8 +913,8 @@ def draw_large_mount(thickness=30,color=DEFAULT_MOUNT_COLOR,geom=None):
     offset1 = Vector(78.95+thickness-30,0,0)
     obj1.Placement = Placement(offset1, Rotation(0,0,0), Vector(0,0,0))
     update_geom_info(obj1, Geom_ground,off0=offset1)
-    print("large mount's post position =", POS+NORMAL*(48.95+thickness,0,0))
-    print("large mount's post height =", POS[2]-70)
+    # print("large mount's post position =", POS+NORMAL*(48.95+thickness,0,0))
+    # print("large mount's post height =", POS[2]-70)
     part = initialize_composition_old(name="mount and post")
     container = obj,obj1
     add_to_composition(part, container)
@@ -1248,12 +1248,12 @@ def model_Post_Marker(name="marker", h1 = (0,0), h2 = (75,0), h3 = (75,75),
 def model_mirror_holder(name="mirror_holder",dia = 25.4,angle = 30,
                         color=DEFAULT_MOUNT_COLOR, geom = None,**kwargs):
   DOC = get_DOC()
-  print(angle)
+  # print(angle)
   reverse= False
   if angle<0:
     angle= -angle
     reverse=True
-  print(angle)
+  # print(angle)
   dia_l = int(dia/10+1)*10
   obj1 = DOC.addObject("Part::Cylinder", "Cylinder")
   obj1.Label = "Cylinder"

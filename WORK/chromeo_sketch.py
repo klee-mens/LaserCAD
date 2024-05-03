@@ -303,7 +303,7 @@ tfp_angle = 65
 # optics
 
 cm0 = Curved_Mirror(radius=focal*2, phi = 180, name="Curved_Far")
-mir1 = Mirror(phi=180 + 10, name="Dichroit")
+mir1 = Mirror(phi=180 + 7, name="Dichroit")
 mir1.aperture = 0.5 * inch
 mir1.set_mount_to_default()
 

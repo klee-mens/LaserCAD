@@ -84,7 +84,8 @@ class Grating(Opt_Element):
     rx = np.sum( ray.normal * xvec )
     ry = np.sum( ray.normal * yvec )
     # rz = np.sum( ray.normal * zvec )
-    return np.arctan(ry / rx) # only in plane with normal and grat vector (perp to lines)
+    # return np.arctan(ry / rx) # only in plane with normal and grat vector (perp to lines)
+    return np.arctan(np.abs(rx / ry)) # only in plane with normal and grat vector (perp to lines)
 
   def matrix(self, inray=Ray()):
     # optical matrix, see https://www.brown.edu/research/labs/mittleman/sites/brown.edu.research.labs.mittleman/files/uploads/lecture11.pdf
@@ -105,26 +106,38 @@ class Grating(Opt_Element):
   def kostenbauder(self, inray=Ray()):
     # kostenbauder matrix, see https://www.brown.edu/research/labs/mittleman/sites/brown.edu.research.labs.mittleman/files/uploads/lecture11.pdf
     kmatrix = np.eye(4)
-    angleIN = self.angle_of_incidence(inray)
+    # angleIN = self.angle_of_incidence(inray)
+    
+    aoi = inray.angle_to(self)
+    # angleIN = np.pi/2 - aoi if aoi > 0 else aoi
+    angleIN = aoi
+    # angleIN = np.abs(angleIN)
     try:
       outray = self.next_ray(inray)
     except:
       outray = Ray()
       print("Irgendwas bei Matrix Gitter Berechnung falsch gelaufen")
-    angleOUT = self.angle_of_incidence(outray)
-    A = np.cos(angleOUT) / np.cos(angleIN)
+    aoo = outray.angle_to(self)
+    # angleOUT = np.pi/2 + aoo if aoo > 0 else aoo #?1
+    angleOUT = aoo
+    # angleOUT = np.abs(angleOUT)
+    # angleOUT = np.pi - angleOUT
+    
+    # angleOUT = self.angle_of_incidence(outray)
+    # A = np.cos(angleOUT) / np.cos(angleIN)
+    A = np.sin(angleOUT) / np.sin(angleIN)
     A *= -1 #??? Steht so in den Folien
     c = 299792458 * 1e3 # speed of light in mm / s
     print("C:", c)
     
     kmatrix[0,0] = A
     kmatrix[1,1] = 1/A
-    kmatrix[1,3] = inray.wavelength * (np.sin(angleOUT) - np.sin(angleIN)) / (c * np.cos(angleOUT))
-    kmatrix[2,0] = (np.sin(angleIN) - np.sin(angleOUT)) / (c * np.cos(angleIN))
+    kmatrix[1,3] = inray.wavelength * (np.cos(angleOUT) - np.cos(angleIN)) / (c * np.sin(angleOUT))
+    kmatrix[2,0] = (np.cos(angleIN) - np.cos(angleOUT)) / (c * np.sin(angleIN))
     
     print()
-    print("sinIN =", np.sin(angleIN))
-    print("sinOUT =", np.sin(angleOUT))
+    print("sinIN =", np.sin(angleIN),"AlphaIN =", angleIN*180/np.pi)
+    print("sinOUT =", np.sin(angleOUT), "AlphaOUT =", angleOUT*180/np.pi)
     print("cosIN =", np.cos(angleIN))
     print("cosOUT =", np.cos(angleOUT))
     print()

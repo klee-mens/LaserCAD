@@ -500,9 +500,9 @@ class Post_Marker(Unit_Mount):
     self.draw_dict["h2"] = (self.h1[0]+(25*self.size),self.h1[1])
     self.draw_dict["h3"] = (self.h1[0]+(25*self.size),self.h1[1]+(25*self.size))
     self.draw_dict["h4"] = (self.h1[0],self.h1[1]+75)
-    print(self.name," holes' pos=",self.h1,(self.h1[0]+(25*self.size),self.h1[1]),
-          (self.h1[0]+(25*self.size),self.h1[1]+(25*self.size)),
-          (self.h1[0],self.h1[1]+(25*self.size)))
+    # print(self.name," holes' pos=",self.h1,(self.h1[0]+(25*self.size),self.h1[1]),
+    #       (self.h1[0]+(25*self.size),self.h1[1]+(25*self.size)),
+    #       (self.h1[0],self.h1[1]+(25*self.size)))
 
 class Adaptive_Angular_Mount(Unit_Mount):
   def __init__(self, aperture=25.4,angle = 30,**kwargs):

@@ -180,6 +180,10 @@ class Mirror(Opt_Element):
     self.draw_dict["dia"]=self.aperture
     self.draw_dict["Radius"] = 0
 
+  def kostenbauder(self, inray=Ray()):
+    kmatrix = np.eye(4)
+    kmatrix[0:2, 0:2] = -self.matrix(inray=inray)
+    return np.array(kmatrix)
 
 
 class Curved_Mirror(Mirror):

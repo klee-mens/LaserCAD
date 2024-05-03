@@ -173,6 +173,10 @@ class Composition(Geom_Object):
       moment_propa[0,1] = B
       M = self._elements[ind].kostenbauder(inray = self._optical_axis[counter])
       
+      print("Counter =", counter)
+      print(moment_propa)
+      print(M)
+      
       self._kostenbauder = np.matmul( moment_propa, self._kostenbauder )
       self._kostenbauder = np.matmul( M, self._kostenbauder )
       
