@@ -31,7 +31,7 @@ from LaserCAD.basic_optics.mount import Unit_Mount, Composed_Mount
 from LaserCAD.non_interactings.table import Table
 if freecad_da:
   clear_doc()
-  
+
 grating_const = 1/450 # in 1/mm
 seperation = 135 # difference grating position und radius_concave
 lambda_mid = 2400e-9 * 1e3 # central wave length in mm
@@ -68,6 +68,7 @@ v = lambda_mid/grating_const
 a = v/2
 B = np.sqrt(a**2 - (v**2 - SinS**2)/(2*(1+CosS)))
 sinB_new = a - B
+# sinB_new = a + B
 Grating_normal = (np.sqrt(1-sinB_new**2), sinB_new, 0)
 
 Grat1 = Grating(grat_const=grating_const, order=-1)

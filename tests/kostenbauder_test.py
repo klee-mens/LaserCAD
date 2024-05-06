@@ -13,7 +13,7 @@ ind = pfad.rfind("lasercad")
 pfad = pfad[0:ind-1]
 if not pfad in sys.path:
   sys.path.append(pfad)
-  
+
 
 from LaserCAD.freecad_models import clear_doc, setview, freecad_da
 from LaserCAD.basic_optics import Mirror, Beam, Composition, inch
@@ -58,6 +58,7 @@ delta_lamda = 200e-9*1e3 # full bandwith in mm
 number_of_rays = 20
 safety_to_stripe_mirror = 5 #distance first incomming ray to stripe_mirror in mm
 periscope_height = 15
+periscope_height = 0
 first_propagation = 20 # legnth of the first ray_bundle to flip mirror1 mm
 distance_flip_mirror1_grating = 300-85
 distance_roof_top_grating = 600
