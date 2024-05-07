@@ -44,6 +44,10 @@ class Grating(Opt_Element):
     sagital_component = np.sum(r1 * sagit)
     sinA = np.sum( sagit * np.cross(r1, norm) )
     sinB = order * ray.wavelength/ self.grating_constant - sinA
+    if abs(sinB)>1:
+      ray2 = self.reflection(ray)
+      print("Warning, there is no diffraction of this order, retun next ray as a reflection")
+      return ray2
     ray2 = deepcopy(ray)
     ray2.name = "next_" + ray.name
     ray2.pos = pos
@@ -98,7 +102,8 @@ class Grating(Opt_Element):
       print("Irgendwas bei Matrix Gitter Berechnung falsch gelaufen")
     angleOUT = self.angle_of_incidence(outray)
     A = np.cos(angleOUT) / np.cos(angleIN)
-    # A *= -1 #??? Steht so in den Folien
+    # A = np.sin(angleOUT) / np.sin(angleIN)
+    A *= 1 #??? Steht so in den Folien
     omatrix[0,0] = A
     omatrix[1,1] = 1/A
     return omatrix

@@ -20,9 +20,11 @@ if not pfad in sys.path:
   sys.path.append(pfad)
 
 from scipy.interpolate import interp1d
+import scipy
 from scipy.misc import derivative
+from copy import deepcopy
 
-from LaserCAD.freecad_models import clear_doc, setview, freecad_da
+from LaserCAD.freecad_models import clear_doc, freecad_da
 from LaserCAD.basic_optics import Mirror, Beam, Composition, inch
 from LaserCAD.basic_optics import Curved_Mirror, Ray, Lens
 from LaserCAD.basic_optics.mirror import Stripe_mirror
@@ -65,7 +67,7 @@ grating_const = 1/450 # in 1/mm
 seperation = 135 # difference grating position und radius_concave
 lambda_mid = 2400e-9 * 1e3 # central wave length in mm
 delta_lamda = 200e-9*1e3 # full bandwith in mm
-number_of_rays = 10
+number_of_rays = 31
 safety_to_stripe_mirror = 5 #distance first incomming ray to stripe_mirror in mm
 periscope_height = 15
 first_propagation = 20 # legnth of the first ray_bundle to flip mirror1 mm
@@ -85,6 +87,13 @@ c = np.cos(seperation_angle)
 a = v/2
 b = np.sqrt(a**2 - (v**2 - s**2)/(2*(1+c)))
 sinB = a - b
+sinAOI = np.sin(seperation_angle+np.arcsin(sinB))
+f = radius_concave
+
+GDD = 2*lambda_mid**3*(seperation)/(np.pi*c0**2*grating_const**2*(1-(lambda_mid/grating_const-sinAOI)**2))
+
+
+print("sin(angle)=",np.sin(seperation_angle+np.arcsin(sinB)))
 grating_normal = (np.sqrt(1-sinB**2), sinB, 0)
 
 Concav = Curved_Mirror(radius=radius_concave, name="Concav_Mirror")
@@ -135,6 +144,29 @@ for wavel in wavels:
       x = 1-(wavel - lambda_mid + delta_lamda/2) / delta_lamda
       rn.draw_dict["color"] = cmap( x )
       rays.append(rn)
+lightsource.override_rays(rays)
+lightsource.draw_dict['model'] = "ray_group"
+
+Ring_number = 2
+Beam_radius = 1
+lightsource = Beam(radius=0, angle=0)
+wavels = np.linspace(lambda_mid-delta_lamda/2, lambda_mid+delta_lamda/2,
+                      number_of_rays)
+rays = []
+cmap = plt.cm.gist_rainbow
+for wavel in wavels:
+  rn = Ray()
+  # rn.normal = vec
+  # rn.pos = pos0
+  rn.wavelength = wavel
+  x = 1-(wavel - lambda_mid + delta_lamda/2) / delta_lamda
+  rn.draw_dict["color"] = cmap( x )
+  rg = Beam(radius=Beam_radius, angle=0,wavelength=wavel)
+  rg.make_circular_distribution(ring_number=Ring_number)
+  for ray_number in range(0,rg._ray_count):
+    rn = rg.get_all_rays()[ray_number]
+    rn.draw_dict["color"] = cmap( x )
+    rays.append(rn)
 lightsource.override_rays(rays)
 lightsource.draw_dict['model'] = "ray_group"
 # -----------------------------------------------------------------------------
@@ -230,7 +262,8 @@ Plane_height = 23+25.4
 Grat2 = Grating(grat_const=grating_const, order=-1)
 # propagation_length = 99.9995
 # propagation_length = seperation*2-0.0078
-propagation_length = seperation*2-0.008
+# propagation_length = seperation*2-0.008
+propagation_length = seperation*2-0.085
 
 # propagation_length = 99.9949
 Grat2.pos -= (500-10-propagation_length*CosS,SinS*propagation_length,periscope_height)
@@ -287,8 +320,8 @@ Grat1.Mount.mount_list[1].flip(-90)
 Grat2.Mount.mount_list[1].flip(-90)
 Grat4.Mount.mount_list[-1]._lower_limit = Plane_height
 Grat1.Mount.mount_list[-1]._lower_limit = Plane_height
-Grat3.Mount.mount_list[-1]._lower_limit = Plane_height-23+25
-Grat2.Mount.mount_list[-1]._lower_limit = Plane_height-23+25
+Grat3.Mount.mount_list[-1]._lower_limit = Plane_height-23
+Grat2.Mount.mount_list[-1]._lower_limit = Plane_height-23
 Grat1.Mount.mount_list[1].model = "POLARIS-K1E3"
 Grat2.Mount.mount_list[1].model = "POLARIS-K1E3"
 Grat3.Mount.mount_list[1].model = "POLARIS-K1E3"
@@ -307,6 +340,8 @@ Grat2.Mount.add(PM1)
 Grat3.Mount.add(PM2)
 
 # print("setting pos=",(Grat1.pos+Grat2.pos+Grat3.pos+Grat4.pos)/4)
+ip = Intersection_plane()
+ip.pos -= (100,0,0)
 Stretcher.add_fixed_elm(Grat1)
 Stretcher.add_fixed_elm(Grat2)
 Stretcher.add_fixed_elm(Grat3)
@@ -322,11 +357,15 @@ Stretcher.add_fixed_elm(C_RoofTop2)
 # setting the final sequence and the last propagation for visualization
 # note that pure cosmetic (pos6) is not in the sequence
 # Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0,6,7,8,9,7,6,10]) #two Gratings Compressor
-Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0,6,7,8,9])#8,9,10,11]) #four Gratings Compressor
-# Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0]) #no compressor
+# Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0,6,7,8,9])#8,9,10,11]) #four Gratings Compressor
+Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0]) #no compressor
 Stretcher.recompute_optical_axis()
 Stretcher.pos += (0,0,24)
 Stretcher.propagate(500)
+# ip=Intersection_plane()
+# ip.set_geom(Stretcher.last_geom())
+# ip.spot_diagram(Stretcher._beams[-1],aberration_analysis=True)
+# ip.draw()
 
 from LaserCAD.basic_optics import Gaussian_Beam
 gb = Gaussian_Beam(radius=input_radius,angle=input_angle)
@@ -375,6 +414,14 @@ ip.spot_diagram(Stretcher._beams[0])
 # ip.spot_diagram(Stretcher._beams[14],aberration_analysis=True)
 # ip.draw()
 # ip_s.draw()
+# ip.spot_diagram(Stretcher._beams[0])
+ip.draw()
+ip_s.draw()
+ip_stripe= Intersection_plane()
+ip_stripe.set_geom(StripeM.get_geom())
+ip_stripe.spot_diagram(Stretcher._beams[3])
+ip_stripe.draw()
+
 pathlength = {}
 for ii in range(Stretcher._beams[0]._ray_count):
   wavelength = Stretcher._beams[0].get_all_rays()[ii].wavelength
@@ -383,7 +430,7 @@ for jj in range(len(Stretcher._beams)-1):
   for ii in Stretcher._beams[jj].get_all_rays():
     a=pathlength[ii.wavelength]
     pathlength[ii.wavelength] = a +ii.length
-    
+
 # """
 # add the optical path length in crystal
 # """
@@ -399,74 +446,154 @@ for jj in range(len(Stretcher._beams)-1):
 # """
 # calculate the GDD,TOD
 # """
-ray_lam = [ray.wavelength for ray in Stretcher._beams[0].get_all_rays()]
-path = [pathlength[ii] for ii in ray_lam]
-path_diff = [ii-path[int(len(path)/2)] for ii in path]
-fai = [path_diff[ii]/ray_lam[ii]*2*np.pi for ii in range(len(path))]
-omega = [c0/ii*2*np.pi for ii in ray_lam]
-omega = [ii - c0/lambda_mid*2*np.pi for ii in omega]
-para = np.polyfit(omega, fai, 6)
-fai = [para[0]*ii**6 + para[1]*ii**5 + para[2]*ii**4 + para[3]*ii**3 + para[4]*ii**2 for ii in omega]
-fai2 = [30*para[0]*ii**4 + 20*para[1]*ii**3 + 12*para[2]*ii**2 + 6*para[3]*ii + 2*para[4] for ii in omega] # Taylor Expantion
-fai3 = [120*para[0]*ii**3 + 60*para[1]*ii**2 + 24*para[2]*ii + 6*para[3] for ii in omega]
+# ray_lam = [ray.wavelength for ray in Stretcher._beams[0].get_all_rays()]
+# path = [pathlength[ii] for ii in ray_lam]
+# path_diff = [ii-path[int(len(path)/2)] for ii in path]
+# fai = [path_diff[ii]/ray_lam[ii]*2*np.pi for ii in range(len(path))]
 
-# # para = np.polyfit(omega, fai, 5)
-# # fai2 = [20*para[0]*ii**3 + 12*para[1]*ii**2 + 6*para[2]*ii + 2*para[3] for ii in omega] # Taylor Expantion
-# # fai3 = [60*para[0]*ii**2 + 24*para[1]*ii + 6*para[2] for ii in omega]
+# delay = [path_diff[ii]/c0 for ii in range(len(path))]
 
-fai_function = interp1d(omega, fai)
-fai_new = fai_function(omega)
+# omega = [c0/ii*2*np.pi for ii in ray_lam]
+# omega = [(ii - c0/lambda_mid*2*np.pi) for ii in omega]
+# fai_new = deepcopy(fai)
+# delay_new = deepcopy(delay)
+# para_order = 9
+# para = np.polyfit(omega, fai, 6)
+# # para = np.polynomial.polynomial.Polynomial.fit(omega, fai, 6)
+# fai = [para[0]*(ii**6) + para[1]*(ii**5) + para[2]*(ii**4) + para[3]*(ii**3) + para[4]*(ii**2) + para[5]*(ii) + para[6] for ii in omega]
+# fai1 = [6  *para[0]*(ii**5) + 5 *para[1]*(ii**4) + 4 *para[2]*(ii**3) + 3*para[3]*(ii**2) + 2*para[4]*(ii) + para[5] for ii in omega]
+# fai2 = [30 *para[0]*(ii**4) + 20*para[1]*(ii**3) + 12*para[2]*(ii**2) + 6*para[3]*ii + 2*para[4] for ii in omega] # Taylor Expantion
+# fai3 = [120*para[0]*(ii**3) + 60*para[1]*(ii**2) + 24*para[2]*ii      + 6*para[3] for ii in omega]
 
-# # fai2_new=[derivative(fai_function, omega[ii],dx=1,n=2,order=5) for ii in range(1,len(omega)-1)]
-# # fai3_new=[derivative(fai_function, omega[ii],dx=1,n=3,order=5) for ii in range(1,len(omega)-1)]
+# para = np.polyfit(omega, delay, para_order)
+# fai2 = []
+# fai3 = []
+# i_count = 0
+# for ii in omega:
+#   fai_add = 0
+#   fai_add2 = 0
+#   fai_add3 = 0
+#   for jj in range(para_order,-1,-1):
+#     fai_add += para[para_order-jj]* ((ii)**jj)
+#     if jj-1>=0:
+#       fai_add2 += para[para_order-jj] * jj * (ii**(jj-1))
+#     if jj-2>=0:
+#       fai_add3 += para[para_order-jj] * jj * (jj-1) * (ii**(jj-2))
+#   fai2.append(fai_add2)
+#   fai3.append(fai_add3)
 
-delay_mid = path[int(len(path)/2)]/c0
-delay = [(pa/c0-delay_mid)*1E9 for pa in path]
 # plt.figure()
-# ax1=plt.subplot(1,2,1)
-# plt.plot(ray_lam,path)
-# plt.ylabel("pathlength (mm)")
-# plt.xlabel("wavelength (mm)")
-# plt.title("Pathlength at different wavelength")
-# plt.axhline(path[int(len(path)/2)], color = 'black', linewidth = 1)
-# ax2=plt.subplot(1,2,2)
-# plt.plot(ray_lam,delay)
-# plt.ylabel("delay (ns)")
-# plt.xlabel("wavelength (mm)")
-# plt.title("Delay at different wavelength")
-# plt.axhline(0, color = 'black', linewidth = 1)
-# plt.show()
+# ax1=plt.subplot(1,3,1)
+# plt.scatter(omega,delay,label="delay")
+# plt.plot(omega,delay_new,label="delay")
+# plt.title("Relationship of delay with angular frequency")
+# plt.xlabel("angular frequency ω (rad/s)")
+# plt.ylabel("delay (s)")
+# plt.axhline(delay[int(len(delay)/2)], color = 'black', linewidth = 1)
+# ax2=plt.subplot(1,3,2)
+# plt.plot(omega,fai2)
+# # omega_d = omega
+# # del omega_d[0]
+# # del omega_d[-1]
+# # plt.plot(omega_d,fai2_new)
+# plt.title("Group delay dispersion")
+# plt.xlabel("angular frequency ω (rad/s)")
+# plt.ylabel("The second order derivative of φ(ω)")
+# plt.axhline(fai2[int(len(fai2)/2)], color = 'black', linewidth = 1)
+# print("Group delay dispersion at the center wavelength:",fai2[int(len(fai2)/2)])
+# print("GDD(theoretical value)=",GDD)
 
-plt.figure()
-ax1=plt.subplot(1,3,1)
-plt.scatter(omega,fai,label="φ(ω)")
-plt.plot(omega,fai_new,label="φ(ω)")
-plt.title("Relationship of phase with angular frequency φ(ω)")
-plt.xlabel("angular frequency ω (rad/s)")
-plt.ylabel("wave phase φ (rad)")
-plt.axhline(fai[int(len(fai)/2)], color = 'black', linewidth = 1)
-ax2=plt.subplot(1,3,2)
-plt.plot(omega,fai2)
-# omega_d = omega
-# del omega_d[0]
-# del omega_d[-1]
-# plt.plot(omega_d,fai2_new)
-plt.title("Group delay dispersion")
-plt.xlabel("angular frequency ω (rad/s)")
-plt.ylabel("The second order derivative of φ(ω)")
-plt.axhline(fai2[int(len(fai2)/2)], color = 'black', linewidth = 1)
-print("Group delay dispersion at the center wavelength:",fai2[int(len(fai2)/2)])
+# ax3=plt.subplot(1,3,3)
+# plt.plot(omega,fai3)
+# # plt.plot(omega_d,fai3_new)
+# plt.title("Third order dispersion")
+# plt.xlabel("angular frequency ω (rad/s)")
+# plt.ylabel("The third order derivative of φ(ω)")
+# plt.axhline(fai3[int(len(fai3)/2)], color = 'black', linewidth = 1)
+# print("3rd order dispersion at the center wavelength:",fai3[int(len(fai2)/2)])
 
-ax3=plt.subplot(1,3,3)
-plt.plot(omega,fai3)
-# plt.plot(omega_d,fai3_new)
-plt.title("Third order dispersion")
-plt.xlabel("angular frequency ω (rad/s)")
-plt.ylabel("The third order derivative of φ(ω)")
-plt.axhline(fai3[int(len(fai3)/2)], color = 'black', linewidth = 1)
-print("3rd order dispersion at the center wavelength:",fai3[int(len(fai3)/2)])
+# -----------------------------------------------------------------------------
+# para = np.polyfit(omega, fai, para_order)
+# fai = []
+# fai2 = []
+# fai3 = []
+# fai4 = []
+# i_count = 0
+# for ii in omega:
+#   fai_add1 = 0
+#   fai_add2 = 0
+#   fai_add3 = 0
+#   fai_add4 = 0
+#   for jj in range(para_order,-1,-1):
+#     fai_add1 += para[para_order-jj]* ((ii)**jj)
+#     if jj-1>=0:
+#       fai_add4 += para[para_order-jj] * jj * (ii**(jj-1))
+#     if jj-2>=0:
+#       fai_add2 += para[para_order-jj] * jj * (jj-1) * (ii**(jj-2))
+#     if jj-3>=0:
+#       fai_add3 += para[para_order-jj] * jj * (jj-1) * (jj-2) * (ii**(jj-3))
+#   fai.append(fai_add1)
+#   fai2.append(fai_add2)
+#   fai3.append(fai_add3)
+#   fai4.append(fai_add4)
+# # print(fai2)
+# # print(fai4)
+# # -----------------------------------------------------------------------------
+# # # para = np.polyfit(omega, fai, 5)
+# # # fai2 = [20*para[0]*ii**3 + 12*para[1]*ii**2 + 6*para[2]*ii + 2*para[3] for ii in omega] # Taylor Expantion
+# # # fai3 = [60*para[0]*ii**2 + 24*para[1]*ii + 6*para[2] for ii in omega]
 
+# # fai_function = interp1d(omega, fai)
+# # fai_new = fai_function(omega)
+
+# # # fai2_new=[derivative(fai_function, omega[ii],dx=1,n=2,order=5) for ii in range(1,len(omega)-1)]
+# # # fai3_new=[derivative(fai_function, omega[ii],dx=1,n=3,order=5) for ii in range(1,len(omega)-1)]
+
+# delay_mid = path[int(len(path)/2)]/c0
+# delay = [(pa/c0-delay_mid)*1E9 for pa in path]
+# # plt.figure()
+# # ax1=plt.subplot(1,2,1)
+# # plt.plot(ray_lam,path)
+# # plt.ylabel("pathlength (mm)")
+# # plt.xlabel("wavelength (mm)")
+# # plt.title("Pathlength at different wavelength")
+# # plt.axhline(path[int(len(path)/2)], color = 'black', linewidth = 1)
+# # ax2=plt.subplot(1,2,2)
+# # plt.plot(ray_lam,delay)
+# # plt.ylabel("delay (ns)")
+# # plt.xlabel("wavelength (mm)")
+# # plt.title("Delay at different wavelength")
+# # plt.axhline(0, color = 'black', linewidth = 1)
+# # plt.show()
+
+# plt.figure()
+# ax1=plt.subplot(1,3,1)
+# plt.scatter(omega,fai,label="φ(ω)")
+# plt.plot(omega,fai_new,label="φ(ω)")
+# plt.title("Relationship of phase with angular frequency φ(ω)")
+# plt.xlabel("angular frequency ω (rad/s)")
+# plt.ylabel("wave phase φ (rad)")
+# plt.axhline(fai[int(len(fai)/2)], color = 'black', linewidth = 1)
+# ax2=plt.subplot(1,3,2)
+# plt.plot(omega,fai2)
+# # omega_d = omega
+# # del omega_d[0]
+# # del omega_d[-1]
+# # plt.plot(omega_d,fai2_new)
+# plt.title("Group delay dispersion")
+# plt.xlabel("angular frequency ω (rad/s)")
+# plt.ylabel("The second order derivative of φ(ω)")
+# plt.axhline(fai2[int(len(fai2)/2)], color = 'black', linewidth = 1)
+# print("Group delay dispersion at the center wavelength:",fai2[int(len(fai2)/2)])
+
+# ax3=plt.subplot(1,3,3)
+# plt.plot(omega,fai3)
+# # plt.plot(omega_d,fai3_new)
+# plt.title("Third order dispersion")
+# plt.xlabel("angular frequency ω (rad/s)")
+# plt.ylabel("The third order derivative of φ(ω)")
+# plt.axhline(fai3[int(len(fai3)/2)], color = 'black', linewidth = 1)
+# print("3rd order dispersion at the center wavelength:",fai3[int(len(fai2)/2)])
+# -----------------------------------------------------------------------------
 
 # # Stretcher.draw_beams()
-if freecad_da:
-  setview()

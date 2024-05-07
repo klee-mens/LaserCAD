@@ -174,7 +174,7 @@ class Unit_Mount(Geom_Object):
         self.draw_dict["color"] = eval(mount_loop["color"])
         # eval
     if not mount_in_database:
-      print("This mount is not in the database.")
+      print("The mount '", self.model, "' is not in the database.")
       self.path = folder
       return False
     self.aperture = aperture

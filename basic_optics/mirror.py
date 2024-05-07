@@ -111,6 +111,19 @@ class Mirror(Opt_Element):
 
   def next_ray(self, ray):
     return self.reflection(ray)
+  
+  def through_out_beam(self, beam):
+    newb = deepcopy(beam)
+    newb.name = "next_" + beam.name
+    rays = beam.get_all_rays(by_reference=True)
+    newrays = []
+    for ray in rays:
+      nr = self.just_pass_through(ray)
+      if not nr:
+        return False 
+      newrays.append(nr)
+    newb.override_rays(newrays)
+    return newb
 
   def set_incident_normal(self, vec):
     """

@@ -11,6 +11,7 @@ from copy import deepcopy
 from .ray import Ray
 from .beam import Beam #,RayGroup
 import matplotlib.pyplot as plt
+# import matplotlib.patches as patches
 # from .freecad_models import model_intersection_plane,iris_post
 from ..freecad_models import model_intersection_plane
 from ..freecad_models.freecad_model_ray import RAY_COLOR
@@ -42,7 +43,7 @@ class Intersection_plane(Opt_Element):
     # return model_intersection_plane(**self.draw_dict)
   
   
-  def spot_diagram(self, beam, aberration_analysis=False):
+  def spot_diagram(self, beam, aberration_analysis=False,default_diagram_size=0):
     """
       Draw the Spot diagram at the intersection plane
 
@@ -60,6 +61,10 @@ class Intersection_plane(Opt_Element):
     point_y = []
     point_c = []
     ray_lam = []
+    point_x_red = []
+    point_y_red = []
+    point_x_blue = []
+    point_y_blue = []
     # if isinstance(beam, RayGroup) or isinstance(beam, Beam):
     if isinstance(beam, Beam):
       rays = beam.get_all_rays()
@@ -89,6 +94,14 @@ class Intersection_plane(Opt_Element):
         self.aperture=self.draw_dict["dia"]
       point_x.append(pos_diff1)
       point_y.append(pos_diff2)
+      
+      # if lamuda<0.001001:
+      #   point_x_blue.append(pos_diff1)
+      #   point_y_blue.append(pos_diff2)
+      # if lamuda>0.001059:
+      #   point_x_red.append(pos_diff1)
+      #   point_y_red.append(pos_diff2)
+      
     ray_middle = rays[int(len(rays)/2)]
     point_x_middle = point_x[int(len(rays)/2)]
     point_y_middle = point_y[int(len(rays)/2)]
@@ -154,13 +167,23 @@ class Intersection_plane(Opt_Element):
       # plt.title("The tilt in the y direction at " + self.name,fontsize=15)
       # plt.title("The tilt in the y direction",fontsize=fs)
       plt.axhline(0, color = 'black', linewidth = 1)
-    plt.figure()
+    fig = plt.figure()
+    ax_only = fig.add_subplot(1,1,1)
     # area = (20 * np.random.rand(37))**2
     # c = np.sqrt(area)
     fs=24
     a=plt.scatter(point_x,point_y,s=10,c=point_c)
+    # xy_red = [[point_x_red[ii],point_y_red[ii]] for ii in range(-12,0,1)]
+    # xy_blue = [[point_x_blue[ii],point_y_blue[ii]] for ii in range(-12,0,1)]
+    # red_spot = plt.Polygon(xy_red,facecolor="red",alpha=0.5)
+    # blue_spot = plt.Polygon(xy_blue,facecolor="blue",alpha=0.5)
+    # ax_only.add_patch(red_spot)
+    # ax_only.add_patch(blue_spot)
     plt.xticks(fontsize=fs)
     plt.yticks(fontsize=fs)
+    if default_diagram_size!=0:
+      plt.xlim(-default_diagram_size,default_diagram_size)
+      plt.ylim(-5,5)
     # plt.xlim(-0.0015,0.0015)
     # plt.ylim(-0.0015,0.0015)
     plt.xlabel("x-axis (mm)",fontsize=fs)
