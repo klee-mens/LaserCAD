@@ -64,3 +64,17 @@ def xy_to_table_plus_offset(x,y):
   offset_y = y - (59-q)*25
   return  [p, offset_x, q, offset_y]
 
+
+def test_xy_table():
+  x,y = [1259.95368134,  762.68269095]
+  print("x,y original : ", x, "|", y)
+  print()
+  p, xo, q, yo = xy_to_table_plus_offset(x, y)
+  print("p , offest_x | q, offest_y : ", p, ",", xo, "|", q, ",", yo)
+  print()
+  xb, yb = table_coordinates_to_xy(p, q)
+  print("back again to x | y : ", xb+xo, "|", yb+yo)
+
+
+if __name__ == "__main__":
+  test_xy_table()
