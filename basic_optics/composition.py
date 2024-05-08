@@ -150,10 +150,10 @@ class Composition(Geom_Object):
       M = self._elements[ind].matrix(inray = self._optical_axis[counter])
       self._matrix = np.matmul(np.array([[1,B], [0,1]]), self._matrix )
       self._matrix = np.matmul(M, self._matrix )
-      
+
     self._matrix = np.matmul(np.array([[1,self._last_prop], [0,1]]), self._matrix ) #last propagation
     return np.array(self._matrix)
-  
+
   def kostenbauder(self):
     """
     computes the optical matrix of the system
@@ -172,14 +172,14 @@ class Composition(Geom_Object):
       moment_propa = np.eye(4)
       moment_propa[0,1] = B
       M = self._elements[ind].kostenbauder(inray = self._optical_axis[counter])
-      
+
       print("Counter =", counter)
       print(moment_propa)
       print(M)
-      
+
       self._kostenbauder = np.matmul( moment_propa, self._kostenbauder )
       self._kostenbauder = np.matmul( M, self._kostenbauder )
-      
+
     last_propa = np.eye(4)
     last_propa[0,1] = self._last_prop
     self._kostenbauder = np.matmul( last_propa, self._kostenbauder ) #last propagation
@@ -244,7 +244,7 @@ class Composition(Geom_Object):
       obj = elm.draw_mount()
       container.append(obj)
     return self.__container_to_part(self._mounts_part, container)
-  
+
   def draw_alignment_posts(self):
     self.__init_parts()
     container = []
@@ -268,6 +268,25 @@ class Composition(Geom_Object):
     self.draw_beams()
     self.draw_mounts()
 
+  def post_positions(self):
+    post_coordinate_list = []
+    for elm in self._elements:
+      try:
+        post = elm.Mount.mount_list[-1]
+        xy = post.pos[0:2]
+        post_coordinate_list.append(xy)
+      except:
+        print("No Post found for Element", elm.name)
+    for non_optical in self.non_opticals:
+      try:
+        post = non_optical.Mount.mount_list[-1]
+        xy = post.pos[0:2]
+        post_coordinate_list.append(xy)
+      except:
+        print("No Post found for Element", non_optical.name)
+    return post_coordinate_list
+
+
   def __container_to_part(self, part, container):
     if freecad_da:
       part = add_to_composition(part, container)
@@ -290,7 +309,7 @@ class Composition(Geom_Object):
         self._mounts_part = []
         self._beams_part = []
         self._alignment_post_part = []
-        self._drawing_part = [self._elements_part, self._mounts_part, 
+        self._drawing_part = [self._elements_part, self._mounts_part,
                               self._beams_part, self._alignment_post_part]
 
 
