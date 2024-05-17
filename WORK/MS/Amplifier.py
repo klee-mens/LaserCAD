@@ -67,7 +67,7 @@ Amp.add_on_axis(PC)
 PC.rotate(vec=PC.normal, phi=np.pi)
 Amp.propagate(d_PC_TFP2)
 TFP2 = Mirror(phi=-a_TFP)
-TFP2.Mount = Composed_Mount(["56_degree_mounts","POLARIS-K1","1inch_post"])
+TFP2.Mount = Composed_Mount(["65_degree_mounts","POLARIS-K1","1inch_post"])
 TFP2.Mount.set_geom(TFP2.get_geom())
 Amp.add_on_axis(TFP2) #0
 Amp.propagate(d_TFP2_M1)

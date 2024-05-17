@@ -640,17 +640,20 @@ for seperation in seperation_list:
                                        roundtrip=roundtrip,centerlamda=centerlamda,
                                        ls=ls,seperation=seperation))
 plt.figure()
-plt.plot(seperation_list,GDD_list)
-plt.tick_params(labelsize=20)
-# plt.xticks(fontsize=20)
-# plt.yticks(fontsize=20)
-plt.xlabel("seperation length of the stretcher(mm)",fontsize=20)
-plt.ylabel("Group delay disperation(s^2)",fontsize=20)
-plt.title("Group delay disperation in different seperation length",fontsize=20)
+fs=24
+a1=plt.subplot(1,1,1)
+a1.yaxis.get_offset_text().set(size=fs)
+plt.plot(seperation_list,GDD_list, linewidth = 2)
+plt.tick_params(labelsize=fs)
+# plt.xticks(fontsize=fs)
+# plt.yticks(fontsize=fs)
+plt.xlabel("seperation length of the stretcher(mm)",fontsize=fs)
+plt.ylabel("Group delay disperation(s^2)",fontsize=fs)
+# plt.title("Group delay disperation in different seperation length",fontsize=fs)
 # plt.axhline(1.4108287432982885e-22, color = 'black', linewidth = 1)
-plt.axhline(9.983659018150005e-23, color = 'black', linewidth = 1)
-# plt.text(208, 1.42e-22, "The absolute value of Compressor's",fontsize=20)
-# plt.text(208, 1.37e-22, "Group delay disperation(1.41E-22s^2)",fontsize=20)
+plt.axhline(9.983659018150005e-23, color = 'black', linewidth = 2)
+plt.text(80-2, 1.01e-22, "The absolute value of Compressor's",fontsize=fs)
+plt.text(80-2, 0.96e-22, "Group delay disperation(9.98e-23)",fontsize=fs)
   
 #   maximun deviation with different wavelength -------------------------------
 # lam_mid = 1030E-6

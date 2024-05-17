@@ -581,8 +581,7 @@ def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,
     
     return max_diff
   elif Comp._lightsource == centerlightsource:
-    # ip.spot_diagram(Comp._beams[-1],aberration_analysis=True)
-    
+    # ip.spot_diagram(Comp._beams[-1],aberration_analysis=False)
     rays_end = Comp._beams[-1].get_all_rays()
     max_pos_diff = 0
     pos_diff = []
@@ -591,10 +590,21 @@ def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,
       # print(intersection_point)
       # pos_diff = intersection_point - ip.pos
       pos_diff.append(intersection_point)
+    # print(pos_diff)
     pos_center = pos_diff[int(len(pos_diff)/2)]
+    # for ii in pos_diff:
+    #   for jj in pos_diff:
+    #     if max_pos_diff < np.linalg.norm(ii-jj):
+    #       max_pos_diff = np.linalg.norm(ii-jj)
+    leftii = rightii = pos_center[1]
     for ii in pos_diff:
-      if max_pos_diff < np.linalg.norm(ii-pos_center):
-        max_pos_diff = np.linalg.norm(ii-pos_center)
+      if leftii > ii[1]:
+        leftii = ii[1]
+      if rightii < ii[1]:
+        rightii = ii[1]
+    #     a = ii-pos_center
+    # print(a)
+    max_pos_diff=abs(leftii-rightii)
     return (max_pos_diff)
 
   else:
@@ -611,10 +621,6 @@ def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,
     B0 = Beam()
     B0.override_rays(rays_0)
     ip_stripe.spot_diagram(B0,aberration_analysis=False,default_diagram_size=22)
-    # ip_stripe.spot_diagram(Comp._beams[-25],aberration_analysis=False)
-    # ip_stripe.spot_diagram(Comp._beams[-24],aberration_analysis=False)
-    # ip_stripe.spot_diagram(Comp._beams[-18],aberration_analysis=False)
-    # ip_stripe.spot_diagram(Comp._beams[-17],aberration_analysis=False)
     ip_stripe.draw()
     # print(ip_stripe.get_geom())
   if freecad_da:
@@ -664,26 +670,31 @@ StripeM_shift = 0
 ls = "CB"
 min_Concav_shift = []
 min_spot = 10
-ii_test = [-0.4,-0.35,-0.3]
-jj_test = [-0.2,-0.15,-0.1]
-kk_test = [-0.1,-0.05, 0  ]
-ll_test = [-0.4,-0.35,-0.3]
+# ii_test = [-0.4,-0.35,-0.3]
+# jj_test = [-0.2,-0.15,-0.1]
+# kk_test = [-0.1,-0.05, 0  ]
+# ll_test = [-0.4,-0.35,-0.3]
+loop = [-0.1,-0.05,0,0.05,0.1]
 # for ii in range(-10,10,1):
 #   for jj in range(-10,10,1):
 #     for kk in range(-10,10,1):
 #       for ll in range(-10,10,1):
-#         Concav_shift = [ii/10,jj/10,kk/10,ll/10]
-#         mat1 = cavity_and_stretcher(C_radius=C_radius,vertical_mat=True,want_to_draw=False,
-#                                     roundtrip=roundtrip,centerlamda=centerlamda,
-#                                     s_shift=StripeM_shift,ls=ls,seperation=71.38147,
-#                                     Tele_added = True,Concav_shift=Concav_shift)
-#         if min_spot>mat1:
-#           min_spot = mat1
-#           min_Concav_shift=Concav_shift
-# print(min_spot,min_Concav_shift)
+for ii in loop:
+  for jj in loop:
+    for kk in loop:
+      for ll in loop:
+        Concav_shift = [ii,jj,kk,ll]
+        mat1 = cavity_and_stretcher(C_radius=C_radius,vertical_mat=True,want_to_draw=False,
+                                    roundtrip=roundtrip,centerlamda=centerlamda,
+                                    s_shift=StripeM_shift,ls=ls,seperation=71.381485,
+                                    Tele_added = True,Concav_shift=Concav_shift)
+        if min_spot>mat1:
+          min_spot = mat1
+          min_Concav_shift=Concav_shift
+print(min_spot,min_Concav_shift)
 # [-0.3, -0.1, 0, -0.3]
 # [-0.35, -0.2, 0, -0.4]
-# min_tele_shift = 0
+min_tele_shift = 0
 # min_spot = 10
 # for ii in range(-500,-490,1):
 #   mat1 = cavity_and_stretcher(C_radius=C_radius,vertical_mat=True,want_to_draw=False,
@@ -695,10 +706,10 @@ ll_test = [-0.4,-0.35,-0.3]
 #     min_tele_shift = ii/10
 # print(min_spot,min_tele_shift)
 
-mat1 = cavity_and_stretcher(C_radius=C_radius,vertical_mat=True,want_to_draw=False,
-                            roundtrip=roundtrip,centerlamda=centerlamda,
-                            s_shift=StripeM_shift,ls=ls,seperation=71.381485,
-                            Tele_added = True,
-                            Concav_shift=[-0.1, -0.05, 0.05, -0.1],tele_shift=-0)
-print(mat1)
+# mat1 = cavity_and_stretcher(C_radius=C_radius,vertical_mat=True,want_to_draw=False,
+#                             roundtrip=roundtrip,centerlamda=centerlamda,
+#                             s_shift=StripeM_shift,ls=ls,seperation=71.381485,
+#                             Tele_added = True,
+#                             Concav_shift=[-0.1, -0.05, 0.05, -0.1],tele_shift=-0)
+# print(mat1)
 # [-0.1, -0.05, 0.05, -0.1]
