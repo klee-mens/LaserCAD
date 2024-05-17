@@ -250,6 +250,10 @@ class Beam(Geom_Object):
   def set_length(self, x):
     for ray in self._rays:
       ray.length = x
+      
+  def set_wavelength(self, wl):
+    for ray in self._rays:
+      ray.length = wl
 
 
   def _pos_changed(self, old_pos, new_pos):

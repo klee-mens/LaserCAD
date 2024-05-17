@@ -170,7 +170,8 @@ class Composition(Geom_Object):
       counter += 1
       B = self._optical_axis[counter].length
       moment_propa = np.eye(4)
-      moment_propa[0,1] = B
+      moment_propa[0,1] = B 
+      # moment_propa[0,1] = B *1e-3
       M = self._elements[ind].kostenbauder(inray = self._optical_axis[counter])
 
       print("Counter =", counter)
@@ -182,6 +183,7 @@ class Composition(Geom_Object):
 
     last_propa = np.eye(4)
     last_propa[0,1] = self._last_prop
+    # last_propa[0,1] = self._last_prop * 1e-3
     self._kostenbauder = np.matmul( last_propa, self._kostenbauder ) #last propagation
     return np.array(self._kostenbauder)
 

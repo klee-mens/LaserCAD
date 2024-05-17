@@ -208,7 +208,8 @@ print(kb)
 
 
 
-
+if freecad_da:
+  Stretcher.draw()
 
 
 

@@ -195,6 +195,7 @@ class Mirror(Opt_Element):
 
   def kostenbauder(self, inray=Ray()):
     kmatrix = np.eye(4)
+    # kmatrix[0:2, 0:2] = self.matrix(inray=inray)
     kmatrix[0:2, 0:2] = -self.matrix(inray=inray)
     return np.array(kmatrix)
 

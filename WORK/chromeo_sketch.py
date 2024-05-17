@@ -436,7 +436,9 @@ TFP_out = Mirror(phi = 180-2*tfp_angle, name="Output_to_Amp2")
 TFP_out.draw_dict["color"] = (1.0, 0.0, 2.0)
 TFP_out.draw_dict["thickness"] = 4
 TFP_out.aperture = 2*inch
-TFP_out.set_mount_to_default()
+# TFP_out.set_mount_to_default()
+TFP_out_Mount = Composed_Mount(["KS2", "1inch_post"])
+TFP_out.set_mount(TFP_out_Mount)
 TFP_out.Mount.mount_list[0].flip()
 TFP_out.next_ray = TFP_out.just_pass_through
 PulsePicker.add_on_axis(TFP_out)
@@ -717,15 +719,15 @@ Compressor.set_geom(Amp2.last_geom())
 # Draw Selection
 # =============================================================================
 
-Seed.draw()
-Stretcher.draw()
-PulsePicker.draw()
-Amplifier_I.draw()
-Pump.draw()
-Amp2.draw()
-BigPump.draw()
-t=Table()
-t.draw()
+# Seed.draw()
+# Stretcher.draw()
+# PulsePicker.draw()
+# Amplifier_I.draw()
+# Pump.draw()
+# Amp2.draw()
+# # BigPump.draw()
+# t=Table()
+# t.draw()
 Compressor.draw()
 # PulsePicker.draw_alignment_posts()
 
