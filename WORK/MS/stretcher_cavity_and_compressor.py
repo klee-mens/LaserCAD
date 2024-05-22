@@ -733,8 +733,8 @@ roundtrip = 40
 centerlamda = 1030E-6
 C_radius = 7000
 # StripeM_shift = 0.07
-# StripeM_shift = 0.13
-StripeM_shift = 0
+StripeM_shift = -0.13
+# StripeM_shift = 0
 # StripeM_shift = 0.115
 # CB=CenterBeam CR=CenterRay 
 ls = "CB"

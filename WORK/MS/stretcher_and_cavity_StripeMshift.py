@@ -590,21 +590,23 @@ def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,
       # print(intersection_point)
       # pos_diff = intersection_point - ip.pos
       pos_diff.append(intersection_point)
-    # print(pos_diff)
     pos_center = pos_diff[int(len(pos_diff)/2)]
+    # print(pos_center,111)
+    for ii in pos_diff:
+      if max_pos_diff < np.linalg.norm(ii-pos_center):
+        max_pos_diff = np.linalg.norm(ii-pos_center)
     # for ii in pos_diff:
     #   for jj in pos_diff:
     #     if max_pos_diff < np.linalg.norm(ii-jj):
     #       max_pos_diff = np.linalg.norm(ii-jj)
-    leftii = rightii = pos_center[1]
-    for ii in pos_diff:
-      if leftii > ii[1]:
-        leftii = ii[1]
-      if rightii < ii[1]:
-        rightii = ii[1]
-    #     a = ii-pos_center
-    # print(a)
-    max_pos_diff=abs(leftii-rightii)
+          
+    # leftii = rightii = pos_center[1]
+    # for ii in pos_diff:
+    #   if leftii > ii[1]:
+    #     leftii = ii[1]
+    #   if rightii < ii[1]:
+    #     rightii = ii[1]
+    # max_pos_diff=abs(leftii-rightii)
     return (max_pos_diff)
 
   else:
@@ -674,7 +676,7 @@ min_spot = 10
 # jj_test = [-0.2,-0.15,-0.1]
 # kk_test = [-0.1,-0.05, 0  ]
 # ll_test = [-0.4,-0.35,-0.3]
-loop = [-0.1,-0.05,0,0.05,0.1]
+loop = [-0.2,-0.15,-0.1,-0.05,0,0.05,0.1,0.15,0.2]
 # for ii in range(-10,10,1):
 #   for jj in range(-10,10,1):
 #     for kk in range(-10,10,1):

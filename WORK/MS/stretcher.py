@@ -33,8 +33,8 @@ from LaserCAD.moduls.periscope import Rooftop_Mirror_Component
 import matplotlib.pyplot as plt
 import numpy as np
 
-if freecad_da:
-  clear_doc()
+# if freecad_da:
+#   clear_doc()
 
 vertical_mat = True
 
@@ -47,7 +47,9 @@ Plane_height = 150 # The height of the second floor.
 angle =1
 para_d = 10
 seperation = 71
-Concav_shift = [0,0,0,0]
+# Concav_shift = [0,0,0,0]
+Concav_shift = [0.2, 0.2, 0.2, 0.2]
+# Concav_shift = [-0.05, -0.05, -0.05, -0.05]
 
 Radius = 600 #Radius des großen Konkavspiegels
 Aperture_concav = 100

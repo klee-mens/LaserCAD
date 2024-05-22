@@ -703,7 +703,7 @@ def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,
           fai3[int(len(fai3)/2)])
     return fai2[int(len(fai2)/2)]
   else:
-    ip.spot_diagram(Comp._beams[-1],aberration_analysis=False)
+    ip.spot_diagram(Comp._beams[-1],aberration_analysis=False)#,default_diagram_size=2)
     ip_stripe = Intersection_plane()
     ip_stripe.set_geom(StripeM.get_geom())
     rays_0 = Comp._beams[-25].get_all_rays()
@@ -756,18 +756,20 @@ def Cal_matrix(Comp=Composition(),vertical_mat = True):
   # Comp._matrix = np.matmul(np.array([[1,Comp._last_prop], [0,1]]), Comp._matrix ) #last propagation
   return np.array(Comp._matrix)
 
-roundtrip = 40
+roundtrip = 1
 centerlamda = 1030E-6
 C_radius = 7000
 StripeM_shift = 0
 # Concav_shift = [-0.1, -0.05, 0.05, -0.1]
 # Concav_shift = [0.05, 0, 0.1, -0.1]
 # Concav_shift = [-0.1, -0.05, 0.1, 0]
-Concav_shift = [0, 0, 0, 0]
-# seperation = 71.381485
-seperation = 5750/80
+# Concav_shift = [0, 0, 0, 0]
+Concav_shift = [-0.15, -0.15, 0.2, 0.1] #min horizontial d
+# Concav_shift = [0.2, 0.05, 0.2, 0] #min length to each point
+seperation = 71.381485
+# seperation = 5750/80
 # CB=CenterBeam CR=CenterRay B=Beamwithradius
-ls = "CB"
+ls = "B"
 mat1 = cavity_and_stretcher(C_radius=C_radius,vertical_mat=True,want_to_draw=True,
                             roundtrip=roundtrip,centerlamda=centerlamda,
                             s_shift=StripeM_shift,ls=ls,seperation=seperation,

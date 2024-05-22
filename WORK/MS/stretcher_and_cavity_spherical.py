@@ -637,7 +637,7 @@ def Cal_matrix(Comp=Composition(),vertical_mat = True):
   # Comp._matrix = np.matmul(np.array([[1,Comp._last_prop], [0,1]]), Comp._matrix ) #last propagation
   return np.array(Comp._matrix)
 
-roundtrip = 1
+roundtrip = 40
 centerlamda = 1030E-6
 C_radius = 7000
 # StripeM_shift = 0.07
