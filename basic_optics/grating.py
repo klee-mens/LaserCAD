@@ -148,6 +148,10 @@ class Grating(Opt_Element):
     kmatrix[1,1] = 1/A
     
     # wl = inray.wavelength * 1e-3 # wavelength in m
+    # sign_factor = np.sign( np.sum(self.get_coordinate_system()[2] * inray.get_coordinate_system()[2] ) * np.sum(self.get_coordinate_system()[1] * inray.get_coordinate_system()[1] ))
+    # sign_factor = np.sign( np.sum(self.get_coordinate_system()[2] * inray.get_coordinate_system()[2] ) * np.sum(self.get_coordinate_system()[1] * inray.get_coordinate_system()[1] ))
+    sign_factor_y = np.sign( np.sum(self.get_coordinate_system()[1] * inray.get_coordinate_system()[1] ))
+    sign_factor_z = np.sign( np.sum(self.get_coordinate_system()[2] * inray.get_coordinate_system()[2] ))
     wl = inray.wavelength * 1 # wavelength in mm
     D = inray.wavelength**2 / (c * self.grating_constant * np.cos(angleOUT)) * -1 * self.diffraction_order
     # D = inray.wavelength * (np.sin(angleOUT) - np.sin(angleIN)) / (c * np.cos(angleOUT))
@@ -163,6 +167,8 @@ class Grating(Opt_Element):
     print("AlphaOUT =", angleOUT*180/np.pi)
     print("A, 1/A", A, 1/A)
     print("D, D*A", D, A*D)
+    print("SignFactorY", sign_factor_y)
+    print("SignFactorZ", sign_factor_z)
     # print("sinIN =", np.sin(angleIN),"AlphaIN =", angleIN*180/np.pi)
     # print("sinOUT =", np.sin(angleOUT), "AlphaOUT =", angleOUT*180/np.pi)
     # print("cosIN =", np.cos(angleIN))

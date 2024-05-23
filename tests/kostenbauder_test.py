@@ -203,9 +203,11 @@ print("My Kostenbauder Stretcher:")
 print(kb)
 
 
-
-
-
+from LaserCAD.basic_optics import Geom_Object
+for ray in Stretcher._optical_axis:
+  geom = Geom_Object()
+  geom.set_geom(ray.get_geom())
+  geom.draw()
 
 
 if freecad_da:
