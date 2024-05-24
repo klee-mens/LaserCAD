@@ -590,15 +590,14 @@ def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,
       # print(intersection_point)
       # pos_diff = intersection_point - ip.pos
       pos_diff.append(intersection_point)
-    pos_center = pos_diff[int(len(pos_diff)/2)]
-    # print(pos_center,111)
-    for ii in pos_diff:
-      if max_pos_diff < np.linalg.norm(ii-pos_center):
-        max_pos_diff = np.linalg.norm(ii-pos_center)
+    # pos_center = pos_diff[int(len(pos_diff)/2)]
     # for ii in pos_diff:
-    #   for jj in pos_diff:
-    #     if max_pos_diff < np.linalg.norm(ii-jj):
-    #       max_pos_diff = np.linalg.norm(ii-jj)
+    #   if max_pos_diff < np.linalg.norm(ii-pos_center):
+    #     max_pos_diff = np.linalg.norm(ii-pos_center)
+    for ii in pos_diff:
+      for jj in pos_diff:
+        if max_pos_diff < np.linalg.norm(ii-jj):
+          max_pos_diff = np.linalg.norm(ii-jj)
           
     # leftii = rightii = pos_center[1]
     # for ii in pos_diff:
@@ -664,9 +663,8 @@ def Cal_matrix(Comp=Composition(),vertical_mat = True):
 roundtrip = 1
 centerlamda = 1030E-6
 C_radius = 7000
-# StripeM_shift = 0.07
-# StripeM_shift = 0.13
-StripeM_shift = 0
+StripeM_shift = 0.18
+# StripeM_shift = 0
 # StripeM_shift = 0.115
 # CB=CenterBeam CR=CenterRay B=Beamwithradius
 ls = "CB"
@@ -676,15 +674,16 @@ min_spot = 10
 # jj_test = [-0.2,-0.15,-0.1]
 # kk_test = [-0.1,-0.05, 0  ]
 # ll_test = [-0.4,-0.35,-0.3]
-loop = [-0.2,-0.15,-0.1,-0.05,0,0.05,0.1,0.15,0.2]
-# for ii in range(-10,10,1):
-#   for jj in range(-10,10,1):
-#     for kk in range(-10,10,1):
-#       for ll in range(-10,10,1):
+loop = [-0.1,-0.05,0,0.05,0.1]
+# loop = [0,0.05,0.1,0.15,0.2,0.25,0.3]
 for ii in loop:
   for jj in loop:
     for kk in loop:
       for ll in loop:
+# for ii in [0.24,0.25,0.26]:
+#   for jj in [-0.06,-0.05,-0.04]:
+#     for kk in [0.29,0.3,0.31]:
+#       for ll in [-0.01,0,0.01]:
         Concav_shift = [ii,jj,kk,ll]
         mat1 = cavity_and_stretcher(C_radius=C_radius,vertical_mat=True,want_to_draw=False,
                                     roundtrip=roundtrip,centerlamda=centerlamda,
@@ -694,6 +693,7 @@ for ii in loop:
           min_spot = mat1
           min_Concav_shift=Concav_shift
 print(min_spot,min_Concav_shift)
+
 # [-0.3, -0.1, 0, -0.3]
 # [-0.35, -0.2, 0, -0.4]
 min_tele_shift = 0
@@ -708,10 +708,10 @@ min_tele_shift = 0
 #     min_tele_shift = ii/10
 # print(min_spot,min_tele_shift)
 
-# mat1 = cavity_and_stretcher(C_radius=C_radius,vertical_mat=True,want_to_draw=False,
-#                             roundtrip=roundtrip,centerlamda=centerlamda,
-#                             s_shift=StripeM_shift,ls=ls,seperation=71.381485,
-#                             Tele_added = True,
-#                             Concav_shift=[-0.1, -0.05, 0.05, -0.1],tele_shift=-0)
-# print(mat1)
+mat1 = cavity_and_stretcher(C_radius=C_radius,vertical_mat=True,want_to_draw=False,
+                            roundtrip=roundtrip,centerlamda=centerlamda,
+                            s_shift=StripeM_shift,ls=ls,seperation=71.381485,
+                            Tele_added = True,
+                            Concav_shift=[0, 0, 0, 0],tele_shift=-0)
+print(mat1)
 # [-0.1, -0.05, 0.05, -0.1]

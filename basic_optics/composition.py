@@ -352,6 +352,58 @@ class Composition(Geom_Object):
     self._rearange_subobjects_axes(old_axes, new_axes, self._optical_axis)
     self._rearange_subobjects_axes(old_axes, new_axes, self.non_opticals)
 
+  def Kostenbauder_matrix(self,shifting_distence=100):
+    point_start=self.pos
+    point_end = self.last_geom()[0]
+    # if self.normal == np.array(shifting_normal):
+    #   return("wrong direction")
+    point_start_dx = point_start + 0.1*self.get_coordinate_system()[1]
+    ls_group = []
+    ls_dx = deepcopy(self._lightsource)
+    ls_dx.pos = point_start_dx
+    ls_group.append(ls_dx)
+    ls_dax = deepcopy(self._lightsource)
+    ls_dax.rotate(self.get_coordinate_system()[2],0.5*np.pi/100)
+    ls_group.append(ls_dax)
+    ls_dlambda = deepcopy(self._lightsource)
+    for ii in range(len(ls_dlambda.get_all_rays())):
+      ls_dlambda.get_all_rays()[ii].wavelength+=ls_dlambda.get_all_rays()[ii].wavelength/100
+    ls_group.append(ls_dlambda)
+    # ls_shift_start = deepcopy(self._lightsource)
+    # ls_shift_start.pos = point_start + shifting_normal*shifting_distence
+    # ls_group.append(ls_shift_start)
+    # ls_shift_dx = deepcopy(ls_shift_start)
+    # ls_shift_dx.pos += np.linalg.norm(point_start)/100*self.get_coordinate_system()[1]
+    # ls_group.append(ls_shift_dx)
+    # ls_shift_dax = deepcopy(ls_shift_start)
+    # ls_shift_dax.rotate(self.get_coordinate_system()[2],0.5*np.pi/100)
+    # ls_group.append(ls_shift_dax)
+    # ls_shift_dlambda = deepcopy(ls_shift_start)
+    # for ii in range(len(ls_shift_dlambda.get_all_rays())):
+    #   ls_shift_dlambda.get_all_rays()[ii].wavelength+=ls_shift_dlambda.get_all_rays()[ii].wavelength/100
+    # ls_group.append(ls_shift_dlambda)
+    
+    point_group = []
+    point_group.append(point_end)
+    for ls in ls_group:
+      comp = Composition()
+      comp.set_geom(ls.get_geom())
+      comp.set_light_source(ls)
+      for element in self._elements:
+        comp.add_fixed_elm(element)
+      comp.set_sequence(self._sequence)
+      comp.recompute_optical_axis()
+      comp.propagate(self._last_prop)
+      comp.compute_beams()
+      point_group.append(comp.last_geom()[0])
+      comp.propagate(shifting_distence)
+      comp.compute_beams()
+      point_group.append(comp.last_geom()[0])
+      comp.draw_beams()
+      del comp
+    return point_group
+      
+    
 
 def next_name(name, prefix=""):
   # generiert einen neuen namen aus dem alten Element
