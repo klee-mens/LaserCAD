@@ -10,6 +10,7 @@ from .ray import Ray
 from .beam import Beam
 from .geom_object import Geom_Object
 from .grating import Grating
+from .intersection_plane import Intersection_plane
 from ..freecad_models import warning, freecad_da, initialize_composition, add_to_composition
 from ..freecad_models.freecad_model_element_holder import Model_element_holder
 import numpy as np
@@ -353,11 +354,14 @@ class Composition(Geom_Object):
     self._rearange_subobjects_axes(old_axes, new_axes, self.non_opticals)
 
   def Kostenbauder_matrix(self,shifting_distence=100):
+    ray0 = self._optical_axis[0]
+    
     point_start=self.pos
     point_end = self.last_geom()[0]
     # if self.normal == np.array(shifting_normal):
     #   return("wrong direction")
     point_start_dx = point_start + 0.1*self.get_coordinate_system()[1]
+    point_start_dy = point_start + 0.1*self.get_coordinate_system()[2]
     ls_group = []
     ls_dx = deepcopy(self._lightsource)
     ls_dx.pos = point_start_dx
@@ -365,6 +369,14 @@ class Composition(Geom_Object):
     ls_dax = deepcopy(self._lightsource)
     ls_dax.rotate(self.get_coordinate_system()[2],0.5*np.pi/100)
     ls_group.append(ls_dax)
+    
+    ls_dy = deepcopy(self._lightsource)
+    ls_dy.pos = point_start_dy
+    ls_group.append(ls_dy)
+    ls_day = deepcopy(self._lightsource)
+    ls_day.rotate(self.get_coordinate_system()[1],-0.5*np.pi/100)
+    ls_group.append(ls_day)
+    
     ls_dlambda = deepcopy(self._lightsource)
     for ii in range(len(ls_dlambda.get_all_rays())):
       ls_dlambda.get_all_rays()[ii].wavelength+=ls_dlambda.get_all_rays()[ii].wavelength/100
@@ -385,6 +397,11 @@ class Composition(Geom_Object):
     
     point_group = []
     point_group.append(point_end)
+    ip_b = Intersection_plane()
+    ip_b.set_geom(self.last_geom())
+    ip_f = Intersection_plane()
+    ip_f.set_geom(self.last_geom())
+    ip_f.pos += 100*ip_f.normal
     for ls in ls_group:
       comp = Composition()
       comp.set_geom(ls.get_geom())
@@ -395,16 +412,62 @@ class Composition(Geom_Object):
       comp.recompute_optical_axis()
       comp.propagate(self._last_prop)
       comp.compute_beams()
-      point_group.append(comp.last_geom()[0])
-      comp.propagate(shifting_distence)
-      comp.compute_beams()
-      point_group.append(comp.last_geom()[0])
-      comp.draw_beams()
+      point_group.append(comp._beams[-1].get_all_rays()[0].intersection(ip_b))
+      point_group.append(comp._beams[-1].get_all_rays()[0].intersection(ip_f))
+      
+      # point_group.append(comp.last_geom()[0])
+      # comp.propagate(shifting_distence)
+      # comp.compute_beams()
+      # point_group.append(comp.last_geom()[0])
+      # comp.draw_beams()
       del comp
-    return point_group
+    
+    # anyway, x, y = ip_b.get_coordinate_system()
+    ii = -1
+    point_group_new = []
+    for point in point_group:
+      ii+=1
+      point-=self.last_geom()[0]
+      if ii ==2:
+        point-=100*ip_f.normal
+        ii=0
+      pos_diff1 = np.dot(point,ip_b.get_coordinate_system()[1])
+      pos_diff2 = np.dot(point,ip_b.get_coordinate_system()[2])
+      # print(ip_b.get_coordinate_system())
+      point1 = np.array([0,pos_diff1,pos_diff2])
+      # print(point1)
+      point_group_new.append(point1)
+      # print(point)
+      # print(ip_b.get_axes())
+      # point = ip_b.get_axes() @ point
+      # print(point)
+    point_group=point_group_new
+    # print(point_group)
+    Ax = (point_group[1][1])/0.1
+    I = (point_group[1][2]-point_group[0][2])/0.1
+    Cx = -(point_group[1][1]-point_group[2][1])/100/0.1
+    K = -(point_group[1][2]-point_group[2][2])/100/0.1
+    
+    # print(point_group[3][1],0.5*np.pi/100)
+    Bx = (point_group[3][1])/(0.5*np.pi/100)
+    J = (point_group[3][2]-point_group[0][2])/(0.5*np.pi/100)
+    Dx = -(point_group[3][1]-point_group[4][1])/(100*0.5*np.pi/100)
+    L = -(point_group[3][2]-point_group[4][2])/(100*0.5*np.pi/100)
+    
+    E = (point_group[5][1])/0.1
+    Ay = (point_group[5][2]-point_group[0][2])/0.1
+    G = -(point_group[5][1]-point_group[6][1])/(100*0.1)
+    Cy = -(point_group[5][2]-point_group[6][2])/(100*0.1)
+    
+    F = (point_group[7][1])/(0.5*np.pi/100)
+    By = (point_group[7][2]-point_group[0][2])/(0.5*np.pi/100)
+    H = -(point_group[7][1]-point_group[8][1])/(100*0.5*np.pi/100)
+    Dy = -(point_group[7][2]-point_group[8][2])/(100*0.5*np.pi/100)
+    
+    kostenbauder_matrix = np.array([[Ax,Bx,E,F],[Cx,Dx,G,H],[I,J,Ay,By],[K,L,Cy,Dy]])
+    return kostenbauder_matrix
       
     
-
 def next_name(name, prefix=""):
   # generiert einen neuen namen aus dem alten Element
   ind = name.rfind("_")

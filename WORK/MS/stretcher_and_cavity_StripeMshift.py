@@ -676,27 +676,28 @@ min_spot = 10
 # ll_test = [-0.4,-0.35,-0.3]
 loop = [-0.1,-0.05,0,0.05,0.1]
 # loop = [0,0.05,0.1,0.15,0.2,0.25,0.3]
-for ii in loop:
-  for jj in loop:
-    for kk in loop:
-      for ll in loop:
+# for ii in [0.15,0.2,0.25,0.3]:
+#   for jj in loop:
+#     for kk in [0.05,0.1,0.15,0.2]:
+#       for ll in [-0.2,-0.15,-0.1,-0.05]:
 # for ii in [0.24,0.25,0.26]:
 #   for jj in [-0.06,-0.05,-0.04]:
 #     for kk in [0.29,0.3,0.31]:
 #       for ll in [-0.01,0,0.01]:
-        Concav_shift = [ii,jj,kk,ll]
-        mat1 = cavity_and_stretcher(C_radius=C_radius,vertical_mat=True,want_to_draw=False,
-                                    roundtrip=roundtrip,centerlamda=centerlamda,
-                                    s_shift=StripeM_shift,ls=ls,seperation=71.381485,
-                                    Tele_added = True,Concav_shift=Concav_shift)
-        if min_spot>mat1:
-          min_spot = mat1
-          min_Concav_shift=Concav_shift
-print(min_spot,min_Concav_shift)
+#         Concav_shift = [ii,jj,kk,ll]
+#         mat1 = cavity_and_stretcher(C_radius=C_radius,vertical_mat=True,want_to_draw=False,
+#                                     roundtrip=roundtrip,centerlamda=centerlamda,
+#                                     s_shift=StripeM_shift,ls=ls,seperation=71.381485,
+#                                     Tele_added = True,Concav_shift=Concav_shift)
+#         if min_spot>mat1:
+#           min_spot = mat1
+#           min_Concav_shift=Concav_shift
+# print(min_spot,min_Concav_shift)
 
 # [-0.3, -0.1, 0, -0.3]
+# [0.1, -0.05, 0.1, 0]
 # [-0.35, -0.2, 0, -0.4]
-min_tele_shift = 0
+# min_tele_shift = 0
 # min_spot = 10
 # for ii in range(-500,-490,1):
 #   mat1 = cavity_and_stretcher(C_radius=C_radius,vertical_mat=True,want_to_draw=False,
@@ -712,6 +713,6 @@ mat1 = cavity_and_stretcher(C_radius=C_radius,vertical_mat=True,want_to_draw=Fal
                             roundtrip=roundtrip,centerlamda=centerlamda,
                             s_shift=StripeM_shift,ls=ls,seperation=71.381485,
                             Tele_added = True,
-                            Concav_shift=[0, 0, 0, 0],tele_shift=-0)
+                            Concav_shift=[0.2, -0.05, 0.1, -0.1],tele_shift=-0)
 print(mat1)
 # [-0.1, -0.05, 0.05, -0.1]
