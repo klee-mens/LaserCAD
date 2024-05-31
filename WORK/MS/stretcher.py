@@ -242,3 +242,5 @@ Stretcher.propagate(250+44)
 
 Stretcher.pos += (0,0,100)
 Stretcher.draw()
+
+print(Stretcher.Kostenbauder_matrix())

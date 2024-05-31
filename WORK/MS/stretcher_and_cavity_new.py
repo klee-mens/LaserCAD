@@ -759,16 +759,16 @@ def Cal_matrix(Comp=Composition(),vertical_mat = True):
 roundtrip = 1
 centerlamda = 1030E-6
 C_radius = 7000
-# StripeM_shift = 0
-StripeM_shift = 0.18
+StripeM_shift = 0
+# StripeM_shift = 0.18
 # Concav_shift = [-0.1, -0.05, 0.05, -0.1]
 # Concav_shift = [0.05, 0, 0.1, -0.1]
 # Concav_shift = [-0.1, -0.05, 0.1, 0]
 # Concav_shift = [0, 0, 0, 0]
 # Concav_shift = [-0.15, -0.15, 0.2, 0.1] #min horizontial d
 # Concav_shift = [0.2, 0.05, 0.2, 0] #min length to each point
-# Concav_shift = [0.26, -0.04, 0.3, 0] #min length to each point
-Concav_shift = [0.2, -0.05, 0.1, -0.1] #min length to each point
+Concav_shift = [0.26, -0.04, 0.3, 0] #min length to each point
+# Concav_shift = [0.2, -0.05, 0.1, -0.1] #min length to each point
 seperation = 71.381485
 # seperation = 5750/80
 # CB=CenterBeam CR=CenterRay B=Beamwithradius

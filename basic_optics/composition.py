@@ -358,8 +358,6 @@ class Composition(Geom_Object):
     
     point_start=self.pos
     point_end = self.last_geom()[0]
-    # if self.normal == np.array(shifting_normal):
-    #   return("wrong direction")
     point_start_dx = point_start + 0.1*self.get_coordinate_system()[1]
     point_start_dy = point_start + 0.1*self.get_coordinate_system()[2]
     ls_group = []
@@ -379,23 +377,18 @@ class Composition(Geom_Object):
     
     ls_dlambda = deepcopy(self._lightsource)
     for ii in range(len(ls_dlambda.get_all_rays())):
-      ls_dlambda.get_all_rays()[ii].wavelength+=ls_dlambda.get_all_rays()[ii].wavelength/100
+      a=deepcopy(ls_dlambda.get_all_rays()[ii].wavelength)
+      ls_dlambda.get_all_rays(by_reference=True)[ii].wavelength=a+a/1000
     ls_group.append(ls_dlambda)
-    # ls_shift_start = deepcopy(self._lightsource)
-    # ls_shift_start.pos = point_start + shifting_normal*shifting_distence
-    # ls_group.append(ls_shift_start)
-    # ls_shift_dx = deepcopy(ls_shift_start)
-    # ls_shift_dx.pos += np.linalg.norm(point_start)/100*self.get_coordinate_system()[1]
-    # ls_group.append(ls_shift_dx)
-    # ls_shift_dax = deepcopy(ls_shift_start)
-    # ls_shift_dax.rotate(self.get_coordinate_system()[2],0.5*np.pi/100)
-    # ls_group.append(ls_shift_dax)
-    # ls_shift_dlambda = deepcopy(ls_shift_start)
-    # for ii in range(len(ls_shift_dlambda.get_all_rays())):
-    #   ls_shift_dlambda.get_all_rays()[ii].wavelength+=ls_shift_dlambda.get_all_rays()[ii].wavelength/100
-    # ls_group.append(ls_shift_dlambda)
-    
     point_group = []
+    length_group = []
+    length0=0
+    com= deepcopy(self)
+    com.compute_beams()
+    for i in com._optical_axis:
+      length0+=i.length
+    dlambda_optical_axis = deepcopy(com._optical_axis[0])
+    dlambda_optical_axis.wavelength+=(dlambda_optical_axis.wavelength/1000)
     point_group.append(point_end)
     ip_b = Intersection_plane()
     ip_b.set_geom(self.last_geom())
@@ -406,12 +399,25 @@ class Composition(Geom_Object):
       comp = Composition()
       comp.set_geom(ls.get_geom())
       comp.set_light_source(ls)
+      
       for element in self._elements:
         comp.add_fixed_elm(element)
       comp.set_sequence(self._sequence)
-      comp.recompute_optical_axis()
+      # comp.recompute_optical_axis()
+      # if len(ls.get_all_rays())%2 ==1:  
+      #   comp.redefine_optical_axis(ls.get_all_rays()[int(len(ls.get_all_rays())/2)])
+      # else:
+      #   comp.redefine_optical_axis(ls.get_all_rays()[int(len(ls.get_all_rays())/2-1)])
+      if ls==ls_group[-1]:
+        comp.redefine_optical_axis(dlambda_optical_axis)
+      else:
+        comp.redefine_optical_axis(com._optical_axis[0])
       comp.propagate(self._last_prop)
       comp.compute_beams()
+      length1 = 0
+      for ii in comp._optical_axis:
+        length1+= ii.length
+      length_group.append(length1-length0)
       point_group.append(comp._beams[-1].get_all_rays()[0].intersection(ip_b))
       point_group.append(comp._beams[-1].get_all_rays()[0].intersection(ip_f))
       
@@ -433,22 +439,15 @@ class Composition(Geom_Object):
         ii=0
       pos_diff1 = np.dot(point,ip_b.get_coordinate_system()[1])
       pos_diff2 = np.dot(point,ip_b.get_coordinate_system()[2])
-      # print(ip_b.get_coordinate_system())
       point1 = np.array([0,pos_diff1,pos_diff2])
-      # print(point1)
       point_group_new.append(point1)
-      # print(point)
-      # print(ip_b.get_axes())
       # point = ip_b.get_axes() @ point
-      # print(point)
     point_group=point_group_new
-    # print(point_group)
     Ax = (point_group[1][1])/0.1
     I = (point_group[1][2]-point_group[0][2])/0.1
     Cx = -(point_group[1][1]-point_group[2][1])/100/0.1
     K = -(point_group[1][2]-point_group[2][2])/100/0.1
     
-    # print(point_group[3][1],0.5*np.pi/100)
     Bx = (point_group[3][1])/(0.5*np.pi/100)
     J = (point_group[3][2]-point_group[0][2])/(0.5*np.pi/100)
     Dx = -(point_group[3][1]-point_group[4][1])/(100*0.5*np.pi/100)
@@ -463,8 +462,25 @@ class Composition(Geom_Object):
     By = (point_group[7][2]-point_group[0][2])/(0.5*np.pi/100)
     H = -(point_group[7][1]-point_group[8][1])/(100*0.5*np.pi/100)
     Dy = -(point_group[7][2]-point_group[8][2])/(100*0.5*np.pi/100)
+    df=299792458*1000/self._optical_axis[0].wavelength/1000
+    length_dev = np.array([0.1,0.5*np.pi/100,0.1,0.5*np.pi/100,1/(299792458*1000),
+                          df])
+    print(df)
+    dxf = point_group[9][1]/df
+    dyf = point_group[9][2]/df
+    daxf = -(point_group[9][1]-point_group[10][1])/100/df
+    dayf = -(point_group[9][2]-point_group[10][2])/100/df
     
-    kostenbauder_matrix = np.array([[Ax,Bx,E,F],[Cx,Dx,G,H],[I,J,Ay,By],[K,L,Cy,Dy]])
+    length_lambda = deepcopy(length_group[-1])
+    print(length_lambda)
+    length_group[-1]=1
+    length_group.append(length_lambda)
+    length_group = np.array(length_group)
+    print(length_group)
+    length_group=length_group/length_dev/(299792458*1000)
+    kostenbauder_matrix = np.array([[Ax,Bx,E,F,0,dxf],[Cx,Dx,G,H,0,daxf],
+                                    [I,J,Ay,By,0,dyf],[K,L,Cy,Dy,0,dayf],
+                                    length_group,[0,0,0,0,0,1]])
     return kostenbauder_matrix
       
     
