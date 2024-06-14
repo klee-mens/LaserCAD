@@ -568,13 +568,18 @@ def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,
   if Comp._lightsource == centerray:
     ip_stripe = Intersection_plane()
     ip_stripe.set_geom(StripeM.get_geom())
-    rays_0 = Comp._beams[-25].get_all_rays()
-    for ray in Comp._beams[-24].get_all_rays():
-      rays_0.append(ray)
-    for ray in Comp._beams[-18].get_all_rays():
-      rays_0.append(ray)
-    for ray in Comp._beams[-17].get_all_rays():
-      rays_0.append(ray)
+    rays_0 = []
+    for n in range(0,32*roundtrip,32):
+      rays_0.append(Comp._beams[n+8].get_all_rays()[0])
+      # rays_0.append(Comp._beams[n+9].get_all_rays()[0])
+      # rays_0.append(Comp._beams[n+15].get_all_rays()[0])
+      # rays_0.append(Comp._beams[n+16].get_all_rays()[0])
+      # for ray in Comp._beams[n-24].get_all_rays()[0]:
+      #   rays_0.append(ray)
+      # for ray in Comp._beams[n-18].get_all_rays()[0]:
+      #   rays_0.append(ray)
+      # for ray in Comp._beams[n-17].get_all_rays()[0]:
+      #   rays_0.append(ray)
     B0 = Beam()
     B0.override_rays(rays_0)
     ip_stripe.spot_diagram(B0,aberration_analysis=False)
@@ -618,7 +623,7 @@ def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,
       rays_0.append(ray)
     for ray in Comp._beams[-17].get_all_rays():
       rays_0.append(ray)
-    
+
     B0 = Beam()
     B0.override_rays(rays_0)
     ip_stripe.spot_diagram(B0,aberration_analysis=False)
@@ -704,6 +709,7 @@ def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,
     return fai2[int(len(fai2)/2)]
   else:
     ip.spot_diagram(Comp._beams[-1],aberration_analysis=False)#,default_diagram_size=2)
+    ip.spot_diagram(Comp._beams[0],aberration_analysis=False)
     ip_stripe = Intersection_plane()
     ip_stripe.set_geom(StripeM.get_geom())
     rays_0 = Comp._beams[-25].get_all_rays()
@@ -764,16 +770,20 @@ StripeM_shift = 0
 # Concav_shift = [-0.1, -0.05, 0.05, -0.1]
 # Concav_shift = [0.05, 0, 0.1, -0.1]
 # Concav_shift = [-0.1, -0.05, 0.1, 0]
-# Concav_shift = [0, 0, 0, 0]
+Concav_shift = [0, 0, 0, 0]
 # Concav_shift = [-0.15, -0.15, 0.2, 0.1] #min horizontial d
 # Concav_shift = [0.2, 0.05, 0.2, 0] #min length to each point
-Concav_shift = [0.26, -0.04, 0.3, 0] #min length to each point
+# Concav_shift = [0.26, -0.04, 0.3, 0] #min length to each point
 # Concav_shift = [0.2, -0.05, 0.1, -0.1] #min length to each point
 seperation = 71.381485
 # seperation = 5750/80
 # CB=CenterBeam CR=CenterRay B=Beamwithradius
-ls = "CB"
-mat1 = cavity_and_stretcher(C_radius=C_radius,vertical_mat=True,want_to_draw=True,
+ls = "B"
+# mat1 = cavity_and_stretcher(C_radius=C_radius,vertical_mat=True,want_to_draw=True,
+#                             roundtrip=roundtrip,centerlamda=centerlamda,
+#                             s_shift=StripeM_shift,ls=ls,seperation=seperation,
+#                             Tele_added = True,Concav_shift=Concav_shift)
+mat1 = cavity_and_stretcher(C_radius=C_radius,vertical_mat=True,want_to_draw=False,
                             roundtrip=roundtrip,centerlamda=centerlamda,
                             s_shift=StripeM_shift,ls=ls,seperation=seperation,
                             Tele_added = True,Concav_shift=Concav_shift)

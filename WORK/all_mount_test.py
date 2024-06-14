@@ -5,12 +5,6 @@ Created on Wed May 22 14:40:39 2024
 @author: 12816
 """
 
-from LaserCAD.freecad_models import clear_doc, setview, freecad_da
-from LaserCAD.basic_optics import Mirror,Crystal
-from LaserCAD.basic_optics import Beam,Grating, Composition, inch, Curved_Mirror, Ray, Geom_Object, LinearResonator, Lens, Component
-from LaserCAD.freecad_models.utils import thisfolder, load_STL
-from LaserCAD.basic_optics.mount import Unit_Mount,Post, Composed_Mount
-from LaserCAD.basic_optics.mount import MIRROR_LIST,LENS_LIST
 
 import sys
 # import os
@@ -22,6 +16,14 @@ ind = pfad.rfind("lasercad")
 pfad = pfad[0:ind-1]
 if not pfad in sys.path:
   sys.path.append(pfad)
+
+from LaserCAD.freecad_models import clear_doc, setview, freecad_da
+from LaserCAD.basic_optics import Mirror,Crystal
+from LaserCAD.basic_optics import Beam,Grating, Composition, inch, Curved_Mirror, Ray, Geom_Object, LinearResonator, Lens, Component
+from LaserCAD.freecad_models.utils import thisfolder, load_STL
+from LaserCAD.basic_optics.mount import Unit_Mount,Post, Composed_Mount
+from LaserCAD.basic_optics.mount import MIRROR_LIST,LENS_LIST
+
 
 if freecad_da:
   clear_doc()
