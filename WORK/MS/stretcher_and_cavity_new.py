@@ -582,7 +582,7 @@ def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,
       #   rays_0.append(ray)
     B0 = Beam()
     B0.override_rays(rays_0)
-    ip_stripe.spot_diagram(B0,aberration_analysis=False)
+    xx,yy=ip_stripe.spot_diagram(B0,aberration_analysis=False)
     ip_stripe.draw()
     diff = []
     diff_out = []
@@ -609,7 +609,7 @@ def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,
         max_diff = diff_R_ver
         max_roundtrip = n//32+1
     
-    return max_diff
+    return max_diff,xx,yy
   elif Comp._lightsource == centerlightsource:
     ip.spot_diagram(Comp._beams[-1],aberration_analysis=True)
     
@@ -770,23 +770,24 @@ StripeM_shift = 0
 # Concav_shift = [-0.1, -0.05, 0.05, -0.1]
 # Concav_shift = [0.05, 0, 0.1, -0.1]
 # Concav_shift = [-0.1, -0.05, 0.1, 0]
-Concav_shift = [0, 0, 0, 0]
+# Concav_shift = [0, 0, 0, 0]
 # Concav_shift = [-0.15, -0.15, 0.2, 0.1] #min horizontial d
-# Concav_shift = [0.2, 0.05, 0.2, 0] #min length to each point
+Concav_shift = [0.2, 0.05, 0.2, 0] #min length to each point
 # Concav_shift = [0.26, -0.04, 0.3, 0] #min length to each point
 # Concav_shift = [0.2, -0.05, 0.1, -0.1] #min length to each point
 seperation = 71.381485
 # seperation = 5750/80
 # CB=CenterBeam CR=CenterRay B=Beamwithradius
-ls = "B"
+ls = "CB"
 # mat1 = cavity_and_stretcher(C_radius=C_radius,vertical_mat=True,want_to_draw=True,
 #                             roundtrip=roundtrip,centerlamda=centerlamda,
 #                             s_shift=StripeM_shift,ls=ls,seperation=seperation,
 #                             Tele_added = True,Concav_shift=Concav_shift)
-mat1 = cavity_and_stretcher(C_radius=C_radius,vertical_mat=True,want_to_draw=False,
+mat1= cavity_and_stretcher(C_radius=C_radius,vertical_mat=True,want_to_draw=False,
                             roundtrip=roundtrip,centerlamda=centerlamda,
                             s_shift=StripeM_shift,ls=ls,seperation=seperation,
                             Tele_added = True,Concav_shift=Concav_shift)
+# print(xx,yy)
 # print(mat1)
 #   maximun deviation with different wavelength -------------------------------
 # lam_mid = 1030E-6

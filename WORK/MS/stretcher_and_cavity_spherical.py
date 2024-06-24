@@ -497,7 +497,7 @@ def cavity_and_stretcher(C_radius = 7000,want_to_draw=True,
       # rays_0.append(Comp._beams[n+16].get_all_rays()[0])
     B0 = Beam()
     B0.override_rays(rays_0)
-    ip_stripe.spot_diagram(B0,aberration_analysis=False)
+    xx,yy=ip_stripe.spot_diagram(B0,aberration_analysis=False)
     ip_stripe.draw()
     diff = []
     diff_out = []
@@ -524,7 +524,7 @@ def cavity_and_stretcher(C_radius = 7000,want_to_draw=True,
         max_diff = diff_R_ver
         max_roundtrip = n//32+1
     
-    return max_diff
+    return max_diff,xx,yy
   elif Comp._lightsource == centerlightsource:
     ip.spot_diagram(Comp._beams[-1],aberration_analysis=True)
     pathlength = {}
@@ -636,19 +636,19 @@ def Cal_matrix(Comp=Composition(),vertical_mat = True):
   # Comp._matrix = np.matmul(np.array([[1,Comp._last_prop], [0,1]]), Comp._matrix ) #last propagation
   return np.array(Comp._matrix)
 
-roundtrip = 40
+roundtrip = 1
 centerlamda = 1030E-6
 C_radius = 7000
 # StripeM_shift = 0.07
-# StripeM_shift = -0.13
-StripeM_shift = 0
+StripeM_shift = -0.13
+# StripeM_shift = 0
 # StripeM_shift = 0.115
 # CB=CenterBeam CR=CenterRay 
-ls = "B"
-mat1 = cavity_and_stretcher(C_radius=C_radius,want_to_draw=True,
+ls = "CB"
+mat1= cavity_and_stretcher(C_radius=C_radius,want_to_draw=False,
                             roundtrip=roundtrip,centerlamda=centerlamda,
                             s_shift=StripeM_shift,ls=ls,seperation=71.381485)
-  
+# print(xx,yy)
 #   maximun deviation with different wavelength -------------------------------
 # lam_mid = 1030E-6
 # delta_lamda = 60E-6
