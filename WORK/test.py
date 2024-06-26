@@ -4,26 +4,6 @@ Created on Mon Mar 18 14:01:12 2024
 
 @author: 12816
 """
-
-import sys
-import os
-from copy import deepcopy
-
-pfad = __file__
-pfad = pfad.replace("\\", "/") #just in case
-ind = pfad.rfind("/")
-pfad = pfad[0:ind]
-ind = pfad.rfind("/")
-pfad = pfad[0:ind]
-ind = pfad.rfind("/")
-pfad = pfad[0:ind+1]
-path_added = False
-for path in sys.path:
-  if path ==pfad:
-    path_added = True
-if not path_added:
-  sys.path.append(pfad)
-
 from LaserCAD.basic_optics import Mirror,Beam,Cylindrical_Mirror,Intersection_plane,Cylindrical_Mirror1,Curved_Mirror,Ray, Composition, Grating
 # from LaserCAD.basic_optics.mirror import 
 from LaserCAD.basic_optics import Unit_Mount,Composed_Mount
@@ -55,8 +35,6 @@ import numpy as np
 # IP.draw()
 # IP.spot_diagram(C._beams[-1])
 
-if freecad_da:
-  clear_doc()
 ray = Ray()
 ray.draw()
 B = Beam(radius=5)
@@ -70,3 +48,7 @@ G = Grating()
 G.pos += (0,300,0)
 G.draw()
 G.draw_mount()
+
+
+if freecad_da:
+  clear_doc()

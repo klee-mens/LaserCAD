@@ -6,14 +6,14 @@ Created on Sat Dec 16 19:06:21 2023
 @author: mens
 """
 
-import sys
-pfad = __file__
-pfad = pfad.replace("\\","/") #folder conventions windows linux stuff
-pfad = pfad.lower()
-ind = pfad.rfind("lasercad")
-pfad = pfad[0:ind-1]
-if not pfad in sys.path:
-  sys.path.append(pfad)
+# import sys
+# pfad = __file__
+# pfad = pfad.replace("\\","/") #folder conventions windows linux stuff
+# pfad = pfad.lower()
+# ind = pfad.rfind("lasercad")
+# pfad = pfad[0:ind-1]
+# if not pfad in sys.path:
+#   sys.path.append(pfad)
   
   
 from LaserCAD.basic_optics import Geom_Object, Beam, Ray

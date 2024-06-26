@@ -6,18 +6,6 @@ Created on Tue Oct 17 10:41:34 2023
 """
 
 import numpy as np
-import sys
-
-pfad = __file__
-pfad = pfad.replace("\\","/") #folder conventions windows linux stuff
-ind = pfad.rfind("/")
-pfad = pfad[0:ind-1]
-ind = pfad.rfind("/")
-pfad = pfad[0:ind-1]
-ind = pfad.rfind("/")
-pfad = pfad[0:ind]
-if not pfad in sys.path:
-  sys.path.append(pfad)
 
 from scipy.interpolate import interp1d
 from scipy.misc import derivative

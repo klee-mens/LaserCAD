@@ -4,15 +4,6 @@ Created on Thu Jun 22 10:53:52 2023
 
 @author: 12816
 """
-
-import sys
-pfad = __file__
-pfad = pfad.replace("\\","/") #folder conventions windows linux stuff
-pfad = pfad.lower()
-ind = pfad.rfind("lasercad")
-pfad = pfad[0:ind-1]
-if not pfad in sys.path:
-  sys.path.append(pfad)
 from LaserCAD.moduls import Make_Amplifier_Typ_I_simple,Make_Amplifier_Typ_I_Mirror
 from LaserCAD.moduls import Make_Amplifier_Typ_II_simple,Make_Amplifier_Typ_II_Mirror
 from LaserCAD.moduls import Make_Amplifier_Typ_II_UpDown

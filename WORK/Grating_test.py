@@ -5,24 +5,7 @@ Created on Fri Mar 15 09:57:01 2024
 @author: 12816
 """
 
-import sys
-import os
 from copy import deepcopy
-
-pfad = __file__
-pfad = pfad.replace("\\", "/") #just in case
-ind = pfad.rfind("/")
-pfad = pfad[0:ind]
-ind = pfad.rfind("/")
-pfad = pfad[0:ind]
-ind = pfad.rfind("/")
-pfad = pfad[0:ind+1]
-path_added = False
-for path in sys.path:
-  if path ==pfad:
-    path_added = True
-if not path_added:
-  sys.path.append(pfad)
 
 from LaserCAD.basic_optics import Mirror,Beam,Cylindrical_Mirror,Intersection_plane,Cylindrical_Mirror1,Curved_Mirror,Ray, Composition, Grating
 # from LaserCAD.basic_optics.mirror import 

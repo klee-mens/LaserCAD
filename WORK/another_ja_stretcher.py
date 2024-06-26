@@ -7,15 +7,6 @@ Created on Tue May 14 11:13:16 2024
 
 
 import numpy as np
-import sys
-
-pfad = __file__
-pfad = pfad.replace("\\","/") #folder conventions windows linux stuff
-pfad = pfad.lower()
-ind = pfad.rfind("lasercad")
-pfad = pfad[0:ind-1]
-if not pfad in sys.path:
-  sys.path.append(pfad)
   
 from LaserCAD.basic_optics import Ray, Grating, Composition, Beam
 from LaserCAD.freecad_models import freecad_da, setview, clear_doc
