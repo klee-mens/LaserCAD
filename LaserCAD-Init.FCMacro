@@ -1,0 +1,8 @@
+# -*- coding: utf-8 -*-
+
+# Macro Begin: /home/mens/projects/LaserCAD/LC-imp1.FCMacro +++++++++++++++++++++++++++++++++++++++++++++++++
+import sys
+sys.path.append('/home/mens/projects')
+
+# Gui.runCommand('Std_DlgMacroRecord',0)
+# Macro End: /home/mens/projects/LaserCAD/LC-imp1.FCMacro +++++++++++++++++++++++++++++++++++++++++++++++++

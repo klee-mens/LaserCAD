@@ -9,12 +9,15 @@ Created on Mon Aug 22 12:34:44 2022
 from . constants import TOLERANCE
 from . geom_object import Geom_Object
 from . ray import Ray
-from .. freecad_models import model_beam,model_ray_1D,model_Gaussian_beam
+# from .. freecad_models import model_beam,model_ray_1D,model_Gaussian_beam
+from .. freecad_models import model_Gaussian_beam
 from .. freecad_models.freecad_model_beam import model_beam_new
 from .. freecad_models.freecad_model_composition import initialize_composition_old, add_to_composition
 
 from copy import deepcopy
 import numpy as np
+
+
 
 
 class Beam(Geom_Object):
@@ -25,48 +28,22 @@ class Beam(Geom_Object):
   average_divegence = ?
 
   """
-  def __init__(self, radius=1, angle=0, name="NewBeam",wavelength=1030E-6, distribution="cone", **kwargs):
+  def __init__(self, radius=1, angle=0, name="NewBeam", wavelength=1030E-6, 
+               ray_count = 2, **kwargs):
     super().__init__(name=name, **kwargs)
-    self._ray_count = 2
+    self._ray_count = ray_count
     self._rays = [Ray() for n in range(self._ray_count)]
     self._angle = angle
     self._radius = radius
-    self._distribution = distribution
     self._Bwavelength = wavelength
-    if distribution == "cone":
-      self.make_cone_distribution()
-      self.draw_dict["model"] = "cone"
-    elif distribution == "square":
-      self.make_square_distribution()
-      self.draw_dict["model"] = "ray_group"
-    elif distribution == "circular":
-      self.make_circular_distribution()
-      self.draw_dict["model"] = "ray_group"
-    elif distribution == "Gaussian":
-      z0 = wavelength/(np.pi*np.tan(angle)*np.tan(angle))
-      w0 = wavelength/(np.pi*np.tan(angle))
-      if w0>radius:
-        print("Woring: Wrong Radius!")
-      z = z0*pow((radius*radius)/(w0*w0)-1,0.5)
-      if angle<0:
-        z = -z
-      q_para = complex(z,z0)
-      self.wavelength = wavelength
-      self.q_para = q_para
-      self.make_Gaussian_distribution()
-      self.draw_dict["model"] = "Gaussian"
-    else:
-      # Abortion
-      print("Distribution tpye not know. Beam not valid.")
-      print("Allowed distribution types are: 'cone', 'square', 'circular', 'Gaussian'")
-      self = -1
-      return None
+    self.make_cone_distribution()
+    self._distribution = "cone"
+    self.draw_dict["model"] = "cone"
+    self.freecad_model = model_beam_new
 
   def make_cone_distribution(self, ray_count=2):
     self._ray_count = ray_count
     self._rays = [Ray() for n in range(self._ray_count)]
-    self._distribution = "cone"
-    self.draw_dict["model"] = "cone"
     mr = self._rays[0]
     mr.set_geom(self.get_geom())
     mr.name = self.name + "_inner_Ray"
@@ -77,102 +54,6 @@ class Beam(Geom_Object):
       our.from_h_alpha_theta(self._radius, self._angle, thetas[n], self)
       our.name = self.name + "_outer_Ray" + str(n)
       our.wavelength = self._Bwavelength
-
-  def make_Gaussian_distribution(self, ray_count=2):
-    angle = self._angle
-    radius = self._radius
-    wavelength = self._Bwavelength
-    z0 = wavelength/(np.pi*np.tan(angle)*np.tan(angle))
-    w0 = wavelength/(np.pi*np.tan(angle))
-    if w0>radius:
-      print("Woring: Wrong Radius!")
-    z = z0*pow((radius*radius)/(w0*w0)-1,0.5)
-    if angle<0:
-      z = -z
-    q_para = complex(z,z0)
-    self.wavelength = wavelength
-    self.q_para = q_para
-    self._ray_count = 1
-    self._distribution = "Gaussian"
-    self.draw_dict["model"] = "Gaussian"
-    mr = self._rays[0]
-    mr.set_geom(self.get_geom())
-    mr.name = self.name + "_inner_Ray"
-
-
-  def make_square_distribution(self, ray_in_line=3):
-    """
-    Let the group of rays follow the square distribution
-    The width of square equals 2*radius of ray group
-    Parameters
-    ----------
-    ray_in_line : int(>0)
-      rays in a line.That is going to determine the density of ray.
-
-    Returns
-    -------
-    None.
-
-    """
-    self._rays = [Ray() for n in range((ray_in_line)**2)]                     #calculate the number of rays,set the rays group
-    ray_counting=0
-    radius=self._radius
-    for n in np.arange(-radius,radius+radius/(ray_in_line-1),
-                       2*radius/(ray_in_line-1)):                              #n repersents y coordinates of the ray
-      for m in np.arange(-radius,radius+radius/(ray_in_line-1),
-                         2*radius/(ray_in_line-1)):                            #m repersents z coordinates of the ray
-        self._rays[ray_counting].set_geom(self.get_geom())
-        self._rays[ray_counting].pos=self._rays[ray_counting].pos+(0,n,m)     #change the position of the ray
-        self._rays[ray_counting].name=self.name+str(ray_counting)
-        self._rays[ray_counting].wavelength = self._Bwavelength
-        ray_counting+=1
-    # print(ray_counting) # ray_counting is the number of the rays.
-    self._ray_count = ray_counting
-    self._distribution = "square"
-    self.draw_dict["model"] = "ray_group"
-
-  def make_circular_distribution(self, ring_number=2):
-    """
-    Let the group of rays follow the circular distribution
-    The radius of circle equals the radius of ray group
-    Parameters
-    ----------
-    ring_number : int(>0).
-      The number of the rings around the center. That is going to
-     determine the density of ray.
-
-    Returns
-    -------
-    None.
-
-    """
-
-    self._rays = [Ray() for n in range(3*ring_number*(ring_number+1)+1)]      #calculate the number of rays,set the rays group
-    ray_counting=0
-    radius=self._radius
-    for r in np.arange(0,radius+radius/ring_number/2,radius/ring_number):        #r repersents the height of the ray
-
-      if r!=0:                                                                 #if the ray is not in the center
-        thetas = np.linspace(0, 2*np.pi, int(r*ring_number/radius)*6+1)        #thetas repersents the rotation angle of the ray
-        for n in range(int(r*ring_number/radius)*6):
-          our=self._rays[ray_counting]
-          # self._rays[ray_counting].wavelength = self._Bwavelength
-          our.from_h_alpha_theta(r, self._angle, thetas[n], self)            # rotate the ray which is not in the center
-          our.name=self.name + "_circular_distribution_Ray" +str(ray_counting)
-          ray_counting+=1
-      else:
-        # self._rays[ray_counting].wavelength = self._Bwavelength
-        mr=self._rays[ray_counting]
-        mr.set_geom(self.get_geom())
-        mr.name = self.name + "_inner_Ray"
-        ray_counting+=1
-    # print(ray_counting) # ray_counting is the number of the rays.
-    self._ray_count = ray_counting
-    # print(ray_counting)
-    for r in range(0,self._ray_count):
-      self._rays[r].wavelength = self._Bwavelength
-    self._distribution = "circular"
-    self.draw_dict["model"] = "ray_group"
 
   def override_rays(self, rays):
     """
@@ -193,16 +74,6 @@ class Beam(Geom_Object):
       rays[n].name = self.name + "_ray" + str(n)
     rays[0].name = self.name + "_middle_ray"
 
-  def __repr__(self):
-    radius, angle = self.radius_angle()
-    txt = 'Beam(radius=' + repr(radius)
-    txt += ', anlge=' + repr(angle)
-    txt += ', distribution=' + repr(self._distribution)
-    if self._distribution == "Gaussian":
-       txt = 'Gaussian_Beam(q_para=' + repr(self.q_para)
-    txt += ', ' + super().__repr__()[6::]
-    return txt
-
   def radius_angle(self):
     """
     berechnet aus 2 Strahlen inn und outer den zugehörigen beam Kegel mit
@@ -213,7 +84,7 @@ class Beam(Geom_Object):
     outer = self._rays[1]
     v0 = inner.normal
     v1 = outer.normal
-    poi = outer.intersection(inner) #Punkt in der Kegelgrundfläche, in dem outer schneidet
+    poi = outer.intersection(inner, False) #Punkt in der Kegelgrundfläche, in dem outer schneidet
     ovec = poi - inner.pos
     novec = np.linalg.norm(ovec)
     if novec < TOLERANCE:
@@ -267,7 +138,6 @@ class Beam(Geom_Object):
     super()._pos_changed(old_pos, new_pos)
     self._rearange_subobjects_pos(old_pos, new_pos, self._rays)
 
-
   def _axes_changed(self, old_axes, new_axes):
     """
     wird aufgerufen, wen das KooSys <_axes> von <self> verändert wird
@@ -283,23 +153,26 @@ class Beam(Geom_Object):
     super()._axes_changed(old_axes, new_axes)
     self._rearange_subobjects_axes(old_axes, new_axes, self._rays)
 
+  def __repr__(self):
+    radius, angle = self.radius_angle()
+    txt = 'Beam(radius=' + repr(radius)
+    txt += ', anlge=' + repr(angle)
+    txt += ', distribution=' + repr(self._distribution)
+    txt += ', ' + super().__repr__()[6::]
+    return txt
 
+  def update_draw_dict(self):
+    super().update_draw_dict()
+    radius, angle = self.radius_angle()
+    self.draw_dict["length"] = self.length()
+    self.draw_dict["radius"] = radius
+    self.draw_dict["angle"] = angle
+  
   def draw_freecad(self):
-    if self.draw_dict["model"] == "Gaussian":
-      return model_Gaussian_beam(name=self.name, q_para=self.q_para,
-                                 wavelength=self.wavelength,
-                                 prop=self.get_all_rays()[0].length,
-                                 geom_info=self.get_geom())
-    elif self.draw_dict["model"] == "cone":
+    if self.draw_dict["model"] == "cone":
       radius, angle = self.radius_angle()
-      # return model_beam(name=self.name, dia=2*radius, prop=self.length(),
-           # f=self.focal_length(), geom_info=self.get_geom(), **self.draw_dict)
-      # return model_beam(dia=2*radius, prop=self.length(), f=self.focal_length(),
-      #                   geom_info=self.get_geom(), **self.draw_dict)
       return model_beam_new(radius=radius, length=self.length(),  angle=angle,
                             geom_info=self.get_geom(),**self.draw_dict)
-      # return model_Gaussian_beam(name=self.name, dia=2*radius, prop=self.length(),
-      #      f=self.focal_length(), geom_info=self.get_geom())
     else:
       part = initialize_composition_old(name="ray group")
       container = []
@@ -312,6 +185,136 @@ class Beam(Geom_Object):
 
 
 
+class SquareBeam(Beam):
+  def __init__(self, radius=1, name="NewBeam", wavelength=1030E-6, ray_in_line = 3, **kwargs):
+    super().__init__(name=name, **kwargs)
+    self._ray_in_line = ray_in_line
+    self.make_square_distribution(ray_in_line)
+    self._distribution = "square"
+    self.draw_dict["model"] = "ray_group"
+
+  def make_square_distribution(self, ray_in_line=3):
+    """
+    Let the group of rays follow the square distribution
+    The width of square equals 2*radius of ray group
+    Parameters
+    ----------
+    ray_in_line : int(>0)
+      rays in a line.That is going to determine the density of ray.
+
+    Returns
+    -------
+    None.
+
+    """
+    self._rays = [Ray() for n in range((ray_in_line)**2)]                     #calculate the number of rays,set the rays group
+    ray_counting=0
+    radius=self._radius
+    for n in np.arange(-radius,radius+radius/(ray_in_line-1),
+                       2*radius/(ray_in_line-1)):                              #n repersents y coordinates of the ray
+      for m in np.arange(-radius,radius+radius/(ray_in_line-1),
+                         2*radius/(ray_in_line-1)):                            #m repersents z coordinates of the ray
+        self._rays[ray_counting].set_geom(self.get_geom())
+        self._rays[ray_counting].pos=self._rays[ray_counting].pos+(0,n,m)     #change the position of the ray
+        self._rays[ray_counting].name=self.name+str(ray_counting)
+        self._rays[ray_counting].wavelength = self._Bwavelength
+        ray_counting+=1
+    self._ray_count = ray_counting
+    
+    for n in range(1, len(self._rays)):
+      self._rays[n].name = self.name + "_Ray" + str(n)
+    self._rays[0].name = self.name + "_inner_Ray"
+    
+
+
+class CircularRayBeam(Beam):
+  def __init__(self, radius=1, name="NewBeam", wavelength=1030E-6, ring_number = 2, **kwargs):
+    super().__init__(name=name, **kwargs)
+    self._ring_number = ring_number
+    self.make_circular_distribution(ring_number)
+    # self._ray_count = len(self._rays)
+    self._distribution = "circular"
+    self.draw_dict["model"] = "ray_group"
+
+  def make_circular_distribution(self, ring_number=2):
+    """
+    Let the group of rays follow the circular distribution
+    The radius of circle equals the radius of ray group
+    Parameters
+    ----------
+    ring_number : int(>0).
+      The number of the rings around the center. That is going to
+     determine the density of ray.
+
+    Returns
+    -------
+    None.
+
+    """
+
+    self._rays = [Ray() for n in range(3*ring_number*(ring_number+1)+1)]      #calculate the number of rays,set the rays group
+    ray_counting=0
+    radius=self._radius
+    for r in np.arange(0,radius+radius/ring_number/2,radius/ring_number):        #r repersents the height of the ray
+
+      if r!=0:                                                                 #if the ray is not in the center
+        thetas = np.linspace(0, 2*np.pi, int(r*ring_number/radius)*6+1)        #thetas repersents the rotation angle of the ray
+        for n in range(int(r*ring_number/radius)*6):
+          our=self._rays[ray_counting]
+          # self._rays[ray_counting].wavelength = self._Bwavelength
+          our.from_h_alpha_theta(r, self._angle, thetas[n], self)            # rotate the ray which is not in the center
+          our.name=self.name + "_circular_distribution_Ray" +str(ray_counting)
+          ray_counting+=1
+      else:
+        # self._rays[ray_counting].wavelength = self._Bwavelength
+        mr=self._rays[ray_counting]
+        mr.set_geom(self.get_geom())
+        mr.name = self.name + "_inner_Ray"
+        ray_counting+=1
+    # print(ray_counting) # ray_counting is the number of the rays.
+    self._ray_count = ray_counting
+    # print(ray_counting)
+    for r in range(0,self._ray_count):
+      self._rays[r].wavelength = self._Bwavelength
+
+
+
+
+import matplotlib.pyplot as plt
+
+class RainbowBeam(Beam):
+  def __init__(self,  name="NewRainbow", wavelength=1030E-6, bandwith=10E-6, ray_count=11, **kwargs):
+    super().__init__(name=name, **kwargs)
+    self._bandwith = bandwith
+    self.make_rainbow_distribution(ray_count)
+    self._distribution = "rainbow"
+    self.draw_dict["model"] = "ray_group"
+    
+  def make_rainbow_distribution(self, ray_count=11):
+    self._ray_count = ray_count
+    # wavels = np.linspace(self._Bwavelength - self.bandwith/2, self._Bwavelength + self.bandwith/2, ray_count)
+    rc_blue = ray_count//2 +1
+    rc_red = ray_count + 1 - rc_blue
+    blue = np.linspace(self._Bwavelength - self._bandwith/2, self._Bwavelength, rc_blue)
+    reds = np.linspace(self._Bwavelength, self._Bwavelength + self._bandwith/2, rc_red)
+  
+    wavels = [self._Bwavelength] # middle ray hat wavelength
+    wavels += list(blue[0:-1]) # then all blue wavelength except middle 
+    wavels += list(reds[1::]) # then all red wavelength except middle
+    rays = []
+    cmap = plt.cm.gist_rainbow
+    for wavel in wavels:
+      rn = Ray()
+      rn.set_geom(self.get_geom())
+      rn.wavelength = wavel
+      x = 1-(wavel - self._Bwavelength + self._bandwith/2) / self._bandwith
+      rn.draw_dict["color"] = cmap( x )
+      rays.append(rn)
+    self._rays = rays
+    for n in range(1, len(self._rays)):
+      self._rays[n].name = self.name + "_Ray" + str(n)
+    self._rays[0].name = self.name + "_inner_Ray"
+  
 
 
 class Gaussian_Beam(Ray):
@@ -346,19 +349,9 @@ class Gaussian_Beam(Ray):
     return txt
 
   def draw_freecad(self):
-    if self.draw_dict["model"] == "Gaussian":
-      return model_Gaussian_beam(name=self.name, q_para=self.q_para,
-                                 wavelength=self.wavelength,prop=self.length,
-                                 geom_info=self.get_geom())
-    if self.draw_dict["model"] == "cone":
-      # quicker method with nearly the same look in most cases
-      radius = self.radius()
-      focal_length = - radius / self.divergence()
-      col = (244/255, 22/255, 112/255)
-      return model_beam(dia=2*radius, prop=self.length, f=focal_length,
-                        geom_info=self.get_geom(), color=col, **self.draw_dict)
-    else:
-      return -1
+    return model_Gaussian_beam(name=self.name, q_para=self.q_para,
+                               wavelength=self.wavelength,prop=self.length,
+                               geom_info=self.get_geom())
   
   def radius(self):
     z = np.real(self.q_para)
@@ -383,6 +376,9 @@ class Gaussian_Beam(Ray):
     ray.length = self.length
     return [ray]
 
+  def inner_ray(self):
+    return self.get_all_rays()[0]
+  
 if __name__ == "__main__":
   b = Beam(name = "Strahlo", radius=2)
   print(b)

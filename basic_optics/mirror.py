@@ -108,6 +108,31 @@ class Mirror(Opt_Element):
   def theta(self, x):
     self.__theta = x
     self.update_normal()
+    
+  def reflection(self, ray):
+    """
+    erzeugt den nächsten Strahl aus <Ray> mit Hilfe des Reflexionsgesetzes
+    (man beachte die umgedrehte <normal> im Gegensatz zur Konvention in z.B.
+    Springer Handbook of Optics and Lasers S. 68)
+  
+    Parameters
+    ----------
+    ray : Ray()
+      incident ray
+  
+    Returns
+    -------
+    reflected ray
+    """
+    ray2 = deepcopy(ray)
+    ray2.pos = self.intersection(ray) #dadruch wird ray.length verändert(!)
+    k = ray2.normal
+    km = -self.normal
+    scpr = np.sum(km*k)
+    newk = k-2*scpr*km
+    ray2.normal = newk
+    # print("REFL", k, km, scpr, newk, ray2.normal)
+    return ray2
 
   def next_ray(self, ray):
     return self.reflection(ray)
@@ -200,6 +225,7 @@ class Mirror(Opt_Element):
     return np.array(kmatrix)
 
 
+
 class Curved_Mirror(Mirror):
   def __init__(self, radius=200, **kwargs):
     super().__init__(**kwargs)
@@ -219,12 +245,6 @@ class Curved_Mirror(Mirror):
   def focal_length(self):
     return self.radius/2
 
-  def next_ray(self, ray):
-    # r1 = self.refraction(ray)
-    # r2 = self.reflection(r1)
-    r2 = self.next_ray_trace(ray)
-    return r2
-
   def __repr__(self):
     n = len(self.class_name())
     txt = self.class_name() + '(radius=' + repr(self.radius)
@@ -237,7 +257,40 @@ class Curved_Mirror(Mirror):
     self.draw_dict["dia"]=self.aperture
     # self.draw_dict["Radius1"] = self.radius
 
-  def next_ray_trace(self, ray):
+  def intersection(self, ray):
+    """
+    ermittelt den Schnittpunkt vom Strahl mit einer Spähre, die durch 
+    <center> € R^3 und <radius> € R definiert ist
+    und setzt seine Länge auf den Abstand self.pos--element.pos (bedenken!)
+    siehe Springer Handbook of Lasers and Optics Seite 66 f
+
+    Parameters
+    ----------
+    center : TYPE 3D-array
+      Mittelpunkt der Sphäre 
+
+    radius : TYPE float
+      Radius der Sphäre; >0 für konkave Spiegel (Fokus), <0 für konvexe
+
+    Returns
+    -------
+    endpoint : TYPE 3D-array
+    """
+    diffvec = self.pos - self.radius*self.normal - ray.pos
+    k = np.sum( diffvec * ray.normal )
+    w = np.sqrt(k**2 - np.sum(diffvec**2) + self.radius**2)
+    s1 = k + w
+    s2 = k - w
+    #Fallunterscheidung
+    if self.radius < 0 and s2 > 0:
+      dist = s2
+    else:
+      dist = s1
+    ray.length = dist
+    endpoint = ray.endpoint()
+    return endpoint
+  
+  def next_ray(self, ray):
     """
     erzeugt den nächsten Ray auf Basis der analytischen Berechung von Schnitt-
     punkt von Sphere mit ray und dem vektoriellen Reflexionsgesetz
@@ -258,7 +311,8 @@ class Curved_Mirror(Mirror):
     ray2.name = "next_" + ray.name
 
     center = self.pos - self.radius * self.normal
-    p0 = ray.intersect_with_sphere(center, self.radius) #Auftreffpunkt p0
+    # p0 = ray.intersect_with_sphere(center, self.radius) #Auftreffpunkt p0
+    p0 = self.intersection(ray) #Auftreffpunkt p0
     surface_norm = p0 - center #Normale auf Spiegeloberfläche in p0
     surface_norm *= 1/np.linalg.norm(surface_norm) #normieren
     ray2.normal = ray.normal - 2*np.sum(ray.normal*surface_norm)*surface_norm

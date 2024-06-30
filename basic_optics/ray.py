@@ -35,109 +35,115 @@ class Ray(Geom_Object):
   def endpoint(self):
     return self.pos + self.length * self.normal
 
-  def intersection(self, element):
+  def intersection(self, element, set_length=True):
     """
-    ermittelt den Schnittpunkt vom Strahl mit der ebene eines opt Elements
+    Calculates the intersection point of the ray with a plane given by a 
+    Geom_Object (e.g a thin lens).
 
     Parameters
     ----------
     element : Geom_Object
-      Element mit dessen Ebene der Schnittpunkt berechnet wird
+      Element in the intersection plane.
+    set_length : optional
+      Sets the length of the ray so that it end on the object plane if true. 
+      The default is True.
 
     Returns
     -------
     endpoint
-
     """
+    
     delta_p = element.pos - self.pos
     s = np.sum(delta_p*element.normal) / np.sum(self.normal * element.normal)
+    if set_length:
+      self.length = s
     return self.pos + s * self.normal
 
-  def intersect_with(self, element):
-    """
-    ermittelt den Schnittpunkt vom Strahl mit der ebene eines opt Elements
-    und setzt seine Länge auf den Abstand self.pos--element.pos (bedenken!)
+  # def intersect_with(self, element):
+  #   """
+  #   ermittelt den Schnittpunkt vom Strahl mit der ebene eines opt Elements
+  #   und setzt seine Länge auf den Abstand self.pos--element.pos (bedenken!)
 
-    Parameters
-    ----------
-    element : Geom_Object
-      Element mit dessen Ebene der Schnittpunkt berechnet wird
+  #   Parameters
+  #   ----------
+  #   element : Geom_Object
+  #     Element mit dessen Ebene der Schnittpunkt berechnet wird
 
-    Returns
-    -------
-    endpoint
+  #   Returns
+  #   -------
+  #   endpoint
 
-    """
-    delta_p = element.pos - self.pos
-    s = np.sum(delta_p*element.normal) / np.sum(self.normal * element.normal)
-    self.length = s
-    return self.endpoint()
+  #   """
+  #   delta_p = element.pos - self.pos
+  #   s = np.sum(delta_p*element.normal) / np.sum(self.normal * element.normal)
+  #   self.length = s
+  #   return self.endpoint()
 
-  def intersect_with_sphere(self, center, radius):
-    """
-    ermittelt den Schnittpunkt vom Strahl mit einer Spähre, die durch 
-    <center> € R^3 und <radius> € R definiert ist
-    und setzt seine Länge auf den Abstand self.pos--element.pos (bedenken!)
-    siehe Springer Handbook of Lasers and Optics Seite 66 f
+  # def intersect_with_sphere(self, center, radius):
+  #   """
+  #   ermittelt den Schnittpunkt vom Strahl mit einer Spähre, die durch 
+  #   <center> € R^3 und <radius> € R definiert ist
+  #   und setzt seine Länge auf den Abstand self.pos--element.pos (bedenken!)
+  #   siehe Springer Handbook of Lasers and Optics Seite 66 f
 
-    Parameters
-    ----------
-    center : TYPE 3D-array
-      Mittelpunkt der Sphäre 
+  #   Parameters
+  #   ----------
+  #   center : TYPE 3D-array
+  #     Mittelpunkt der Sphäre 
 
-    radius : TYPE float
-      Radius der Sphäre; >0 für konkave Spiegel (Fokus), <0 für konvexe
+  #   radius : TYPE float
+  #     Radius der Sphäre; >0 für konkave Spiegel (Fokus), <0 für konvexe
 
-    Returns
-    -------
-    endpoint : TYPE 3D-array
-    """
-    diffvec = center - self.pos
-    k = np.sum( diffvec * self.normal )
-    w = np.sqrt(k**2 - np.sum(diffvec**2) + radius**2)
-    s1 = k + w
-    s2 = k - w
-    #Fallunterscheidung
-    if radius < 0 and s2 > 0:
-      dist = s2
-    else:
-      dist = s1
-    self.length = dist
-    endpoint = self.endpoint()
-    return endpoint
+  #   Returns
+  #   -------
+  #   endpoint : TYPE 3D-array
+  #   """
+  #   diffvec = center - self.pos
+  #   k = np.sum( diffvec * self.normal )
+  #   w = np.sqrt(k**2 - np.sum(diffvec**2) + radius**2)
+  #   s1 = k + w
+  #   s2 = k - w
+  #   #Fallunterscheidung
+  #   if radius < 0 and s2 > 0:
+  #     dist = s2
+  #   else:
+  #     dist = s1
+  #   self.length = dist
+  #   endpoint = self.endpoint()
+  #   return endpoint
   
-  def sphere_intersection(self, center, radius):
-    """
-    ermittelt den Schnittpunkt vom Strahl mit einer Spähre, die durch 
-    <center> € R^3 und <radius> € R definiert ist
-    und setzt seine Länge auf den Abstand self.pos--element.pos (bedenken!)
-    siehe Springer Handbook of Lasers and Optics Seite 66 f
+  # def sphere_intersection(self, center, radius):
+  #   """
+  #   ermittelt den Schnittpunkt vom Strahl mit einer Spähre, die durch 
+  #   <center> € R^3 und <radius> € R definiert ist
+  #   und setzt seine Länge auf den Abstand self.pos--element.pos (bedenken!)
+  #   siehe Springer Handbook of Lasers and Optics Seite 66 f
 
-    Parameters
-    ----------
-    center : TYPE 3D-array
-      Mittelpunkt der Sphäre 
+  #   Parameters
+  #   ----------
+  #   center : TYPE 3D-array
+  #     Mittelpunkt der Sphäre 
 
-    radius : TYPE float
-      Radius der Sphäre; >0 für konkave Spiegel (Fokus), <0 für konvexe
+  #   radius : TYPE float
+  #     Radius der Sphäre; >0 für konkave Spiegel (Fokus), <0 für konvexe
 
-    Returns
-    -------
-    endpoint : TYPE 3D-array
-    """
-    diffvec = center - self.pos
-    k = np.sum( diffvec * self.normal )
-    w = np.sqrt(k**2 - np.sum(diffvec**2) + radius**2)
-    s1 = k + w
-    s2 = k - w
-    #Fallunterscheidung
-    if radius < 0 and s2 > 0:
-      dist = s2
-    else:
-      dist = s1
-    # self.length = dist
-    endpoint = self.pos + dist * self.normal
-    return endpoint
+  #   Returns
+  #   -------
+  #   endpoint : TYPE 3D-array
+  #   """
+  #   diffvec = center - self.pos
+  #   k = np.sum( diffvec * self.normal )
+  #   w = np.sqrt(k**2 - np.sum(diffvec**2) + radius**2)
+  #   s1 = k + w
+  #   s2 = k - w
+  #   #Fallunterscheidung
+  #   if radius < 0 and s2 > 0:
+  #     dist = s2
+  #   else:
+  #     dist = s1
+  #   # self.length = dist
+  #   endpoint = self.pos + dist * self.normal
+  #   return endpoint
   
   def h_alpha_to(self, element):
     """
@@ -182,9 +188,6 @@ class Ray(Geom_Object):
     element : geom_object
     """
     self.set_geom(element.get_geom())
-    # pos, norm = element.get_geom()
-    # pos = element.pos
-    # norm = element.normal
     xa, ya, za = element.get_coordinate_system()
     vec_in_eb = za*np.cos(theta) - ya*np.sin(theta)
     self.pos += vec_in_eb*h
@@ -195,29 +198,7 @@ class Ray(Geom_Object):
     super().update_draw_dict()
     self.draw_dict["length"] = self.length
 
-  # def draw_freecad(self, **kwargs):
-    # self.update_draw_dict()
-    # obj = model_ray_1D(**self.draw_dict)
-    # return obj
 
-
-
-  # def draw(self):
-  #   if freecad_da:
-  #     model_ray_1D(name=self.name, length=self.length, geom=self.get_geom())
-  #   else:
-  #     txt = "Der Strahl <" + self.name + "> wird von "
-  #     txt += str(self.pos) + " mit der Ausrichtung " + str(self.normal)
-  #     txt += " bis nach " + str(self.endpoint()) + " gezeichnet."
-  #     print(txt)
-  #     return txt
-
-#   def copy(self):
-#     cop = Ray()
-#     cop.name = self.name
-#     cop.set_geom(self.get_geom())
-#     cop.length = self.length
-#     return cop
 
 def tests():
   r = Ray()

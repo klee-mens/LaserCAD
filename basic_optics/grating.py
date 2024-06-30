@@ -18,45 +18,90 @@ class Grating(Opt_Element):
   """
   Klasse für Gitter
   """
-  def __init__(self, grat_const=0.005, order=1, **kwargs):
+  def __init__(self, grat_const=0.005, order=-1, **kwargs):
     self.height = 60
     self.thickness = 8
     super().__init__(**kwargs)
-    self.grating_constant = grat_const
+    self.grating_constant = grat_const # lines per millimeter
     self.width = 50
     self.diffraction_order = order
+    self.G = 2*np.pi / self.grating_constant * self.get_coordinate_system()[1] 
+
     self.update_draw_dict()
     self.freecad_model = model_grating
     self.set_mount_to_default()
 
-  def next_ray(self, ray, order=None):
+  # def next_ray(self, ray, order=None):
+  #   """
+  #   Beugung entsprechend des Gittergesetzes g(sinA + sinB) = m*lam
+  #   m = order
+  #   """
+  #   if order == None:
+  #     order = self.diffraction_order
+  #   norm, gratAx, sagit = self.get_coordinate_system() # Normale, Gitterachse, Sagitalvector
+  #   norm *= -1 #selbe Konvention wie beim Spiegel, 1,0,0 heißt Reflektion von 1,0,0
+  #   gratAx *= -1 #selbe Konvention wie beim Spiegel, 1,0,0 heißt Reflektion von 1,0,0
+  #   r1 = ray.normal #einfallender Strahl
+  #   pos = ray.intersection(self)
+  #   sagital_component = np.sum(r1 * sagit)
+  #   sinA = np.sum( sagit * np.cross(r1, norm) )
+  #   sinB = order * ray.wavelength/ self.grating_constant - sinA
+  #   if abs(sinB)>1:
+  #     ray2 = self.reflection(ray)
+  #     print("Warning, there is no diffraction of this order, retun next ray as a reflection")
+  #     return ray2
+  #   ray2 = deepcopy(ray)
+  #   ray2.name = "next_" + ray.name
+  #   ray2.pos = pos
+  #   ray2.normal = (np.sqrt(1-sinB**2) * norm + sinB * gratAx) * np.sqrt(1-sagital_component**2) + sagital_component * sagit
+  #   k_prop = np.cross(norm,np.cross(ray.normal*2*np.pi/ray.wavelength,norm))
+  #   k_p_out = k_prop+order*2*np.pi/self.grating_constant*gratAx
+  #   k_r = k_p_out + abs(np.sqrt((2*np.pi/ray.wavelength)**2-np.linalg.norm(k_p_out)**2))*norm
+  #   n_r = k_r/np.linalg.norm(k_r)
+  #   ray2.normal = n_r
+  #   return ray2
+  
+  def next_ray(self, ray, alternative_order=None):
     """
-    Beugung entsprechend des Gittergesetzes g(sinA + sinB) = m*lam
-    m = order
+    computes the diffracted beam by adding <diffraction_order> times a
+    reciprocal grating vector to the parallel wave vector
+    computes the diffraction in an alternative_order if given
+    if there is now diffraction in this order, it gives out a standard Ray()
+    and a warning, which should definitely be seen in the model as a huge error
+
+    Parameters
+    ----------
+    ray : TYPE
+      DESCRIPTION.
+    alternative_order : TYPE, optional
+      DESCRIPTION. The default is None.
+
+    Returns
+    -------
+    ray2 : TYPE
+      DESCRIPTION.
+
     """
-    if order == None:
-      order = self.diffraction_order
-    norm, gratAx, sagit = self.get_coordinate_system() # Normale, Gitterachse, Sagitalvector
-    norm *= -1 #selbe Konvention wie beim Spiegel, 1,0,0 heißt Reflektion von 1,0,0
-    gratAx *= -1 #selbe Konvention wie beim Spiegel, 1,0,0 heißt Reflektion von 1,0,0
-    r1 = ray.normal #einfallender Strahl
-    pos = ray.intersect_with(self)
-    sagital_component = np.sum(r1 * sagit)
-    sinA = np.sum( sagit * np.cross(r1, norm) )
-    sinB = order * ray.wavelength/ self.grating_constant - sinA
-    if abs(sinB)>1:
-      ray2 = self.reflection(ray)
-      print("Warning, there is no diffraction of this order, retun next ray as a reflection")
-      return ray2
     ray2 = deepcopy(ray)
-    ray2.name = "next_" + ray.name
-    ray2.pos = pos
-    ray2.normal = (np.sqrt(1-sinB**2) * norm + sinB * gratAx) * np.sqrt(1-sagital_component**2) + sagital_component * sagit
-    k_prop = np.cross(norm,np.cross(ray.normal*2*np.pi/ray.wavelength,norm))
-    k_p_out = k_prop+order*2*np.pi/self.grating_constant*gratAx
-    k_r = k_p_out + abs(np.sqrt((2*np.pi/ray.wavelength)**2-np.linalg.norm(k_p_out)**2))*norm
-    n_r = k_r/np.linalg.norm(k_r)
-    ray2.normal = n_r
+    intersec = ray.intersection(self)
+    ray2.pos = intersec
+    
+    if alternative_order:
+      m = alternative_order
+    else:
+      m = self.diffraction_order
+    
+    # reciprocal grating vector G perpindicular to lines, by default parallel to y-axis
+    G = 2*np.pi / self.grating_constant * self.get_coordinate_system()[1]    
+    k1 = ray.normal * 2 * np.pi / ray.wavelength # wave vector 1
+    k1p = k1 - self.normal * np.sum(k1 * self.normal) # k1 in grating plane, = nx(k1xn)
+    direction_sign = np.sign(np.sum(k1p * G) + 1e-12) # +1 if G and k1p in same direction
+    k2p = k1p + m * direction_sign * G
+    if np.linalg.norm(k2p) > np.linalg.norm(k1):
+      print("Warning, there is no diffraction of this order, return next ray as Ray()")
+      return Ray()
+    k2 = k2p - self.normal * np.sqrt(np.sum(k1*k1) - np.sum(k2p * k2p))
+    ray2.normal = k2 
     return ray2
 
   def update_draw_dict(self):

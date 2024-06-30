@@ -7,12 +7,9 @@ Created on Sat Aug 19 13:59:08 2023
 
 from .geom_object import Geom_Object
 from .constants import inch
-# from ..non_interactings import 
-# from .mount import Mount
-from .mount import Unit_Mount, get_mount_by_aperture_and_element
-# from .post import Post_and_holder
+from .mount import get_mount_by_aperture_and_element
 
-from .. freecad_models import freecad_da
+# from .. freecad_models import freecad_da
 
 class Component(Geom_Object):
   """

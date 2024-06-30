@@ -10,10 +10,10 @@ from LaserCAD.freecad_models import clear_doc, setview, freecad_da
 from LaserCAD.basic_optics import Mirror, Beam, Composition, inch
 from LaserCAD.basic_optics import Curved_Mirror, Ray, Component
 from LaserCAD.basic_optics import LinearResonator, Lens
-from LaserCAD.basic_optics import Grating, Crystal
+from LaserCAD.basic_optics import Grating
 import matplotlib.pyplot as plt
 from LaserCAD.freecad_models.utils import thisfolder, load_STL
-from LaserCAD.non_interactings import Faraday_Isolator, Pockels_Cell, Lambda_Plate
+from LaserCAD.non_interactings import Faraday_Isolator, Pockels_Cell, Lambda_Plate, Crystal
 from LaserCAD.basic_optics.mirror import Stripe_mirror
 from LaserCAD.moduls import Make_RoofTop_Mirror
 from LaserCAD.basic_optics.mount import Unit_Mount, Composed_Mount
@@ -537,7 +537,7 @@ concave2 = Curved_Mirror(radius=focal*2, phi=180+sep_angle_A2)
 Amp2.add_on_axis(concave2)
 concave2.set_normal_with_2_points(end_concave.pos, active_mir.pos)
 Amp2.set_sequence([0, 1, 2, 3, 4, 5, 4, 6, 7, 8, 4, 5, 4])
-Amp2.recompute_optical_axis()
+# Amp2.recompute_optical_axis()
 
 a2_safe_angle_for_non_colliding_with_crystal = 2
 Amp2.propagate(580)
@@ -657,10 +657,10 @@ pure_cosmetic1.aperture = periscope_height
 # =============================================================================
 # Four Gratings Compressor
 # =============================================================================
-Grat3 =Grating(grat_const=grating_const,order=1)
+Grat3 =Grating(grat_const=grating_const,order=-1)
 Grat3.pos = (Grat1.pos[0]-Grat2.pos[0]+Grat1.pos[0]-45-2*35*abs(Grat1.normal[0]),Grat2.pos[1],Grat2.pos[2])
 Grat3.normal = (Grat1.normal[0],-Grat1.normal[1],Grat1.normal[2])
-Grat4 =Grating(grat_const=grating_const,order=1)
+Grat4 =Grating(grat_const=grating_const,order=-1)
 Grat4.pos = (Grat2.pos[0]-Grat2.pos[0]+Grat1.pos[0]-45-2*35*abs(Grat1.normal[0]),Grat1.pos[1],Grat2.pos[2])
 Grat4.normal = (Grat2.normal[0],-Grat2.normal[1],Grat2.normal[2])
 # Grat3.pos += (1,0,0)
@@ -712,15 +712,15 @@ Compressor.set_geom(Amp2.last_geom())
 # Draw Selection
 # =============================================================================
 
-Seed.draw()
-Stretcher.draw()
-PulsePicker.draw()
-Amplifier_I.draw()
+# Seed.draw()
+# Stretcher.draw()
+# PulsePicker.draw()
+# Amplifier_I.draw()
 Pump.draw()
-Amp2.draw()
+# Amp2.draw()
 BigPump.draw()
-t=Table()
-t.draw()
+# t=Table()
+# t.draw()
 Compressor.draw()
 # PulsePicker.draw_alignment_posts()
 

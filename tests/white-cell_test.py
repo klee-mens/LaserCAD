@@ -20,7 +20,7 @@ if freecad_da:
 
 if __name__ == "__main__":
 
-  wc = Make_White_Cell(roundtrips4=3, seperation=8)
+  wc = Make_White_Cell(roundtrips4=2, seperation=8)
   wc.draw()
 
 if freecad_da:
