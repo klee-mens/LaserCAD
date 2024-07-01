@@ -783,7 +783,7 @@ ls = "CB"
 #                             roundtrip=roundtrip,centerlamda=centerlamda,
 #                             s_shift=StripeM_shift,ls=ls,seperation=seperation,
 #                             Tele_added = True,Concav_shift=Concav_shift)
-mat1= cavity_and_stretcher(C_radius=C_radius,vertical_mat=True,want_to_draw=False,
+mat1= cavity_and_stretcher(C_radius=C_radius,vertical_mat=True,want_to_draw=True,
                             roundtrip=roundtrip,centerlamda=centerlamda,
                             s_shift=StripeM_shift,ls=ls,seperation=seperation,
                             Tele_added = True,Concav_shift=Concav_shift)
