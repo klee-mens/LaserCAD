@@ -33,8 +33,8 @@ from LaserCAD.moduls.periscope import Rooftop_Mirror_Component
 import matplotlib.pyplot as plt
 import numpy as np
 
-# if freecad_da:
-#   clear_doc()
+if freecad_da:
+  clear_doc()
 
 vertical_mat = True
 
@@ -64,9 +64,12 @@ lam_mid = centerlamda # Zentralwellenlänge in mm
 lam_mid_grating = 1030E-6 # Zentralwellenlänge in mm
 delta_lamda = 60e-9*1e3 # Bandbreite in mm
 number_of_rays = 15
-safety_to_StripeM = 5 
+# safety_to_StripeM = 5 
 periscope_distance = 12
 c0 = 299792458*1000 #mm/s
+
+half_height_middle = 10
+
 v = lam_mid_grating/grat_const
 s = np.sin(gamma)
 c = np.cos(gamma)
@@ -127,70 +130,83 @@ if vertical_mat:
   Concav2 = Cylindrical_Mirror1(radius=Radius,name="Concav_Mirror")
   Concav3 = Cylindrical_Mirror1(radius=Radius,name="Concav_Mirror")
   Concav4 = Cylindrical_Mirror1(radius=Radius,name="Concav_Mirror")
-  StripeM = Cylindrical_Mirror1(radius= -Radius/2, name="Stripe_Mirror")
+  StripeM1 = Cylindrical_Mirror1(radius= -Radius/2, name="Stripe_Mirror")
+  StripeM2 = Cylindrical_Mirror1(radius= -Radius/2, name="Stripe_Mirror")
 else:
   Concav1 = Cylindrical_Mirror(radius=Radius,name="Concav_Mirror")
   Concav2 = Cylindrical_Mirror(radius=Radius,name="Concav_Mirror")
   Concav3 = Cylindrical_Mirror(radius=Radius,name="Concav_Mirror")
   Concav4 = Cylindrical_Mirror(radius=Radius,name="Concav_Mirror")
-  StripeM = Cylindrical_Mirror(radius= -Radius/2, name="Stripe_Mirror")
-Concav1.pos = (Radius/2-np.sqrt(((Radius/2+Concav_shift[0])**2)-(h_StripeM/2 + safety_to_StripeM)**2),
-               0,-h_StripeM/2 - safety_to_StripeM)
-# Concav1.pos = (0,0,-h_StripeM/2 - safety_to_StripeM)
-Concav1.aperture = Aperture_concav
-Concav1.normal = (-1,0,0)
-Concav1.draw_dict["height"]=10
-Concav1.draw_dict["thickness"]=25
-point0 = (Radius-seperation, 0, -h_StripeM/2 - safety_to_StripeM)
-point1 = (Radius/2, 0, 0)
-Concav1.set_normal_with_2_points(point0, point1)
-Concav1.draw_dict["mount_type"] = "dont_draw"
+  StripeM1 = Cylindrical_Mirror(radius= -Radius/2, name="Stripe_Mirror")
+  StripeM2 = Cylindrical_Mirror(radius= -Radius/2, name="Stripe_Mirror")
 
-StripeM.pos = (Radius/2+s_shift, 0, 0)
-StripeM.aperture=50
-StripeM.draw_dict["height"]=9
-StripeM.draw_dict["thickness"]=25
-StripeM.Mount = Composed_Mount(unit_model_list=["Stripe_mirror_mount",
+StripeM1.pos = (Radius/2+s_shift, 0, -half_height_middle-periscope_distance/2)
+StripeM1.aperture=50
+StripeM1.draw_dict["height"]=9
+StripeM1.draw_dict["thickness"]=25
+StripeM1.Mount = Composed_Mount(unit_model_list=["Stripe_mirror_mount",
                                                 "POLARIS-K2","1inch_post"])
-StripeM.Mount.set_geom(StripeM.get_geom())
-StripeM.Mount.pos += StripeM.normal*25
+StripeM1.Mount.set_geom(StripeM1.get_geom())
+StripeM1.Mount.pos += StripeM1.normal*25
+
+StripeM2.pos = (Radius/2+s_shift, 0, half_height_middle+periscope_distance/2)
+StripeM2.aperture=50
+StripeM2.draw_dict["height"]=9
+StripeM2.draw_dict["thickness"]=25
+StripeM2.Mount = Composed_Mount(unit_model_list=["Stripe_mirror_mount",
+                                                "POLARIS-K2","1inch_post"])
+StripeM2.Mount.set_geom(StripeM2.get_geom())
+StripeM2.Mount.pos += StripeM2.normal*25
 
 Grat = Grating(grat_const=grat_const,order=1, name="Gitter")
 Grat.pos = (Radius-seperation, 0, 0)
 Grat.normal = (np.sqrt(1-sinB**2), -sinB, 0)
 
-Concav2.pos = (Radius/2-np.sqrt(((Radius/2+Concav_shift[1])**2)-(h_StripeM/2 + safety_to_StripeM)**2), 
-               0, h_StripeM/2 + safety_to_StripeM)
+
+Concav1.pos = (Radius/2-np.sqrt(((Radius/2+Concav_shift[0])**2)-(periscope_distance/2)**2),
+               0,-half_height_middle)
+# Concav1.pos = (0,0,-half_height_middle)
+Concav1.aperture = Aperture_concav
+Concav1.normal = (-1,0,0)
+Concav1.draw_dict["height"]=10
+Concav1.draw_dict["thickness"]=25
+point0 = (Radius-seperation, 0, -half_height_middle)
+point1 = (Radius/2, 0, -half_height_middle-periscope_distance/2)
+Concav1.set_normal_with_2_points(point0, point1)
+Concav1.draw_dict["mount_type"] = "dont_draw"
+
+Concav2.pos = (Radius/2-np.sqrt(((Radius/2+Concav_shift[1])**2)-(periscope_distance/2)**2), 
+               0, half_height_middle)
 Concav2.aperture = Aperture_concav
 Concav2.normal = (-1,0,0)
 Concav2.draw_dict["height"]=10
 Concav2.draw_dict["thickness"]=25
-point0 = (Radius-seperation, 0, h_StripeM/2 + safety_to_StripeM)
-point1 = (Radius/2, 0, 0)
+point0 = (Radius-seperation, 0, half_height_middle)
+point1 = (Radius/2, 0, half_height_middle+periscope_distance/2)
 Concav2.set_normal_with_2_points(point0, point1)
 Concav2.draw_dict["mount_type"] = "dont_draw"
-Concav3.pos = (Radius/2-np.sqrt(((Radius/2+Concav_shift[2])**2)-(h_StripeM/2 + safety_to_StripeM+periscope_distance)**2), 
-               0, h_StripeM/2 + safety_to_StripeM + periscope_distance)
+Concav3.pos = (Radius/2-np.sqrt(((Radius/2+Concav_shift[2])**2)-(periscope_distance/2)**2), 
+               0, half_height_middle + periscope_distance)
 Concav3.aperture = Aperture_concav
 Concav3.normal = (-1,0,0)
 Concav3.draw_dict["height"]=10
 Concav3.draw_dict["thickness"]=25
-point0 = (Radius-seperation, 0, h_StripeM/2 + safety_to_StripeM + periscope_distance)
-point1 = (Radius/2, 0, 0)
+point0 = (Radius-seperation, 0, half_height_middle + periscope_distance)
+point1 = (Radius/2, 0, half_height_middle+periscope_distance/2)
 Concav3.set_normal_with_2_points(point0, point1)
 Concav3.draw_dict["mount_type"] = "dont_draw"
-Concav4.pos = (Radius/2-np.sqrt(((Radius/2+Concav_shift[3])**2)-(h_StripeM/2 + safety_to_StripeM+periscope_distance)**2), 
-               0, -h_StripeM/2 - safety_to_StripeM - periscope_distance)
+Concav4.pos = (Radius/2-np.sqrt(((Radius/2+Concav_shift[3])**2)-(periscope_distance/2)**2), 
+               0, -half_height_middle - periscope_distance)
 Concav4.aperture = Aperture_concav
 Concav4.normal = (-1,0,0)
 Concav4.draw_dict["height"]=10
 Concav4.draw_dict["thickness"]=25
-point0 = (Radius-seperation, 0, -h_StripeM/2 - safety_to_StripeM - periscope_distance)
-point1 = (Radius/2, 0, 0)
+point0 = (Radius-seperation, 0, -half_height_middle - periscope_distance)
+point1 = (Radius/2, 0, -half_height_middle-periscope_distance/2)
 Concav4.set_normal_with_2_points(point0, point1)
 Concav4.draw_dict["mount_type"] = "dont_draw"
 ray0 = Ray()
-p_grat = np.array((Radius-seperation, 0, -h_StripeM/2 - safety_to_StripeM - periscope_distance))
+p_grat = np.array((Radius-seperation, 0, -half_height_middle - periscope_distance))
 vec = np.array((c, s, 0))
 pos0 = p_grat - 250 * vec
 ray0.normal = vec
@@ -198,23 +214,23 @@ ray0.pos = pos0
 ray0.wavelength = lam_mid
 
 nfm1 = - ray0.normal
-pfm1 = Grat.pos + 300 * nfm1 + (0,0,h_StripeM/2 + safety_to_StripeM + periscope_distance)
+pfm1 = Grat.pos + 300 * nfm1 + (0,0,-half_height_middle)
 
 # roof = Make_RoofTop_Mirror(height=periscope_distance,up=False)
-roof = Make_Periscope(height=periscope_distance, up=False, backwards=True)
-roof.height = periscope_distance # just for the records
+roof = Make_Periscope(height=half_height_middle*2, up=True, backwards=True)
+roof.height = half_height_middle*2 # just for the records
 m1, m2 = roof._elements
 m1.invisible = True
 m2.invisible = True
 roof.pos = pfm1
 roof.normal = nfm1
-pure_cosmetic = Rooftop_Mirror_Component(name="RoofTop_Mirror",aperture=periscope_distance)
+pure_cosmetic = Rooftop_Mirror_Component(name="RoofTop_Mirror",aperture=half_height_middle*2)
 pure_cosmetic.pos = (m1.pos+m2.pos)/2
 pure_cosmetic.normal = (m1.normal+m2.normal)/2
 pure_cosmetic.draw_dict["model_type"] = "Rooftop"
 pure_cosmetic.Mount= Unit_Mount("dont_draw")
-pure_cosmetic.draw_dict["length"] = 28
-pure_cosmetic.draw_dict["l_height"] = 15
+pure_cosmetic.draw_dict["length"] = 25
+pure_cosmetic.draw_dict["l_height"] = 25
 
 
 Stretcher = Composition()
@@ -229,22 +245,22 @@ else:
 
 Stretcher.add_fixed_elm(Grat)#0
 Stretcher.add_fixed_elm(Concav4)#1
-Stretcher.add_fixed_elm(StripeM)#2
-Stretcher.add_fixed_elm(Concav3)#3
+Stretcher.add_fixed_elm(StripeM1)#2
+Stretcher.add_fixed_elm(Concav1)#3
 Stretcher.add_supcomposition_fixed(roof) #4,5
 Stretcher.add_fixed_elm(Concav2)#6
-Stretcher.add_fixed_elm(Concav1)#7
-Stretcher.add_fixed_elm(pure_cosmetic)#8
-seq = [0,1,2,3,0,4,5,0,6,2,7,0]
+Stretcher.add_fixed_elm(StripeM2)#7
+Stretcher.add_fixed_elm(Concav3)#8
+Stretcher.add_fixed_elm(pure_cosmetic)#9
+seq = [0,1,2,3,0,4,5,0,6,7,8,0]
 Stretcher.set_sequence(seq)
 Stretcher.recompute_optical_axis()
 Stretcher.propagate(250+44)
-
 Stretcher.pos += (0,0,100)
 Stretcher.draw()
-
 ip = Intersection_plane()
 ip.set_geom(Stretcher.last_geom())
-ip.pos+=(0,0,6)
+ip.pos+=(0,0,7)
 ip.spot_diagram(Stretcher._beams[-1],aberration_analysis=True)
 ip.draw()
+# print(Stretcher.Kostenbauder_matrix())

@@ -353,9 +353,9 @@ class Composition(Geom_Object):
     self._rearange_subobjects_axes(old_axes, new_axes, self._optical_axis)
     self._rearange_subobjects_axes(old_axes, new_axes, self.non_opticals)
 
+"""
   def Kostenbauder_matrix(self,shifting_distence=100):
     ray0 = self._optical_axis[0]
-    
     point_start=self.pos
     point_end = self.last_geom()[0]
     point_start_dx = point_start + 0.1*self.get_coordinate_system()[1]
@@ -482,7 +482,7 @@ class Composition(Geom_Object):
                                     [I,J,Ay,By,0,dyf],[K,L,Cy,Dy,0,dayf],
                                     length_group,[0,0,0,0,0,1]])
     return kostenbauder_matrix
-      
+"""
     
 def next_name(name, prefix=""):
   # generiert einen neuen namen aus dem alten Element
