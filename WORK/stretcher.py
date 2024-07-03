@@ -144,19 +144,19 @@ StripeM1.pos = (Radius/2+s_shift, 0, -half_height_middle-periscope_distance/2)
 StripeM1.aperture=50
 StripeM1.draw_dict["height"]=9
 StripeM1.draw_dict["thickness"]=25
-StripeM1.Mount = Composed_Mount(unit_model_list=["Stripe_mirror_mount",
-                                                "POLARIS-K2","1inch_post"])
-StripeM1.Mount.set_geom(StripeM1.get_geom())
-StripeM1.Mount.pos += StripeM1.normal*25
+# StripeM1.Mount = Composed_Mount(unit_model_list=["Stripe_mirror_mount",
+#                                                 "POLARIS-K2","1inch_post"])
+# StripeM1.Mount.set_geom(StripeM1.get_geom())
+# StripeM1.Mount.pos += StripeM1.normal*25
 
 StripeM2.pos = (Radius/2+s_shift, 0, half_height_middle+periscope_distance/2)
 StripeM2.aperture=50
 StripeM2.draw_dict["height"]=9
 StripeM2.draw_dict["thickness"]=25
-StripeM2.Mount = Composed_Mount(unit_model_list=["Stripe_mirror_mount",
-                                                "POLARIS-K2","1inch_post"])
-StripeM2.Mount.set_geom(StripeM2.get_geom())
-StripeM2.Mount.pos += StripeM2.normal*25
+# StripeM2.Mount = Composed_Mount(unit_model_list=["Stripe_mirror_mount",
+#                                                 "POLARIS-K2","1inch_post"])
+# StripeM2.Mount.set_geom(StripeM2.get_geom())
+# StripeM2.Mount.pos += StripeM2.normal*25
 
 Grat = Grating(grat_const=grat_const,order=1, name="Gitter")
 Grat.pos = (Radius-seperation, 0, 0)
