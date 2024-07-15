@@ -15,6 +15,7 @@ from .. freecad_models.freecad_model_composition import initialize_composition_o
 
 from copy import deepcopy
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 class Beam(Geom_Object):
@@ -378,6 +379,25 @@ class Gaussian_Beam(Ray):
     ray.wavelength = self.wavelength
     ray.length = self.length
     return [ray]
+  
+  def draw_gaussian_profile(self,center_intensity= 2,norm=True):
+    sig = self.radius()
+    fs = 24
+    def Gaussian(x, mu, sig):
+      return (1.0 / (np.sqrt(2.0 * np.pi) * sig) * np.exp(-np.power((x - mu) / sig, 2.0) / 2))
+
+    ran= int(sig*3)
+    x_values = np.linspace(-ran, ran,120)
+    cen_amp = Gaussian(0,0,sig)
+    norm_amp = 1/cen_amp
+    intensity_amp = center_intensity/cen_amp
+    a1=plt.figure()
+    if norm :
+      plt.plot(x_values, norm_amp*Gaussian(x_values,0,sig))
+    plt.plot(x_values, intensity_amp*Gaussian(x_values,0,sig))
+    plt.xticks(fontsize=fs)
+    plt.yticks(fontsize=fs)
+    return a1
 
 if __name__ == "__main__":
   b = Beam(name = "Strahlo", radius=2)

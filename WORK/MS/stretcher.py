@@ -47,7 +47,8 @@ Plane_height = 150 # The height of the second floor.
 angle =1
 para_d = 10
 seperation = 71
-Concav_shift = [0,0,0,0]
+# Concav_shift = [0,0,0,0]
+Concav_shift = [0.2, 0.05, 0.2, 0]
 # Concav_shift = [0.2, 0.2, 0.2, 0.2]
 # Concav_shift = [-0.05, -0.05, -0.05, -0.05]
 

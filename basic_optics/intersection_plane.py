@@ -129,10 +129,10 @@ class Intersection_plane(Opt_Element):
     tilt_x = [np.arcsin(ray.normal[1])-np.arcsin(ray_middle.normal[1]) for ray in rays]
     tilt_y = [np.arcsin(ray.normal[2])-np.arcsin(ray_middle.normal[2]) for ray in rays]
     if aberration_analysis:
-      print("diff_x",diff_x)
-      print("diff_y",diff_y)
-      print("tilt_x",tilt_x)
-      print("tilt_y",tilt_y)
+      # print("diff_x",diff_x)
+      # print("diff_y",diff_y)
+      # print("tilt_x",tilt_x)
+      # print("tilt_y",tilt_y)
       fs = 24
       a=plt.figure()
       # ax1=plt.subplot(5,5,7)
