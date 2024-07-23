@@ -288,6 +288,8 @@ dist_crystal_end = 20
 last = total_length - dist_mir_pz - dist_pz_lambda - dist_lambda_tfp -dist_tfp_fold1
 tfp_aperture = 2*inch
 tfp_angle = 65
+tfp_thickness = 6.35
+
 
 # optics
 
@@ -299,6 +301,7 @@ mir1.set_mount_to_default()
 TFP_Amp1 = Mirror(phi= 180 - 2*tfp_angle, name="TFP_Amp1")
 TFP_Amp1.draw_dict["color"] = (1.0, 0.0, 2.0)
 TFP_Amp1.aperture = tfp_aperture
+TFP_Amp1.thickness = tfp_thickness
 TFP_Amp1.set_mount_to_default()
 pol_mount = TFP_Amp1.Mount.mount_list[0]
 pol_mount.flip()
@@ -368,7 +371,6 @@ tfp_angle = 65 #tfp angle of incidence in degree
 flip_mirror_push_down = 8 # distance to push the first mirror out ouf the seed beam
 tfp_push_aside = 5 # distance in mm to push the TFP aside, so that the beam can pass through
 
-
 PulsePicker = Composition(name="PulsePicker")
 PulsePicker.set_geom(Stretcher.last_geom())
 
@@ -409,6 +411,7 @@ TFP_pp = Mirror(phi = 180-2*tfp_angle)
 TFP_pp.draw_dict["color"] = (1.0, 0.0, 2.0)
 TFP_pp.draw_dict["thickness"] = 4
 TFP_pp.aperture = 2*inch
+# TFP_pp.thickness = tfp_thickness
 TFP_pp.set_mount_to_default()
 # TFP_out.mount_dict["Flip90"]=True
 PulsePicker.add_on_axis(TFP_pp)
@@ -425,6 +428,7 @@ TFP_out = Mirror(phi = 180-2*tfp_angle, name="Output_to_Amp2")
 TFP_out.draw_dict["color"] = (1.0, 0.0, 2.0)
 TFP_out.draw_dict["thickness"] = 4
 TFP_out.aperture = 2*inch
+TFP_out.thickness = tfp_thickness
 # TFP_out.set_mount_to_default()
 TFP_out_Mount = Composed_Mount(["KS2", "1inch_post"])
 TFP_out.set_mount(TFP_out_Mount)

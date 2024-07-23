@@ -23,7 +23,7 @@ The creed is:
 git clone https://github.com/klee-mens/LaserCAD.git
 ```
 Now you can execute e.g. the /tutorial/0_Opening.py in your interpreter.
-You should get some text output like
+You should get some text output that ends with something like
 ```
 The geometric object <Composed_Mount:unnamed> is drawn to the position[108.51854, 264.70476,  80.     ] with the direction [-0.95766,  0.2566 , -0.13053]
 ```
@@ -33,23 +33,57 @@ model looks like this:
 
 ![Screenshot von 0_Opening.py in Spyder und in FreeCAD](manual/images/Tutorial-images/0_Opening.png)
 
-# Some notes and tips
+# Setting the paths
+Currently there is no proper installation process, for 2 reasons:
+1. FreeCAD uses its own python libraries and will most likely have other sys 
+search paths than your standard python interpreter, so one would have to deal 
+with links and stuff, or using 2 copies of the project, but then it's harder to
+change the source code and no.
+2. I have no clue how to do it. And I'm too lazy to search for it.
 
-After that, you can continue executing the other tutorials and tests. Some may
-take a few seconds, but most likely, the computation time is less than a minute.
-In the manual folder, you can find some more or less useful texts about the
-program and the ideas behind it. Some other documents may follow.
-
+So right now, there are 2 ways:
+## Copy the path in the executable
 In each executable script, the first lines import the location of LaserCAD in
-the sys.path list so that python and FreeCAD can find the package. While I am
-sure that there exists a better way of installing it, ... I have no clue how
-to do it. So for the moment, make sure that every executable script has these
-lines on top and is in the work directory or somewhere in the LaserCAD package
-itself.
+the sys.path list so that python and FreeCAD can find the package. Make sure,
+that every executable script has these lines 
+```python
+import sys
+pfad = __file__
+pfad = pfad.replace("\\","/") #folder conventions windows linux stuff
+pfad = pfad.lower()
+ind = pfad.rfind("lasercad")
+pfad = pfad[0:ind-1]
+if not pfad in sys.path:
+  sys.path.append(pfad)
+```
+on top and is in the work directory or somewhere in the LaserCAD package itself.
 
 For the best support from your python IDE I can recommend copying the LaserCAD
 folder in your standard python search path, so, for example, side by side with
 the numpy package.
+
+## Add the path by macro and IDE
+You can also leave the folder were it is (say /home/mens/projects/) and add it to
+your python IDE (e.g. Spyder) and FreeCAD manually. For Spyder you can do this
+with Tools -> PYTHONPATH manager +
+For FreeCAD you have to create yourself a short [macro](https://wiki.freecad.org/Macros), that does the trick.
+Click on record and stop it, then you can edit it and insert the following lines
+```python
+import sys
+sys.path.append('/home/mens/projects/')
+```
+Of course you ahve to replace /home/mens/projects/ with the path to the LaserCAD
+clone folder. You can fix the macro to the toolbar with the according dialogue
+in FreeCAD (Macro -> add to toolbar).
+
+
+# Some notes and tips
+
+After that, you can continue executing the other tutorials and tests. Some may
+take a few seconds, but most likely, the rendering time is less than a minute.
+In the manual folder, you can find some more or less useful texts about the
+program and the ideas behind it. Some other documents may follow.
+
 
 # Some examples
 Just to show some of the capabilities of LaserCAD you can see the following
