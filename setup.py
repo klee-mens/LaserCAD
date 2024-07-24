@@ -7,5 +7,6 @@ setup(name='lasercad',
       author='Clemens Anschütz',
       author_email='clemens.anschuetz@uni-jena.de',
       license='MIT',
-      packages=['lasercad'],
+      packages=['lasercad','lasercad.basic_optics','lasercad.freecad_models','lasercad.non_interactings'],
+      install_requires=['numpy','matplotlib'],
       zip_safe=False)
