@@ -8,5 +8,6 @@ setup(name='lasercad',
       author_email='clemens.anschuetz@uni-jena.de',
       license='MIT',
       packages=find_packages(),
+      include_package_data=True,
       install_requires=['numpy','matplotlib'],
       zip_safe=False)
