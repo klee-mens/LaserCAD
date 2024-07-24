@@ -307,9 +307,25 @@ class Beam(Geom_Object):
       add_to_composition(part, container)
       return part
 
-
-
-
+class Rainbow(Beam):
+  def __init__(self, separation=0, angle=0,ray_count=15, name="NewBeam",wavelength_range=(1000E-6,1060E-6), **kwargs):
+    super().__init__(name = name, **kwargs)
+    self.draw_dict['model'] = "ray_group"
+    self._ray_count = ray_count
+    self._wavelength_group = np.linspace(wavelength_range[0], wavelength_range[1],ray_count)
+    shifting_group = np.linspace(-separation/2, separation/2,ray_count)
+    self._rays = []
+    cmap = plt.cm.gist_rainbow
+    for i in range(ray_count):
+      ray = Ray()
+      ray.wavelength = self._wavelength_group[i]
+      x = 1-(self._wavelength_group[i] -min(wavelength_range[0],wavelength_range[1])) / abs(wavelength_range[1]-wavelength_range[0])
+      ray.draw_dict["color"] = cmap( x )
+      ray.set_geom(self.get_geom())
+      ray.pos += (0,shifting_group[i],0)
+      self._rays.append(ray)
+    
+    
 
 class Gaussian_Beam(Ray):
 # class Gaussian_beam(Geom_Object):

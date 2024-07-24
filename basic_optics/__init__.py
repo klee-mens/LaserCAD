@@ -15,7 +15,7 @@ Erstellen der 3D Obejkte in FreeCAD
 
 from .geom_object import Geom_Object, TOLERANCE
 from .ray import Ray
-from .beam import Beam, Gaussian_Beam
+from .beam import Beam, Gaussian_Beam, Rainbow
 from .optical_element import Opt_Element
 from .lens import Lens
 from .mirror import Mirror, Curved_Mirror, Cylindrical_Mirror,Cylindrical_Mirror1,Stripe_mirror
