@@ -14,4 +14,4 @@ Created on Tue Jul 11 15:14:57 2023
 from . import basic_optics
 from . import freecad_models
 from . import moduls
-from . import tests
+# from . import tests
