@@ -1,0 +1,3 @@
+recursive-include lasercad/freecad_models/misc_meshes *
+recursive-include lasercad/freecad_models/mount_meshes *
+recursive-include lasercad/freecad_models/post *

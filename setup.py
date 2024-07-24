@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(name='lasercad',
       version='1.0.0',
@@ -7,6 +7,6 @@ setup(name='lasercad',
       author='Clemens Anschütz',
       author_email='clemens.anschuetz@uni-jena.de',
       license='MIT',
-      packages=['lasercad','lasercad.basic_optics','lasercad.freecad_models','lasercad.non_interactings'],
+      packages=find_packages(),
       install_requires=['numpy','matplotlib'],
       zip_safe=False)
