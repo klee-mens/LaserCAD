@@ -6,7 +6,7 @@ Created on Wed Aug 24 01:31:42 2022
 @author: mens
 """
 
-from .utils import freecad_da, update_geom_info, get_DOC
+from .utils import freecad_da, update_geom_info, get_DOC, GEOM0
 from .freecad_model_composition import initialize_composition_old, add_to_composition
 import numpy as np
 if freecad_da:
@@ -21,56 +21,10 @@ BEAM_TRANSPARENCY = 50
 # BEAM_TRANSPARENCY = 0
 
 
-def model_beam(name="beam", dia=10, prop=200,  f=130, color=DEFAULT_COLOR_CRIMSON,
-               geom_info=None, **kwargs):
-  """creates a red beam with length <prop>, diameter <dia>,
-  fokus <f> and name ~
-  example :  beam1 = model_beam("laser1", 10, 200, 100)
-  beam1 = model_beam(name="laser1", dia=10, prop=200, f=-45)
-  """
-  DOC = get_DOC()
-  if f==0 or abs(f) > 1e4:
-    # wenn die Brennweite unendlich oder zu groß (10m) ist
-     obj = DOC.addObject("Part::Cylinder", name)
-     obj.Height = prop
-     obj.Radius = dia/2
-  elif prop < f or f < 0:
-    # only one cone
-    dia2 = dia * (f-prop)/f
-    obj = DOC.addObject("Part::Cone", name)
-    obj.Height = prop
-    obj.Radius1 = dia/2
-    obj.Radius2 = dia2/2
-  else:
-    dia2 = 0 #1 altern
-    obj1 = DOC.addObject("Part::Cone", name+"_1")
-    obj1.Height = f
-    obj1.Radius1 = dia/2
-    obj1.Radius2 = dia2/2
 
-    dia3 = dia * (prop-f)/f
-    obj2 = DOC.addObject("Part::Cone", name+"_2")
-    obj2.Height = prop-f
-    obj2.Radius1 = dia2/2
-    obj2.Radius2 = dia3/2
-    obj2.Placement = FreeCAD.Placement(Vector(0,0,f), FreeCAD.Rotation(Vector(0,1,0),0), Vector(0,0,0))
-    obj = DOC.addObject("Part::Fuse", name)
-    obj.Base = obj1
-    obj.Tool = obj2
-    obj.Refine = True
-    DOC.recompute()
 
-  obj.Placement = FreeCAD.Placement(Vector(0,0,0), FreeCAD.Rotation(Vector(0,1,0),90), Vector(0,0,0))
-  obj.ViewObject.ShapeColor = color
-  obj.ViewObject.Transparency = BEAM_TRANSPARENCY
-  obj.Label = name
-  update_geom_info(obj, geom_info)
-
-  DOC.recompute()
-  return obj
-
-def model_beam_new(name="beam", radius=5, length=200,  angle=0.02,
-                   color=DEFAULT_COLOR_CRIMSON,geom_info=None, **kwargs):
+def model_beam(name="beam", radius=5, length=200,  angle=0.02,
+                   color=DEFAULT_COLOR_CRIMSON,geom=GEOM0, **kwargs):
   DOC = get_DOC()
 
   if abs(angle) < 1E-9:
@@ -112,13 +66,13 @@ def model_beam_new(name="beam", radius=5, length=200,  angle=0.02,
   obj.ViewObject.ShapeColor = color
   # obj.ViewObject.Transparency = 50
   obj.Label = name
-  update_geom_info(obj, geom_info)
+  update_geom_info(obj, geom)
 
   DOC.recompute()
   return obj
 
 def model_asti_beam (name="beam", dia_l=10,dia_s=10, prop=200,  f_l=100,f_s=150,rot_angle=0, color=DEFAULT_COLOR_CRIMSON,
-               geom_info=None):
+               geom=None):
   """
   creates a beam that take astigmatism account
   Parameters
@@ -139,7 +93,7 @@ def model_asti_beam (name="beam", dia_l=10,dia_s=10, prop=200,  f_l=100,f_s=150,
     rotation angle. The default is 0.
   color : float, optional
     The color of beam. The default is DEFAULT_COLOR_CRIMSON.
-  geom_info : float, optional
+  geom : float, optional
     The default is None.
 
   Returns
@@ -171,7 +125,7 @@ def model_asti_beam (name="beam", dia_l=10,dia_s=10, prop=200,  f_l=100,f_s=150,
         sketch_end.Visibility = False
         obj.ViewObject.ShapeColor = color
         obj.ViewObject.Transparency = 50
-        update_geom_info(obj, geom_info)
+        update_geom_info(obj, geom)
         obj1=obj2=None
       else:
         sketch_f1 = obj.newObject('Sketcher::SketchObject', name+'_sketch_f1')
@@ -189,7 +143,7 @@ def model_asti_beam (name="beam", dia_l=10,dia_s=10, prop=200,  f_l=100,f_s=150,
         sketch_f1.Visibility = False
         obj.ViewObject.ShapeColor = color
         obj.ViewObject.Transparency = 50
-        update_geom_info(obj, geom_info)
+        update_geom_info(obj, geom)
         obj1 = DOC.addObject('PartDesign::Body', name+'1')
         if prop < max(f_s,f_l):
           sketch_end = obj1.newObject('Sketcher::SketchObject', name+'_sketch_end')
@@ -206,10 +160,10 @@ def model_asti_beam (name="beam", dia_l=10,dia_s=10, prop=200,  f_l=100,f_s=150,
           sketch_end.Visibility = False
           obj.ViewObject.ShapeColor = color
           obj.ViewObject.Transparency = 50
-          update_geom_info(obj, geom_info)
+          update_geom_info(obj, geom)
           obj1.ViewObject.ShapeColor = color
           obj1.ViewObject.Transparency = 50
-          update_geom_info(obj1, geom_info)
+          update_geom_info(obj1, geom)
           obj2=None
         else:
           sketch_f2 = obj1.newObject('Sketcher::SketchObject', name+'_sketch_f2')
@@ -229,10 +183,10 @@ def model_asti_beam (name="beam", dia_l=10,dia_s=10, prop=200,  f_l=100,f_s=150,
             obj2=None
             obj.ViewObject.ShapeColor = color
             obj.ViewObject.Transparency = 50
-            update_geom_info(obj, geom_info)
+            update_geom_info(obj, geom)
             obj1.ViewObject.ShapeColor = color
             obj1.ViewObject.Transparency = 50
-            update_geom_info(obj1, geom_info)
+            update_geom_info(obj1, geom)
           else:
             obj2 = DOC.addObject('PartDesign::Body', name+'2')
             sketch_end = obj2.newObject('Sketcher::SketchObject', name+'_sketch_end')
@@ -249,13 +203,13 @@ def model_asti_beam (name="beam", dia_l=10,dia_s=10, prop=200,  f_l=100,f_s=150,
             sketch_end.Visibility = False
             obj.ViewObject.ShapeColor = color
             obj.ViewObject.Transparency = 50
-            update_geom_info(obj, geom_info)
+            update_geom_info(obj, geom)
             obj1.ViewObject.ShapeColor = color
             obj1.ViewObject.Transparency = 50
-            update_geom_info(obj1, geom_info)
+            update_geom_info(obj1, geom)
             obj2.ViewObject.ShapeColor = color
             obj2.ViewObject.Transparency = 50
-            update_geom_info(obj2, geom_info)
+            update_geom_info(obj2, geom)
     else:
       if prop < f_l:
         sketch_end = obj.newObject('Sketcher::SketchObject', name+'_sketch_end')
@@ -272,7 +226,7 @@ def model_asti_beam (name="beam", dia_l=10,dia_s=10, prop=200,  f_l=100,f_s=150,
         sketch_end.Visibility = False
         obj.ViewObject.ShapeColor = color
         obj.ViewObject.Transparency = 50
-        update_geom_info(obj, geom_info)
+        update_geom_info(obj, geom)
         obj1=obj2=None
       else:
         sketch_f_l = obj.newObject('Sketcher::SketchObject', name+'_sketch_f_l')
@@ -299,10 +253,10 @@ def model_asti_beam (name="beam", dia_l=10,dia_s=10, prop=200,  f_l=100,f_s=150,
         sketch_end.Visibility = False
         obj.ViewObject.ShapeColor = color
         obj.ViewObject.Transparency = 50
-        update_geom_info(obj, geom_info)
+        update_geom_info(obj, geom)
         obj1.ViewObject.ShapeColor = color
         obj1.ViewObject.Transparency = 50
-        update_geom_info(obj1, geom_info)
+        update_geom_info(obj1, geom)
         obj2=None
   elif f_s<0 and f_l<0:
     sketch_end = obj.newObject('Sketcher::SketchObject', name+'_sketch_end')
@@ -319,7 +273,7 @@ def model_asti_beam (name="beam", dia_l=10,dia_s=10, prop=200,  f_l=100,f_s=150,
     sketch_end.Visibility = False
     obj.ViewObject.ShapeColor = color
     obj.ViewObject.Transparency = 50
-    update_geom_info(obj, geom_info)
+    update_geom_info(obj, geom)
     obj1=obj2=None
   else:
     if max(f_l,f_s)>=prop:
@@ -337,7 +291,7 @@ def model_asti_beam (name="beam", dia_l=10,dia_s=10, prop=200,  f_l=100,f_s=150,
       sketch_end.Visibility = False
       obj.ViewObject.ShapeColor = color
       obj.ViewObject.Transparency = 50
-      update_geom_info(obj, geom_info)
+      update_geom_info(obj, geom)
       obj1=obj2=None
     else:
       sketch_f =  obj.newObject('Sketcher::SketchObject', name+'_sketch_end')
@@ -368,10 +322,10 @@ def model_asti_beam (name="beam", dia_l=10,dia_s=10, prop=200,  f_l=100,f_s=150,
       sketch_end.Visibility = False
       obj.ViewObject.ShapeColor = color
       obj.ViewObject.Transparency = 50
-      update_geom_info(obj, geom_info)
+      update_geom_info(obj, geom)
       obj1.ViewObject.ShapeColor = color
       obj1.ViewObject.Transparency = 50
-      update_geom_info(obj1, geom_info)
+      update_geom_info(obj1, geom)
       obj2=None
 
   part = initialize_composition_old(name="asti beam")
@@ -382,7 +336,7 @@ def model_asti_beam (name="beam", dia_l=10,dia_s=10, prop=200,  f_l=100,f_s=150,
   return part
 
 def model_Gaussian_beam (name="Gaussian_beam",q_para=-100+200j,prop=200,wavelength=650E-6,
-                          color=DEFAULT_COLOR_CRIMSON,beam_count=1, geom_info=None):
+                          color=DEFAULT_COLOR_CRIMSON,beam_count=1, geom=None):
     """
     creates a Gaussian beam.
     Parameters
@@ -397,7 +351,7 @@ def model_Gaussian_beam (name="Gaussian_beam",q_para=-100+200j,prop=200,waveleng
         wavelength. The default is 650E-9.
     color : TYPE, optional
         beam color. The default is DEFAULT_COLOR_CRIMSON.
-    geom_info : TYPE, optional
+    geom : TYPE, optional
         DESCRIPTION. The default is None.
 
     Returns
@@ -583,9 +537,57 @@ def model_Gaussian_beam (name="Gaussian_beam",q_para=-100+200j,prop=200,waveleng
     obj.ViewObject.PointColor = color
     obj.ViewObject.Transparency = 50
     obj.Label = name
-    update_geom_info(obj, geom_info)
+    update_geom_info(obj, geom)
     DOC.recompute()
     return obj
+
+# def model_beam(name="beam", dia=10, prop=200,  f=130, color=DEFAULT_COLOR_CRIMSON,
+#                 geom=GEOM0, **kwargs):
+#   """creates a red beam with length <prop>, diameter <dia>,
+#   fokus <f> and name ~
+#   example :  beam1 = model_beam("laser1", 10, 200, 100)
+#   beam1 = model_beam(name="laser1", dia=10, prop=200, f=-45)
+#   """
+#   DOC = get_DOC()
+#   if f==0 or abs(f) > 1e4:
+#     # wenn die Brennweite unendlich oder zu groß (10m) ist
+#       obj = DOC.addObject("Part::Cylinder", name)
+#       obj.Height = prop
+#       obj.Radius = dia/2
+#   elif prop < f or f < 0:
+#     # only one cone
+#     dia2 = dia * (f-prop)/f
+#     obj = DOC.addObject("Part::Cone", name)
+#     obj.Height = prop
+#     obj.Radius1 = dia/2
+#     obj.Radius2 = dia2/2
+#   else:
+#     dia2 = 0 #1 altern
+#     obj1 = DOC.addObject("Part::Cone", name+"_1")
+#     obj1.Height = f
+#     obj1.Radius1 = dia/2
+#     obj1.Radius2 = dia2/2
+
+#     dia3 = dia * (prop-f)/f
+#     obj2 = DOC.addObject("Part::Cone", name+"_2")
+#     obj2.Height = prop-f
+#     obj2.Radius1 = dia2/2
+#     obj2.Radius2 = dia3/2
+#     obj2.Placement = FreeCAD.Placement(Vector(0,0,f), FreeCAD.Rotation(Vector(0,1,0),0), Vector(0,0,0))
+#     obj = DOC.addObject("Part::Fuse", name)
+#     obj.Base = obj1
+#     obj.Tool = obj2
+#     obj.Refine = True
+#     DOC.recompute()
+
+#   obj.Placement = FreeCAD.Placement(Vector(0,0,0), FreeCAD.Rotation(Vector(0,1,0),90), Vector(0,0,0))
+#   obj.ViewObject.ShapeColor = color
+#   obj.ViewObject.Transparency = BEAM_TRANSPARENCY
+#   obj.Label = name
+#   update_geom_info(obj, geom)
+
+#   DOC.recompute()
+#   return obj
 
 # Test
 if __name__ == "__main__":

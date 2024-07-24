@@ -10,8 +10,8 @@ from . constants import TOLERANCE
 from . geom_object import Geom_Object
 from . ray import Ray
 # from .. freecad_models import model_beam,model_ray_1D,model_Gaussian_beam
-from .. freecad_models import model_Gaussian_beam
-from .. freecad_models.freecad_model_beam import model_beam_new
+from .. freecad_models import model_Gaussian_beam, model_beam
+# from .. freecad_models.freecad_model_beam import model_beam_new
 from .. freecad_models.freecad_model_composition import initialize_composition_old, add_to_composition
 
 from copy import deepcopy
@@ -39,7 +39,7 @@ class Beam(Geom_Object):
     self.make_cone_distribution()
     self._distribution = "cone"
     self.draw_dict["model"] = "cone"
-    self.freecad_model = model_beam_new
+    self.freecad_model = model_beam
 
   def make_cone_distribution(self, ray_count=2):
     self._ray_count = ray_count
@@ -170,9 +170,10 @@ class Beam(Geom_Object):
   
   def draw_freecad(self):
     if self.draw_dict["model"] == "cone":
+      # return self.freecad_model(**self.draw_dict)
       radius, angle = self.radius_angle()
-      return model_beam_new(radius=radius, length=self.length(),  angle=angle,
-                            geom_info=self.get_geom(),**self.draw_dict)
+      return model_beam(radius=radius, length=self.length(),  angle=angle,
+                            geom=self.get_geom(), name=self.name)
     else:
       part = initialize_composition_old(name="ray group")
       container = []
@@ -351,7 +352,7 @@ class Gaussian_Beam(Ray):
   def draw_freecad(self):
     return model_Gaussian_beam(name=self.name, q_para=self.q_para,
                                wavelength=self.wavelength,prop=self.length,
-                               geom_info=self.get_geom())
+                               geom=self.get_geom())
   
   def radius(self):
     z = np.real(self.q_para)
