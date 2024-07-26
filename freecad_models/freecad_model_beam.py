@@ -587,6 +587,70 @@ def model_Gaussian_beam (name="Gaussian_beam",q_para=-100+200j,prop=200,waveleng
     DOC.recompute()
     return obj
 
+def model_Gaussian_beam_cone (name="Gaussian_beam",q_para=-100+200j,prop=200,wavelength=650E-6,
+                          color=DEFAULT_COLOR_CRIMSON,beam_count=1, geom_info=None):
+  """
+  creates a Gaussian beam.
+  Parameters
+  ----------
+  name : TYPE, optional
+      beam name. The default is "Gaussian_beam".
+  q : TYPE, optional
+      q-parameter. The default is -100+200j.
+  prop : TYPE, optional
+      propgation length. The default is 200.
+  wavelength : TYPE, optional
+      wavelength. The default is 650E-9.
+  color : TYPE, optional
+      beam color. The default is DEFAULT_COLOR_CRIMSON.
+  geom_info : TYPE, optional
+      DESCRIPTION. The default is None.
+
+  Returns
+  -------
+  obj : TYPE
+      DESCRIPTION.
+  example: beam1 = model_beam("laser1", -100+200j, 200, 650E-6)
+  """
+  DOC = get_DOC()
+  # obj = DOC.addObject('PartDesign::Body', name)
+  # sketch = obj.newObject('Sketcher::SketchObject', name+'_sketch')
+  # # sketch.Support = (DOC.getObject('XY_Plane'),[''])
+  # sketch.MapMode = 'FlatFace'
+  z0 = np.imag(q_para)
+  z_start=np.real(q_para)
+  z_end = z_start+prop
+  w0 = pow(wavelength*z0/np.pi,0.5)
+  w_start = w0 * pow(1+(z_start/z0)**2,0.5)
+  w_end = w0 * pow(1+(z_end/z0)**2,0.5)
+  if z_start<0 and z_end>w0:
+    radius2 = w0
+    obj1 = DOC.addObject("Part::Cone", name+"_1")
+    obj1.Height = -z_start
+    obj1.Radius1 = w_start
+    obj1.Radius2 = w0
+    obj2 = DOC.addObject("Part::Cone", name+"_2")
+    obj2.Height = z_start+prop
+    obj2.Radius1 = w0
+    obj2.Radius2 = w_end
+    obj2.Placement = FreeCAD.Placement(Vector(0,0,-z_start), FreeCAD.Rotation(Vector(0,1,0),0), Vector(0,0,0))
+    obj = DOC.addObject("Part::Fuse", name)
+    obj.Base = obj1
+    obj.Tool = obj2
+    obj.Refine = True
+    DOC.recompute()
+  else:
+    obj = DOC.addObject("Part::Cone", name)
+    obj.Height = prop
+    obj.Radius1 = w_start
+    obj.Radius2 = w_end
+  obj.Placement = FreeCAD.Placement(Vector(0,0,0), FreeCAD.Rotation(Vector(0,1,0),90), Vector(0,0,0))
+  obj.ViewObject.ShapeColor = color
+  obj.Label = name
+  update_geom_info(obj, geom_info)
+  DOC.recompute()
+  return obj
+  
 # Test
 if __name__ == "__main__":
   from utils import start_DOC

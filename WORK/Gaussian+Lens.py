@@ -39,7 +39,7 @@ def calculate_a(L, i1, i2):
 i1 = 2045.3077171808552
 
 i2 = 2041.1349901770946
-L = 3070.68077879392
+L = 3369.8317671573777
 a=0
 # a1 = L-np.sqrt(L*L-i1*i2+(i1*L*L)/(i1-i2))
 # a2 = L+np.sqrt(L*L-i1*i2+(i1*L*L)/(i1-i2))
@@ -70,7 +70,7 @@ Comp = Composition()
 Comp.set_light_source(B)
 Comp.propagate(a)
 Comp.add_on_axis(Lens(f=f))
-Comp.propagate(L-a)
+Comp.propagate(L)
 Comp.draw()
 print(Comp._beams[1].q_para)
 

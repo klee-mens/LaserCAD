@@ -9,7 +9,7 @@ Created on Mon Aug 22 12:34:44 2022
 from . constants import TOLERANCE
 from . geom_object import Geom_Object
 from . ray import Ray
-from .. freecad_models import model_beam,model_ray_1D,model_Gaussian_beam
+from .. freecad_models import model_beam,model_ray_1D,model_Gaussian_beam,model_Gaussian_beam_cone
 from .. freecad_models.freecad_model_beam import model_beam_new
 from .. freecad_models.freecad_model_composition import initialize_composition_old, add_to_composition
 
@@ -331,8 +331,8 @@ class Gaussian_Beam(Ray):
 # class Gaussian_beam(Geom_Object):
   def __init__(self, radius=10, angle=0.02, wavelength=1030E-6, name="NewGassian",  **kwargs):
     super().__init__(name=name, **kwargs)
-    z0 = wavelength/(np.pi*np.tan(angle)*np.tan(angle))
-    w0 = wavelength/(np.pi*np.tan(angle))
+    z0 = wavelength/(np.pi*np.tan(abs(angle))*np.tan(abs(angle)))
+    w0 = wavelength/(np.pi*np.tan(abs(angle)))
     if w0>radius:
       print("Woring: Wrong Radius!")
     z = z0*pow((radius*radius)/(w0*w0)-1,0.5)
@@ -361,15 +361,19 @@ class Gaussian_Beam(Ray):
   def draw_freecad(self):
     if self.draw_dict["model"] == "Gaussian":
       return model_Gaussian_beam(name=self.name, q_para=self.q_para,
+                                  wavelength=self.wavelength,prop=self.length,
+                                  geom_info=self.get_geom())
+      
+    if self.draw_dict["model"] == "cone":
+      return model_Gaussian_beam_cone(name=self.name, q_para=self.q_para,
                                  wavelength=self.wavelength,prop=self.length,
                                  geom_info=self.get_geom())
-    if self.draw_dict["model"] == "cone":
       # quicker method with nearly the same look in most cases
-      radius = self.radius()
-      focal_length = - radius / self.divergence()
-      col = (244/255, 22/255, 112/255)
-      return model_beam(dia=2*radius, prop=self.length, f=focal_length,
-                        geom_info=self.get_geom(), color=col, **self.draw_dict)
+      # radius = self.radius()
+      # focal_length = - radius / self.divergence()
+      # col = (244/255, 22/255, 112/255)
+      # return model_beam(dia=2*radius, prop=self.length, f=focal_length,
+      #                   geom_info=self.get_geom(), color=col, **self.draw_dict)
     else:
       return -1
   

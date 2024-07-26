@@ -24,13 +24,14 @@ from LaserCAD.basic_optics import Intersection_plane
 if freecad_da:
   clear_doc()
   
-ls = Gaussian_Beam(radius=5,angle=0.1)
+ls = Gaussian_Beam(radius=1,angle=-0.01,wavelength=10000E-6)
+ls.draw_dict["model"] = "cone"
 # ls.make_Gaussian_distribution()
 Comp = Composition()
 Comp.set_light_source(ls)
-Comp.propagate(50)
-Comp.add_on_axis(Lens())
-Comp.propagate(200)
+Comp.propagate(300)
+Comp.add_on_axis(Lens(f =80))
+Comp.propagate(500)
 Comp.draw()
 
 if freecad_da:
