@@ -708,20 +708,21 @@ Compressor.add_fixed_elm(Grat1)
 Compressor.propagate(300)
 Compressor.set_geom(Amp2.last_geom())
 
+
+t=Table()
 # =============================================================================
 # Draw Selection
 # =============================================================================
 
-# Seed.draw()
-# Stretcher.draw()
-# PulsePicker.draw()
-# Amplifier_I.draw()
-Pump.draw()
+Seed.draw()
+Stretcher.draw()
+PulsePicker.draw()
+Amplifier_I.draw()
+# Pump.draw()
 # Amp2.draw()
-BigPump.draw()
-# t=Table()
-# t.draw()
-Compressor.draw()
+# BigPump.draw()
+t.draw()
+# Compressor.draw()
 # PulsePicker.draw_alignment_posts()
 
 
