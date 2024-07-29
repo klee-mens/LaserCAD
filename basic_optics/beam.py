@@ -89,6 +89,7 @@ class Beam(Geom_Object):
     novec = np.linalg.norm(ovec)
     if novec < TOLERANCE:
       #beide rays im gleichen Punkt, h = 0, alpha>0
+      # print("v0*v1:", np.sum(v0 * v1))
       return novec, np.arccos(np.sum(v0 * v1))
     else:
       ovec /= novec #normieren

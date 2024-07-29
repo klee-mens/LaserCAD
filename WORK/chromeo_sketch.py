@@ -715,16 +715,16 @@ t=Table()
 # Draw Selection
 # =============================================================================
 
-Seed.draw()
-Stretcher.draw()
-PulsePicker.draw()
-Amplifier_I.draw()
-Pump.draw()
-Amp2.draw()
-BigPump.draw()
-t.draw()
-Compressor.draw()
-PulsePicker.draw_alignment_posts()
+# Seed.draw()
+# Stretcher.draw()
+# PulsePicker.draw()
+# Amplifier_I.draw()
+# Pump.draw()
+# Amp2.draw()
+# BigPump.draw()
+# t.draw()
+# Compressor.draw()
+# PulsePicker.draw_alignment_posts()
 
 
 
