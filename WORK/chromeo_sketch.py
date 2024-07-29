@@ -536,8 +536,9 @@ concave2 = Curved_Mirror(radius=focal*2, phi=180+sep_angle_A2)
 # concave2 = Mirror(phi=180+sep_angle_A2)
 Amp2.add_on_axis(concave2)
 concave2.set_normal_with_2_points(end_concave.pos, active_mir.pos)
-Amp2.set_sequence([0, 1, 2, 3, 4, 5, 4, 6, 7, 8, 4, 5, 4])
-# Amp2.recompute_optical_axis()
+
+Amp2.set_sequence([0,1,2,3, 4,5,6,7,4   ])
+Amp2.recompute_optical_axis()
 
 a2_safe_angle_for_non_colliding_with_crystal = 2
 Amp2.propagate(580)
@@ -718,12 +719,12 @@ Seed.draw()
 Stretcher.draw()
 PulsePicker.draw()
 Amplifier_I.draw()
-# Pump.draw()
-# Amp2.draw()
-# BigPump.draw()
+Pump.draw()
+Amp2.draw()
+BigPump.draw()
 t.draw()
-# Compressor.draw()
-# PulsePicker.draw_alignment_posts()
+Compressor.draw()
+PulsePicker.draw_alignment_posts()
 
 
 

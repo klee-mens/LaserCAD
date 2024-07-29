@@ -11,7 +11,8 @@ from LaserCAD.freecad_models import clear_doc, setview, freecad_da
 from LaserCAD.basic_optics import Mirror, Beam, Composition, inch
 from LaserCAD.basic_optics import Curved_Mirror, Ray, Component
 from LaserCAD.basic_optics import LinearResonator, Lens
-from LaserCAD.basic_optics import Grating, Crystal
+from LaserCAD.basic_optics import Grating
+from LaserCAD.non_interactings import Crystal
 import matplotlib.pyplot as plt
 from LaserCAD.freecad_models.utils import thisfolder, load_STL
 from LaserCAD.non_interactings import Faraday_Isolator, Pockels_Cell, Lambda_Plate
@@ -418,8 +419,8 @@ amp2.propagate(2*focal)
 concave2 = Curved_Mirror(radius=focal*2, phi=180+sep_angle)
 amp2.add_on_axis(concave2)
 concave2.set_normal_with_2_points(end_concave.pos, active_mir.pos)
-# amp2.set_sequence([0,1,2,3,4,5,2])
-amp2.set_sequence([0,1,2,3,2,4,5,6,2,3,2])
+amp2.set_sequence([0,1,2,3,4,5,2])
+# amp2.set_sequence([0,1,2,3,2,4,5,6,2,3,2])
 amp2.recompute_optical_axis()
 amp2.propagate(650)
 amp2.add_on_axis(Mirror(phi=90))

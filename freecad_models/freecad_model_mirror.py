@@ -177,7 +177,7 @@ def model_stripe_mirror(name="Stripe_Mirror", dia=75, Radius=250, thickness=25,
   pad = obj.newObject('PartDesign::Pad','Pad')
   pad.Profile = sketch
   pad.Length = height
-  pad.ReferenceAxis = (sketch,['N_Axis'])
+  # pad.ReferenceAxis = (sketch,['N_Axis'])
   pad.Midplane = 1
   sketch.Visibility = False
   # print("geom=",geom)
@@ -248,7 +248,7 @@ def model_rooftop_mirror(name="rooftop_mirror",dia=0, geom=None,l_height=35,leng
   pad = obj.newObject('PartDesign::Pad','Pad')
   pad.Profile = sketch
   pad.Length = length
-  pad.ReferenceAxis = (sketch,['N_Axis'])
+  # pad.ReferenceAxis = (sketch,['N_Axis'])
   pad.Midplane = 1
   sketch.Visibility = False
 

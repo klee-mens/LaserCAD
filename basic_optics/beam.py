@@ -170,10 +170,11 @@ class Beam(Geom_Object):
   
   def draw_freecad(self):
     if self.draw_dict["model"] == "cone":
-      # return self.freecad_model(**self.draw_dict)
-      radius, angle = self.radius_angle()
-      return model_beam(radius=radius, length=self.length(),  angle=angle,
-                            geom=self.get_geom(), name=self.name)
+      # radius, angle = self.radius_angle()
+      self.update_draw_dict()
+      return self.freecad_model(**self.draw_dict)
+      # return model_beam(radius=radius, length=self.length(),  angle=angle,
+                            # geom=self.get_geom(), name=self.name)
     else:
       part = initialize_composition_old(name="ray group")
       container = []
