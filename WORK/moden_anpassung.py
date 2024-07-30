@@ -41,7 +41,7 @@ zt = (d-a)/ 2/ c #z target
 zrt = abs( np.sqrt((4 - (d+a)**2)) / (2*c) ) # rayleigh target
 
 a, b, f, z1, zr1 = symbols("a b f z1 zr1")
-A,B,C,D, q1, q2 = symbols("A B C D, q1, q2")
+A,B,C,D = symbols("A B C D")
 
 system_matrix = Seed.matrix() @ Stretcher.matrix() @ PulsePicker.matrix()
 
@@ -49,4 +49,16 @@ system_matrix = Seed.matrix() @ Stretcher.matrix() @ PulsePicker.matrix()
 prop = system_matrix[0,1]
 
 
-equ1 = (A*q1 + B)
+equ1 = ( A*C*(z1**2 + zr1**2) + (A*D+B*C)*z1 + B*D ) / ( (C*z1 + D)**2 + (zr1*C)**2 ) - zt
+
+equ2 = zr1 / ( (C*z1 + D)**2 + (zr1*C)**2 ) - zrt
+
+mat1 = 1-b/f - A
+mat2 = a+b -a*b/f - B
+mat3 = -1/f - C
+mat4 = 1-a/f - D
+
+lang = a + b - prop
+
+sol = solve([equ1, equ2, mat1, mat2, mat3, mat4, lang], a, f, dict=True)
+
