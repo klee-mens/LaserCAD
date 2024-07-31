@@ -66,7 +66,7 @@ def small_shift_finden(Concav_shift=[0,0,0,0]):
   delta_lamda = 60e-9*1e3 # Bandbreite in mm
   number_of_rays = 15
   # safety_to_StripeM = 5 
-  periscope_distance = 12
+  periscope_distance = 20
   c0 = 299792458*1000 #mm/s
   
   half_height_middle = 10
@@ -278,19 +278,22 @@ def small_shift_finden(Concav_shift=[0,0,0,0]):
   for point_i in rays_end:
     intersection_point = point_i.intersection(ip)
     # print(intersection_point)
-    # pos_diff = intersection_point - ip.pos
     pos_diff.append(intersection_point)
-  # print(pos_diff)
   pos_center = pos_diff[int(len(pos_diff)/2)]
   for ii in pos_diff:
     if max_pos_diff < np.linalg.norm(ii-pos_center):
       max_pos_diff = np.linalg.norm(ii-pos_center)
+  new_pos_center = np.array([pos_center[0],pos_center[1],0])
+  # for ii in pos_diff:
+  #   ii_new = np.array([ii[0],ii[1],0])
+  #   if max_pos_diff < np.linalg.norm(ii_new-new_pos_center):
+  #     max_pos_diff = np.linalg.norm(ii_new-new_pos_center)
   # for ii in pos_diff:
   #   for jj in pos_diff:
   #     # print(ii,jj,np.linalg.norm(ii-jj))
   #     if max_pos_diff < np.linalg.norm(ii-jj):
   #       max_pos_diff = np.linalg.norm(ii-jj)
-  #       # print(max_pos_diff)
+        # print(max_pos_diff)
   return (max_pos_diff)
 # print(Stretcher.Kostenbauder_matrix())
 # min_spot = 10
@@ -303,9 +306,13 @@ def small_shift_finden(Concav_shift=[0,0,0,0]):
 #         mat1 = small_shift_finden(Concav_shift=Concav_shift)
 #         if min_spot>mat1:
 #           min_spot = mat1
+#           print(min_spot)
 #           min_Concav_shift=Concav_shift
+#           print(min_Concav_shift)
 # print(min_spot,min_Concav_shift)
 # mat1 = small_shift_finden(Concav_shift=[0.05, -0.2, 0.15, 0.2])
 # mat1 = small_shift_finden(Concav_shift=[0.05, -0.05, 0.1, 0.1])
-mat1 = small_shift_finden(Concav_shift=[0, 0, 0, 0])
+# mat1 = small_shift_finden(Concav_shift=[0.05, -0.1, 0.1, 0.1]) # min spot
+mat1 = small_shift_finden(Concav_shift=[-0.05, -0.05, -0.1, -0.1]) #min x 
+# mat1 = small_shift_finden(Concav_shift=[0, 0, 0, 0])
 print(mat1)

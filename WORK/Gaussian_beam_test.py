@@ -33,6 +33,11 @@ Comp.propagate(300)
 Comp.add_on_axis(Lens(f =80))
 Comp.propagate(500)
 Comp.draw()
+ls.draw_dict["model"] = "Gaussian"
+ls.draw()
 
+B= Beam()
+B.pos= (0,0,70)
+B.draw()
 if freecad_da:
   setview()

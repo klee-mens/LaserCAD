@@ -16,6 +16,7 @@ if freecad_da:
   import Sketcher
 
 DEFAULT_COLOR_CRIMSON = (0.86,0.08,0.24) #crimson
+DEFAULT_COLOR_GAUSSIAN = (255/255,23/255,73/255) 
 MIN_RADIUS =0.5
 BEAM_TRANSPARENCY = 50
 # BEAM_TRANSPARENCY = 0
@@ -382,7 +383,7 @@ def model_asti_beam (name="beam", dia_l=10,dia_s=10, prop=200,  f_l=100,f_s=150,
   return part
 
 def model_Gaussian_beam (name="Gaussian_beam",q_para=-100+200j,prop=200,wavelength=650E-6,
-                          color=DEFAULT_COLOR_CRIMSON,beam_count=1, geom_info=None):
+                          color=DEFAULT_COLOR_GAUSSIAN,beam_count=1, geom_info=None):
     """
     creates a Gaussian beam.
     Parameters
@@ -588,7 +589,7 @@ def model_Gaussian_beam (name="Gaussian_beam",q_para=-100+200j,prop=200,waveleng
     return obj
 
 def model_Gaussian_beam_cone (name="Gaussian_beam",q_para=-100+200j,prop=200,wavelength=650E-6,
-                          color=DEFAULT_COLOR_CRIMSON,beam_count=1, geom_info=None):
+                          color=DEFAULT_COLOR_GAUSSIAN,beam_count=1, geom_info=None):
   """
   creates a Gaussian beam.
   Parameters
