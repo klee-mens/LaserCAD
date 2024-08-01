@@ -22,9 +22,6 @@ from LaserCAD.non_interactings.table import Table
 if freecad_da:
   clear_doc()
 
-a1=0.314258136824135*1000
-b1=1.65864036470845*1000
-
 # =============================================================================
 # Measured Coordinates on the Table (approx to unity m6 holes)
 # =============================================================================
@@ -661,10 +658,10 @@ pure_cosmetic1.aperture = periscope_height
 # =============================================================================
 # Four Gratings Compressor
 # =============================================================================
-Grat3 =Grating(grat_const=grating_const,order=1)
+Grat3 =Grating(grat_const=grating_const,order=-1)
 Grat3.pos = (Grat1.pos[0]-Grat2.pos[0]+Grat1.pos[0]-45-2*35*abs(Grat1.normal[0]),Grat2.pos[1],Grat2.pos[2])
 Grat3.normal = (Grat1.normal[0],-Grat1.normal[1],Grat1.normal[2])
-Grat4 =Grating(grat_const=grating_const,order=1)
+Grat4 =Grating(grat_const=grating_const,order=-1)
 Grat4.pos = (Grat2.pos[0]-Grat2.pos[0]+Grat1.pos[0]-45-2*35*abs(Grat1.normal[0]),Grat1.pos[1],Grat2.pos[2])
 Grat4.normal = (Grat2.normal[0],-Grat2.normal[1],Grat2.normal[2])
 # Grat3.pos += (1,0,0)
@@ -719,16 +716,16 @@ t=Table()
 # Draw Selection
 # =============================================================================
 
-#Seed.draw()
-#Stretcher.draw()
-#PulsePicker.draw()
-#Amplifier_I.draw()
-#Pump.draw()
-#Amp2.draw()
-#BigPump.draw()
-#t.draw()
+# Seed.draw()
+# Stretcher.draw()
+# PulsePicker.draw()
+# Amplifier_I.draw()
+# Pump.draw()
+# Amp2.draw()
+# BigPump.draw()
+# t.draw()
 # Compressor.draw()
-#PulsePicker.draw_alignment_posts()
+# PulsePicker.draw_alignment_posts()
 
 
 
