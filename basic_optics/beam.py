@@ -365,9 +365,12 @@ class Gaussian_Beam(Ray):
                                   geom_info=self.get_geom())
       
     if self.draw_dict["model"] == "cone":
-      return model_Gaussian_beam_cone(name=self.name, q_para=self.q_para,
-                                 wavelength=self.wavelength,prop=self.length,
-                                 geom_info=self.get_geom())
+      self.update_draw_dict()
+      self.draw_dict["q_para"] = self.q_para
+      return model_Gaussian_beam_cone(**self.draw_dict)
+      # return model_Gaussian_beam_cone(name=self.name, q_para=self.q_para,
+      #                            wavelength=self.wavelength,prop=self.length,
+      #                            geom_info=self.get_geom())
       # quicker method with nearly the same look in most cases
       # radius = self.radius()
       # focal_length = - radius / self.divergence()
@@ -376,7 +379,13 @@ class Gaussian_Beam(Ray):
       #                   geom_info=self.get_geom(), color=col, **self.draw_dict)
     else:
       return -1
-  
+    
+  def update_draw_dict(self):
+    self.draw_dict["name"] = self.name
+    self.draw_dict["wavelength"] = self.wavelength
+    self.draw_dict["prop"] = self.length
+    self.draw_dict["geom_info"] = self.get_geom()
+     
   def radius(self):
     z = np.real(self.q_para)
     zr = np.imag(self.q_para)
@@ -393,6 +402,7 @@ class Gaussian_Beam(Ray):
     cone.set_length(self.length)
     return cone
 
+  # def get_all_rays(self, by_reference=True):
   def get_all_rays(self):
     ray = Ray()
     ray.set_geom(self.get_geom())

@@ -16,12 +16,12 @@ import matplotlib.pyplot as plt
 from ..freecad_models import model_intersection_plane
 from ..freecad_models.freecad_model_ray import RAY_COLOR
 from matplotlib.ticker import MultipleLocator
-"""
+
 diff_x_cry = [-0.20076010797285335, -0.1752682057638194, -0.14832976837497858, -0.12015735440635117, -0.09099987494151646, -0.06109424159855406, -0.030680196399349085, 0.0, 0.0307019214285767, 0.06117937732711312, 0.09118486873072389, 0.12047010861884357, 0.14879170126868208, 0.17590597398977387, 0.2015544706580202]
 diff_y_cry = [-0.10156237363102605, -0.0750474302730737, -0.05241530208066081, -0.03373726562095669, -0.01908489361107968, -0.008529989532291893, -0.0021444304046127627, 0.0, -0.0021681899642942426, -0.008719962919457203, -0.019725470668134903, -0.035253719056612454, -0.05537216198555939, -0.08014624388293612, -0.10963881833544065]
 tilt_x_cry = [-2.7526473850164273e-05, -2.414982747700558e-05, -2.0505872992448785e-05, -1.6639956011570334e-05, -1.260514845164071e-05, -8.452289178150265e-06, -4.233069844349944e-06, 0.0, 4.193632299962809e-06, 8.293805118329173e-06, 1.224581310997181e-05, 1.599432491232215e-05, 1.9484451468185168e-05, 2.2660903050038627e-05, 2.5464224627602982e-05]
 tilt_y_cry = [-3.608313639199279e-05, -2.6738140103065177e-05, -1.8730088901166558e-05, -1.2093258705964494e-05, -6.8634633913724195e-06, -3.0781793650919874e-06, -7.766486052704896e-07, 0.0, -7.913822926101208e-07, -3.196110027968585e-06, -7.2618241948557955e-06, -1.30386694404533e-05, -2.0579486633780402e-05, -2.994003897978144e-05, -4.117924346314692e-05]
-
+"""
 diff_x_sph = [0.16018770658053902, 0.1345679295447665, 0.11010694142276586, 0.08665928248627776, 0.0640767696415976, 0.042208613173014636, 0.020901550553515256, 0.0, -0.020653762970307712, -0.04121940266663089, -0.06185828943071674, -0.08273323005766872, -0.1040081559775854, -0.12584776197683054, -0.14841708666358747]
 diff_y_sph = [-0.01527368314286548, -0.011749667338733616, -0.00865827812567943, -0.006008091105513813, -0.0038079376431738865, -0.002066913031569584, -0.0007943846508027264, 0.0, 0.00030630551464128075, 0.00011430112178345553, -0.000586546187932413, -0.001807077799611534, -0.0035584485342923244, -0.005852130287081536, -0.00869991381740931]
 tilt_x_sph = [3.2087059435245096e-05, 2.6966832002983275e-05, 2.2076967484525565e-05, 1.738718074860054e-05, 1.2866519239706575e-05, 8.483374320971082e-06, 4.205494381947827e-06, 0.0, -4.166598514272111e-06, -8.328380903245369e-06, -1.2519993596465797e-05, -1.6776622767258376e-05, -2.1133963159938242e-05, -2.562818203004037e-05, -3.029587739915924e-05]
@@ -138,15 +138,15 @@ class Intersection_plane(Opt_Element):
       # ax1=plt.subplot(5,5,7)
       a.subplots_adjust(wspace=0.5,hspace=0.5)
       ax1=plt.subplot(2,2,1)
-      # plt.plot(ray_lam, diff_x_sph)
+      plt.plot(ray_lam, diff_x_cry)
       plt.plot(ray_lam, diff_x)
-      # plt.legend(['before movement','after movement'], fontsize=fs-6)
+      plt.legend(['before movement','after movement'], fontsize=fs-6)
       ax1.tick_params(axis='x', labelsize=fs)
       ax1.tick_params(axis='y', labelsize=fs)
       ax1.set_title('(a)',x=-0.1,y=1.05,fontsize=fs)
       # x_loc = MultipleLocator(len(ray_lam)//5)
       # ax1.xaxis.set_major_locator(x_loc)
-      plt.ylabel("x-shift (mm)",fontsize=fs)
+      plt.ylabel("x spatial chirp (mm)",fontsize=fs-6)
       plt.xlabel("wavelength (nm)",fontsize=fs)
       # plt.title("The displacement in the x direction at " + self.name,fontsize=15)
       # plt.title("The displacement in the x direction",fontsize=fs)
@@ -158,10 +158,10 @@ class Intersection_plane(Opt_Element):
       ax2.tick_params(axis='y', labelsize=fs)
       ax2.set_title('(b)',x=-0.1,y=1.05,fontsize=fs)
       # ax2.xaxis.set_major_locator(x_loc)
-      # plt.plot(ray_lam, diff_y_sph)
+      plt.plot(ray_lam, diff_y_cry)
       plt.plot(ray_lam, diff_y)
-      # plt.legend(['before movement','after movement'], fontsize=fs-6)
-      plt.ylabel("y-shift (mm)",fontsize=fs)
+      plt.legend(['before movement','after movement'], fontsize=fs-6)
+      plt.ylabel("y spatial chirp (mm)",fontsize=fs-6)
       plt.xlabel("wavelength (nm)",fontsize=fs)
       # plt.title("The displacement in the y direction at " + self.name,fontsize=15)
       # plt.title("The displacement in the y direction",fontsize=fs)
@@ -172,9 +172,9 @@ class Intersection_plane(Opt_Element):
       ax3.tick_params(axis='y', labelsize=fs)
       ax3.yaxis.get_offset_text().set(size=fs)
       ax3.set_title('(c)',x=-0.1,y=1.05,fontsize=fs)
-      # plt.plot(ray_lam, tilt_x_sph)
+      plt.plot(ray_lam, tilt_x_cry)
       plt.plot(ray_lam, tilt_x)
-      # plt.legend(['before movement','after movement'], fontsize=fs-6)
+      plt.legend(['before movement','after movement'], fontsize=fs-6)
       plt.ylabel("x-tilt (rad)",fontsize=fs)
       plt.xlabel("wavelength (nm)",fontsize=fs)
       # plt.title("The tilt in the x direction at " + self.name,fontsize=15)
@@ -186,9 +186,9 @@ class Intersection_plane(Opt_Element):
       ax4.tick_params(axis='y', labelsize=fs)
       ax4.yaxis.get_offset_text().set(size=fs)
       ax4.set_title('(d)',x=-0.1,y=1.05,fontsize=fs)
-      # plt.plot(ray_lam, tilt_y_sph)
+      plt.plot(ray_lam, tilt_y_cry)
       plt.plot(ray_lam, tilt_y)
-      # plt.legend(['before movement','after movement'], fontsize=fs-6)
+      plt.legend(['before movement','after movement'], fontsize=fs-6)
       plt.ylabel("y-tilt (rad)",fontsize=fs)
       plt.xlabel("wavelength (nm)",fontsize=fs)
       # plt.title("The tilt in the y direction at " + self.name,fontsize=15)

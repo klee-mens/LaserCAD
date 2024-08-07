@@ -383,7 +383,7 @@ def model_asti_beam (name="beam", dia_l=10,dia_s=10, prop=200,  f_l=100,f_s=150,
   return part
 
 def model_Gaussian_beam (name="Gaussian_beam",q_para=-100+200j,prop=200,wavelength=650E-6,
-                          color=DEFAULT_COLOR_GAUSSIAN,beam_count=1, geom_info=None):
+                          color=DEFAULT_COLOR_GAUSSIAN,beam_count=1, geom_info=None,**kwargs):
     """
     creates a Gaussian beam.
     Parameters
@@ -589,7 +589,7 @@ def model_Gaussian_beam (name="Gaussian_beam",q_para=-100+200j,prop=200,waveleng
     return obj
 
 def model_Gaussian_beam_cone (name="Gaussian_beam",q_para=-100+200j,prop=200,wavelength=650E-6,
-                          color=DEFAULT_COLOR_GAUSSIAN,beam_count=1, geom_info=None):
+                          color=DEFAULT_COLOR_GAUSSIAN,beam_count=1, geom_info=None,**kwargs):
   """
   creates a Gaussian beam.
   Parameters
@@ -625,26 +625,42 @@ def model_Gaussian_beam_cone (name="Gaussian_beam",q_para=-100+200j,prop=200,wav
   w_start = w0 * pow(1+(z_start/z0)**2,0.5)
   w_end = w0 * pow(1+(z_end/z0)**2,0.5)
   if z_start<0 and z_end>w0:
-    radius2 = w0
-    obj1 = DOC.addObject("Part::Cone", name+"_1")
-    obj1.Height = -z_start
-    obj1.Radius1 = w_start
-    obj1.Radius2 = w0
-    obj2 = DOC.addObject("Part::Cone", name+"_2")
-    obj2.Height = z_start+prop
-    obj2.Radius1 = w0
-    obj2.Radius2 = w_end
-    obj2.Placement = FreeCAD.Placement(Vector(0,0,-z_start), FreeCAD.Rotation(Vector(0,1,0),0), Vector(0,0,0))
+    radius2 = w0 
+    if abs(w_start-w0)<1E-3:
+      obj1 = DOC.addObject("Part::Cylinder", name)
+      obj1.Height = -z_start
+      obj1.Radius = w0
+    else:
+      obj1 = DOC.addObject("Part::Cone", name+"_1")
+      obj1.Height = -z_start
+      obj1.Radius1 = w_start
+      obj1.Radius2 = w0
+    if abs(w0-w_end)<1E-3:
+      obj2 = DOC.addObject("Part::Cylinder", name+"_2")
+      obj2.Height = z_start+prop
+      obj2.Radius = w0
+      obj2.Placement = FreeCAD.Placement(Vector(0,0,-z_start), FreeCAD.Rotation(Vector(0,1,0),0), Vector(0,0,0))
+    else:
+      obj2 = DOC.addObject("Part::Cone", name+"_2")
+      obj2.Height = z_start+prop
+      obj2.Radius1 = w0
+      obj2.Radius2 = w_end
+      obj2.Placement = FreeCAD.Placement(Vector(0,0,-z_start), FreeCAD.Rotation(Vector(0,1,0),0), Vector(0,0,0))
     obj = DOC.addObject("Part::Fuse", name)
     obj.Base = obj1
     obj.Tool = obj2
     obj.Refine = True
     DOC.recompute()
   else:
-    obj = DOC.addObject("Part::Cone", name)
-    obj.Height = prop
-    obj.Radius1 = w_start
-    obj.Radius2 = w_end
+    if abs(w_start-w_end)<1E-3:
+      obj = DOC.addObject("Part::Cylinder", name)
+      obj.Height = prop
+      obj.Radius = w_end
+    else:
+      obj = DOC.addObject("Part::Cone", name)
+      obj.Height = prop
+      obj.Radius1 = w_start
+      obj.Radius2 = w_end
   obj.Placement = FreeCAD.Placement(Vector(0,0,0), FreeCAD.Rotation(Vector(0,1,0),90), Vector(0,0,0))
   obj.ViewObject.ShapeColor = color
   obj.Label = name
