@@ -598,7 +598,8 @@ def cavity_and_stretcher(C_radius = 7000,vertical_mat=True,want_to_draw=True,
       for jj in pos_diff:
         if max_pos_diff < np.linalg.norm(ii-jj):
           max_pos_diff = np.linalg.norm(ii-jj)
-          
+          print("ii=",ii)
+          print("jj=",jj)
     # leftii = rightii = pos_center[1]
     # for ii in pos_diff:
     #   if leftii > ii[1]:

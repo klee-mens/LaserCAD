@@ -96,7 +96,7 @@ def cavity_and_stretcher(C_radius = 7000,want_to_draw=True,
   safety_to_StripeM = 5 
   periscope_distance = 12
   c0 = 299792458*1000 #mm/s
-  v = lam_mid/grat_const
+  v = lam_mid_grating/grat_const
   s = np.sin(gamma)
   c = np.cos(gamma)
   a = v/2
@@ -140,7 +140,6 @@ def cavity_and_stretcher(C_radius = 7000,want_to_draw=True,
     rays.append(rn)
   centerlightsource.override_rays(rays)
   centerlightsource.draw_dict['model'] = "ray_group"
-  
   centerray = Beam(radius=0.5, angle=0,wavelength=centerlamda)
   centerray.make_cone_distribution(ray_count=13)
   for ray1 in centerray.get_all_rays():
@@ -490,16 +489,16 @@ def cavity_and_stretcher(C_radius = 7000,want_to_draw=True,
     # ip.spot_diagram(Comp._beams[-1],aberration_analysis=False)
     ip_stripe = Intersection_plane()
     ip_stripe.set_geom(StripeM.get_geom())
-    rays_0 = Comp._beams[-25].get_all_rays()
-    for ray in Comp._beams[-24].get_all_rays():
-      rays_0.append(ray)
-    for ray in Comp._beams[-18].get_all_rays():
-      rays_0.append(ray)
-    for ray in Comp._beams[-17].get_all_rays():
-      rays_0.append(ray)
+    rays_0 = []
+    for n in range(0,32*roundtrip,32):
+      rays_0.append(Comp._beams[n+8].get_all_rays()[0])
+      # rays_0.append(Comp._beams[n+9].get_all_rays()[0])
+      # rays_0.append(Comp._beams[n+15].get_all_rays()[0])
+      # rays_0.append(Comp._beams[n+16].get_all_rays()[0])
     B0 = Beam()
     B0.override_rays(rays_0)
-    ip_stripe.spot_diagram(B0,aberration_analysis=False)
+    xx,yy=ip_stripe.spot_diagram(B0,aberration_analysis=False)
+    ip_stripe.draw()
     diff = []
     diff_out = []
     diff_hor = []
@@ -525,7 +524,7 @@ def cavity_and_stretcher(C_radius = 7000,want_to_draw=True,
         max_diff = diff_R_ver
         max_roundtrip = n//32+1
     
-    return max_diff
+    return max_diff,xx,yy
   elif Comp._lightsource == centerlightsource:
     ip.spot_diagram(Comp._beams[-1],aberration_analysis=True)
     pathlength = {}
@@ -637,19 +636,19 @@ def Cal_matrix(Comp=Composition(),vertical_mat = True):
   # Comp._matrix = np.matmul(np.array([[1,Comp._last_prop], [0,1]]), Comp._matrix ) #last propagation
   return np.array(Comp._matrix)
 
-roundtrip = 40
+roundtrip = 1
 centerlamda = 1030E-6
 C_radius = 7000
 # StripeM_shift = 0.07
-# StripeM_shift = -0.13
-StripeM_shift = 0
+StripeM_shift = -0.13
+# StripeM_shift = 0
 # StripeM_shift = 0.115
 # CB=CenterBeam CR=CenterRay 
 ls = "CB"
-mat1 = cavity_and_stretcher(C_radius=C_radius,want_to_draw=True,
+mat1= cavity_and_stretcher(C_radius=C_radius,want_to_draw=False,
                             roundtrip=roundtrip,centerlamda=centerlamda,
                             s_shift=StripeM_shift,ls=ls,seperation=71.381485)
-  
+# print(xx,yy)
 #   maximun deviation with different wavelength -------------------------------
 # lam_mid = 1030E-6
 # delta_lamda = 60E-6

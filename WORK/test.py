@@ -129,4 +129,31 @@ helper.draw_elements()
 
 
 if freecad_da:
+<<<<<<< HEAD
   clear_doc()
+=======
+  clear_doc()
+# Grating and Mirror test
+# ray = Ray()
+# ray.draw()
+# B = Beam(radius=5)
+# B.pos += (0,100,0)
+# B.draw()
+# M = Mirror()
+# M.pos += (0,200,0)
+# M.draw()
+# M.draw_mount()
+# G = Grating()
+# G.pos += (0,300,0)
+# G.draw()
+# G.draw_mount()
+
+M1 = Cylindrical_Mirror()
+M1.pos += (100,0,0)
+B = Beam()
+B.normal = (1,0.1,0)
+B1 = M1.next_beam(B)
+B.draw()
+B1.draw()
+M1.draw()
+>>>>>>> he_experimental

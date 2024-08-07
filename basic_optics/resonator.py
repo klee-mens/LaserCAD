@@ -141,7 +141,8 @@ class LinearResonator(Composition):
     self.set_sequence([x for x in range(1, len(self._elements)-1)])
     super().compute_beams(external_source)
     for beam in self._beams:
-      beam.draw_dict["model"] = self.draw_dict["beam_model"]
+      # beam.draw_dict["model"] = self.draw_dict["beam_model"]
+      beam.draw_dict["model"] = "cone"
         
     
   def transform_gauss_to_cone_beams(self):

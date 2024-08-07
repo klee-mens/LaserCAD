@@ -26,7 +26,6 @@ class Grating(Opt_Element):
     self.width = 50
     self.diffraction_order = order
     self.G = 2*np.pi / self.grating_constant * self.get_coordinate_system()[1] 
-
     self.update_draw_dict()
     self.freecad_model = model_grating
     self.set_mount_to_default()
@@ -103,6 +102,50 @@ class Grating(Opt_Element):
     k2 = k2p - self.normal * np.sqrt(np.sum(k1*k1) - np.sum(k2p * k2p))
     ray2.normal = k2 
     return ray2
+
+  
+    # def next_ray(self, ray, alternative_order=None):
+    #   """
+    #   computes the diffracted beam by adding <diffraction_order> times a
+    #   reciprocal grating vector to the parallel wave vector
+    #   computes the diffraction in an alternative_order if given
+    #   if there is now diffraction in this order, it gives out a standard Ray()
+    #   and a warning, which should definitely be seen in the model as a huge error
+  
+    #   Parameters
+    #   ----------
+    #   ray : TYPE
+    #     DESCRIPTION.
+    #   alternative_order : TYPE, optional
+    #     DESCRIPTION. The default is None.
+  
+    #   Returns
+    #   -------
+    #   ray2 : TYPE
+    #     DESCRIPTION.
+    #   """
+    #   ray2 = deepcopy(ray)
+    #   intersec = ray.intersection(self)
+    #   ray2.pos = intersec
+      
+    #   if alternative_order:
+    #     m = alternative_order
+    #   else:
+    #     m = self.diffraction_order
+      
+    #   # reciprocal grating vector G perpindicular to lines, by default parallel to y-axis
+    #   G = 2*np.pi / self.grating_constant * self.get_coordinate_system()[1]    
+    #   k1 = ray.normal * 2 * np.pi / ray.wavelength # wave vector 1
+    #   k1p = k1 - self.normal * np.sum(k1 * self.normal) # k1 in grating plane, = nx(k1xn)
+    #   direction_sign = np.sign(np.sum(k1p * G) + 1e-12) # +1 if G and k1p in same direction
+    #   k2p = k1p + m * direction_sign * G
+    #   if np.linalg.norm(k2p) > np.linalg.norm(k1):
+    #     print("Warning, there is no diffraction of this order, return next ray as Ray()")
+    #     return Ray()
+    #   k2 = k2p - self.normal * np.sqrt(np.sum(k1*k1) - np.sum(k2p * k2p))
+    #   ray2.normal = k2 
+    #   return ray2
+
 
   def update_draw_dict(self):
     super().update_draw_dict()

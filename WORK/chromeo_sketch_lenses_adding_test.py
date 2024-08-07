@@ -22,9 +22,9 @@ from LaserCAD.non_interactings.table import Table
 if freecad_da:
   clear_doc()
 
-a1=0.314258136824135*1000
-b1=1.65864036470845*1000
-PP_distance = 377.17429684739864
+# a1=0.314258136824135*1000
+# b1=1.65864036470845*1000
+# PP_distance = 377.17429684739864
 
 # =============================================================================
 # Measured Coordinates on the Table (approx to unity m6 holes)
@@ -79,9 +79,7 @@ Seed.propagate(distance_faraday_mirror)
 Seed.add_on_axis(Flip0)
 Seed.propagate(75)
 Seed.add_on_axis(Lambda_Plate())
-Seed.propagate(39.25813682413502)
-Seed.add_on_axis(Lens(f=750))
-Seed.propagate(200-39.25813682413502)
+Seed.propagate(200)
 seed_end_geom = Seed.last_geom()
 # print(faraday_isolator_6mm.pos)
 # =============================================================================
@@ -400,9 +398,7 @@ PulsePicker.set_geom(Stretcher.last_geom())
 PulsePicker.propagate(320)
 Lambda2 = Lambda_Plate()
 PulsePicker.add_on_axis(Lambda2)
-PulsePicker.propagate(57.17429684739864)
-PulsePicker.add_on_axis(Lens(f=750))
-PulsePicker.propagate(272.82570315260136)
+PulsePicker.propagate(330)
 Back_Mirror_PP = Mirror()
 PulsePicker.add_on_axis(Back_Mirror_PP)
 PulsePicker.propagate(30)
@@ -427,9 +423,32 @@ x,y,z = TFP_pp.get_coordinate_system()
 TFP_pp.pos += y * tfp_push_aside
 
 
-PulsePicker.propagate(80)
-PulsePicker.add_on_axis(Lambda_Plate())
+PulsePicker.propagate(44.27579530578214)
+PulsePicker.add_on_axis(Mirror(phi=90))
 PulsePicker.propagate(100)
+L1 = Lens(f=1029)
+L1.set_geom( PulsePicker.last_geom())
+L1.pos += L1.get_coordinate_system()[1]*7.5
+PulsePicker.add_fixed_elm(L1)
+PulsePicker.recompute_optical_axis()
+PulsePicker.propagate((19.3920212936470+1029*2-4)/2)
+M_tele = Mirror()
+M_tele.set_geom(PulsePicker.last_geom())
+M_tele.normal = L1.normal
+PulsePicker.add_fixed_elm(M_tele)
+PulsePicker.recompute_optical_axis()
+# PulsePicker.propagate((19.3920212936470+1029*2)/2)
+PulsePicker.set_sequence([0,1,2,3,4,3])
+PulsePicker.recompute_optical_axis()
+PulsePicker.propagate(50)
+M_tele2 = Mirror(phi = 90)
+M_tele2.set_mount(Composed_Mount(unit_model_list=["MH25_KMSS", "1inch_post"]))
+# M_tele2.Mount.mount_list[0].flip()
+# M_tele2.Mount.set_geom(M_tele2.get_geom())
+PulsePicker.add_on_axis(M_tele2)
+PulsePicker.propagate(30)
+PulsePicker.add_on_axis(Lambda_Plate())
+PulsePicker.propagate(80)
 
 # Output TFP to sedn the beam to Amp2
 TFP_out = Mirror(phi = 180-2*tfp_angle, name="Output_to_Amp2")
@@ -446,19 +465,22 @@ PulsePicker.add_on_axis(TFP_out)
 TFP_out.normal = TFP_pp.normal
 x,y,z = TFP_out.get_coordinate_system()
 TFP_out.pos += - y * tfp_push_aside
-PulsePicker.propagate(90) # maybe just use the thickness of the energy detector everytime instead ...
+
+PulsePicker.propagate(60) # maybe just use the thickness of the energy detector everytime instead ...
+
 
 # zick zack beam line to adjust the beam into Amp1
 FlipMirror2_pp = Mirror(phi=90)
 PulsePicker.add_on_axis(FlipMirror2_pp)
-PulsePicker.propagate(80)
+
+PulsePicker.propagate(20)
 FaradPP = Faraday_Isolator()
 PulsePicker.add_on_axis(FaradPP)
-PulsePicker.propagate(120)
+PulsePicker.propagate(80)
 Lambda2_2_pp = Lambda_Plate()
 PulsePicker.add_on_axis(Lambda2_2_pp)
 #last knee for adjustment
-PulsePicker.propagate(80)
+PulsePicker.propagate(40)
 
 second_last_flip_pp = Mirror(phi=-90)
 PulsePicker.add_on_axis(second_last_flip_pp)
@@ -467,12 +489,15 @@ PulsePicker.add_on_axis(second_last_flip_pp)
 #zick zack meet in Regen TFP
 p,a = PulsePicker.last_geom()
 n1 = a[:,0]
-Lslfp = np.sum(TFP_Amp1.pos*n1) - np.sum(second_last_flip_pp.pos*n1)
 
-PulsePicker.propagate(Lslfp)
+# Lslfp = np.sum(TFP_Amp1.pos*n1) - np.sum(second_last_flip_pp.pos*n1)
+
+PulsePicker.propagate(50)
+# 69.96298760819298
 last_flip_pp = Mirror(phi=90)
 PulsePicker.add_on_axis(last_flip_pp)
-PulsePicker.propagate(np.linalg.norm(last_flip_pp.pos - TFP_Amp1.pos))
+# PulsePicker.propagate(np.linalg.norm(last_flip_pp.pos - TFP_Amp1.pos))
+PulsePicker.propagate(40)
 
 
 # =============================================================================
@@ -723,19 +748,90 @@ t=Table()
 # Draw Selection
 # =============================================================================
 
-Seed.draw()
-Stretcher.draw()
+from LaserCAD.basic_optics import Gaussian_Beam
+from copy import deepcopy
+
+gb = Gaussian_Beam()
+gb.wavelength = 2.4E-3
+gb.q_para =  2045.3077171808552j
+gb.draw_dict["model"]= "cone"
+Seed.set_light_source(gb)
+
+Seed.compute_beams()
+last_gb1 = Seed._beams[-1]
+
+def next_gaussian_beam(last_gb=Gaussian_Beam()):
+  next_gb = deepcopy(last_gb)
+  next_gb.q_para += last_gb.length
+  next_gb.pos = last_gb.endpoint()
+  return next_gb
+
+Stretcher.set_light_source(next_gaussian_beam(last_gb1))
+Stretcher.compute_beams()
+last_gb2 = Stretcher._beams[-1]
+PulsePicker.set_light_source(next_gaussian_beam(last_gb2))
+# PulsePicker.compute_beams()
+# last_gb3 = PulsePicker._beams[-1]
+# Amplifier_I.set_light_source(next_gaussian_beam(last_gb3))
+
+amp1_lengths = [r.length for r in Amplifier_I._optical_axis]
+s2 = sum(amp1_lengths[0:4])
+s1 = amp1_lengths[4]
+
+def PropMat(s):
+  mat = np.eye(2)
+  mat[0,1] = s
+  return mat
+
+def Curved(R):
+  mat = np.eye(2)
+  mat[1,0] = -2/R
+  return mat
+
+ResonMat = PropMat(s2) @ Curved(5000) @ PropMat(s2) @ PropMat(s1) @ Curved(5000) @ PropMat(s1)
+
+def Kogel(Mat ,q):
+  return (Mat[0,0] *q + Mat[0,1]) / ( Mat[1,0] *q + Mat[1,1] )
+
+
+[[A,B], [C,D]] = ResonMat
+
+zamp = (A-D) / 2 / C
+
+zrayamp = np.sqrt(4-(A+D)**2) / 2 / C
+zrayamp = np.abs(zrayamp)
+
+# Seed.draw()
+# Stretcher.draw()
 PulsePicker.draw()
-Amplifier_I.draw()
-Pump.draw()
-Amp2.draw()
-BigPump.draw()
-t.draw()
-Compressor.draw()
-# PulsePicker.draw_alignment_posts()
+# Amplifier_I.draw()
+# Pump.draw()
+# Amp2.draw()
+# BigPump.draw()
+# t.draw()
+# Compressor.draw()
+#PulsePicker.draw_alignment_posts()
 
+resonator_overlay_beams = []
+b0 = deepcopy(PulsePicker._beams[-1])
+b0.draw_dict["color"] = (0.2,0.2,0.8)
 
+resonator_overlay_beams.append(b0)
 
+b1 = Amplifier_I._elements[-1].next_beam(b0)
+resonator_overlay_beams.append(b1)
+
+b2 = Amplifier_I._elements[-2].next_beam(b1)
+resonator_overlay_beams.append(b2)
+
+b3 = Amplifier_I._elements[-3].next_beam(b2)
+resonator_overlay_beams.append(b3)
+
+b4 = Amplifier_I._elements[-4].next_beam(b3)
+resonator_overlay_beams.append(b4)
+
+# for beeem in resonator_overlay_beams:
+#   beeem.draw()
 
 # =============================================================================
 # breadboards
