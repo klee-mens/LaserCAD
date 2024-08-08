@@ -7,7 +7,7 @@ Created on Tue Jun 27 22:34:31 2023
 
 import numpy as np
 from LaserCAD.freecad_models import clear_doc, setview, freecad_da
-from LaserCAD.basic_optics import Mirror, Beam, Composition, inch
+from LaserCAD.basic_optics import Mirror, Beam, Composition, inch, RainbowBeam
 from LaserCAD.basic_optics import Curved_Mirror, Ray, Component
 from LaserCAD.basic_optics import LinearResonator, Lens
 from LaserCAD.basic_optics import Grating
@@ -161,23 +161,24 @@ helper.propagate(radius_concave/2)
 helper.add_on_axis(StripeM)
 
 # setting the lightsource as an bundle of different coulered rays
-lightsource = Beam(radius=0, angle=0)
-wavels = np.linspace(lambda_mid-delta_lamda/2, lambda_mid+delta_lamda/2, number_of_rays)
-rays = []
-cmap = plt.cm.gist_rainbow
-for wavel in wavels:
-  rn = Ray()
-  # rn.normal = vec
-  # rn.pos = pos0
-  rn.wavelength = wavel
-  x = 1-(wavel - lambda_mid + delta_lamda/2) / delta_lamda
-  rn.draw_dict["color"] = cmap( x )
-  rays.append(rn)
-mid_ray = Ray() # add additionally the 2400 nm mid lambda beam to be the inner ray, just cause
-mid_ray.wavelength = lambda_mid
-rays = [mid_ray] + rays
-lightsource.override_rays(rays)
-lightsource.draw_dict['model'] = "ray_group"
+lightsource = RainbowBeam(wavelength=lambda_mid, bandwith=delta_lamda, ray_count=number_of_rays)
+# lightsource = Beam(radius=0, angle=0)
+# wavels = np.linspace(lambda_mid-delta_lamda/2, lambda_mid+delta_lamda/2, number_of_rays)
+# rays = []
+# cmap = plt.cm.gist_rainbow
+# for wavel in wavels:
+#   rn = Ray()
+#   # rn.normal = vec
+#   # rn.pos = pos0
+#   rn.wavelength = wavel
+#   x = 1-(wavel - lambda_mid + delta_lamda/2) / delta_lamda
+#   rn.draw_dict["color"] = cmap( x )
+#   rays.append(rn)
+# mid_ray = Ray() # add additionally the 2400 nm mid lambda beam to be the inner ray, just cause
+# mid_ray.wavelength = lambda_mid
+# rays = [mid_ray] + rays
+# lightsource.override_rays(rays)
+# lightsource.draw_dict['model'] = "ray_group"
 
 # starting the real stretcher
 Stretcher = Composition(name="DerStrecker")
@@ -719,12 +720,12 @@ t=Table()
 # Draw Selection
 # =============================================================================
 
-# Seed.draw()
-# Stretcher.draw()
+Seed.draw()
+Stretcher.draw()
 # PulsePicker.draw()
 # Amplifier_I.draw()
 # Pump.draw()
-# Amp2.draw()
+Amp2.draw()
 # BigPump.draw()
 # t.draw()
 Compressor.draw()

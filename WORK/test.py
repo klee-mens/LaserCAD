@@ -49,6 +49,29 @@ import numpy as np
 # G.draw()
 # G.draw_mount()
 
+if freecad_da:
+  clear_doc()
+
+# M1 = Cylindrical_Mirror()
+# M1.pos += (100,0,0)
+# B = Beam()
+# B.normal = (1,0.1,0)
+# B1 = M1.next_beam(B)
+# B.draw()
+# B1.draw()
+# M1.draw()
+
+import matplotlib.pyplot as plt
+from LaserCAD.basic_optics import inch, Stripe_mirror
+from LaserCAD.moduls import Make_Stretcher
+from LaserCAD.basic_optics.beam import RainbowBeam
+
+
+from LaserCAD.moduls import Make_Stretcher_chromeo, Make_Stretcher
+
+# Strecker = Make_Stretcher_chromeo()
+Strecker = Make_Stretcher()
+Strecker.draw()
 
 
 
@@ -57,103 +80,12 @@ import numpy as np
 
 
 
-# from .. basic_optics import Composition, inch, Curved_Mirror, Unit_Mount
-# import numpy as np
 
 
-name="WhiteCell"
-Radius=300
-roundtrips4=2 
-seperation=15
-"""
-Generates a White Cell Mirror Triplett for a compact multipass system with
-optical unity matrix (or something similar)
-See Multipass cells on wikipedia or so
-Parameters
-----------
-name : str, optional
-  DESCRIPTION. The default is "WhiteCell".
-Radius : float, optional
-  Radius of all convex spheres and distances. The default is 300.
-roundtrips4 : integer, optional
-  gives the number of roundtrips the beam apsses the cell.
-  For each the beam will propagate 4x the Radius.
-  The default is 2.
-seperation : TYPE, optional
-  The seperation of the beam hits on the big sphere. Might be smaller.
-  The default is 15.
-
-Returns
--------
-white_cell : Composition
-  DESCRIPTION.
-
-"""
-mirror_sep_angle = 12 #degree, could be smaller
-deflection = 2 * np.arcsin(seperation/2 / Radius) * 180/np.pi
-
-helper = Composition(name=name)
-helper.propagate(Radius)
-scm1 = Curved_Mirror(radius=Radius, phi=180-deflection)
-helper.add_on_axis(scm1)
-helper.propagate(Radius)
-
-bigcm = Curved_Mirror(radius=Radius, phi=180+mirror_sep_angle)
-bigcm.aperture = 12 + (roundtrips4-1)*2*seperation
-bigcm.Mount = Unit_Mount()
-helper.add_on_axis(bigcm)
-helper.propagate(Radius)
-
-scm2 = Curved_Mirror(radius=Radius, phi=180-deflection)
-helper.add_on_axis(scm2)
-helper.propagate(Radius)
-
-white_cell = Composition()
-white_cell.pos = helper.pos - (0, seperation*(roundtrips4-1), 0)
-white_cell.normal = scm1.pos - white_cell.pos
-white_cell.add_supcomposition_fixed(helper)
-
-seq = [0, 1, 2]
-roundtrip_sequence = [1, 0, 1, 2]
-for n in range(roundtrips4-1):
-  seq.extend(roundtrip_sequence)
-white_cell.set_sequence(seq)
-
-white_cell.propagate(Radius*1.2)
-
-
-helper.draw_elements()
 
 
 
 
 
 if freecad_da:
-<<<<<<< HEAD
-  clear_doc()
-=======
-  clear_doc()
-# Grating and Mirror test
-# ray = Ray()
-# ray.draw()
-# B = Beam(radius=5)
-# B.pos += (0,100,0)
-# B.draw()
-# M = Mirror()
-# M.pos += (0,200,0)
-# M.draw()
-# M.draw_mount()
-# G = Grating()
-# G.pos += (0,300,0)
-# G.draw()
-# G.draw_mount()
-
-M1 = Cylindrical_Mirror()
-M1.pos += (100,0,0)
-B = Beam()
-B.normal = (1,0.1,0)
-B1 = M1.next_beam(B)
-B.draw()
-B1.draw()
-M1.draw()
->>>>>>> he_experimental
+  setview()

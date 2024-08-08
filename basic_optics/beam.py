@@ -193,7 +193,7 @@ class Beam(Geom_Object):
 
 class SquareBeam(Beam):
   def __init__(self, radius=1, name="NewBeam", wavelength=1030E-6, ray_in_line = 3, **kwargs):
-    super().__init__(name=name, **kwargs)
+    super().__init__(name=name, radius=radius, **kwargs)
     self._ray_in_line = ray_in_line
     self.make_square_distribution(ray_in_line)
     self._distribution = "square"
@@ -290,7 +290,7 @@ class CircularRayBeam(Beam):
 
 class RainbowBeam(Beam):
   def __init__(self,  name="NewRainbow", wavelength=1030E-6, bandwith=10E-6, ray_count=11, **kwargs):
-    super().__init__(name=name, **kwargs)
+    super().__init__(name=name, wavelength=wavelength, **kwargs)
     self._bandwith = bandwith
     self.make_rainbow_distribution(ray_count)
     self._distribution = "rainbow"
@@ -322,143 +322,25 @@ class RainbowBeam(Beam):
     self._rays[0].name = self.name + "_inner_Ray"
   
 
-# =======
-#     self._axes = rays[0].get_axes()
-#     self._pos = rays[0].pos
-#     for n in range(len(rays)):
-#       rays[n].name = self.name + "_ray" + str(n)
-#     rays[0].name = self.name + "_middle_ray"
-
-  def __repr__(self):
-    radius, angle = self.radius_angle()
-    txt = 'Beam(radius=' + repr(radius)
-    txt += ', anlge=' + repr(angle)
-    txt += ', distribution=' + repr(self._distribution)
-    if self._distribution == "Gaussian":
-       txt = 'Gaussian_Beam(q_para=' + repr(self.q_para)
-    txt += ', ' + super().__repr__()[6::]
-    return txt
-
-  def radius_angle(self):
-    """
-    berechnet aus 2 Strahlen inn und outer den zugehörigen beam Kegel mit
-    radius r und öffnungswinkel alpha und zwar von hinten durch die Brust
-    ins Auge
-    """
-    inner = self._rays[0]
-    outer = self._rays[1]
-    v0 = inner.normal
-    v1 = outer.normal
-    poi = outer.intersection(inner) #Punkt in der Kegelgrundfläche, in dem outer schneidet
-    ovec = poi - inner.pos
-    novec = np.linalg.norm(ovec)
-    if novec < TOLERANCE:
-      #beide rays im gleichen Punkt, h = 0, alpha>0
-      return novec, np.arccos(np.sum(v0 * v1))
-    else:
-      ovec /= novec #normieren
-      a = np.sum(v1 * ovec)
-      b = np.sum(v0 * v1)
-    return novec, np.arctan(a/b)
-
-  def get_all_rays(self, by_reference=False):
-    if by_reference:
-      return self._rays
-    else:
-      return deepcopy(self._rays)
-
-  def inner_ray(self):
-    return deepcopy(self._rays[0])
-
-  def outer_rays(self):
-    return deepcopy(self._rays[1::])
-
-  def focal_length(self):
-    r, alph = self.radius_angle()
-    if alph == 0:
-      return 0
-    else:
-       return - r/np.tan(alph)
-
-  def length(self):
-    return self.inner_ray().length
-
-  def set_length(self, x):
-    for ray in self._rays:
-      ray.length = x
 
 
-  def _pos_changed(self, old_pos, new_pos):
-    """
-    wird aufgerufen, wen die Position von <self> verändert wird
-    ändert die Position aller __rays mit
-
-    is called when the position of <self> is changed
-    changes the position of all __rays with
-    """
-    super()._pos_changed(old_pos, new_pos)
-    self._rearange_subobjects_pos(old_pos, new_pos, self._rays)
-
-
-  def _axes_changed(self, old_axes, new_axes):
-    """
-    wird aufgerufen, wen das KooSys <_axes> von <self> verändert wird
-    dreht die KooSys aller __rays mit
-
-    dreht außerdem das eigene Koordiantensystem
-
-    is called when the KooSys <_axes> is changed from <self>.
-    rotates the KooSys of all __rays as well
-
-    also rotates the own coordiante system
-    """
-    super()._axes_changed(old_axes, new_axes)
-    self._rearange_subobjects_axes(old_axes, new_axes, self._rays)
-
-
-  def draw_freecad(self):
-    if self.draw_dict["model"] == "Gaussian":
-      return model_Gaussian_beam(name=self.name, q_para=self.q_para,
-                                 wavelength=self.wavelength,
-                                 prop=self.get_all_rays()[0].length,
-                                 geom_info=self.get_geom())
-    elif self.draw_dict["model"] == "cone":
-      radius, angle = self.radius_angle()
-      # return model_beam(name=self.name, dia=2*radius, prop=self.length(),
-           # f=self.focal_length(), geom_info=self.get_geom(), **self.draw_dict)
-      return model_beam(dia=2*radius, prop=self.length(), f=self.focal_length(),
-                        geom_info=self.get_geom(), **self.draw_dict)
-      # return model_beam_new(radius=radius, length=self.length(),  angle=angle,
-                            # geom_info=self.get_geom(),**self.draw_dict)
-      # return model_Gaussian_beam(name=self.name, dia=2*radius, prop=self.length(),
-      #      f=self.focal_length(), geom_info=self.get_geom())
-    else:
-      part = initialize_composition_old(name="ray group")
-      container = []
-      for nn in range(self._ray_count):
-        our=self._rays[nn]
-        obj = our.draw_freecad()
-        container.append(obj)
-      add_to_composition(part, container)
-      return part
-
-class Rainbow(Beam):
-  def __init__(self, separation=0, angle=0,ray_count=15, name="NewBeam",wavelength_range=(1000E-6,1060E-6), **kwargs):
-    super().__init__(name = name, **kwargs)
-    self.draw_dict['model'] = "ray_group"
-    self._ray_count = ray_count
-    self._wavelength_group = np.linspace(wavelength_range[0], wavelength_range[1],ray_count)
-    shifting_group = np.linspace(-separation/2, separation/2,ray_count)
-    self._rays = []
-    cmap = plt.cm.gist_rainbow
-    for i in range(ray_count):
-      ray = Ray()
-      ray.wavelength = self._wavelength_group[i]
-      x = 1-(self._wavelength_group[i] -min(wavelength_range[0],wavelength_range[1])) / abs(wavelength_range[1]-wavelength_range[0])
-      ray.draw_dict["color"] = cmap( x )
-      ray.set_geom(self.get_geom())
-      ray.pos += (0,shifting_group[i],0)
-      self._rays.append(ray)
+# class Rainbow(Beam):
+#   def __init__(self, separation=0, angle=0,ray_count=15, name="NewBeam",wavelength_range=(1000E-6,1060E-6), **kwargs):
+#     super().__init__(name = name, **kwargs)
+#     self.draw_dict['model'] = "ray_group"
+#     self._ray_count = ray_count
+#     self._wavelength_group = np.linspace(wavelength_range[0], wavelength_range[1],ray_count)
+#     shifting_group = np.linspace(-separation/2, separation/2,ray_count)
+#     self._rays = []
+#     cmap = plt.cm.gist_rainbow
+#     for i in range(ray_count):
+#       ray = Ray()
+#       ray.wavelength = self._wavelength_group[i]
+#       x = 1-(self._wavelength_group[i] -min(wavelength_range[0],wavelength_range[1])) / abs(wavelength_range[1]-wavelength_range[0])
+#       ray.draw_dict["color"] = cmap( x )
+#       ray.set_geom(self.get_geom())
+#       ray.pos += (0,shifting_group[i],0)
+#       self._rays.append(ray)
     
     
 
