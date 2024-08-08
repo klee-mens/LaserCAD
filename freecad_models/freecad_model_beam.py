@@ -580,7 +580,7 @@ def model_Gaussian_beam_cone (name="Gaussian_beam",q_para=-100+200j,prop=200,wav
   w0 = pow(wavelength*z0/np.pi,0.5)
   w_start = w0 * pow(1+(z_start/z0)**2,0.5)
   w_end = w0 * pow(1+(z_end/z0)**2,0.5)
-  if z_start<0 and z_end>w0:
+  if z_start<-1E-2 and z_end-w0>1E-2:
     radius2 = w0 
     if abs(w_start-w0)<1E-3:
       obj1 = DOC.addObject("Part::Cylinder", name)

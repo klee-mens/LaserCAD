@@ -142,7 +142,7 @@ class LinearResonator(Composition):
     super().compute_beams(external_source)
     for beam in self._beams:
       # beam.draw_dict["model"] = self.draw_dict["beam_model"]
-      beam.draw_dict["model"] = "cone"
+      beam.draw_dict["model"] = "Gaussian"
         
     
   def transform_gauss_to_cone_beams(self):
