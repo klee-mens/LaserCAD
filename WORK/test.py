@@ -8,7 +8,7 @@ from LaserCAD.basic_optics import Mirror,Beam,Cylindrical_Mirror,Intersection_pl
 # from LaserCAD.basic_optics.mirror import 
 from LaserCAD.basic_optics import Unit_Mount,Composed_Mount
 from LaserCAD.non_interactings import Lambda_Plate
-
+from LaserCAD.basic_optics.mount import Stages_Mount
 from LaserCAD.freecad_models import clear_doc, setview, add_to_composition
 from LaserCAD.freecad_models import freecad_da
 from LaserCAD.moduls import Make_RoofTop_Mirror
@@ -48,14 +48,6 @@ import numpy as np
 # G.pos += (0,300,0)
 # G.draw()
 # G.draw_mount()
-
-
-
-
-
-
-
-
 
 # from .. basic_optics import Composition, inch, Curved_Mirror, Unit_Mount
 # import numpy as np
@@ -129,9 +121,6 @@ helper.draw_elements()
 
 
 if freecad_da:
-<<<<<<< HEAD
-  clear_doc()
-=======
   clear_doc()
 # Grating and Mirror test
 # ray = Ray()
@@ -148,12 +137,17 @@ if freecad_da:
 # G.draw()
 # G.draw_mount()
 
-M1 = Cylindrical_Mirror()
-M1.pos += (100,0,0)
-B = Beam()
-B.normal = (1,0.1,0)
-B1 = M1.next_beam(B)
-B.draw()
-B1.draw()
+M1 = Mirror()
+M1.pos = (0,0,100)
+M1.normal = (1,1,0)
+
+# M1.Mount = Stages_Mount(aperture=M1.aperture,elm_type = "Mirror",elm_thickness=M1.thickness)
+# M1.Mount.set_geom(M1.get_geom())
+
+Mount1 = M1.Mount
+M1.Mount = Stages_Mount(basic_mount=Mount1,x_aligned=True)
+M1.Mount.set_geom(M1.get_geom())
+M1.Mount.find_screw_hole()
 M1.draw()
->>>>>>> he_experimental
+M1.draw_mount()
+print(M1.Mount.mount_list[1]._lower_limit)
