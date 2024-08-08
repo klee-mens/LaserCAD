@@ -36,5 +36,12 @@ gb.pos += (0,200,0)
 gb.draw()
 
 
+gb2 = Gaussian_Beam(radius=1)
+gb2.pos += (0, 250, 0)
+gb2.draw()
+gb2.draw_dict["model"] = "cone"
+gb2.draw()
+
+
 if freecad_da:
   setview()

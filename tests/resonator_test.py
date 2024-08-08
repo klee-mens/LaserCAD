@@ -170,7 +170,8 @@ if __name__ == "__main__":
 
   if freecad_da:
     clear_doc()
+  # simple_resonator_test()
   three_resonators_test()
-  Lab_Resonator_test()
+  # Lab_Resonator_test()
   if freecad_da:
     setview()
