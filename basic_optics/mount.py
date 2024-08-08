@@ -451,7 +451,7 @@ class Stages_Mount(Composed_Mount):
     hole_pos = self.mount_list[-1].pos - (hole[0]*np.cos(angle)-hole[1]*np.sin(angle),
                                           hole[0]*np.sin(angle)+hole[1]*np.cos(angle),
                                           hole[2])
-    shifted_pos = (int(hole_pos[0]/25.4)*25.4,int(hole_pos[1]/25.4)*25.4,0)
+    shifted_pos = (int(hole_pos[0]/25)*25,int(hole_pos[1]/25)*25,0)
     shifting_vec = hole_pos-shifted_pos
     self.mount_list[-1].pos -= shifting_vec
   

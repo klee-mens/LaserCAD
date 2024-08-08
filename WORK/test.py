@@ -138,14 +138,14 @@ if freecad_da:
 # G.draw_mount()
 
 M1 = Mirror()
-M1.pos = (0,0,100)
+M1.pos = (50,10,100)
 M1.normal = (1,1,0)
 
 # M1.Mount = Stages_Mount(aperture=M1.aperture,elm_type = "Mirror",elm_thickness=M1.thickness)
 # M1.Mount.set_geom(M1.get_geom())
 
 Mount1 = M1.Mount
-M1.Mount = Stages_Mount(basic_mount=Mount1,x_aligned=True)
+M1.Mount = Stages_Mount(basic_mount=Mount1,x_aligned=False)
 M1.Mount.set_geom(M1.get_geom())
 M1.Mount.find_screw_hole()
 M1.draw()
