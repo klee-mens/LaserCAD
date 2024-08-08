@@ -7,7 +7,7 @@ Created on Tue Jun 27 22:34:31 2023
 
 import numpy as np
 from LaserCAD.freecad_models import clear_doc, setview, freecad_da
-from LaserCAD.basic_optics import Mirror, Beam, Composition, inch
+from LaserCAD.basic_optics import Mirror, Beam, Composition, inch, RainbowBeam
 from LaserCAD.basic_optics import Curved_Mirror, Ray, Component
 from LaserCAD.basic_optics import LinearResonator, Lens
 from LaserCAD.basic_optics import Grating
@@ -21,6 +21,9 @@ from LaserCAD.non_interactings.table import Table
 
 if freecad_da:
   clear_doc()
+
+# a1=0.314258136824135*1000
+# b1=1.65864036470845*1000
 
 # =============================================================================
 # Measured Coordinates on the Table (approx to unity m6 holes)
@@ -158,23 +161,24 @@ helper.propagate(radius_concave/2)
 helper.add_on_axis(StripeM)
 
 # setting the lightsource as an bundle of different coulered rays
-lightsource = Beam(radius=0, angle=0)
-wavels = np.linspace(lambda_mid-delta_lamda/2, lambda_mid+delta_lamda/2, number_of_rays)
-rays = []
-cmap = plt.cm.gist_rainbow
-for wavel in wavels:
-  rn = Ray()
-  # rn.normal = vec
-  # rn.pos = pos0
-  rn.wavelength = wavel
-  x = 1-(wavel - lambda_mid + delta_lamda/2) / delta_lamda
-  rn.draw_dict["color"] = cmap( x )
-  rays.append(rn)
-mid_ray = Ray() # add additionally the 2400 nm mid lambda beam to be the inner ray, just cause
-mid_ray.wavelength = lambda_mid
-rays = [mid_ray] + rays
-lightsource.override_rays(rays)
-lightsource.draw_dict['model'] = "ray_group"
+lightsource = RainbowBeam(wavelength=lambda_mid, bandwith=delta_lamda, ray_count=number_of_rays)
+# lightsource = Beam(radius=0, angle=0)
+# wavels = np.linspace(lambda_mid-delta_lamda/2, lambda_mid+delta_lamda/2, number_of_rays)
+# rays = []
+# cmap = plt.cm.gist_rainbow
+# for wavel in wavels:
+#   rn = Ray()
+#   # rn.normal = vec
+#   # rn.pos = pos0
+#   rn.wavelength = wavel
+#   x = 1-(wavel - lambda_mid + delta_lamda/2) / delta_lamda
+#   rn.draw_dict["color"] = cmap( x )
+#   rays.append(rn)
+# mid_ray = Ray() # add additionally the 2400 nm mid lambda beam to be the inner ray, just cause
+# mid_ray.wavelength = lambda_mid
+# rays = [mid_ray] + rays
+# lightsource.override_rays(rays)
+# lightsource.draw_dict['model'] = "ray_group"
 
 # starting the real stretcher
 Stretcher = Composition(name="DerStrecker")
@@ -212,17 +216,22 @@ Stretcher.add_supcomposition_on_axis(Make_RoofTop_Mirror(height=periscope_height
 
 # setting the final sequence and the last propagation for visualization
 # note that pure cosmetic (pos6) is not in the sequence
-Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0])
+# Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0])
+Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1])
 Stretcher.recompute_optical_axis()
-Stretcher.propagate(120)
+Stretcher.propagate(150)
 
 
 # last small flip mirror from stretcher with cosmetics
-FlipMirror_pp = Mirror(phi=-90, name="Small_Output_Flip")
+FlipMirror_pp = Mirror(phi=90, name="Small_Output_Flip")
 FlipMirror_pp.set_mount(Composed_Mount(unit_model_list = ["MH25_KMSS","1inch_post"]))
 flip_mirror_push_down = - 5 # distance to push the first mirror out ouf the seed beam
 Stretcher.add_on_axis(FlipMirror_pp)
 FlipMirror_pp.pos += (0,0,flip_mirror_push_down)
+# p1 = Stretcher._optical_axis[-2].pos 
+# p1[2] = FlipMirror_pp.pos[2]
+# p2 = FlipMirror_pp.pos + (0,-100,0)
+# FlipMirror_pp.set_normal_with_2_points(p1, p2)
 Stretcher.propagate(13)
 
 Stretcher.set_geom(seed_end_geom)
@@ -662,6 +671,7 @@ Grat3 =Grating(grat_const=grating_const,order=-1)
 Grat3.pos = (Grat1.pos[0]-Grat2.pos[0]+Grat1.pos[0]-45-2*35*abs(Grat1.normal[0]),Grat2.pos[1],Grat2.pos[2])
 Grat3.normal = (Grat1.normal[0],-Grat1.normal[1],Grat1.normal[2])
 Grat4 =Grating(grat_const=grating_const,order=-1)
+
 Grat4.pos = (Grat2.pos[0]-Grat2.pos[0]+Grat1.pos[0]-45-2*35*abs(Grat1.normal[0]),Grat1.pos[1],Grat2.pos[2])
 Grat4.normal = (Grat2.normal[0],-Grat2.normal[1],Grat2.normal[2])
 # Grat3.pos += (1,0,0)
@@ -706,7 +716,6 @@ Compressor.add_fixed_elm(Grat4)
 Compressor.add_fixed_elm(Grat3)
 Compressor.add_fixed_elm(Grat2)
 Compressor.add_fixed_elm(Grat1)
-print(Grat4.get_axes())
 Compressor.propagate(300)
 Compressor.set_geom(Amp2.last_geom())
 
@@ -716,8 +725,8 @@ t=Table()
 # Draw Selection
 # =============================================================================
 
-# Seed.draw()
-# Stretcher.draw()
+Seed.draw()
+Stretcher.draw()
 # PulsePicker.draw()
 # Amplifier_I.draw()
 # Pump.draw()
@@ -725,9 +734,86 @@ t=Table()
 # BigPump.draw()
 # t.draw()
 # Compressor.draw()
-# PulsePicker.draw_alignment_posts()
+# # PulsePicker.draw_alignment_posts()
+
+#PulsePicker.draw_alignment_posts()
 
 
+from LaserCAD.basic_optics import Gaussian_Beam
+from copy import deepcopy
+
+gb = Gaussian_Beam()
+gb.wavelength = 2.4E-3
+gb.q_para =  2045.3077171808552j
+gb.draw_dict["model"]= "cone"
+Seed.set_light_source(gb)
+
+Seed.compute_beams()
+last_gb1 = Seed._beams[-1]
+
+def next_gaussian_beam(last_gb=Gaussian_Beam()):
+  next_gb = deepcopy(last_gb)
+  next_gb.q_para += last_gb.length
+  next_gb.pos = last_gb.endpoint()
+  return next_gb
+
+Stretcher.set_light_source(next_gaussian_beam(last_gb1))
+Stretcher.compute_beams()
+last_gb2 = Stretcher._beams[-1]
+PulsePicker.set_light_source(next_gaussian_beam(last_gb2))
+# PulsePicker.compute_beams()
+# last_gb3 = PulsePicker._beams[-1]
+# Amplifier_I.set_light_source(next_gaussian_beam(last_gb3))
+
+amp1_lengths = [r.length for r in Amplifier_I._optical_axis]
+s2 = sum(amp1_lengths[0:4])
+s1 = amp1_lengths[4]
+
+def PropMat(s):
+  mat = np.eye(2)
+  mat[0,1] = s
+  return mat
+
+def Curved(R):
+  mat = np.eye(2)
+  mat[1,0] = -2/R
+  return mat
+
+ResonMat = PropMat(s2) @ Curved(5000) @ PropMat(s2) @ PropMat(s1) @ Curved(5000) @ PropMat(s1)
+
+def Kogel(Mat ,q):
+  return (Mat[0,0] *q + Mat[0,1]) / ( Mat[1,0] *q + Mat[1,1] )
+
+
+[[A,B], [C,D]] = ResonMat
+
+zamp = (A-D) / 2 / C
+
+zrayamp = np.sqrt(4-(A+D)**2) / 2 / C
+zrayamp = np.abs(zrayamp)
+
+
+
+resonator_overlay_beams = []
+b0 = deepcopy(PulsePicker._beams[-1])
+b0.draw_dict["color"] = (0.2,0.2,0.8)
+
+resonator_overlay_beams.append(b0)
+
+b1 = Amplifier_I._elements[-1].next_beam(b0)
+resonator_overlay_beams.append(b1)
+
+b2 = Amplifier_I._elements[-2].next_beam(b1)
+resonator_overlay_beams.append(b2)
+
+b3 = Amplifier_I._elements[-3].next_beam(b2)
+resonator_overlay_beams.append(b3)
+
+b4 = Amplifier_I._elements[-4].next_beam(b3)
+resonator_overlay_beams.append(b4)
+
+# for beeem in resonator_overlay_beams:
+#   beeem.draw()
 
 
 # =============================================================================

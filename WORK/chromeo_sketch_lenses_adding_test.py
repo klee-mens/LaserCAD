@@ -802,9 +802,9 @@ zrayamp = np.sqrt(4-(A+D)**2) / 2 / C
 zrayamp = np.abs(zrayamp)
 
 # Seed.draw()
-# Stretcher.draw()
+Stretcher.draw()
 PulsePicker.draw()
-# Amplifier_I.draw()
+Amplifier_I.draw()
 # Pump.draw()
 # Amp2.draw()
 # BigPump.draw()
