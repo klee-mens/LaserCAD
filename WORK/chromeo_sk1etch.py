@@ -93,7 +93,7 @@ seed_end_geom = Seed.last_geom()
 # Stretcher parameter
 # =============================================================================
 
-# def Make_Stretcher_chromeo():
+## def Make_Stretcher_chromeo():
 """
 constructs an Offner Stretcher with an on axis helper composition
 Note: When drawing a rooftop mirror, we will draw apure_cosmetic mirror to
@@ -216,26 +216,64 @@ Stretcher.add_supcomposition_on_axis(Make_RoofTop_Mirror(height=periscope_height
 
 # setting the final sequence and the last propagation for visualization
 # note that pure cosmetic (pos6) is not in the sequence
-# Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0])
-Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1])
+Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0])
 Stretcher.recompute_optical_axis()
-Stretcher.propagate(150)
+Stretcher.propagate(120)
 
 
 # last small flip mirror from stretcher with cosmetics
-FlipMirror_pp = Mirror(phi=90, name="Small_Output_Flip")
+FlipMirror_pp = Mirror(phi=-90, name="Small_Output_Flip")
 FlipMirror_pp.set_mount(Composed_Mount(unit_model_list = ["MH25_KMSS","1inch_post"]))
 flip_mirror_push_down = - 5 # distance to push the first mirror out ouf the seed beam
 Stretcher.add_on_axis(FlipMirror_pp)
 FlipMirror_pp.pos += (0,0,flip_mirror_push_down)
-# p1 = Stretcher._optical_axis[-2].pos 
-# p1[2] = FlipMirror_pp.pos[2]
-# p2 = FlipMirror_pp.pos + (0,-100,0)
-# FlipMirror_pp.set_normal_with_2_points(p1, p2)
 Stretcher.propagate(13)
 
 Stretcher.set_geom(seed_end_geom)
 
+
+
+# =============================================================================
+# Mode adaption
+# =============================================================================
+adapt_dist_lens1 = 100
+
+AdaptTeles = Composition()
+# AdaptTeles.propagate(45)
+# AdaptTeles.add_on_axis(Mirror(phi=90))
+AdaptTeles.propagate(adapt_dist_lens1)
+L1 = Lens(f=1029)
+AdaptTeles.add_on_axis(L1)
+# L1.set_geom( AdaptTeles.last_geom())
+L1.pos += L1.get_coordinate_system()[1]*-7.5
+# AdaptTeles.add_fixed_elm(L1)
+AdaptTeles.recompute_optical_axis()
+AdaptTeles.propagate((19.3920212936470+1029*2-4)/2)
+M_tele = Mirror()
+AdaptTeles.add_on_axis(M_tele)
+# M_tele.set_geom(AdaptTeles.last_geom())
+M_tele.normal = L1.normal
+# AdaptTeles.add_fixed_elm(M_tele)
+AdaptTeles.recompute_optical_axis()
+# AdaptTeles.propagate((19.3920212936470+1029*2)/2)
+AdaptTeles.set_sequence([0,1,0])
+AdaptTeles.recompute_optical_axis()
+AdaptTeles.propagate(50)
+M_tele2 = Mirror(phi = -90)
+M_tele2.set_mount(Composed_Mount(unit_model_list=["MH25_KMSS", "1inch_post"]))
+# # M_tele2.Mount.mount_list[0].flip()
+# # M_tele2.Mount.set_geom(M_tele2.get_geom())
+AdaptTeles.add_on_axis(M_tele2)
+AdaptTeles.propagate(130)
+# AdaptTeles.add_on_axis(Lambda_Plate())
+# AdaptTeles.propagate(80)
+
+AdaptTeles.set_geom(Stretcher.last_geom())
+
+AdaptTeles.draw()
+
+
+PropA = Seed.matrix()[0,1] + Stretcher.matrix()[0,1] + adapt_dist_lens1 
 
 
 # =============================================================================
@@ -725,7 +763,7 @@ t=Table()
 # Draw Selection
 # =============================================================================
 
-Seed.draw()
+# Seed.draw()
 Stretcher.draw()
 # PulsePicker.draw()
 # Amplifier_I.draw()
