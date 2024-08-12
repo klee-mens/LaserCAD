@@ -37,16 +37,12 @@ TABLE_MAX_COORDINATES = np.array((158, 58)) * 25
 
 stretcher_out_obj = Lens(name="Stretcher_Output")
 stretcher_out_obj.pos = POS_STRETCHER_END_MIRROR
-stretcher_out_obj.draw()
 
 tm_big_obj = Lens(name="TmLaser_Big_Output")
 tm_big_obj.pos = POS_THULIUM_BIG_OUT
-tm_big_obj.draw()
-
 
 tm_small_obj = Lens(name="TmOszillator_Output")
 tm_small_obj.pos = POS_THULIUM_SMALL_OUT
-tm_small_obj.draw()
 
 # =============================================================================
 # Draw the seed laser and seed beam
@@ -162,23 +158,6 @@ helper.add_on_axis(StripeM)
 
 # setting the lightsource as an bundle of different coulered rays
 lightsource = RainbowBeam(wavelength=lambda_mid, bandwith=delta_lamda, ray_count=number_of_rays)
-# lightsource = Beam(radius=0, angle=0)
-# wavels = np.linspace(lambda_mid-delta_lamda/2, lambda_mid+delta_lamda/2, number_of_rays)
-# rays = []
-# cmap = plt.cm.gist_rainbow
-# for wavel in wavels:
-#   rn = Ray()
-#   # rn.normal = vec
-#   # rn.pos = pos0
-#   rn.wavelength = wavel
-#   x = 1-(wavel - lambda_mid + delta_lamda/2) / delta_lamda
-#   rn.draw_dict["color"] = cmap( x )
-#   rays.append(rn)
-# mid_ray = Ray() # add additionally the 2400 nm mid lambda beam to be the inner ray, just cause
-# mid_ray.wavelength = lambda_mid
-# rays = [mid_ray] + rays
-# lightsource.override_rays(rays)
-# lightsource.draw_dict['model'] = "ray_group"
 
 # starting the real stretcher
 Stretcher = Composition(name="DerStrecker")
@@ -218,7 +197,7 @@ Stretcher.add_supcomposition_on_axis(Make_RoofTop_Mirror(height=periscope_height
 # note that pure cosmetic (pos6) is not in the sequence
 Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0])
 Stretcher.recompute_optical_axis()
-Stretcher.propagate(120)
+Stretcher.propagate(161)
 
 
 # last small flip mirror from stretcher with cosmetics
@@ -231,85 +210,6 @@ Stretcher.propagate(13)
 
 Stretcher.set_geom(seed_end_geom)
 
-
-
-# =============================================================================
-# Mode adaption
-# =============================================================================
-adapt_dist_lens1 = 100
-
-AdaptTeles = Composition()
-# AdaptTeles.propagate(45)
-# AdaptTeles.add_on_axis(Mirror(phi=90))
-AdaptTeles.propagate(adapt_dist_lens1)
-L1 = Lens(f=1029)
-AdaptTeles.add_on_axis(L1)
-# L1.set_geom( AdaptTeles.last_geom())
-L1.pos += L1.get_coordinate_system()[1]*-7.5
-# AdaptTeles.add_fixed_elm(L1)
-AdaptTeles.recompute_optical_axis()
-AdaptTeles.propagate((19.3920212936470+1029*2-4)/2)
-M_tele = Mirror()
-AdaptTeles.add_on_axis(M_tele)
-# M_tele.set_geom(AdaptTeles.last_geom())
-M_tele.normal = L1.normal
-# AdaptTeles.add_fixed_elm(M_tele)
-AdaptTeles.recompute_optical_axis()
-# AdaptTeles.propagate((19.3920212936470+1029*2)/2)
-AdaptTeles.set_sequence([0,1,0])
-AdaptTeles.recompute_optical_axis()
-AdaptTeles.propagate(50)
-M_tele2 = Mirror(phi = -90)
-M_tele2.set_mount(Composed_Mount(unit_model_list=["MH25_KMSS", "1inch_post"]))
-# # M_tele2.Mount.mount_list[0].flip()
-# # M_tele2.Mount.set_geom(M_tele2.get_geom())
-AdaptTeles.add_on_axis(M_tele2)
-AdaptTeles.propagate(130)
-# AdaptTeles.add_on_axis(Lambda_Plate())
-# AdaptTeles.propagate(80)
-
-AdaptTeles.set_geom(Stretcher.last_geom())
-
-AdaptTeles.draw()
-
-
-PropA = Seed.matrix()[0,1] + Stretcher.matrix()[0,1] + adapt_dist_lens1 
-
-
-# =============================================================================
-# Pump Amp1
-# =============================================================================
-
-X_ADDITIONAL = 0
-Y_ADDITIONAL = 80
-f1 = -100
-f2 = 150
-
-pump_first_prop = 100 + X_ADDITIONAL #in -x
-pump_second_prop = 100 + Y_ADDITIONAL # in +y
-pump_third_prop = 100 # in -x
-
-# pump_geom = Amplifier_I._elements[-2].get_geom()
-Pump = Composition(name="Pump")
-Pump.pos = POS_THULIUM_SMALL_OUT
-Pump.normal = (-1,0,0)
-
-pump_light = Beam(radius=1.5, angle=0)
-pump_light.draw_dict["color"] = (1.0, 1.0, 0.0)
-Pump.set_light_source(pump_light)
-
-
-Pump.propagate(pump_first_prop)
-Pump.add_on_axis(Mirror(phi=-90))
-Pump.propagate(pump_second_prop)
-Pump.add_on_axis(Mirror(phi=+90))
-Pump.propagate(pump_third_prop)
-
-# Pump.add_on_axis(Lens(f=f1))
-Pump.propagate(f1+f2*0.5)
-Pump.propagate(f1+f2*0.5)
-# Pump.add_on_axis(Lens(f=f2))
-Pump.propagate(190)
 
 
 # =============================================================================
@@ -339,7 +239,6 @@ tfp_thickness = 6.35
 
 
 # optics
-
 cm0 = Curved_Mirror(radius=focal*2, phi = 180, name="Curved_Far")
 mir1 = Mirror(phi=180 + 7, name="Dichroit")
 mir1.aperture = 0.5 * inch
@@ -359,86 +258,205 @@ PockelsCell = Pockels_Cell(name="PockelZelleRes1")
 Lambda_Regen = Lambda_Plate()
 fold1 = Mirror(phi=90)
 
-
 simres = LinearResonator(name="Regen")
 simres.set_wavelength(lam_mid)
-
 simres.add_on_axis(cm0)
 simres.propagate(total_length)
-
 simres.add_on_axis(mir1)
-
 simres.propagate(dist_crystal_end)
 laser_crys = Crystal(width=6, thickness=10, n=2.45)
 simres.add_on_axis(laser_crys)
-
 simres.propagate(last-dist_crystal_end)
-
 simres.add_on_axis(fold1)
-
 simres.propagate(dist_tfp_fold1)
-
 simres.add_on_axis(TFP_Amp1)
-# x,y,z = TFP_Amp1.get_coordinate_system()
-# TFP_Amp1.pos += y * tfp_push_aside
-
 simres.propagate(dist_lambda_tfp)
-
 simres.add_on_axis(Lambda_Regen)
-
 simres.propagate(dist_pz_lambda)
-
 simres.add_on_axis(PockelsCell)
-
 simres.propagate(dist_mir_pz)
-
 simres.add_on_axis(cm)
-
 simres.compute_eigenmode()
-
-# PockelsCell.rotate(PockelsCell.normal, np.pi/2)
-
 
 # Amplifier_I = Make_Amplifier_I()
 Amplifier_I = simres
 # Amplifier_I.set_input_coupler_index(1, False)
-ppos, paxes = Pump.last_geom()
+# ppos, paxes = Pump.last_geom()
 
-Amplifier_I.set_input_coupler_index(1)
-Amplifier_I.set_geom(Pump.last_geom())
+Amplifier_I.set_input_coupler_index(3)
+# Amplifier_I.set_geom(Pump.last_geom())
 # Amplifier_I.pos = ppos
+
+
+# =============================================================================
+# Amp1 Mode
+# =============================================================================
+amp_len = [x.length  for x in Amplifier_I._optical_axis]
+s1 = amp_len[5]
+s2 = sum(amp_len[6::])
+
+
+def MatProp(x):
+  mat = np.eye(2)
+  mat[0,1] = x
+  return mat
+
+def MatCm(R):
+  mat = np.eye(2)
+  mat[1,0] = -2/R
+  return mat
+
+MatRes = MatProp(s2) @ MatCm(2*focal) @ MatProp(s2) @ MatProp(s1) @ MatCm(2*focal) @ MatProp(s1)
+
+[[A,B], [C,D]] = MatRes
+
+z2 = (A-D) / 2 / C
+r2 = abs(1/2/C) * np.sqrt(4 - (A+D)**2)
+
+
+
+# =============================================================================
+# complicated calculation for compensation
+# =============================================================================
+# PropA = 1695.724204685186
+adapt_a2b2 = 250
+adapt_a1 = 70
+adapt_out_mirror_diff = -40
+adapt_last_prop = 130
+PropA = Seed.optical_path_length() + Stretcher.matrix()[0,1] + adapt_a1 + adapt_a2b2
+
+
+adapt_focal = 1029
+
+a = PropA
+f = adapt_focal
+r1 = 2.5**2 * np.pi / 4 / 2.4e-3
+
+v = r1/r2
+al = 1 - a/f
+ph = 1/f
+
+p = al / (al**2 + ph**2 * r1**2)
+q = (1-v) / (al**2 + ph**2 * r1**2)
+
+x1 = -p + np.sqrt(p**2 - q)
+x2 = -p - np.sqrt(p**2 - q)
+x = x1
+
+def bet(x):
+  nen = (1 + al*x)**2 + (ph*x*r1)**2
+  return (z2*nen +f*al*(1+al*x) + ph*x*r1**2) / ((1+al*x)**2*f + ph*x**2*r1**2 ) * -1
+
+delta = x*f
+beta = bet(x)
+b = f*(1-beta )
+PropB = b
+
+# Test
+L = 2*f + delta
+
+def Kogel(mat, q):
+  return (mat[0,0]*q + mat[0,1]) / (mat[1,0]*q + mat[1,1])
+
+q1 = 0 + 1j*r1
+q2 = z2 + 1j*r2
+
+mattele = MatProp(b) @ MatCm(2*f) @ MatProp(2*f+delta) @MatCm(2*f) @ MatProp(a)
+
+# print("q1", q1)
+# print("q2", q2)
+# print("Kogelnik", Kogel(mattele, q1))
+
+# print()
+# print("delta:", delta)
+# print("b:", b)
+ 
+
+def complete_solver_del_b(a=1695.7, f=1029, r1=2045.3, r2=2165, z2=1045):
+  v = r1/r2
+  al = 1 - a/f
+  ph = 1/f
+  
+  p = al / (al**2 + ph**2 * r1**2)
+  q = (1-v) / (al**2 + ph**2 * r1**2)
+  
+  x1 = -p + np.sqrt(p**2 - q)
+  x2 = -p - np.sqrt(p**2 - q)
+  x = x1
+  
+  bet1 = (z2*v +f*al*(1+al*x) + ph*x*r1**2) / ((1+al*x)**2*f + ph*x**2*r1**2 ) * -1
+  
+  x = x2
+  bet2 = (z2*v +f*al*(1+al*x) + ph*x*r1**2) / ((1+al*x)**2*f + ph*x**2*r1**2 ) * -1
+  
+  delta1 = x1*f
+  delta2 = x2*f
+  b1 = f*(1-bet1)
+  b2 = f*(1-bet2)
+  return [(delta1, b1), (delta2, b2)]
+
+a = np.linspace(PropA*0.9, PropA*1.5, 2000)
+
+[(delta1, b1), (delta2, b2)] = complete_solver_del_b(a=a)
+
+
+# import matplotlib.pyplot as plt
+plt.figure()
+plt.plot(a, b1)
+plt.plot(PropA, complete_solver_del_b(a=PropA)[0][1], "-xk" )
+
+
+# =============================================================================
+# AdaptTeles
+# =============================================================================
+
+
+
+AdaptTeles = Composition(name="ModeAdaptionTelescope")
+
+AdaptTeles.propagate(adapt_a1)
+AdaptTeles.add_on_axis(Mirror(phi=90))
+AdaptTeles.propagate(adapt_a2b2)
+
+L1 = Lens(f=adapt_focal)
+AdaptTeles.add_on_axis(L1)
+L1.pos += L1.get_coordinate_system()[1]*7.5
+AdaptTeles.recompute_optical_axis()
+AdaptTeles.propagate(adapt_focal + delta/2)
+
+M_tele = Mirror()
+AdaptTeles.add_on_axis(M_tele)
+M_tele.normal = L1.normal
+
+AdaptTeles.set_sequence([0,1,2,1])
+AdaptTeles.recompute_optical_axis()
+AdaptTeles.propagate(adapt_a2b2 + adapt_out_mirror_diff)
+M_tele2 = Mirror(phi = 90)
+M_tele2.set_mount(Composed_Mount(unit_model_list=["MH25_KMSS", "1inch_post"]))
+AdaptTeles.add_on_axis(M_tele2)
+AdaptTeles.propagate(adapt_last_prop)
+
+AdaptTeles.set_geom(Stretcher.last_geom())
+AdaptTeles._lightsource.draw_dict["model"] = "ray_group"
+
+
+
 
 
 # =============================================================================
 # The pulse picker
 # =============================================================================
 
-
 tfp_angle = 65 #tfp angle of incidence in degree
 flip_mirror_push_down = 8 # distance to push the first mirror out ouf the seed beam
 tfp_push_aside = 5 # distance in mm to push the TFP aside, so that the beam can pass through
 
 PulsePicker = Composition(name="PulsePicker")
-PulsePicker.set_geom(Stretcher.last_geom())
-
-# PulsePicker.pos = POS_STRETCHER_END_MIRROR - (0, 12, 0)
-# PulsePicker.normal = (0, 1, 0)
-# PulsePicker.propagate(12)
-
-# lightsource_pp = Beam(angle=0, radius=seed_beam_radius)
-# PulsePicker.set_light_source(lightsource_pp)
-# PulsePicker.propagate(distance_seed_laser_stretcher*0.2)
-
-# first small flip mirror from stretcher with cosmetics
-# FlipMirror_pp = Mirror(phi=-90)
-# FlipMirror_pp_mount=Composed_Mount()
-# FlipMirror_pp.set_mount(Composed_Mount(unit_model_list = ["MH25_KMSS","1inch_post"]))
-# FlipMirror_pp.Mount.set_geom(FlipMirror_pp.get_geom())
-# PulsePicker.add_on_axis(FlipMirror_pp)
-# FlipMirror_pp.pos += (0,0,flip_mirror_push_down)
+# PulsePicker.set_geom(Stretcher.last_geom())
+PulsePicker.set_geom(AdaptTeles.last_geom())
 
 # polarisation optics upt to pockels cell
-PulsePicker.propagate(320)
+PulsePicker.propagate(136)
 Lambda2 = Lambda_Plate()
 PulsePicker.add_on_axis(Lambda2)
 PulsePicker.propagate(330)
@@ -509,9 +527,198 @@ n1 = a[:,0]
 Lslfp = np.sum(TFP_Amp1.pos*n1) - np.sum(second_last_flip_pp.pos*n1)
 
 PulsePicker.propagate(Lslfp)
+
+pp_last_prop = PropB - PulsePicker.optical_path_length() -adapt_a2b2 - adapt_last_prop
+
+
+
+
 last_flip_pp = Mirror(phi=90)
 PulsePicker.add_on_axis(last_flip_pp)
-PulsePicker.propagate(np.linalg.norm(last_flip_pp.pos - TFP_Amp1.pos))
+# PulsePicker.propagate(np.linalg.norm(last_flip_pp.pos - TFP_Amp1.pos))
+PulsePicker.propagate(pp_last_prop)
+
+
+PulsePicker._lightsource.draw_dict["model"] = "ray_group"
+
+
+Amplifier_I.set_geom(PulsePicker.last_geom())
+
+# =============================================================================
+# Draw Selection
+# =============================================================================
+
+Seed.draw()
+Stretcher.draw()
+AdaptTeles.draw()
+PulsePicker.draw()
+Amplifier_I.draw()
+
+
+
+
+# Pump.draw()
+# Amp2.draw()
+# BigPump.draw()
+# Table().draw()
+# Compressor.draw()
+# # PulsePicker.draw_alignment_posts()
+
+
+# stretcher_out_obj.draw()
+# tm_big_obj.draw()
+# tm_small_obj.draw()
+
+#PulsePicker.draw_alignment_posts()
+
+
+
+
+# from LaserCAD.basic_optics import Gaussian_Beam
+# from copy import deepcopy
+
+# gb = Gaussian_Beam()
+# gb.wavelength = 2.4E-3
+# gb.q_para =  2045.3077171808552j
+# gb.draw_dict["model"]= "cone"
+# Seed.set_light_source(gb)
+
+# Seed.compute_beams()
+# last_gb1 = Seed._beams[-1]
+
+# def next_gaussian_beam(last_gb=Gaussian_Beam()):
+#   next_gb = deepcopy(last_gb)
+#   next_gb.q_para += last_gb.length
+#   next_gb.pos = last_gb.endpoint()
+#   return next_gb
+
+# Stretcher.set_light_source(next_gaussian_beam(last_gb1))
+# Stretcher.compute_beams()
+# last_gb2 = Stretcher._beams[-1]
+# PulsePicker.set_light_source(next_gaussian_beam(last_gb2))
+# # PulsePicker.compute_beams()
+# # last_gb3 = PulsePicker._beams[-1]
+# # Amplifier_I.set_light_source(next_gaussian_beam(last_gb3))
+
+# amp1_lengths = [r.length for r in Amplifier_I._optical_axis]
+# s2 = sum(amp1_lengths[0:4])
+# s1 = amp1_lengths[4]
+
+# def PropMat(s):
+#   mat = np.eye(2)
+#   mat[0,1] = s
+#   return mat
+
+# def Curved(R):
+#   mat = np.eye(2)
+#   mat[1,0] = -2/R
+#   return mat
+
+# ResonMat = PropMat(s2) @ Curved(5000) @ PropMat(s2) @ PropMat(s1) @ Curved(5000) @ PropMat(s1)
+
+# def Kogel(Mat ,q):
+#   return (Mat[0,0] *q + Mat[0,1]) / ( Mat[1,0] *q + Mat[1,1] )
+
+
+# [[A,B], [C,D]] = ResonMat
+
+# zamp = (A-D) / 2 / C
+
+# zrayamp = np.sqrt(4-(A+D)**2) / 2 / C
+# zrayamp = np.abs(zrayamp)
+
+
+
+# resonator_overlay_beams = []
+# b0 = deepcopy(PulsePicker._beams[-1])
+# b0.draw_dict["color"] = (0.2,0.2,0.8)
+
+# resonator_overlay_beams.append(b0)
+
+# b1 = Amplifier_I._elements[-1].next_beam(b0)
+# resonator_overlay_beams.append(b1)
+
+# b2 = Amplifier_I._elements[-2].next_beam(b1)
+# resonator_overlay_beams.append(b2)
+
+# b3 = Amplifier_I._elements[-3].next_beam(b2)
+# resonator_overlay_beams.append(b3)
+
+# b4 = Amplifier_I._elements[-4].next_beam(b3)
+# resonator_overlay_beams.append(b4)
+
+# for beeem in resonator_overlay_beams:
+#   beeem.draw()
+
+
+# =============================================================================
+# breadboards
+# =============================================================================
+# from LaserCAD.non_interactings import Breadboard
+# StartPos = (-700, -450, 0)
+# b1 = Breadboard()
+# b1.pos += StartPos
+# b1.draw()
+# b2= Breadboard()
+# b2.pos += b1.pos + (b2.Xdimension, 0, 0)
+# b2.draw()
+# b3= Breadboard()
+# b3.pos += b1.pos + (0, b2.Ydimension, 0)
+# b3.draw()
+# b4= Breadboard()
+# b4.pos += b1.pos + (b2.Xdimension, b2.Ydimension, 0)
+# b4.draw()
+# b5= Breadboard()
+# b5.pos += b1.pos + (0, -b2.Ydimension, 0)
+# b5.draw()
+# b6= Breadboard()
+# b6.pos += b1.pos + (b2.Xdimension, -b2.Ydimension, 0)
+# b6.draw()
+
+
+
+# =============================================================================
+# Pump Amp1
+# =============================================================================
+
+X_ADDITIONAL = 0
+Y_ADDITIONAL = 80
+f1 = -100
+f2 = 150
+
+pump_first_prop = 100 + X_ADDITIONAL #in -x
+pump_second_prop = 100 + Y_ADDITIONAL # in +y
+pump_third_prop = 100 # in -x
+
+# pump_geom = Amplifier_I._elements[-2].get_geom()
+Pump = Composition(name="Pump")
+Pump.pos = POS_THULIUM_SMALL_OUT
+Pump.normal = (-1,0,0)
+
+pump_light = Beam(radius=1.5, angle=0)
+pump_light.draw_dict["color"] = (1.0, 1.0, 0.0)
+Pump.set_light_source(pump_light)
+
+
+Pump.propagate(pump_first_prop)
+Pump.add_on_axis(Mirror(phi=-90))
+Pump.propagate(pump_second_prop)
+Pump.add_on_axis(Mirror(phi=+90))
+Pump.propagate(pump_third_prop)
+
+# Pump.add_on_axis(Lens(f=f1))
+Pump.propagate(f1+f2*0.5)
+Pump.propagate(f1+f2*0.5)
+# Pump.add_on_axis(Lens(f=f2))
+Pump.propagate(190)
+
+
+
+
+
+
+
+
 
 
 # =============================================================================
@@ -528,8 +735,8 @@ helper_mirror = Mirror()
 helper_mirror.set_geom(TFP_out.get_geom())
 Out_Beam1 = helper_mirror.next_beam(Out_Beam0)
 
-Out_Beam0.draw()
-Out_Beam1.draw()
+# Out_Beam0.draw()
+# Out_Beam1.draw()
 
 
 
@@ -702,6 +909,7 @@ pure_cosmetic1.normal = (C_RoofTop1.normal + C_RoofTop2.normal ) / 2
 pure_cosmetic1.draw_dict["model_type"] = "Rooftop"
 pure_cosmetic1.aperture = periscope_height
 """
+
 # =============================================================================
 # Four Gratings Compressor
 # =============================================================================
@@ -756,127 +964,6 @@ Compressor.add_fixed_elm(Grat2)
 Compressor.add_fixed_elm(Grat1)
 Compressor.propagate(300)
 Compressor.set_geom(Amp2.last_geom())
-
-
-t=Table()
-# =============================================================================
-# Draw Selection
-# =============================================================================
-
-# Seed.draw()
-Stretcher.draw()
-# PulsePicker.draw()
-# Amplifier_I.draw()
-# Pump.draw()
-# Amp2.draw()
-# BigPump.draw()
-# t.draw()
-# Compressor.draw()
-# # PulsePicker.draw_alignment_posts()
-
-#PulsePicker.draw_alignment_posts()
-
-
-from LaserCAD.basic_optics import Gaussian_Beam
-from copy import deepcopy
-
-gb = Gaussian_Beam()
-gb.wavelength = 2.4E-3
-gb.q_para =  2045.3077171808552j
-gb.draw_dict["model"]= "cone"
-Seed.set_light_source(gb)
-
-Seed.compute_beams()
-last_gb1 = Seed._beams[-1]
-
-def next_gaussian_beam(last_gb=Gaussian_Beam()):
-  next_gb = deepcopy(last_gb)
-  next_gb.q_para += last_gb.length
-  next_gb.pos = last_gb.endpoint()
-  return next_gb
-
-Stretcher.set_light_source(next_gaussian_beam(last_gb1))
-Stretcher.compute_beams()
-last_gb2 = Stretcher._beams[-1]
-PulsePicker.set_light_source(next_gaussian_beam(last_gb2))
-# PulsePicker.compute_beams()
-# last_gb3 = PulsePicker._beams[-1]
-# Amplifier_I.set_light_source(next_gaussian_beam(last_gb3))
-
-amp1_lengths = [r.length for r in Amplifier_I._optical_axis]
-s2 = sum(amp1_lengths[0:4])
-s1 = amp1_lengths[4]
-
-def PropMat(s):
-  mat = np.eye(2)
-  mat[0,1] = s
-  return mat
-
-def Curved(R):
-  mat = np.eye(2)
-  mat[1,0] = -2/R
-  return mat
-
-ResonMat = PropMat(s2) @ Curved(5000) @ PropMat(s2) @ PropMat(s1) @ Curved(5000) @ PropMat(s1)
-
-def Kogel(Mat ,q):
-  return (Mat[0,0] *q + Mat[0,1]) / ( Mat[1,0] *q + Mat[1,1] )
-
-
-[[A,B], [C,D]] = ResonMat
-
-zamp = (A-D) / 2 / C
-
-zrayamp = np.sqrt(4-(A+D)**2) / 2 / C
-zrayamp = np.abs(zrayamp)
-
-
-
-resonator_overlay_beams = []
-b0 = deepcopy(PulsePicker._beams[-1])
-b0.draw_dict["color"] = (0.2,0.2,0.8)
-
-resonator_overlay_beams.append(b0)
-
-b1 = Amplifier_I._elements[-1].next_beam(b0)
-resonator_overlay_beams.append(b1)
-
-b2 = Amplifier_I._elements[-2].next_beam(b1)
-resonator_overlay_beams.append(b2)
-
-b3 = Amplifier_I._elements[-3].next_beam(b2)
-resonator_overlay_beams.append(b3)
-
-b4 = Amplifier_I._elements[-4].next_beam(b3)
-resonator_overlay_beams.append(b4)
-
-# for beeem in resonator_overlay_beams:
-#   beeem.draw()
-
-
-# =============================================================================
-# breadboards
-# =============================================================================
-# from LaserCAD.non_interactings import Breadboard
-# StartPos = (-700, -450, 0)
-# b1 = Breadboard()
-# b1.pos += StartPos
-# b1.draw()
-# b2= Breadboard()
-# b2.pos += b1.pos + (b2.Xdimension, 0, 0)
-# b2.draw()
-# b3= Breadboard()
-# b3.pos += b1.pos + (0, b2.Ydimension, 0)
-# b3.draw()
-# b4= Breadboard()
-# b4.pos += b1.pos + (b2.Xdimension, b2.Ydimension, 0)
-# b4.draw()
-# b5= Breadboard()
-# b5.pos += b1.pos + (0, -b2.Ydimension, 0)
-# b5.draw()
-# b6= Breadboard()
-# b6.pos += b1.pos + (b2.Xdimension, -b2.Ydimension, 0)
-# b6.draw()
 
 if freecad_da:
   setview()

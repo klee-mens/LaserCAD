@@ -14,36 +14,7 @@ from LaserCAD.freecad_models import freecad_da, clear_doc, setview
 if freecad_da:
   clear_doc()
 
-AdaptTeles = Composition()
 
-AdaptTeles.propagate(45)
-AdaptTeles.add_on_axis(Mirror(phi=90))
-AdaptTeles.propagate(100)
-L1 = Lens(f=1029)
-AdaptTeles.add_on_axis(L1)
-# L1.set_geom( AdaptTeles.last_geom())
-L1.pos += L1.get_coordinate_system()[1]*7.5
-# AdaptTeles.add_fixed_elm(L1)
-AdaptTeles.recompute_optical_axis()
-AdaptTeles.propagate((19.3920212936470+1029*2-4)/2)
-M_tele = Mirror()
-AdaptTeles.add_on_axis(M_tele)
-# M_tele.set_geom(AdaptTeles.last_geom())
-M_tele.normal = L1.normal
-# AdaptTeles.add_fixed_elm(M_tele)
-AdaptTeles.recompute_optical_axis()
-# AdaptTeles.propagate((19.3920212936470+1029*2)/2)
-AdaptTeles.set_sequence([0,1,2,1])
-AdaptTeles.recompute_optical_axis()
-AdaptTeles.propagate(50)
-M_tele2 = Mirror(phi = 90)
-M_tele2.set_mount(Composed_Mount(unit_model_list=["MH25_KMSS", "1inch_post"]))
-# # M_tele2.Mount.mount_list[0].flip()
-# # M_tele2.Mount.set_geom(M_tele2.get_geom())
-AdaptTeles.add_on_axis(M_tele2)
-AdaptTeles.propagate(30)
-AdaptTeles.add_on_axis(Lambda_Plate())
-AdaptTeles.propagate(80)
 
 
 
@@ -172,12 +143,17 @@ MatRes = MatProp(s2) @ MatCm(2*focal) @ MatProp(s2) @ MatProp(s1) @ MatCm(2*foca
 z2 = (A-D) / 2 / C
 r2 = abs(1/2/C) * np.sqrt(4 - (A+D)**2)
 
+
+
 # =============================================================================
 # complicated calculation for compensation
 # =============================================================================
 PropA = 1695.724204685186
+
+adapt_focal = 1029
+
 a = PropA
-f = 1029
+f = adapt_focal
 r1 = 2.5**2 * np.pi / 4 / 2.4e-3
 
 v = r1/r2
@@ -193,10 +169,11 @@ x = x1
 
 def bet(x):
   nen = (1 + al*x)**2 + (ph*x*r1)**2
-  return (z2*nen +f*al*(1+al*x) + ph*x*r1**2) / ((1+al*x)**2 + ph*x**2*r1**2 ) * -1
+  return (z2*nen +f*al*(1+al*x) + ph*x*r1**2) / ((1+al*x)**2*f + ph*x**2*r1**2 ) * -1
 
 delta = x*f
-b = f*(1-bet(x) )
+beta = bet(x)
+b = f*(1-beta )
 
 
 # Test
@@ -214,11 +191,77 @@ print("q1", q1)
 print("q2", q2)
 print("Kogelnik", Kogel(mattele, q1))
 
+print()
+print("delta:", delta)
+print("b:", b)
+ 
+
+def complete_solver_del_b(a=1695.7, f=1029, r1=2045.3, r2=2165, z2=1045):
+  v = r1/r2
+  al = 1 - a/f
+  ph = 1/f
+  
+  p = al / (al**2 + ph**2 * r1**2)
+  q = (1-v) / (al**2 + ph**2 * r1**2)
+  
+  x1 = -p + np.sqrt(p**2 - q)
+  x2 = -p - np.sqrt(p**2 - q)
+  x = x1
+  
+  bet1 = (z2*v +f*al*(1+al*x) + ph*x*r1**2) / ((1+al*x)**2*f + ph*x**2*r1**2 ) * -1
+  
+  x = x2
+  bet2 = (z2*v +f*al*(1+al*x) + ph*x*r1**2) / ((1+al*x)**2*f + ph*x**2*r1**2 ) * -1
+  
+  delta1 = x1*f
+  delta2 = x2*f
+  b1 = f*(1-bet1)
+  b2 = f*(1-bet2)
+  return [(delta1, b1), (delta2, b2)]
+
+a = np.linspace(PropA*0.9, PropA*1.5, 2000)
+
+[(delta1, b1), (delta2, b2)] = complete_solver_del_b(a=a)
+
+
+# =============================================================================
+# AdaptTeles
+# =============================================================================
+
+
+AdaptTeles = Composition()
+
+AdaptTeles.propagate(70)
+AdaptTeles.add_on_axis(Mirror(phi=-90))
+AdaptTeles.propagate(100)
+
+L1 = Lens(f=adapt_focal)
+AdaptTeles.add_on_axis(L1)
+L1.pos += L1.get_coordinate_system()[1]*-7.5
+AdaptTeles.recompute_optical_axis()
+AdaptTeles.propagate(adapt_focal + delta/2)
+
+M_tele = Mirror()
+AdaptTeles.add_on_axis(M_tele)
+M_tele.normal = L1.normal
+
+AdaptTeles.set_sequence([0,1,2,1])
+AdaptTeles.recompute_optical_axis()
+AdaptTeles.propagate(50)
+M_tele2 = Mirror(phi = -90)
+M_tele2.set_mount(Composed_Mount(unit_model_list=["MH25_KMSS", "1inch_post"]))
+AdaptTeles.add_on_axis(M_tele2)
+AdaptTeles.propagate(130)
+
+AdaptTeles._lightsource.draw_dict["model"] = "ray_group" 
  
 # =============================================================================
 # Draw selection
 # =============================================================================
-# AdaptTeles.draw()
+AdaptTeles.draw_elements()
+AdaptTeles.draw_mounts()
+AdaptTeles.draw_beams()
+
 
 if freecad_da:
   setview()
