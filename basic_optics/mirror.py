@@ -205,6 +205,29 @@ class Mirror(Opt_Element):
     # print("nextnormal", (inc - refl)/np.linalg.norm(inc - refl))
     self.normal = inc - refl
     self.__phi, self.__theta =  self.recompute_angles()
+    
+  def set_normal_with_output_direction(self, output_vec=(0,1,0)):
+    """
+    sets the normal of the mirror using its __incident_normal and a direction 
+    where the reflected beam should go
+    
+    Example 
+    m = Mirror()
+    m.set_normal_with_output_direction(output_vec=(0,1,0))
+    
+    Parameters
+    ----------
+    output_vec : TYPE, optional
+      DESCRIPTION. The default is (0,1,0).
+
+    Returns
+    -------
+    None.
+
+    """
+    p0 = self.pos - self.__incident_normal
+    p1 = self.pos + output_vec
+    self.set_normal_with_2_points(p0, p1)
 
   def __repr__(self):
     n = len(self.class_name())
@@ -500,7 +523,7 @@ class Cylindrical_Mirror(Stripe_mirror):
   #   # rotate(obj, vec, angle, off0=0)
   #   return obj
 
-  def next_ray_trace(self, ray):
+  def next_ray(self, ray):
     """
     erzeugt den nächsten Ray auf Basis der analytischen Berechung von Schnitt-
     punkt von Sphere mit ray und dem vektoriellen Reflexionsgesetz

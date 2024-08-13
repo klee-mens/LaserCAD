@@ -38,6 +38,9 @@ if __name__ == "__main__":
   # Amplifter_Typ_II_test()
   from LaserCAD.moduls.type_II_Amplifier import Make_Amplifier_Typ_II_plane
   amp = Make_Amplifier_Typ_II_plane(roundtrips2=2)
+  from LaserCAD.basic_optics import Beam
+  # amp._lightsource = Beam(radius=10)
+  # amp._lightsource.draw_dict["model"] = "ray_group"
   amp.draw()
 
 if freecad_da:

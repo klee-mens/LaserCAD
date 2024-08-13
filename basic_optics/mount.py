@@ -7,7 +7,7 @@ Created on Sat Aug 19 14:40:56 2023
 
 from ..freecad_models.utils import thisfolder,load_STL,rotate,translate
 from ..freecad_models.freecad_model_composition import initialize_composition_old,add_to_composition
-from ..freecad_models.freecad_model_mounts import mirror_mount,DEFAULT_MOUNT_COLOR,DEFAULT_MAX_ANGULAR_OFFSET,model_Post_Marker
+from ..freecad_models.freecad_model_mounts import mirror_mount,DEFAULT_MOUNT_COLOR,DEFAULT_MAX_ANGULAR_OFFSET,model_Post_Marker,rotate_vector
 from ..freecad_models.freecad_model_grating import grating_mount
 from .geom_object import Geom_Object, rotation_matrix
 from .post import Post_and_holder
@@ -219,10 +219,10 @@ class Unit_Mount(Geom_Object):
 
 
 class Post(Geom_Object):
-  def __init__(self, name="post",model="1inch_post", **kwargs):
+  def __init__(self, name="post",model="1inch_post",lower_limit=0, **kwargs):
     super().__init__(name, **kwargs)
     self.axis_fixed = True
-    self._lower_limit = 0
+    self._lower_limit = lower_limit
     self.draw_dict["post_color"] = DEFALUT_POST_COLOR
     self.draw_dict["holder_color"] = DEFALUT_HOLDER_COLOR
     self.model=model
@@ -422,7 +422,39 @@ class Composed_Mount(Geom_Object):
       second = self.mount_list[mount_number+1]
       second.set_geom(first.docking_obj.get_geom())
 
-
+class Stages_Mount(Composed_Mount):
+  """
+  class for a Composed mount with x stage.
+  
+  """
+  def __init__(self, stages_height=23.1,aperture=25.4,elm_type = "Mirror",
+               elm_thickness=10,basic_mount=None,x_aligned=True,stage_name="XR25C",**kwargs):
+    super().__init__(**kwargs)
+    if basic_mount == None:
+      basic_mount = get_mount_by_aperture_and_element(aperture, elm_type,elm_thickness)
+    basic_mount.mount_list[-1].set_lower_limit(stages_height)
+    for mou in basic_mount.mount_list:
+      self.add(mou)
+    self.add(Unit_Mount("XR25C"))
+    self.x_aligned = x_aligned
+    if not self.x_aligned:  
+      self.mount_list[-1].normal = self.mount_list[0].normal
+  
+  def _axes_changed(self, old_axes, new_axes):
+    super()._axes_changed(old_axes, new_axes)
+    if not self.x_aligned:  
+      self.mount_list[-1].normal = self.mount_list[0].normal
+  
+  def find_screw_hole(self):
+    angle=np.arccos(self.mount_list[-1].normal[0])
+    hole = (25.4,95.3/2,self.mount_list[-1].pos[2])
+    hole_pos = self.mount_list[-1].pos - (hole[0]*np.cos(angle)-hole[1]*np.sin(angle),
+                                          hole[0]*np.sin(angle)+hole[1]*np.cos(angle),
+                                          hole[2])
+    shifted_pos = (int(hole_pos[0]/25)*25,int(hole_pos[1]/25)*25,0)
+    shifting_vec = hole_pos-shifted_pos
+    self.mount_list[-1].pos -= shifting_vec
+  
 
 class Stripe_Mirror_Mount(Composed_Mount):
   def __init__(self, mirror_thickness=10,**kwargs):

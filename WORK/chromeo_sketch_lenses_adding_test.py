@@ -71,6 +71,7 @@ Seed = Composition(name="Seed")
 # Seed.normal = (1,2,0)
 Seed.pos = start_point
 Seed.set_light_source(Beam(angle=0, radius=seed_beam_radius))
+Seed._lightsource.draw_dict["model"] = "ray_group"
 Seed.add_on_axis(seed_laser)
 Seed.propagate(distance_6_mm_faraday)
 Seed.add_on_axis(faraday_isolator_6mm)
@@ -801,7 +802,7 @@ zamp = (A-D) / 2 / C
 zrayamp = np.sqrt(4-(A+D)**2) / 2 / C
 zrayamp = np.abs(zrayamp)
 
-# Seed.draw()
+Seed.draw()
 Stretcher.draw()
 PulsePicker.draw()
 Amplifier_I.draw()

@@ -35,6 +35,10 @@ gb = Gaussian_Beam(name="KFG-Beam")
 gb.pos += (0,200,0)
 gb.draw()
 
+b1 = Beam(ray_count = 5)
+b1.pos -= (0,50,0)
+b1.draw_dict["model"] = "ray_group"
+b1.draw()
 
 gb2 = Gaussian_Beam(radius=1)
 gb2.pos += (0, 250, 0)

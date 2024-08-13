@@ -8,7 +8,7 @@ from LaserCAD.basic_optics import Mirror,Beam,Cylindrical_Mirror,Grating,Ray
 from LaserCAD.basic_optics import Intersection_plane,Cylindrical_Mirror1
 from LaserCAD.basic_optics import Curved_Mirror, Composition,Rainbow,Lens
 
-from LaserCAD.basic_optics import Unit_Mount,Composed_Mount, Crystal,Gaussian_Beam
+from LaserCAD.basic_optics import Unit_Mount,Composed_Mount,Gaussian_Beam
 from LaserCAD.non_interactings import Pockels_Cell
 from LaserCAD.non_interactings import Lambda_Plate
 
@@ -21,13 +21,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-R1 = 2045.3077171808552
+# R1 = 2045.3077171808552
+R1 = 2061.8448908395217
 # i1 = 2061.844890839514
 R2 = 2165.0635094610957
 # L = 3485
-f =480
+f =1029
 phi = 1/f
-a = 2500
+a = 2630.923337251946+100
 alpha = 1 - a/f
 
 
@@ -44,7 +45,7 @@ discriminant = (b_coef ** 2) - 4 * a_coef * c_coef
 root1 = (-b_coef + np.sqrt(discriminant)) / (2 * a_coef)
 root2 = (-b_coef - np.sqrt(discriminant)) / (2 * a_coef)
 
-delta = max(root1, root2)
+delta = min(root1, root2)
 C = phi**2 * delta
 D = -1 - phi * delta * alpha
 dev = D**2 + C**2*R1**2
@@ -55,6 +56,7 @@ print(delta,b)
 
 Comp = Composition()
 B =Gaussian_Beam(radius=1.25,angle=np.arctan(2400E-6/(np.pi*1.25)), wavelength=2400E-6)
+B.q_para = 1j*R1
 Comp.set_light_source(B)
 Comp.propagate(a)
 L1 = Lens(f=f)
@@ -64,4 +66,5 @@ Comp.propagate(2*f+delta)
 Comp.add_on_axis(L2)
 Comp.propagate(b)
 Comp.compute_beams()
+Comp.draw()
 print(Comp._beams[-1])
