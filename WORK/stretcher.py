@@ -20,8 +20,9 @@ from copy import deepcopy
 from LaserCAD.basic_optics import Mirror,Beam,Cylindrical_Mirror,Grating,Ray
 from LaserCAD.basic_optics import Intersection_plane,Cylindrical_Mirror1
 from LaserCAD.basic_optics import Curved_Mirror, Composition
+from LaserCAD.basic_optics.beam import CircularRayBeam
 
-from LaserCAD.basic_optics import Unit_Mount,Composed_Mount, Crystal
+from LaserCAD.basic_optics import Unit_Mount,Composed_Mount
 from LaserCAD.non_interactings import Pockels_Cell
 from LaserCAD.non_interactings import Lambda_Plate
 
@@ -93,12 +94,13 @@ def small_shift_finden(Concav_shift=[0,0,0,0]):
     rn.wavelength = wavel
     x = 1-(wavel - lam_mid + delta_lamda/2) / delta_lamda
     rn.draw_dict["color"] = cmap( x )
-    rg = Beam(radius=Beam_radius, angle=0,wavelength=wavel)
-    rg.make_circular_distribution(ring_number=Ring_number)
+    rg = CircularRayBeam(radius=Beam_radius, wavelength=wavel,ring_number=Ring_number)
+    # rg.make_circular_distribution(ring_number=Ring_number)
     for ray_number in range(0,rg._ray_count):
       rn = rg.get_all_rays()[ray_number]
       rn.draw_dict["color"] = cmap( x )
       rays.append(rn)
+  # print(rays)
   lightsource.override_rays(rays)
   lightsource.draw_dict['model'] = "ray_group"
   centerlightsource = Beam(radius=0, angle=0)
@@ -159,7 +161,7 @@ def small_shift_finden(Concav_shift=[0,0,0,0]):
   # StripeM2.Mount.set_geom(StripeM2.get_geom())
   # StripeM2.Mount.pos += StripeM2.normal*25
   
-  Grat = Grating(grat_const=grat_const,order=1, name="Gitter")
+  Grat = Grating(grat_const=grat_const,order=-1, name="Gitter")
   Grat.pos = (Radius-seperation, 0, 0)
   Grat.normal = (np.sqrt(1-sinB**2), -sinB, 0)
   
@@ -269,7 +271,7 @@ def small_shift_finden(Concav_shift=[0,0,0,0]):
   ip = Intersection_plane()
   ip.set_geom(Stretcher.last_geom())
   ip.pos+=(0,0,7)
-  ip.spot_diagram(Stretcher._beams[-1],aberration_analysis=True)
+  # ip.spot_diagram(Stretcher._beams[-1],aberration_analysis=True)
   ip.draw()
   rays_end = Stretcher._beams[-1].get_all_rays()
   # print(rays_end)

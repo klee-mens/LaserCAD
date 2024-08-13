@@ -44,7 +44,7 @@ class Intersection_plane(Opt_Element):
     
   def next_ray(self, ray):
     ray2=deepcopy(ray)
-    ray2.pos = ray.intersect_with(self)
+    ray2.pos = ray.intersection(self)
     # return ray2
     return ray2
   

@@ -500,7 +500,7 @@ class Cylindrical_Mirror(Stripe_mirror):
   #   # rotate(obj, vec, angle, off0=0)
   #   return obj
 
-  def next_ray_trace(self, ray):
+  def next_ray(self, ray):
     """
     erzeugt den nächsten Ray auf Basis der analytischen Berechung von Schnitt-
     punkt von Sphere mit ray und dem vektoriellen Reflexionsgesetz

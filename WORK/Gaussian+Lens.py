@@ -8,7 +8,7 @@ from LaserCAD.basic_optics import Mirror,Beam,Cylindrical_Mirror,Grating,Ray
 from LaserCAD.basic_optics import Intersection_plane,Cylindrical_Mirror1
 from LaserCAD.basic_optics import Curved_Mirror, Composition,Rainbow,Lens
 
-from LaserCAD.basic_optics import Unit_Mount,Composed_Mount, Crystal,Gaussian_Beam
+from LaserCAD.basic_optics import Unit_Mount,Composed_Mount,Gaussian_Beam
 from LaserCAD.non_interactings import Pockels_Cell
 from LaserCAD.non_interactings import Lambda_Plate
 

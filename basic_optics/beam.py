@@ -38,7 +38,7 @@ class Beam(Geom_Object):
     self._angle = angle
     self._radius = radius
     self._Bwavelength = wavelength
-    self.make_cone_distribution()
+    self.make_cone_distribution(ray_count)
     self._distribution = "cone"
     self.draw_dict["model"] = "cone"
     self.freecad_model = model_beam
@@ -194,6 +194,7 @@ class Beam(Geom_Object):
 class SquareBeam(Beam):
   def __init__(self, radius=1, name="NewBeam", wavelength=1030E-6, ray_in_line = 3, **kwargs):
     super().__init__(name=name, **kwargs)
+    self._radius = radius
     self._ray_in_line = ray_in_line
     self.make_square_distribution(ray_in_line)
     self._distribution = "square"
@@ -236,6 +237,8 @@ class SquareBeam(Beam):
 class CircularRayBeam(Beam):
   def __init__(self, radius=1, name="NewBeam", wavelength=1030E-6, ring_number = 2, **kwargs):
     super().__init__(name=name, **kwargs)
+    self._radius = radius
+    self._Bwavelength = wavelength
     self._ring_number = ring_number
     self.make_circular_distribution(ring_number)
     # self._ray_count = len(self._rays)
@@ -291,6 +294,8 @@ class CircularRayBeam(Beam):
 class RainbowBeam(Beam):
   def __init__(self,  name="NewRainbow", wavelength=1030E-6, bandwith=10E-6, ray_count=11, **kwargs):
     super().__init__(name=name, **kwargs)
+    self._Bwavelength = wavelength
+    self._ray_count = ray_count
     self._bandwith = bandwith
     self.make_rainbow_distribution(ray_count)
     self._distribution = "rainbow"
@@ -416,31 +421,31 @@ class RainbowBeam(Beam):
     self._rearange_subobjects_axes(old_axes, new_axes, self._rays)
 
 
-  def draw_freecad(self):
-    if self.draw_dict["model"] == "Gaussian":
-      return model_Gaussian_beam(name=self.name, q_para=self.q_para,
-                                 wavelength=self.wavelength,
-                                 prop=self.get_all_rays()[0].length,
-                                 geom_info=self.get_geom())
-    elif self.draw_dict["model"] == "cone":
-      radius, angle = self.radius_angle()
-      # return model_beam(name=self.name, dia=2*radius, prop=self.length(),
-           # f=self.focal_length(), geom_info=self.get_geom(), **self.draw_dict)
-      return model_beam(dia=2*radius, prop=self.length(), f=self.focal_length(),
-                        geom_info=self.get_geom(), **self.draw_dict)
-      # return model_beam_new(radius=radius, length=self.length(),  angle=angle,
-                            # geom_info=self.get_geom(),**self.draw_dict)
-      # return model_Gaussian_beam(name=self.name, dia=2*radius, prop=self.length(),
-      #      f=self.focal_length(), geom_info=self.get_geom())
-    else:
-      part = initialize_composition_old(name="ray group")
-      container = []
-      for nn in range(self._ray_count):
-        our=self._rays[nn]
-        obj = our.draw_freecad()
-        container.append(obj)
-      add_to_composition(part, container)
-      return part
+  # def draw_freecad(self):
+  #   if self.draw_dict["model"] == "Gaussian":
+  #     return model_Gaussian_beam(name=self.name, q_para=self.q_para,
+  #                                wavelength=self.wavelength,
+  #                                prop=self.get_all_rays()[0].length,
+  #                                geom_info=self.get_geom())
+  #   elif self.draw_dict["model"] == "cone":
+  #     radius, angle = self.radius_angle()
+  #     # return model_beam(name=self.name, dia=2*radius, prop=self.length(),
+  #          # f=self.focal_length(), geom_info=self.get_geom(), **self.draw_dict)
+  #     return model_beam(dia=2*radius, prop=self.length(), f=self.focal_length(),
+  #                       geom_info=self.get_geom(), **self.draw_dict)
+  #     # return model_beam_new(radius=radius, length=self.length(),  angle=angle,
+  #                           # geom_info=self.get_geom(),**self.draw_dict)
+  #     # return model_Gaussian_beam(name=self.name, dia=2*radius, prop=self.length(),
+  #     #      f=self.focal_length(), geom_info=self.get_geom())
+  #   else:
+  #     part = initialize_composition_old(name="ray group")
+  #     container = []
+  #     for nn in range(self._ray_count):
+  #       our=self._rays[nn]
+  #       obj = our.draw_freecad()
+  #       container.append(obj)
+  #     add_to_composition(part, container)
+  #     return part
 
 class Rainbow(Beam):
   def __init__(self, separation=0, angle=0,ray_count=15, name="NewBeam",wavelength_range=(1000E-6,1060E-6), **kwargs):
