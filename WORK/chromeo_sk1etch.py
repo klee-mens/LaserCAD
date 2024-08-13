@@ -72,10 +72,10 @@ Seed.add_on_axis(faraday_isolator_6mm)
 Flip0 = Mirror(phi=-90)
 Seed.propagate(distance_faraday_mirror)
 Seed.add_on_axis(Flip0)
-Seed.propagate(75)
+Seed.propagate(50)
 Seed.add_on_axis(Lambda_Plate())
-Seed.propagate(200)
-seed_end_geom = Seed.last_geom()
+Seed.propagate(225)
+# seed_end_geom = Seed.last_geom()
 # print(faraday_isolator_6mm.pos)
 # =============================================================================
 # Create and draw the stretcher
@@ -197,7 +197,7 @@ Stretcher.add_supcomposition_on_axis(Make_RoofTop_Mirror(height=periscope_height
 # note that pure cosmetic (pos6) is not in the sequence
 Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0])
 Stretcher.recompute_optical_axis()
-Stretcher.propagate(161)
+Stretcher.propagate(185)
 
 
 # last small flip mirror from stretcher with cosmetics
@@ -208,7 +208,7 @@ Stretcher.add_on_axis(FlipMirror_pp)
 FlipMirror_pp.pos += (0,0,flip_mirror_push_down)
 Stretcher.propagate(13)
 
-Stretcher.set_geom(seed_end_geom)
+Stretcher.set_geom(Seed.last_geom())
 
 
 
@@ -288,6 +288,82 @@ Amplifier_I.set_input_coupler_index(3)
 # Amplifier_I.pos = ppos
 
 
+
+# =============================================================================
+# folded Resonator
+# =============================================================================
+# calculus
+# A_target = 4.908738521234052 #from gain simlutation area in mm^2
+focal = 2500
+lam_mid = 2.4e-3
+# A_natural = lam_mid * focal
+# geometrie_factor = A_target / A_natural
+total_length = focal / 2
+tfp_push_aside = 5 # distance in mm to push the TFP aside, so that the beam can pass through
+
+# design params
+width_pz = 80
+dist_mir_pz = 20 + width_pz
+dist_pz_lambda = 115 - width_pz
+dist_lambda_tfp = 70
+dist_tfp_fold1 = 65
+# dist_fold1_fold2 = 300
+dist_crystal_end = 20
+last = total_length - dist_mir_pz - dist_pz_lambda - dist_lambda_tfp -dist_tfp_fold1
+tfp_aperture = 2*inch
+tfp_angle = 65
+tfp_thickness = 6.35
+
+
+# optics
+cm0 = Curved_Mirror(radius=focal*2, phi = 180, name="Curved_Far")
+mir1 = Mirror(phi=-90, name="Dichroit")
+mir1.draw_dict["color"] = (0.8, 0.6, 0.1)
+
+TFP_Amp1 = Mirror(phi= 180 - 2*tfp_angle, name="TFP_Amp1")
+TFP_Amp1.draw_dict["color"] = (1.0, 0.0, 2.0)
+TFP_Amp1.aperture = tfp_aperture
+TFP_Amp1.thickness = tfp_thickness
+TFP_Amp1.set_mount_to_default()
+pol_mount = TFP_Amp1.Mount.mount_list[0]
+pol_mount.flip()
+# TFP_Amp1.mount_dict["Flip90"]=True
+
+cm = Curved_Mirror(radius=focal*2, phi = 180, name="Curved_PZ")
+PockelsCell = Pockels_Cell(name="PockelZelleRes1")
+Lambda_Regen = Lambda_Plate()
+fold1 = Mirror(phi=90)
+
+simres = LinearResonator(name="Regen")
+simres.set_wavelength(lam_mid)
+simres.add_on_axis(cm0)
+simres.propagate(total_length)
+simres.add_on_axis(mir1)
+simres.propagate(dist_crystal_end)
+laser_crys = Crystal(width=6, thickness=10, n=2.45)
+simres.add_on_axis(laser_crys)
+simres.propagate(last-dist_crystal_end)
+simres.add_on_axis(fold1)
+simres.propagate(dist_tfp_fold1)
+simres.add_on_axis(TFP_Amp1)
+simres.propagate(dist_lambda_tfp)
+simres.add_on_axis(Lambda_Regen)
+simres.propagate(dist_pz_lambda)
+simres.add_on_axis(PockelsCell)
+simres.propagate(dist_mir_pz)
+simres.add_on_axis(cm)
+simres.compute_eigenmode()
+
+# Amplifier_I = Make_Amplifier_I()
+Amplifier_I = simres
+# Amplifier_I.set_input_coupler_index(1, False)
+# ppos, paxes = Pump.last_geom()
+
+Amplifier_I.set_input_coupler_index(3)
+# Amplifier_I.set_geom(Pump.last_geom())
+# Amplifier_I.pos = ppos
+
+
 # =============================================================================
 # Amp1 Mode
 # =============================================================================
@@ -319,14 +395,15 @@ r2 = abs(1/2/C) * np.sqrt(4 - (A+D)**2)
 # complicated calculation for compensation
 # =============================================================================
 # PropA = 1695.724204685186
-adapt_a2b2 = 250
+adapt_a2b2 = 220
 adapt_a1 = 70
-adapt_out_mirror_diff = -40
+adapt_out_mirror_diff = - 64
 adapt_last_prop = 130
 PropA = Seed.optical_path_length() + Stretcher.matrix()[0,1] + adapt_a1 + adapt_a2b2
 
 
-adapt_focal = 1029
+# adapt_focal = 1029
+adapt_focal = 772
 
 a = PropA
 f = adapt_focal
@@ -484,59 +561,65 @@ x,y,z = TFP_pp.get_coordinate_system()
 TFP_pp.pos += y * tfp_push_aside
 
 
-PulsePicker.propagate(80)
-PulsePicker.add_on_axis(Lambda_Plate())
+# Spacer Stage for adapting the real part of the beam to the regen
 PulsePicker.propagate(100)
 
-# Output TFP to sedn the beam to Amp2
-TFP_out = Mirror(phi = 180-2*tfp_angle, name="Output_to_Amp2")
+# zick zack beam line to adjust the beam into Amp1
+FlipMirror2_pp = Mirror(phi=90)
+PulsePicker.add_on_axis(FlipMirror2_pp)
+
+# delay stage
+pp_delay_stage_length = 540
+PulsePicker.propagate(pp_delay_stage_length)
+PulsePicker.add_on_axis(Mirror(phi=-90))
+PulsePicker.propagate(100)
+PulsePicker.add_on_axis(Mirror(phi=-90))
+PulsePicker.propagate(pp_delay_stage_length-30)
+PulsePicker.add_on_axis(Mirror(phi=90))
+
+
+# PulsePicker.propagate(385)
+
+# Output Stage bevore the RegenAmp
+pp_dist_last_flip_mirror_to_lambda3 = 40
+pp_dist_lambda3_to_tfp_out = 100
+pp_dist_tfp_out_to_lambda4 = 70
+pp_dist_lambda4_to_faraday_rot = 50
+pp_dist_faraday_rot_to_regen_in = 150
+
+pp_last_prop = PropB - PulsePicker.optical_path_length() -adapt_a2b2 - pp_dist_last_flip_mirror_to_lambda3 - adapt_last_prop -pp_dist_lambda3_to_tfp_out - pp_dist_tfp_out_to_lambda4 - pp_dist_lambda4_to_faraday_rot - pp_dist_faraday_rot_to_regen_in
+PulsePicker.propagate(pp_last_prop)
+
+last_flip_pp = Mirror(phi=90)
+PulsePicker.add_on_axis(last_flip_pp)
+PulsePicker.propagate(pp_dist_last_flip_mirror_to_lambda3)
+
+PulsePicker.add_on_axis(Lambda_Plate())
+PulsePicker.propagate(pp_dist_lambda3_to_tfp_out)
+
+# Output TFP to send the beam to Amp2
+TFP_out = Mirror(phi = -180+2*tfp_angle, name="Output_to_Amp2")
 TFP_out.draw_dict["color"] = (1.0, 0.0, 2.0)
 TFP_out.draw_dict["thickness"] = 4
 TFP_out.aperture = 2*inch
 TFP_out.thickness = tfp_thickness
-# TFP_out.set_mount_to_default()
 TFP_out_Mount = Composed_Mount(["KS2", "1inch_post"])
 TFP_out.set_mount(TFP_out_Mount)
 TFP_out.Mount.mount_list[0].flip()
 TFP_out.next_ray = TFP_out.just_pass_through
 PulsePicker.add_on_axis(TFP_out)
 TFP_out.normal = TFP_pp.normal
+TFP_out.rotate((0,0,1), phi=np.pi/2)
 x,y,z = TFP_out.get_coordinate_system()
 TFP_out.pos += - y * tfp_push_aside
-PulsePicker.propagate(90) # maybe just use the thickness of the energy detector everytime instead ...
+PulsePicker.propagate(pp_dist_tfp_out_to_lambda4) # maybe just use the thickness of the energy detector everytime instead ...
 
-# zick zack beam line to adjust the beam into Amp1
-FlipMirror2_pp = Mirror(phi=90)
-PulsePicker.add_on_axis(FlipMirror2_pp)
-PulsePicker.propagate(80)
-FaradPP = Faraday_Isolator()
-PulsePicker.add_on_axis(FaradPP)
-PulsePicker.propagate(120)
 Lambda2_2_pp = Lambda_Plate()
 PulsePicker.add_on_axis(Lambda2_2_pp)
-#last knee for adjustment
-PulsePicker.propagate(80)
-
-second_last_flip_pp = Mirror(phi=-90)
-PulsePicker.add_on_axis(second_last_flip_pp)
-
-#geometrical considerations regarding 2 perpendicular rays that should
-#zick zack meet in Regen TFP
-p,a = PulsePicker.last_geom()
-n1 = a[:,0]
-Lslfp = np.sum(TFP_Amp1.pos*n1) - np.sum(second_last_flip_pp.pos*n1)
-
-PulsePicker.propagate(Lslfp)
-
-pp_last_prop = PropB - PulsePicker.optical_path_length() -adapt_a2b2 - adapt_last_prop
-
-
-
-
-last_flip_pp = Mirror(phi=90)
-PulsePicker.add_on_axis(last_flip_pp)
-# PulsePicker.propagate(np.linalg.norm(last_flip_pp.pos - TFP_Amp1.pos))
-PulsePicker.propagate(pp_last_prop)
+PulsePicker.propagate(pp_dist_lambda4_to_faraday_rot)
+FaradPP = Faraday_Isolator()
+PulsePicker.add_on_axis(FaradPP)
+PulsePicker.propagate(pp_dist_faraday_rot_to_regen_in)
 
 
 PulsePicker._lightsource.draw_dict["model"] = "ray_group"
@@ -548,26 +631,28 @@ Amplifier_I.set_geom(PulsePicker.last_geom())
 # Draw Selection
 # =============================================================================
 
-Seed.draw()
-Stretcher.draw()
+# Seed.draw()
+# Stretcher.draw()
+Stretcher.draw_elements()
 AdaptTeles.draw()
 PulsePicker.draw()
-Amplifier_I.draw()
+# Amplifier_I.draw()
+Amplifier_I.draw_elements()
+Amplifier_I.draw_mounts()
 
 
 
 
 # Pump.draw()
-# Amp2.draw()
 # BigPump.draw()
-# Table().draw()
+Table().draw()
 # Compressor.draw()
 # # PulsePicker.draw_alignment_posts()
 
 
 # stretcher_out_obj.draw()
 # tm_big_obj.draw()
-# tm_small_obj.draw()
+tm_small_obj.draw()
 
 #PulsePicker.draw_alignment_posts()
 
@@ -725,18 +810,18 @@ Pump.propagate(190)
 # Output Beam to Amp2
 # =============================================================================
 bs = PulsePicker.compute_beams()
-b4 = bs[4]
-b3 = bs[3]
+b_pp_end = bs[-1]
+r_pp_end = b_pp_end.inner_ray()
 Out_Beam0 = Beam(radius=2, name="Beam_to_Amp2")
 Out_Beam0.draw_dict["color"] = (1.0, 0.5, 0.5)
-Out_Beam0.pos = b4.pos
-Out_Beam0.normal = -b3.normal
+Out_Beam0.pos = r_pp_end.endpoint()
+Out_Beam0.normal = -b_pp_end.normal
 helper_mirror = Mirror()
 helper_mirror.set_geom(TFP_out.get_geom())
 Out_Beam1 = helper_mirror.next_beam(Out_Beam0)
 
-# Out_Beam0.draw()
-# Out_Beam1.draw()
+Out_Beam0.draw()
+Out_Beam1.draw()
 
 
 
@@ -964,6 +1049,10 @@ Compressor.add_fixed_elm(Grat2)
 Compressor.add_fixed_elm(Grat1)
 Compressor.propagate(300)
 Compressor.set_geom(Amp2.last_geom())
+
+
+Amp2.draw()
+
 
 if freecad_da:
   setview()
