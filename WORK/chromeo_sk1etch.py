@@ -338,7 +338,8 @@ PropA = Seed.optical_path_length() + Stretcher.matrix()[0,1] + adapt_a1 + adapt_
 
 
 # adapt_focal = 1029
-adapt_focal = 772
+# adapt_focal = 772
+adapt_focal = 479.3
 
 a = PropA
 f = adapt_focal
@@ -468,7 +469,7 @@ PulsePicker = Composition(name="PulsePicker")
 # PulsePicker.set_geom(Stretcher.last_geom())
 PulsePicker.set_geom(AdaptTeles.last_geom())
 
-# polarisation optics upt to pockels cell
+# polarisation optics up to pockels cell
 PulsePicker.propagate(136)
 Lambda2 = Lambda_Plate()
 PulsePicker.add_on_axis(Lambda2)
@@ -498,9 +499,7 @@ TFP_pp.pos += y * tfp_push_aside
 
 
 # Spacer Stage for adapting the real part of the beam to the regen
-PulsePicker.propagate(100)
-
-# zick zack beam line to adjust the beam into Amp1
+PulsePicker.propagate(140)
 FlipMirror2_pp = Mirror(phi=90)
 PulsePicker.add_on_axis(FlipMirror2_pp)
 
@@ -508,7 +507,7 @@ PulsePicker.add_on_axis(FlipMirror2_pp)
 pp_delay_stage_length = 540
 PulsePicker.propagate(pp_delay_stage_length)
 PulsePicker.add_on_axis(Mirror(phi=-90))
-PulsePicker.propagate(100)
+PulsePicker.propagate(60)
 PulsePicker.add_on_axis(Mirror(phi=-90))
 PulsePicker.propagate(pp_delay_stage_length-60)
 PulsePicker.add_on_axis(Mirror(phi=90))
@@ -713,47 +712,6 @@ Pump.propagate(abs(ep[1] - tm_small_obj.pos[1]))
 Pump.add_on_axis(Mirror(phi=90))
 Pump.propagate(abs(ep[0] - tm_small_obj.pos[0]))
 
-# X_ADDITIONAL = 0
-# Y_ADDITIONAL = 80
-# f1 = -100
-# f2 = 150
-
-# pump_first_prop = 100 + X_ADDITIONAL #in -x
-# pump_second_prop = 100 + Y_ADDITIONAL # in +y
-# pump_third_prop = 100 # in -x
-
-# # pump_geom = Amplifier_I._elements[-2].get_geom()
-# Pump = Composition(name="Pump")
-# Pump.pos = POS_THULIUM_SMALL_OUT
-# Pump.normal = (-1,0,0)
-
-# pump_light = Beam(radius=1.5, angle=0)
-# pump_light.draw_dict["color"] = (1.0, 1.0, 0.0)
-# Pump.set_light_source(pump_light)
-
-
-# Pump.propagate(pump_first_prop)
-# Pump.add_on_axis(Mirror(phi=-90))
-# Pump.propagate(pump_second_prop)
-# Pump.add_on_axis(Mirror(phi=+90))
-# Pump.propagate(pump_third_prop)
-
-# # Pump.add_on_axis(Lens(f=f1))
-# Pump.propagate(f1+f2*0.5)
-# Pump.propagate(f1+f2*0.5)
-# # Pump.add_on_axis(Lens(f=f2))
-# Pump.propagate(190)
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -940,22 +898,24 @@ klt_pump.pos = regen_laser_crys.pos
 # Draw Selection
 # =============================================================================
 
-Seed.draw()
-Stretcher.draw()
+# Seed.draw()
+# Stretcher.draw()
 AdaptTeles.draw()
 PulsePicker.draw()
 Amplifier_I.draw()
+# Amplifier_I.draw_elements()
+# Amplifier_I.draw_mounts()
 klt_pump.draw()
 
-Out_Beam0.draw()
-Out_Beam1.draw()
+# Out_Beam0.draw()
+# Out_Beam1.draw()
 
 Amp2.draw()
 
-Pump.draw()
-BigPump.draw()
+# Pump.draw()
+# BigPump.draw()
 Table().draw()
-Compressor.draw()
+# Compressor.draw()
 
 # # PulsePicker.draw_alignment_posts()
 
