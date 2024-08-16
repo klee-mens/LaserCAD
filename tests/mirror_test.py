@@ -24,14 +24,14 @@ m.draw()
 l.draw()
 g1= Geom_Object()
 g1.set_geom(l.get_geom())
-# g1.draw()
+g1.draw()
 m.draw_mount()
 l.draw_mount()
 
 g = Geom_Object()
 g.set_geom(m.get_geom())
 
-# g.draw()  
+g.draw()  
   
 gr = Grating()
 gr.pos += 0,100,0

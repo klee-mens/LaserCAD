@@ -27,9 +27,7 @@ C.set_light_source(B)
 C.propagate(100)
 a= Cylindrical_Mirror(radius=100)
 a.height =25
-print(a.get_coordinate_system())
 a.rotate(a.normal, np.pi/2)
-print(a.get_coordinate_system())
 a.Mount = Stripe_Mirror_Mount(mirror_thickness=a.thickness)
 a.aperture = 75
 a.pos += (100,0,0)
