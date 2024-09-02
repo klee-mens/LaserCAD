@@ -6,7 +6,7 @@ Created on Mon Aug 22 12:34:44 2022
 """
 
 # from basic_optics import Ray, Geom_Object, TOLERANCE
-from . constants import TOLERANCE
+from . constants import TOLERANCE, c
 from . geom_object import Geom_Object
 from . ray import Ray
 # from .. freecad_models import model_beam,model_ray_1D,model_Gaussian_beam
@@ -291,15 +291,16 @@ class CircularRayBeam(Beam):
 # import matplotlib.pyplot as plt
 
 class RainbowBeam(Beam):
-  def __init__(self,  name="NewRainbow", wavelength=1030E-6, bandwith=10E-6, ray_count=11, **kwargs):
+  def __init__(self,  name="NewRainbow", wavelength=1030E-6, bandwith=10E-6, 
+               ray_count=11,spatial_chirp = 0, **kwargs):
     super().__init__(name=name, wavelength=wavelength, **kwargs)
     self._ray_count = ray_count
     self._bandwith = bandwith
-    self.make_rainbow_distribution(ray_count)
+    self.make_rainbow_distribution(ray_count,spatial_chirp)
     self._distribution = "rainbow"
     self.draw_dict["model"] = "ray_group"
     
-  def make_rainbow_distribution(self, ray_count=11):
+  def make_rainbow_distribution(self, ray_count=11,spatial_chirp = 0):
     self._ray_count = ray_count
     # wavels = np.linspace(self._Bwavelength - self.bandwith/2, self._Bwavelength + self.bandwith/2, ray_count)
     rc_blue = ray_count//2 +1
@@ -311,20 +312,27 @@ class RainbowBeam(Beam):
     wavels += list(blue[0:-1]) # then all blue wavelength except middle 
     wavels += list(reds[1::]) # then all red wavelength except middle
     rays = []
+    shifting_group = np.linspace(-spatial_chirp*3E8*1E3/2/self._bandwith, 
+                                 0,int((ray_count+1)/2))
+    print(shifting_group)
     cmap = plt.cm.gist_rainbow
     for wavel in wavels:
       rn = Ray()
       rn.set_geom(self.get_geom())
       rn.wavelength = wavel
+      
       x = 1-(wavel - self._Bwavelength + self._bandwith/2) / self._bandwith
       rn.draw_dict["color"] = cmap( x )
       rays.append(rn)
     self._rays = rays
     for n in range(1, len(self._rays)):
       self._rays[n].name = self.name + "_Ray" + str(n)
+      # self._rays[n].pos += (0,shifting_group[n-1],0)
     self._rays[0].name = self.name + "_inner_Ray"
-  
-
+    
+    for n in range(0,int((ray_count+1)/2)):
+      self._rays[n+1].pos += (0,shifting_group[n],0)
+      self._rays[ray_count-1-n].pos -= (0,shifting_group[n],0)
 
 
 # class Rainbow(Beam):
