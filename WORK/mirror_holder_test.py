@@ -5,7 +5,7 @@ Created on Sat Aug 19 13:16:37 2023
 @author: mens
 """
 from LaserCAD.freecad_models import clear_doc, setview, freecad_da
-from LaserCAD.basic_optics import Mirror,Crystal
+from LaserCAD.basic_optics import Mirror
 from LaserCAD.basic_optics import Beam,Grating, Composition, inch, Curved_Mirror, Ray, Geom_Object, LinearResonator, Lens, Component
 from LaserCAD.freecad_models.utils import thisfolder, load_STL
 from LaserCAD.basic_optics.mount import Unit_Mount,Post, Composed_Mount,Post_Marker
@@ -15,7 +15,7 @@ if freecad_da:
   clear_doc()
   
 from LaserCAD.basic_optics.mount import Stripe_Mirror_Mount
-from LaserCAD.basic_optics.mirror import Stripe_mirror,Rooftop_mirror
+from LaserCAD.basic_optics.mirror import Stripe_mirror
 
 from LaserCAD.freecad_models.freecad_model_mounts import model_mirror_holder
 from LaserCAD.basic_optics.mount import Adaptive_Angular_Mount
