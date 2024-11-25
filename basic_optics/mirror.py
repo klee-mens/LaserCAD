@@ -29,8 +29,8 @@ class Mirror(Opt_Element):
   <theta> € [-90,90] aus der xy-Ebene heraus, wenn man die normale voher mit
   set_geom() einstellt
   """
-  def __init__(self, phi=180, theta=0, **kwargs):
-    super().__init__(**kwargs)
+  def __init__(self, phi=180, theta=0, name="NewMirror", **kwargs):
+    super().__init__(name=name, **kwargs)
     self.__incident_normal = np.array(NORM0) # default von Strahl von x
     self.__theta = theta
     self.__phi = phi

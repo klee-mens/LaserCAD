@@ -74,7 +74,7 @@ Seed.propagate(distance_faraday_mirror)
 Seed.add_on_axis(Flip0)
 Seed.propagate(50)
 Seed.add_on_axis(Lambda_Plate())
-Seed.propagate(225)
+Seed.propagate(223)
 # seed_end_geom = Seed.last_geom()
 # print(faraday_isolator_6mm.pos)
 # =============================================================================
@@ -472,7 +472,7 @@ PulsePicker = Composition(name="PulsePicker")
 PulsePicker.set_geom(AdaptTeles.last_geom())
 
 # polarisation optics up to pockels cell
-PulsePicker.propagate(136)
+PulsePicker.propagate(136-12.5)
 Lambda2 = Lambda_Plate()
 PulsePicker.add_on_axis(Lambda2)
 PulsePicker.propagate(330)
@@ -488,7 +488,7 @@ pockelscell.rotate(vec=pockelscell.normal,phi=np.pi*-0.5)
 PulsePicker.propagate(150)
 
 # Splitting TFP
-TFP_pp = Mirror(phi = 180-2*tfp_angle)
+TFP_pp = Mirror(phi = 180-2*tfp_angle, name="TFP_p")
 TFP_pp.draw_dict["color"] = (1.0, 0.0, 2.0)
 TFP_pp.draw_dict["thickness"] = 4
 TFP_pp.aperture = 2*inch
@@ -884,12 +884,12 @@ klt_pump.pos = regen_laser_crys.pos
 # Draw Selection
 # =============================================================================
 
-# Seed.draw()
-# Stretcher.draw()
-# AdaptTeles.draw()
-# PulsePicker.draw()
+Seed.draw()
+Stretcher.draw()
+AdaptTeles.draw()
+PulsePicker.draw()
 # Amplifier_I.draw()
-klt_pump.draw()
+# klt_pump.draw()
 
 # Out_Beam0.draw()
 # Out_Beam1.draw()
