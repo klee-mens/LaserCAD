@@ -240,6 +240,11 @@ regen_dist_end_mir_to_flip1 = 550
 regen_dist_flip1_flip2 = 150
 
 
+class U100_A2K(Mirror):
+  def __init__(self, phi=180, theta=0, **kwargs):
+    super().__init__(phi=phi, theta=theta, **kwargs)
+    self.set_mount(Composed_Mount(["U100-A2K", "1inch_post"]))
+
 # optics
 
 cm0 = Curved_Mirror(radius=focal*2, phi = 180, name="Curved_Far")
