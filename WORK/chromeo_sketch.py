@@ -241,6 +241,7 @@ regen_dist_flip1_flip2 = 150
 
 
 class U100_A2K(Mirror):
+  # pass
   def __init__(self, phi=180, theta=0, **kwargs):
     super().__init__(phi=phi, theta=theta, **kwargs)
     self.set_mount(Composed_Mount(["U100-A2K", "1inch_post"]))
@@ -251,8 +252,8 @@ cm0 = Curved_Mirror(radius=focal*2, phi = 180, name="Curved_Far")
 mir1 = Mirror(phi=-90, name="Dichroit")
 mir1.draw_dict["color"] = (0.8, 0.6, 0.1)
 
-regen_flip1 = Mirror(name="Flip1", phi=-90)
-regen_flip2 = Mirror(name="Flip2", phi=-90)
+regen_flip1 = U100_A2K(name="Flip1", phi=-90)
+regen_flip2 = U100_A2K(name="Flip2", phi=-90)
 
 
 TFP_Amp1 = Mirror(phi= 180 - 2*tfp_angle, name="TFP_Amp1")
@@ -267,7 +268,7 @@ pol_mount.flip()
 cm = Curved_Mirror(radius=focal*2, phi = 180, name="Curved_PZ")
 PockelsCell = Pockels_Cell(name="PockelZelleRes1")
 Lambda_Regen = Lambda_Plate()
-fold1 = Mirror(phi=90)
+fold1 = U100_A2K(phi=90)
 
 regen_laser_crys = Crystal(width=6, thickness=10, n=2.45)
 
@@ -893,18 +894,20 @@ Seed.draw()
 Stretcher.draw()
 AdaptTeles.draw()
 PulsePicker.draw()
-# Amplifier_I.draw()
-# klt_pump.draw()
+Amplifier_I.draw()
+# Amplifier_I.draw_elements()
+# Amplifier_I.draw_mounts()
+klt_pump.draw()
 
-# Out_Beam0.draw()
-# Out_Beam1.draw()
+Out_Beam0.draw()
+Out_Beam1.draw()
 
-# Amp2.draw()
+Amp2.draw()
 
 # Pump.draw()
-# BigPump.draw()
-# Table().draw()
-# Compressor.draw()
+BigPump.draw()
+Table().draw()
+Compressor.draw()
 
 # # PulsePicker.draw_alignment_posts()
 
