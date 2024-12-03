@@ -22,6 +22,9 @@ The creed is:
 ```
 git clone https://github.com/klee-mens/LaserCAD.git
 ```
+If you used the **Download ZIP** function, make sure to rename the folder to 
+**LaserCAD** and not LaserCAD-main or something like that, or the import lines 
+at the beginning of each tutorial script will not work.
 Now you can execute e.g. the /tutorial/0_Opening.py in your interpreter.
 You should get some text output that ends with something like
 ```

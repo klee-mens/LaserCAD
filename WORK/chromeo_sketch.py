@@ -77,13 +77,14 @@ Seed.add_on_axis(Lambda_Plate())
 Seed.propagate(223)
 # seed_end_geom = Seed.last_geom()
 # print(faraday_isolator_6mm.pos)
+
+
+
 # =============================================================================
 # Create and draw the stretcher
 # =============================================================================
 
 
-# def dont():
-#   return None
 
 # =============================================================================
 # Stretcher parameter
@@ -212,6 +213,8 @@ Stretcher.set_geom(Seed.last_geom())
 
 
 
+
+
 # =============================================================================
 # folded Resonator
 # =============================================================================
@@ -294,9 +297,12 @@ Amplifier_I = simres
 # Amplifier_I.set_input_coupler_index(1, False)
 # ppos, paxes = Pump.last_geom()
 
-Amplifier_I.set_input_coupler_index(5)
+Amplifier_I.set_input_coupler_index(5)# Einkopplung über TFP_Amp1
+TFP_Amp1.pos += -8*TFP_Amp1.get_coordinate_system()[1]
 # Amplifier_I.set_geom(Pump.last_geom())
 # Amplifier_I.pos = ppos
+
+
 
 
 # =============================================================================
@@ -323,8 +329,6 @@ MatRes = MatProp(s2) @ MatCm(2*focal) @ MatProp(s2) @ MatProp(s1) @ MatCm(2*foca
 
 z2 = (A-D) / 2 / C
 r2 = abs(1/2/C) * np.sqrt(4 - (A+D)**2)
-
-
 
 # =============================================================================
 # complicated calculation for compensation
@@ -370,17 +374,7 @@ def Kogel(mat, q):
 
 q1 = 0 + 1j*r1
 q2 = z2 + 1j*r2
-
 mattele = MatProp(b) @ MatCm(2*f) @ MatProp(2*f+delta) @MatCm(2*f) @ MatProp(a)
-
-# print("q1", q1)
-# print("q2", q2)
-# print("Kogelnik", Kogel(mattele, q1))
-
-# print()
-# print("delta:", delta)
-# print("b:", b)
- 
 
 def complete_solver_del_b(a=1695.7, f=1029, r1=2045.3, r2=2165, z2=1045):
   v = r1/r2
@@ -514,16 +508,18 @@ PulsePicker.add_on_axis(K1_Mirror(phi=-90))
 PulsePicker.propagate(60)
 PulsePicker.add_on_axis(K1_Mirror(phi=-90))
 PulsePicker.propagate(pp_delay_stage_length-60)
-PulsePicker.add_on_axis(K1_Mirror(phi=90))
-
+FlipMirror_rev_pp = K1_Mirror(phi=90)
+FlipMirror_rev_pp.Mount.reverse()
+PulsePicker.add_on_axis(FlipMirror_rev_pp)
+FlipMirror_rev_pp.pos += 5*FlipMirror_rev_pp.get_coordinate_system()[1]
 
 # PulsePicker.propagate(385)
 
 # Output Stage bevore the RegenAmp
 pp_dist_last_flip_mirror_to_lambda3 = 40
-pp_dist_lambda3_to_tfp_out = 100
-pp_dist_tfp_out_to_lambda4 = 70
-pp_dist_lambda4_to_faraday_rot = 50
+pp_dist_lambda3_to_tfp_out = 100+15
+pp_dist_tfp_out_to_lambda4 = 70-10
+pp_dist_lambda4_to_faraday_rot = 50-5
 pp_dist_faraday_rot_to_regen_in = 150
 
 pp_last_prop = PropB - PulsePicker.optical_path_length() -adapt_a2b2 - pp_dist_last_flip_mirror_to_lambda3 - adapt_last_prop -pp_dist_lambda3_to_tfp_out - pp_dist_tfp_out_to_lambda4 - pp_dist_lambda4_to_faraday_rot - pp_dist_faraday_rot_to_regen_in
@@ -569,6 +565,7 @@ Amplifier_I.set_geom(PulsePicker.last_geom())
 
 
 
+
 # =============================================================================
 # Output Beam to Amp2
 # =============================================================================
@@ -582,9 +579,6 @@ Out_Beam0.normal = -b_pp_end.normal
 helper_mirror = Mirror()
 helper_mirror.set_geom(TFP_out.get_geom())
 Out_Beam1 = helper_mirror.next_beam(Out_Beam0)
-
-
-
 
 
 
@@ -607,7 +601,7 @@ knee_shift_amp2 = -220
 Amp2 = Composition(name="RelayTyp2")
 Amp2.set_light_source(source)
 
-Amp2.propagate(257)
+Amp2.propagate(270)
 Amp2.add_on_axis(Mirror(phi=-90))
 
 Amp2.propagate(200)
@@ -884,17 +878,17 @@ klt_pump.pos = regen_laser_crys.pos
 # Draw Selection
 # =============================================================================
 
-Seed.draw()
-Stretcher.draw()
+# Seed.draw()
+# Stretcher.draw()
 AdaptTeles.draw()
 PulsePicker.draw()
-# Amplifier_I.draw()
+Amplifier_I.draw()
 # klt_pump.draw()
 
 # Out_Beam0.draw()
 # Out_Beam1.draw()
 
-# Amp2.draw()
+Amp2.draw()
 
 # Pump.draw()
 # BigPump.draw()
