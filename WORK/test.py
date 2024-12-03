@@ -70,8 +70,8 @@ from LaserCAD.basic_optics.beam import RainbowBeam
 from LaserCAD.moduls import Make_Stretcher_chromeo, Make_Stretcher
 
 # Strecker = Make_Stretcher_chromeo()
-Strecker = Make_Stretcher()
-Strecker.draw()
+#Strecker = Make_Stretcher()
+#Strecker.draw()
 
 
 
@@ -94,17 +94,35 @@ Strecker.draw()
 # G.draw()
 # G.draw_mount()
 
-M1 = Mirror()
-M1.pos = (50,10,100)
-M1.normal = (1,1,0)
+# M1 = Mirror()
+# M1.pos = (50,10,100)
+# M1.normal = (1,1,0)
 
 # M1.Mount = Stages_Mount(aperture=M1.aperture,elm_type = "Mirror",elm_thickness=M1.thickness)
 # M1.Mount.set_geom(M1.get_geom())
 
-Mount1 = M1.Mount
-M1.Mount = Stages_Mount(basic_mount=Mount1,x_aligned=False)
-M1.Mount.set_geom(M1.get_geom())
-M1.Mount.find_screw_hole()
-M1.draw()
-M1.draw_mount()
-print(M1.Mount.mount_list[1]._lower_limit)
+# Mount1 = M1.Mount
+# M1.Mount = Stages_Mount(basic_mount=Mount1,x_aligned=False)
+# M1.Mount.set_geom(M1.get_geom())
+# M1.Mount.find_screw_hole()
+# M1.draw()
+# M1.draw_mount()
+# print(M1.Mount.mount_list[1]._lower_limit)
+
+# =============================================================================
+# U100-A2K Mirrors
+# =============================================================================
+
+class K1_Mirror(Mirror):
+  def __init__(self, phi=180, theta=0, **kwargs):
+    super().__init__(phi=phi, theta=theta, **kwargs)
+    self.set_mount(Composed_Mount(["KS1", "1inch_post"]))
+
+class U100_A2K(Mirror):
+  def __init__(self, phi=180, theta=0, **kwargs):
+    super().__init__(phi=phi, theta=theta, **kwargs)
+    self.set_mount(Composed_Mount(["U100-A2K", "1inch_post"]))
+    
+mir1 = U100_A2K()
+mir1.draw()
+mir1.draw_mount()

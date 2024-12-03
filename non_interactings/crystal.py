@@ -27,12 +27,22 @@ from ..freecad_models import model_crystal
 class Crystal(Component):
   def __init__(self, width=10,height=10,thickness=10,n=1.5, name="NewCrystal", **kwargs):
     super().__init__(name=name, **kwargs)
-    self.draw_dict["width"]=width
-    self.draw_dict["height"]=height
     self.thickness=thickness
-    self.draw_dict["thickness"]=self.thickness
+    self.width = width
+    self.height = height
     self.relative_refractive_index = n
+    self.freecad_model = model_crystal
 
-  def draw_fc(self):
-    self.update_draw_dict()
-    return model_crystal(**self.draw_dict)
+  def update_draw_dict(self):
+    super().update_draw_dict()
+    self.draw_dict["height"] = self.height
+    self.draw_dict["width"] = self.width
+    self.draw_dict["thickness"] = self.thickness
+
+    # self.draw_dict["length"] = self.length
+    # self.draw_dict["radius"] = radius
+    # self.draw_dict["angle"] = angle
+
+  # def draw_fc(self):
+  #   self.update_draw_dict()
+  #   return model_crystal(**self.draw_dict)

@@ -18,6 +18,9 @@ POS0 = np.array((0,0,80)) #Strahlhöhe 80 mm
 NORM0 = np.array((1,0,0)) #Strahl startet in x-Richtung
 TOLERANCE = 1e-9 #Wert ab dem zwei Größen (meist Winkel) als gleich angenommen werden
 
+table_max_y_extension = 59 # last hole in y direction, btw i counted backwards, my fault, you might change this
+
+
 def table_coordinates_to_xy(p, q):
   """
   transforms the integer table coordinates (just the screw hole number counted
@@ -39,7 +42,7 @@ def table_coordinates_to_xy(p, q):
   None.
 
   """
-  return p*25, (59-q)*25
+  return p*25, (table_max_y_extension-q)*25
 
 def xy_to_table_plus_offset(x,y):
   """
@@ -60,9 +63,23 @@ def xy_to_table_plus_offset(x,y):
   """
   p = int(x // 25)
   offset_x = x - 25*p
-  q = int(59 - y//25)
-  offset_y = y - (59-q)*25
+  q = int(table_max_y_extension - y//25)
+  offset_y = y - (table_max_y_extension-q)*25
   return  [p, offset_x, q, offset_y]
+
+# def post_positions_to_table(post_coordiante_list):
+  # return []
+  # pq_off_list = []
+  # for xy_in post_coordiante_list:
+    
+
+# def elements_to_table_coordiates(elements, verbose=False):
+#   table_offs_list = []
+#   for elm in elements:
+#     if verbose:
+#       print(elm.name, ":", xy_to_table_plus_offset(elm.pos[0], elm.pos[1]))
+#     table_offs_list.append(xy_to_table_plus_offset(elm.pos[0], elm.pos[1]))
+#   return table_offs_list
 
 
 def test_xy_table():
