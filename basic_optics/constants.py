@@ -67,13 +67,19 @@ def xy_to_table_plus_offset(x,y):
   offset_y = y - (table_max_y_extension-q)*25
   return  [p, offset_x, q, offset_y]
 
-def elements_to_table_coordiates(elements, verbose=False):
-  table_offs_list = []
-  for elm in elements:
-    if verbose:
-      print(elm.name, ":", xy_to_table_plus_offset(elm.pos[0], elm.pos[1]))
-    table_offs_list.append(xy_to_table_plus_offset(elm.pos[0], elm.pos[1]))
-  return table_offs_list
+# def post_positions_to_table(post_coordiante_list):
+  # return []
+  # pq_off_list = []
+  # for xy_in post_coordiante_list:
+    
+
+# def elements_to_table_coordiates(elements, verbose=False):
+#   table_offs_list = []
+#   for elm in elements:
+#     if verbose:
+#       print(elm.name, ":", xy_to_table_plus_offset(elm.pos[0], elm.pos[1]))
+#     table_offs_list.append(xy_to_table_plus_offset(elm.pos[0], elm.pos[1]))
+#   return table_offs_list
 
 
 def test_xy_table():

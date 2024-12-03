@@ -99,7 +99,7 @@ def model_crystal(name="crystal",model="cube", width=50, height=10, thickness=25
   pad = obj.newObject('PartDesign::Pad','Pad')
   pad.Profile = sketch
   pad.Length = thickness
-  pad.ReferenceAxis = (sketch,['N_Axis'])
+  # pad.ReferenceAxis = (sketch,['N_Axis'])
   sketch.Visibility = False
   
   obj.ViewObject.ShapeColor = color
@@ -213,7 +213,7 @@ def model_crystal_mount(name="crystal_mount",model="cube", width=50, height=10, 
   pad = obj.newObject('PartDesign::Pad','Pad')
   pad.Profile = sketch
   pad.Length = thickness + 2
-  pad.ReferenceAxis = (sketch,['N_Axis'])
+  # pad.ReferenceAxis = (sketch,['N_Axis'])
   sketch.Visibility = False
   
   DOC.recompute()

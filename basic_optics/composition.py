@@ -13,6 +13,7 @@ from .grating import Grating
 from .intersection_plane import Intersection_plane
 from ..freecad_models import warning, freecad_da, initialize_composition, add_to_composition
 from ..freecad_models.freecad_model_element_holder import Model_element_holder
+from .constants import xy_to_table_plus_offset
 import numpy as np
 from copy import deepcopy
 
@@ -271,24 +272,37 @@ class Composition(Geom_Object):
     self.draw_beams()
     self.draw_mounts()
 
-  def post_positions(self):
+  def post_positions(self, verbose=False):
     post_coordinate_list = []
     for elm in self._elements:
       try:
         post = elm.Mount.mount_list[-1]
         xy = post.pos[0:2]
-        post_coordinate_list.append(xy)
+        if verbose:
+          post_coordinate_list.append((elm.name, xy))
+        else:
+          post_coordinate_list.append(xy)
       except:
         print("No Post found for Element", elm.name)
     for non_optical in self.non_opticals:
       try:
         post = non_optical.Mount.mount_list[-1]
         xy = post.pos[0:2]
-        post_coordinate_list.append(xy)
+        if verbose:
+          post_coordinate_list.append((elm.name, xy))
+        else:
+          post_coordinate_list.append(xy)
       except:
         print("No Post found for Element", non_optical.name)
     return post_coordinate_list
 
+  def posts_pq_on_table(self, verbose=True):
+    # Gives the postions in hole p, q coordiantes plus offset accodring to xy_to_table_plus_offset
+    if verbose:
+      return [(name, xy_to_table_plus_offset(*xy) ) for (name, xy) in self.post_positions(verbose=True)]
+    else:
+      return [xy_to_table_plus_offset(*xy) for xy in self.post_positions(verbose=False)]
+      
 
   def __container_to_part(self, part, container):
     if freecad_da:
