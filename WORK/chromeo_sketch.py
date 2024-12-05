@@ -16,7 +16,7 @@ from LaserCAD.freecad_models.utils import thisfolder, load_STL
 from LaserCAD.non_interactings import Faraday_Isolator, Pockels_Cell, Lambda_Plate, Crystal, Iris
 from LaserCAD.basic_optics.mirror import Stripe_mirror
 from LaserCAD.moduls import Make_RoofTop_Mirror
-from LaserCAD.basic_optics.mount import Unit_Mount, Composed_Mount
+from LaserCAD.basic_optics.mount import Unit_Mount, Composed_Mount, Post
 from LaserCAD.non_interactings.table import Table
 
 if freecad_da:
@@ -244,28 +244,37 @@ regen_dist_flip1_flip2 = 150
 
 
 # optics
+class U100_A_Mirror(Mirror):
+  def __init__(self, phi=180, theta=0, **kwargs):
+    super().__init__(phi=phi, theta=theta, **kwargs)
+    self.set_mount(Composed_Mount(["U100-A2K", "1inch_post"]))
+    
 
 cm0 = Curved_Mirror(radius=focal*2, phi = 180, name="Curved_Far")
-mir1 = Mirror(phi=-90, name="Dichroit")
+cm0.set_mount(Composed_Mount(["U100-A2K", "1inch_post"]))
+mir1 = U100_A_Mirror(phi=-90, name="Dichroit")
 mir1.draw_dict["color"] = (0.8, 0.6, 0.1)
 
-regen_flip1 = Mirror(name="Flip1", phi=-90)
-regen_flip2 = Mirror(name="Flip2", phi=-90)
+regen_flip1 = U100_A_Mirror(name="Flip1", phi=-90)
+regen_flip2 = U100_A_Mirror(name="Flip2", phi=-90)
 
 
 TFP_Amp1 = Mirror(phi= 180 - 2*tfp_angle, name="TFP_Amp1")
 TFP_Amp1.draw_dict["color"] = (1.0, 0.0, 2.0)
 TFP_Amp1.aperture = tfp_aperture
 TFP_Amp1.thickness = tfp_thickness
-TFP_Amp1.set_mount_to_default()
-pol_mount = TFP_Amp1.Mount.mount_list[0]
-pol_mount.flip()
-# TFP_Amp1.mount_dict["Flip90"]=True
+pol_unitmount = Unit_Mount(model="KS2")
+pol_unitmount.flip()
+pol_mount = Composed_Mount()
+pol_mount.add(pol_unitmount)
+pol_mount.add(Post())
+TFP_Amp1.set_mount(pol_mount)
 
 cm = Curved_Mirror(radius=focal*2, phi = 180, name="Curved_PZ")
+cm.set_mount(Composed_Mount(["U100-A2K", "1inch_post"]))
 PockelsCell = Pockels_Cell(name="PockelZelleRes1")
 Lambda_Regen = Lambda_Plate()
-fold1 = Mirror(phi=90)
+fold1 = U100_A_Mirror(phi=90)
 
 regen_laser_crys = Crystal(width=6, thickness=10, n=2.45)
 
@@ -519,8 +528,8 @@ FlipMirror_rev_pp.pos += 5*FlipMirror_rev_pp.get_coordinate_system()[1]
 pp_dist_last_flip_mirror_to_lambda3 = 40
 pp_dist_lambda3_to_tfp_out = 100+15
 pp_dist_tfp_out_to_lambda4 = 70-10
-pp_dist_lambda4_to_faraday_rot = 50-5
-pp_dist_faraday_rot_to_regen_in = 150
+pp_dist_lambda4_to_faraday_rot = 50+15+25
+pp_dist_faraday_rot_to_regen_in = 150-20-25
 
 pp_last_prop = PropB - PulsePicker.optical_path_length() -adapt_a2b2 - pp_dist_last_flip_mirror_to_lambda3 - adapt_last_prop -pp_dist_lambda3_to_tfp_out - pp_dist_tfp_out_to_lambda4 - pp_dist_lambda4_to_faraday_rot - pp_dist_faraday_rot_to_regen_in
 PulsePicker.propagate(pp_last_prop)
@@ -550,11 +559,11 @@ TFP_out.pos += - y * tfp_push_aside
 PulsePicker.propagate(pp_dist_tfp_out_to_lambda4) # maybe just use the thickness of the energy detector everytime instead ...
 
 Lambda2_2_pp = Lambda_Plate()
-PulsePicker.add_on_axis(Lambda2_2_pp)
-PulsePicker.propagate(pp_dist_lambda4_to_faraday_rot)
 FaradPP = Faraday_Isolator()
 PulsePicker.add_on_axis(FaradPP)
 PulsePicker.propagate(pp_dist_faraday_rot_to_regen_in)
+PulsePicker.add_on_axis(Lambda2_2_pp)
+PulsePicker.propagate(pp_dist_lambda4_to_faraday_rot)
 
 
 PulsePicker._lightsource.draw_dict["model"] = "ray_group"
@@ -878,22 +887,22 @@ klt_pump.pos = regen_laser_crys.pos
 # Draw Selection
 # =============================================================================
 
-# Seed.draw()
-# Stretcher.draw()
+Seed.draw()
+Stretcher.draw()
 AdaptTeles.draw()
 PulsePicker.draw()
 Amplifier_I.draw()
-# klt_pump.draw()
+klt_pump.draw()
 
-# Out_Beam0.draw()
-# Out_Beam1.draw()
+Out_Beam0.draw()
+Out_Beam1.draw()
 
 Amp2.draw()
 
-# Pump.draw()
-# BigPump.draw()
-# Table().draw()
-# Compressor.draw()
+Pump.draw()
+BigPump.draw()
+Table().draw()
+Compressor.draw()
 
 # # PulsePicker.draw_alignment_posts()
 

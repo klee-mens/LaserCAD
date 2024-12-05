@@ -105,10 +105,18 @@ class Composition(Geom_Object):
     self.add_supcomposition_fixed(subcomp)
 
   def add_supcomposition_fixed(self, subcomp):
+    # for element in subcomp._elements:
+    #   self.add_fixed_elm(element)
+    # for nonopt in subcomp.non_opticals:
+    #   self.add_fixed_elm(nonopt)
+    old_sequence = self._sequence
+    sub_sequence = np.array(subcomp.get_sequence())
+    sub_sequence += max(old_sequence)
     for element in subcomp._elements:
       self.add_fixed_elm(element)
     for nonopt in subcomp.non_opticals:
       self.add_fixed_elm(nonopt)
+    self.set_sequence(old_sequence + list(sub_sequence))
 
   def redefine_optical_axis(self, ray):
     # zB wenn die wavelength angepasst werden muss
@@ -289,7 +297,7 @@ class Composition(Geom_Object):
         post = non_optical.Mount.mount_list[-1]
         xy = post.pos[0:2]
         if verbose:
-          post_coordinate_list.append((elm.name, xy))
+          post_coordinate_list.append((non_optical.name, xy))
         else:
           post_coordinate_list.append(xy)
       except:
