@@ -74,14 +74,15 @@ b3.set_length(410)
 from LaserCAD.freecad_models import model_mirror
 from LaserCAD.basic_optics import Composed_Mount, Component
 
+
 class Transmission_Disk(Composition):
-  def __init__(self, name="NewExtended_TFP", refractive_index=1.5, AOI=45, 
+  def __init__(self, name="NewExtended_TFP", refractive_index=1.5, AOI=56, 
                thickness=5, aperture = 2*inch, **kwargs):
     super().__init__(name=name, **kwargs)
     self.thickness = thickness
     self.aperture = aperture
     self.refractive_index = refractive_index
-    self.angle_of_incidence = 45
+    self.angle_of_incidence = AOI
     
     ref1 = Refractive_plane(relative_refractive_index=self.refractive_index)
     ref1.invisible = True
@@ -94,9 +95,13 @@ class Transmission_Disk(Composition):
     cosmetic.set_mount(Composed_Mount(unit_model_list=["KS2", "1inch_post"]))
     cosmetic.draw_dict["color"] = (1.0, 0.0, 2.0)
     self.add_on_axis(ref1)
-    self.add_fixed_elm(cosmetic)
-    self.propagate(self.thickness)
+    self.add_on_axis(cosmetic)
+    self.propagate(self.thickness/np.cos(self.angle_of_incidence*np.pi/180))
     self.add_on_axis(ref2)
+    
+    ref1.rotate((0,0,1), self.angle_of_incidence*np.pi/180)
+    ref2.rotate((0,0,1), self.angle_of_incidence*np.pi/180)
+    cosmetic.rotate((0,0,1), self.angle_of_incidence*np.pi/180)
     # self.set_sequence([0,1])
 
 
@@ -121,7 +126,25 @@ tfp._lightsource = b0
 tfp.propagate(300)
 tfp.draw()
 
+comp = Composition()
+comp.propagate(100)
+comp.add_on_axis(Mirror(phi=90))
+comp.propagate(200)
+tfp = Transmission_Disk(AOI=-56, thickness=8)
+comp.add_supcomposition_on_axis(tfp)
+# tfp.rotate((0,0,1), -45*np.pi/180)
+comp.recompute_optical_axis()
+comp.propagate(400)
+comp.add_on_axis(Mirror(phi=90))
+comp.propagate(100)
 
+tfp_shape = comp.non_opticals[0]
+tfp_shape.Mount.reverse()
+
+comp.draw()
+
+for ray in comp._optical_axis:
+  ray.draw()
 
 if freecad_da:
   setview()

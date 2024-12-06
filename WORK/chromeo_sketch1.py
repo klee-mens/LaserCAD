@@ -467,6 +467,7 @@ class K1_Mirror(Mirror):
     super().__init__(phi=phi, theta=theta, **kwargs)
     self.set_mount(Composed_Mount(["KS1", "1inch_post"]))
 
+
 class Extended_TFP(Composition):
   def __init__(self, name="NewExtended_TFP", refractive_index=1.4316, 
                thickness=6.35, aperture = 2*inch, **kwargs):
@@ -490,33 +491,7 @@ class Extended_TFP(Composition):
     self.add_fixed_elm(cosmetic_mirror)
     self.set_sequence([0,1])
 
-from LaserCAD.freecad_models import model_mirror
 
-class Transmission_Disk(Composition):
-  def __init__(self, name="NewExtended_TFP", refractive_index=1.5, AOI=45, 
-               thickness=5, aperture = 2*inch, **kwargs):
-    super().__init__(name=name, **kwargs)
-    self.thickness = thickness
-    self.aperture = aperture
-    self.refractive_index = refractive_index
-    self.angle_of_incidence = 45
-    
-    ref1 = Refractive_plane(relative_refractive_index=self.refractive_index)
-    ref1.invisible = True
-    ref2 = Refractive_plane(relative_refractive_index=1/self.refractive_index)
-    ref2.invisible = True
-    cosmetic = Component(name="ShapeObject")
-    cosmetic.freecad_model = model_mirror
-    cosmetic.thickness = self.thickness
-    cosmetic.aperture = self.aperture
-    cosmetic.set_mount(Composed_Mount(unit_model_list=["KS2", "1inch_post"]))
-    cosmetic.draw_dict["color"] = (1.0, 0.0, 2.0)
-    self.add_on_axis(ref1)
-    self.add_fixed_elm(cosmetic)
-    self.propagate(self.thickness)
-    self.add_on_axis(ref2)
-
-    
 tfp_angle = 65 #tfp angle of incidence in degree
 flip_mirror_push_down = 8 # distance to push the first mirror out ouf the seed beam
 tfp_push_aside = 5 # distance in mm to push the TFP aside, so that the beam can pass through
@@ -604,11 +579,50 @@ PulsePicker.propagate(pp_dist_lambda3_to_tfp_out)
 # TFP_out.Mount.mount_list[0].flip()
 # TFP_out.next_ray = TFP_out.just_pass_through
 
+from LaserCAD.freecad_models import model_mirror
+
+class Transmission_Disk(Composition):
+  def __init__(self, name="NewExtended_TFP", refractive_index=1.5, AOI=56, 
+               thickness=5, aperture = 2*inch, mount_reversed=False, **kwargs):
+    super().__init__(name=name, **kwargs)
+    self.thickness = thickness
+    self.aperture = aperture
+    self.refractive_index = refractive_index
+    self.angle_of_incidence = AOI
+    
+    ref1 = Refractive_plane(relative_refractive_index=self.refractive_index)
+    ref1.invisible = True
+    ref2 = Refractive_plane(relative_refractive_index=1/self.refractive_index)
+    ref2.invisible = True
+    cosmetic = Component(name="ShapeObject")
+    cosmetic.freecad_model = model_mirror
+    cosmetic.thickness = self.thickness
+    cosmetic.aperture = self.aperture
+    cosmetic.set_mount(Composed_Mount(unit_model_list=["KS2", "1inch_post"]))
+    cosmetic.draw_dict["color"] = (1.0, 0.0, 2.0)
+    self.add_on_axis(ref1)
+    self.add_on_axis(cosmetic)
+    self.propagate(self.thickness/np.cos(self.angle_of_incidence*np.pi/180))
+    self.add_on_axis(ref2)
+    
+    ref1.rotate((0,0,1), self.angle_of_incidence*np.pi/180)
+    ref2.rotate((0,0,1), self.angle_of_incidence*np.pi/180)
+    cosmetic.rotate((0,0,1), self.angle_of_incidence*np.pi/180)
+    
+    if mount_reversed:
+      cosmetic.Mount.reverse()
+
+    
+
+
 # TFP_out = Extended_TFP(name="Output_to_Amp2")
-TFP_out = Transmission_Disk(name="Output_to_Amp2")
+TFP_out = Transmission_Disk(name="Output_to_Amp2", refractive_index=1.4316, 
+                            AOI=+65, thickness=6.35, mount_reversed=True)
 TFP_out.pos = PulsePicker.last_geom()[0]
-TFP_out.normal = -TFP_pp.normal
-PulsePicker.add_supcomposition_fixed(TFP_out)
+# TFP_out.normal = TFP_pp.normal
+# PulsePicker.add_supcomposition_fixed(TFP_out)
+PulsePicker.add_supcomposition_on_axis(TFP_out)
+PulsePicker.recompute_optical_axis()
 # TFP_out.rotate((0,0,1), phi=np.pi/2)
 # x,y,z = TFP_out.get_coordinate_system()
 # TFP_out.pos += - y * tfp_push_aside
@@ -619,10 +633,17 @@ FaradPP = Faraday_Isolator()
 PulsePicker.add_on_axis(FaradPP)
 PulsePicker.propagate(pp_dist_faraday_rot_to_regen_in)
 PulsePicker.add_on_axis(Lambda2_2_pp)
-PulsePicker.propagate(pp_dist_lambda4_to_faraday_rot)
+PulsePicker.propagate(pp_dist_lambda4_to_faraday_rot-5)
 
 
-PulsePicker._lightsource.draw_dict["model"] = "ray_group"
+invis_tfp = Transmission_Disk(name="Output_to_Amp2", refractive_index=1.4316, 
+                            AOI=65, thickness=6.35, mount_reversed=True)
+PulsePicker.add_supcomposition_on_axis(invis_tfp)
+PulsePicker.recompute_optical_axis()
+PulsePicker.non_opticals.pop(-1) # invis tfp beeing invis
+PulsePicker.propagate(0.1)
+
+# PulsePicker._lightsource.draw_dict["model"] = "ray_group"
 
 
 Amplifier_I.set_geom(PulsePicker.last_geom())
@@ -635,14 +656,14 @@ Amplifier_I.set_geom(PulsePicker.last_geom())
 # Output Beam to Amp2
 # =============================================================================
 bs = PulsePicker.compute_beams()
-b_pp_end = bs[-1]
+b_pp_end = bs[-3]
 r_pp_end = b_pp_end.inner_ray()
 Out_Beam0 = Beam(radius=2, name="Beam_to_Amp2")
 Out_Beam0.draw_dict["color"] = (1.0, 0.5, 0.5)
 Out_Beam0.pos = r_pp_end.endpoint()
 Out_Beam0.normal = -b_pp_end.normal
 helper_mirror = Mirror()
-helper_mirror.set_geom(TFP_out.get_geom())
+helper_mirror.set_geom(TFP_out._elements[1].get_geom())
 Out_Beam1 = helper_mirror.next_beam(Out_Beam0)
 
 
@@ -943,22 +964,22 @@ klt_pump.pos = regen_laser_crys.pos
 # Draw Selection
 # =============================================================================
 
-# Seed.draw()
-# Stretcher.draw()
-# AdaptTeles.draw()
+Seed.draw()
+Stretcher.draw()
+AdaptTeles.draw()
 PulsePicker.draw()
-# Amplifier_I.draw()
-# klt_pump.draw()
+Amplifier_I.draw()
+klt_pump.draw()
 
-# Out_Beam0.draw()
-# Out_Beam1.draw()
+Out_Beam0.draw()
+Out_Beam1.draw()
 
-# Amp2.draw()
+Amp2.draw()
 
 # Pump.draw()
 # BigPump.draw()
-# Table().draw()
-# Compressor.draw()
+Table().draw()
+Compressor.draw()
 
 # # PulsePicker.draw_alignment_posts()
 
