@@ -401,6 +401,10 @@ class Composed_Mount(Geom_Object):
     first.reverse()
     self.set_geom(self.get_geom()) # to adjust the other elements
     
+  def flip(self):
+    first = self.mount_list[0]
+    first.flip()
+    
   def __repr__(self):
    txt = super().__repr__()
    ind = txt.index(",")
@@ -421,6 +425,10 @@ class Composed_Mount(Geom_Object):
       first = self.mount_list[mount_number]
       second = self.mount_list[mount_number+1]
       second.set_geom(first.docking_obj.get_geom())
+
+
+
+
 
 class Stages_Mount(Composed_Mount):
   """
@@ -455,7 +463,7 @@ class Stages_Mount(Composed_Mount):
     shifting_vec = hole_pos-shifted_pos
     self.mount_list[-1].pos -= shifting_vec
   
-
+  
 class Stripe_Mirror_Mount(Composed_Mount):
   def __init__(self, mirror_thickness=10,**kwargs):
     super().__init__(**kwargs)
@@ -464,6 +472,7 @@ class Stripe_Mirror_Mount(Composed_Mount):
     self.add(stripe)
     self.add(Unit_Mount("POLARIS-K2"))
     self.add(Post())
+  
     
 class Rooftop_Mirror_Mount(Composed_Mount):
   def __init__(self, **kwargs):
@@ -472,6 +481,7 @@ class Rooftop_Mirror_Mount(Composed_Mount):
     self.add(roof)
     self.add(Unit_Mount("POLARIS-K2"))
     self.add(Post())
+
 
 class Grating_Mount(Composed_Mount):
   def __init__(self,height=50,thickness=8, **kwargs):
@@ -536,6 +546,7 @@ class Post_Marker(Unit_Mount):
     #       (self.h1[0]+(25*self.size),self.h1[1]+(25*self.size)),
     #       (self.h1[0],self.h1[1]+(25*self.size)))
 
+
 class Adaptive_Angular_Mount(Unit_Mount):
   def __init__(self, aperture=25.4,angle = 30,**kwargs):
     super().__init__(**kwargs)
@@ -574,125 +585,4 @@ class Adaptive_Angular_Mount(Unit_Mount):
       self.docking_obj.normal = self.normal
     super().set_axes(new_axes)
     
-  # def reverse(self):
-  #   x,y,z = self.get_coordinate_system()
-  #   self.rotate(z, np.pi)
-  #   self.pos += x * self.element_thickness
-    
-
-# class Special_mount(Unit_Mount):
-#   """
-#   in fact only for rooftop mirrors and stripe mirrors
-#   maybe deleted in the next version or more generalized
-#   """
-#   def __init__(self, name="special_mounmt",model="special_mount",aperture=25.4,thickness=10,
-#                docking_pos = (1,2,3),docking_normal=(0,0,1),drawing_post=False, **kwargs):
-#     super().__init__(name, **kwargs)
-#     self.draw_dict["aperture"] = aperture
-#     self.aperture = aperture
-#     self.draw_dict["thickness"] = thickness
-#     self.thickness = thickness
-#     self.draw_dict["geom"]=self.get_geom()
-#     self.model = model
-#     self.drawing_post = drawing_post
-#     if model=="rooftop mirror mount":
-#       self.post = None
-#       xshift = 38
-#       zshift = -5
-#       docking_pos = (xshift,0,zshift)
-#       docking_normal = self.normal
-#     if model == "Stripe mirror mount":
-#       xshift = 24
-#       yshift = 104.3
-#       self.post = None
-#       docking_pos = (xshift,yshift,0)
-#       docking_normal = -self.normal
-#     self.docking_obj = Geom_Object()
-#     self.docking_obj.pos = self.pos+docking_pos[0]*self._axes[:,0]+docking_pos[1]*self._axes[:,1]+docking_pos[2]*self._axes[:,2]
-#     self.docking_obj.normal=docking_normal
-#     if drawing_post:
-#       post = Post_and_holder(name=self.name + "post",elm_type=self.elm_type)
-#       post.set_geom(self.docking_obj.get_geom())
-#       self.post = post
-  
-#   def set_geom(self, geom):
-#     """
-#     since the position of rooftop mirror and stripe mirror are related to the 
-#     aperture and thickness of the mirror itself, the are some changes that must 
-#     be made in the geom setting.
-
-#     """
-#     if np.shape(geom[1])==(3,3):
-#       normal = geom[1][:,0]
-#     else:
-#       normal = geom[1]
-#     if self.model != "Stripe mirror mount" and self.model != "rooftop mirror mount":
-#       self.pos = np.array(geom[0])
-#       self.set_axes(geom[1])
-#       return 1
-#     if self.model =="Stripe mirror mount":
-#       new_pos = np.array((self.thickness-25,0,0))
-#     elif self.model == "rooftop mirror mount":
-#       new_pos = np.array((self.aperture/2,0,0))
-#     a = (1,0,0)
-#     if np.sum(np.cross(a,normal))!=0:
-#       rot_axis = np.cross(a,normal)/np.linalg.norm(np.cross(a,normal))
-#       rot_angle = np.arccos(np.sum(a*normal)/(np.linalg.norm(a)*np.linalg.norm(normal)))
-#       new_pos = rotate_vector(new_pos,rot_axis,rot_angle)
-#     if np.sum(np.cross(a,normal))==0 and normal[0]<-0.999:
-#       geom0 = np.array(geom[0] - new_pos)
-#     else:
-#       geom0 = np.array(geom[0] + new_pos)
-#     self.pos = np.array(geom0)
-#     self.set_axes(geom[1])
-    
-#   @property
-#   def docking_pos(self):
-#     return np.array(self.docking_obj.pos) * 1.0
-#   @docking_pos.setter
-#   def docking_pos(self, x):
-#     self.docking_pos = np.array(x) * 1.0
-#     self.docking_obj.pos = self.docking_pos
-  
-#   @property
-#   def docking_normal(self):
-#     return np.array(self.docking_obj.normal) * 1.0
-#   @docking_normal.setter
-#   def docking_normal(self, x):
-#     self.docking_normal = np.array(x) * 1.0
-#     self.docking_obj.normal = self.docking_normal
-  
-#   def _pos_changed(self, old_pos, new_pos):
-#     if self.post != None:
-#       self._rearange_subobjects_pos( old_pos, new_pos, [self.docking_obj,self.post])
-#     else:
-#       self._rearange_subobjects_pos( old_pos, new_pos, [self.docking_obj])
-  
-#   def _axes_changed(self, old_axes, new_axes):
-#     if self.post != None:
-#       self._rearange_subobjects_axes( old_axes, new_axes, [self.docking_obj,self.post])
-#     else:
-#       self._rearange_subobjects_axes( old_axes, new_axes, [self.docking_obj])
-  
-#   def draw_fc(self):
-#     if self.model=="rooftop mirror mount" or self.model=="Stripe mirror mount":
-#       self.draw_dict["geom"]=self.get_geom()
-#       self.draw_dict["stl_file"]=thisfolder+"/mount_meshes/special mount/" + self.model + ".stl"
-#       return load_STL(**self.draw_dict)
-#       # return mirror_mount(**self.draw_dict)
-#     else:
-#       if self._axes[2,2] <-0.9:
-#         self.rotate(self.normal,np.pi)
-#         self.draw_dict["geom"] = self.get_geom()
-#       self.draw_dict["geom"]=self.get_geom()
-#       self.draw_dict["stl_file"]=thisfolder+"/mount_meshes/special mount/" + self.model + ".stl"
-#       obj = load_STL(**self.draw_dict)
-#       if self.drawing_post:
-#         obj1 = self.post.draw()
-#         part = initialize_composition_old(name="mount, post and base")
-#         container = obj,obj1
-#         add_to_composition(part, container)
-#         return part
-#       else:
-#         return obj
     
