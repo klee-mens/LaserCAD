@@ -633,6 +633,7 @@ Out_Beam1 = helper_mirror.next_beam(Out_Beam0)
 
 
 
+
 # =============================================================================
 # 4pass Relay Imaging Amp2
 # =============================================================================
@@ -643,30 +644,37 @@ bigcrys = Crystal(width=20, thickness=15, n=2.45)
 source = Beam(radius=1.4, angle=0)
 telesf1 = -75
 telesf2 = 270
-knee_shift_amp2 = -220
+# knee_shift_amp2 = -220
 # knee_shift_amp2 = 150
 
 #Telescope for beam widening
 Amp2 = Composition(name="RelayTyp2")
 Amp2.set_light_source(source)
 
-Amp2.propagate(270)
+Amp2.propagate(80)
 Amp2.add_on_axis(Mirror(phi=-90))
 
-Amp2.propagate(200)
+Amp2.propagate(50)
+# Amp2.add_on_axis(Mirror(phi=-90))
+# Amp2.propagate(50)
 teles_lens1 = Lens(f=telesf1)
 Amp2.add_on_axis(teles_lens1)
+# Amp2.propagate(100)
+
 Amp2.propagate(telesf1 + telesf2)
 teles_lens2 = Lens(f=telesf2)
 Amp2.add_on_axis(teles_lens2)
 
-
+Amp2.propagate(42)
+Amp2.add_on_axis(Mirror(phi=90))
+Amp2.propagate(275)
+Amp2.add_on_axis(Mirror(phi=-90))
 # # Knee for adjustments
 # Amp2.propagate(90)
 # Amp2.add_on_axis(Mirror(phi=90*np.sign(knee_shift_amp2)))
 # Amp2.propagate(np.abs(knee_shift_amp2))
 # Amp2.add_on_axis(Mirror(phi=-90*np.sign(knee_shift_amp2)))
-Amp2.propagate(680)
+Amp2.propagate(840)
 
 # AmpTyp2 with for passes, that will definitely fail
 Amp2.add_on_axis(bigcrys)
@@ -688,17 +696,17 @@ Amp2.add_on_axis(concave2)
 concave2.set_normal_with_2_points(end_concave.pos, active_mir.pos)
 
 # Amp2.set_sequence([0,1,2,3, 4,5,6,7,4   ])
-# Amp2.set_sequence([0,1,2,3,4, 5,6,7,8,5   ])
-Amp2.set_sequence([0,1,2, 3,4,5,6,3   ])
+Amp2.set_sequence([0,1,2,3,4, 5,6,7,8,5   ])
+# Amp2.set_sequence([0,1,2, 3,4,5,6,3   ])
 Amp2.recompute_optical_axis()
 
-a2_safe_angle_for_non_colliding_with_crystal = 2
+a2_safe_angle_for_non_colliding_with_crystal = 3
 Amp2.propagate(580)
-Amp2.add_on_axis(Mirror(phi=180 - sep_angle_A2 + a2_safe_angle_for_non_colliding_with_crystal-3))
+Amp2.add_on_axis(Mirror(phi=180 - sep_angle_A2 + a2_safe_angle_for_non_colliding_with_crystal))
 Amp2.propagate(580)
 
-Amp2.add_on_axis(Mirror(phi=90 - a2_safe_angle_for_non_colliding_with_crystal+3))
-Amp2.propagate(400)
+Amp2.add_on_axis(Mirror(phi=90 - a2_safe_angle_for_non_colliding_with_crystal))
+Amp2.propagate(350)
 Beam_Splitter = Mirror(phi=90, name="BeamSplitter")
 Beam_Splitter.aperture= 2*inch
 Beam_Splitter.set_mount_to_default() # should really automatize this...
@@ -707,32 +715,7 @@ Amp2.add_on_axis(Beam_Splitter)
 Amp2.propagate(20)
 
 Amp2.set_geom(Out_Beam1.get_geom())
-
-
-
-# =============================================================================
-# breadboards
-# =============================================================================
-# from LaserCAD.non_interactings import Breadboard
-# StartPos = (-700, -450, 0)
-# b1 = Breadboard()
-# b1.pos += StartPos
-# b1.draw()
-# b2= Breadboard()
-# b2.pos += b1.pos + (b2.Xdimension, 0, 0)
-# b2.draw()
-# b3= Breadboard()
-# b3.pos += b1.pos + (0, b2.Ydimension, 0)
-# b3.draw()
-# b4= Breadboard()
-# b4.pos += b1.pos + (b2.Xdimension, b2.Ydimension, 0)
-# b4.draw()
-# b5= Breadboard()
-# b5.pos += b1.pos + (0, -b2.Ydimension, 0)
-# b5.draw()
-# b6= Breadboard()
-# b6.pos += b1.pos + (b2.Xdimension, -b2.Ydimension, 0)
-# b6.draw()
+notused = Amp2._elements[0].next_beam(Out_Beam1)
 
 
 
@@ -932,7 +915,7 @@ Adjust_Laser_Pulsepicker.recompute_optical_axis()
 Adjust_Laser_Pulsepicker.propagate(0.1)
 for n in range(2, len(Adjust_Laser_Pulsepicker._elements)):
   Adjust_Laser_Pulsepicker._elements[n].invisible = True
-Adjust_Laser_Pulsepicker.draw()
+
 
 
 # =============================================================================
@@ -940,21 +923,22 @@ Adjust_Laser_Pulsepicker.draw()
 # =============================================================================
 
 Seed.draw()
-# Stretcher.draw()
-# AdaptTeles.draw()
+Stretcher.draw()
+AdaptTeles.draw()
 PulsePicker.draw()
-# Amplifier_I.draw()
-# klt_pump.draw()
+Adjust_Laser_Pulsepicker.draw()
+Amplifier_I.draw()
+klt_pump.draw()
 
-# Out_Beam0.draw()
-# Out_Beam1.draw()
+Out_Beam0.draw()
+Out_Beam1.draw()
 
-# Amp2.draw()
+Amp2.draw()
 
-# Pump.draw()
-# BigPump.draw()
+Pump.draw()
+BigPump.draw()
 Table().draw()
-# Compressor.draw()
+Compressor.draw()
 
 
 
@@ -966,7 +950,29 @@ Table().draw()
 
 
 
-
+# =============================================================================
+# breadboards
+# =============================================================================
+# from LaserCAD.non_interactings import Breadboard
+# StartPos = (-700, -450, 0)
+# b1 = Breadboard()
+# b1.pos += StartPos
+# b1.draw()
+# b2= Breadboard()
+# b2.pos += b1.pos + (b2.Xdimension, 0, 0)
+# b2.draw()
+# b3= Breadboard()
+# b3.pos += b1.pos + (0, b2.Ydimension, 0)
+# b3.draw()
+# b4= Breadboard()
+# b4.pos += b1.pos + (b2.Xdimension, b2.Ydimension, 0)
+# b4.draw()
+# b5= Breadboard()
+# b5.pos += b1.pos + (0, -b2.Ydimension, 0)
+# b5.draw()
+# b6= Breadboard()
+# b6.pos += b1.pos + (b2.Xdimension, -b2.Ydimension, 0)
+# b6.draw()
 
 
 
