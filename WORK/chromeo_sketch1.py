@@ -217,8 +217,8 @@ Stretcher.set_geom(Seed.last_geom())
 
 
 class Transmission_Disk(Composition):
-  def __init__(self, name="NewExtended_TFP", refractive_index=1.5, AOI=56, 
-               thickness=5, aperture = 2*inch, mount_reversed=False, 
+  def __init__(self, name="NewExtended_TFP", refractive_index=1.5, AOI=56,
+               thickness=5, aperture = 2*inch, mount_reversed=False,
                mount_flipped=False, **kwargs):
     super().__init__(name=name, **kwargs)
     self.thickness = thickness
@@ -228,7 +228,7 @@ class Transmission_Disk(Composition):
     self.AOI = AOI
     inside_angel = np.arcsin(np.sin(self.__angle_of_incidence) / self.refractive_index)
     self.lateral = self.thickness * (np.tan(self.__angle_of_incidence) - np.tan(inside_angel))
-    
+
     ref1 = Refractive_plane(relative_refractive_index=self.refractive_index)
     ref1.invisible = True
     ref2 = Refractive_plane(relative_refractive_index=1/self.refractive_index)
@@ -243,19 +243,19 @@ class Transmission_Disk(Composition):
     self.add_on_axis(cosmetic)
     self.propagate(self.thickness/np.cos(self.__angle_of_incidence))
     self.add_on_axis(ref2)
-    
+
     ref1.rotate((0,0,1), self.__angle_of_incidence)
     ref2.rotate((0,0,1), self.__angle_of_incidence)
     cosmetic.rotate((0,0,1), self.__angle_of_incidence)
     cosmetic.pos += - cosmetic.get_coordinate_system()[1]*self.lateral/2
-    
+
     if mount_reversed:
       cosmetic.Mount.reverse()
     if mount_flipped:
       cosmetic.Mount.flip()
 
-TFP_out = Transmission_Disk(name="Output_to_Amp2", refractive_index=1.4316, 
-                            AOI=+65, thickness=6.35, mount_reversed=True, 
+TFP_out = Transmission_Disk(name="Output_to_Amp2", refractive_index=1.4316,
+                            AOI=+65, thickness=6.35, mount_reversed=True,
                             mount_flipped=True)
 
 # =============================================================================
@@ -291,7 +291,7 @@ class U100_A_Mirror(Mirror):
   def __init__(self, phi=180, theta=0, **kwargs):
     super().__init__(phi=phi, theta=theta, **kwargs)
     self.set_mount(Composed_Mount(["U100-A2K", "1inch_post"]))
-    
+
 
 cm0 = Curved_Mirror(radius=focal*2, phi = 180, name="Curved_Far")
 cm0.set_mount(Composed_Mount(["U100-A2K", "1inch_post"]))
@@ -433,19 +433,19 @@ def complete_solver_del_b(a=1695.7, f=1029, r1=2045.3, r2=2165, z2=1045):
   v = r1/r2
   al = 1 - a/f
   ph = 1/f
-  
+
   p = al / (al**2 + ph**2 * r1**2)
   q = (1-v) / (al**2 + ph**2 * r1**2)
-  
+
   x1 = -p + np.sqrt(p**2 - q)
   x2 = -p - np.sqrt(p**2 - q)
   x = x1
-  
+
   bet1 = (z2*v +f*al*(1+al*x) + ph*x*r1**2) / ((1+al*x)**2*f + ph*x**2*r1**2 ) * -1
-  
+
   x = x2
   bet2 = (z2*v +f*al*(1+al*x) + ph*x*r1**2) / ((1+al*x)**2*f + ph*x**2*r1**2 ) * -1
-  
+
   delta1 = x1*f
   delta2 = x2*f
   b1 = f*(1-bet1)
@@ -584,8 +584,8 @@ PulsePicker.add_on_axis(Lambda_Plate())
 PulsePicker.propagate(pp_dist_lambda3_to_tfp_out)
 
 # TFP_out = Extended_TFP(name="Output_to_Amp2")
-TFP_out = Transmission_Disk(name="Output_to_Amp2", refractive_index=1.4316, 
-                            AOI=+65, thickness=6.35, mount_reversed=True, 
+TFP_out = Transmission_Disk(name="Output_to_Amp2", refractive_index=1.4316,
+                            AOI=+65, thickness=6.35, mount_reversed=True,
                             mount_flipped=True)
 TFP_out.pos = PulsePicker.last_geom()[0]
 PulsePicker.add_supcomposition_on_axis(TFP_out)
@@ -600,7 +600,7 @@ PulsePicker.add_on_axis(Lambda2_2_pp)
 PulsePicker.propagate(pp_dist_last_lambda_to_regen_in)
 
 
-invis_tfp = Transmission_Disk(name="Output_to_Amp2", refractive_index=1.4316, 
+invis_tfp = Transmission_Disk(name="Output_to_Amp2", refractive_index=1.4316,
                             AOI=65, thickness=6.35, mount_reversed=True)
 PulsePicker.add_supcomposition_on_axis(invis_tfp)
 PulsePicker.recompute_optical_axis()
@@ -707,10 +707,6 @@ Amp2.add_on_axis(Beam_Splitter)
 Amp2.propagate(20)
 
 Amp2.set_geom(Out_Beam1.get_geom())
-
-
-
-
 
 
 
@@ -908,17 +904,47 @@ klt_laser.rotate((0,0,1), np.pi)
 klt_pump.pos = regen_laser_crys.pos
 
 
+# =============================================================================
+# Pulsepicker Alignment Laser
+# =============================================================================
+from copy import deepcopy
+helper = Composition()
+b1 = PulsePicker.compute_beams()[1]
+helper.pos = b1.inner_ray().endpoint()
+helper.normal = -b1.normal
+helper.propagate(b1.length()*0.4)
+helper.add_on_axis(Mirror(phi=90))
+helper.propagate(150)
+helper.add_on_axis(Mirror(phi=90))
+helper.propagate(380)
+
+Adjust_Laser_Pulsepicker = Composition(name="Adjust_Pulsepicker")
+green_start = Beam()
+green_start.draw_dict["color"] = (0.0, 1.0, 0.0)
+Adjust_Laser_Pulsepicker.set_light_source(green_start)
+Adjust_Laser_Pulsepicker.set_geom(helper.last_geom())
+Adjust_Laser_Pulsepicker.normal *= -1
+Adjust_Laser_Pulsepicker.add_fixed_elm(helper._elements[-1])
+Adjust_Laser_Pulsepicker.add_fixed_elm(helper._elements[-2])
+for n in range(1, len(PulsePicker._elements)):
+  Adjust_Laser_Pulsepicker.add_fixed_elm(deepcopy(PulsePicker._elements[n]))
+Adjust_Laser_Pulsepicker.recompute_optical_axis()
+Adjust_Laser_Pulsepicker.propagate(0.1)
+for n in range(2, len(Adjust_Laser_Pulsepicker._elements)):
+  Adjust_Laser_Pulsepicker._elements[n].invisible = True
+Adjust_Laser_Pulsepicker.draw()
+
 
 # =============================================================================
 # Draw Selection
 # =============================================================================
 
 Seed.draw()
-Stretcher.draw()
-AdaptTeles.draw()
+# Stretcher.draw()
+# AdaptTeles.draw()
 PulsePicker.draw()
-Amplifier_I.draw()
-klt_pump.draw()
+# Amplifier_I.draw()
+# klt_pump.draw()
 
 # Out_Beam0.draw()
 # Out_Beam1.draw()
@@ -930,8 +956,21 @@ klt_pump.draw()
 Table().draw()
 # Compressor.draw()
 
-# # PulsePicker.draw_alignment_posts()
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+# # PulsePicker.draw_alignment_posts()
 
 # stretcher_out_obj.draw()
 # tm_big_obj.draw()
