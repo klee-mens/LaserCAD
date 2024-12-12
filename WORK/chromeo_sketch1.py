@@ -891,20 +891,23 @@ klt_pump.pos = regen_laser_crys.pos
 # Pulsepicker Alignment Laser
 # =============================================================================
 from copy import deepcopy
+from LaserCAD.non_interactings import LaserPointer
+
 helper = Composition()
 b1 = PulsePicker.compute_beams()[1]
 helper.pos = b1.inner_ray().endpoint()
 helper.normal = -b1.normal
 helper.propagate(b1.length()*0.4)
 helper.add_on_axis(Mirror(phi=90))
-helper.propagate(150)
+helper.propagate(200)
 helper.add_on_axis(Mirror(phi=90))
-helper.propagate(380)
+helper.propagate(200)
 
 Adjust_Laser_Pulsepicker = Composition(name="Adjust_Pulsepicker")
 green_start = Beam()
 green_start.draw_dict["color"] = (0.0, 1.0, 0.0)
 Adjust_Laser_Pulsepicker.set_light_source(green_start)
+Adjust_Laser_Pulsepicker.add_on_axis(LaserPointer())
 Adjust_Laser_Pulsepicker.set_geom(helper.last_geom())
 Adjust_Laser_Pulsepicker.normal *= -1
 Adjust_Laser_Pulsepicker.add_fixed_elm(helper._elements[-1])
@@ -923,22 +926,22 @@ for n in range(2, len(Adjust_Laser_Pulsepicker._elements)):
 # =============================================================================
 
 Seed.draw()
-Stretcher.draw()
-AdaptTeles.draw()
+# Stretcher.draw()
+# AdaptTeles.draw()
 PulsePicker.draw()
 Adjust_Laser_Pulsepicker.draw()
-Amplifier_I.draw()
-klt_pump.draw()
+# Amplifier_I.draw()
+# klt_pump.draw()
 
-Out_Beam0.draw()
-Out_Beam1.draw()
+# Out_Beam0.draw()
+# Out_Beam1.draw()
 
-Amp2.draw()
+# Amp2.draw()
 
-Pump.draw()
-BigPump.draw()
+# Pump.draw()
+# BigPump.draw()
 Table().draw()
-Compressor.draw()
+# Compressor.draw()
 
 
 
