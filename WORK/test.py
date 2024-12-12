@@ -15,7 +15,7 @@ if freecad_da:
 farad = Faraday_Isolator()
 farad.draw()
 farad.draw_mount()
-  
+
 # THICKNESS = 42
 
 # ref = Refractive_plane()
@@ -45,13 +45,13 @@ farad.draw_mount()
 # from copy import deepcopy
 
 # class Transmission_Optic(Opt_Element):
-#   def __init__(self, name="NewTransmissionOptic", refractive_index=1.5, 
+#   def __init__(self, name="NewTransmissionOptic", refractive_index=1.5,
 #                thickness=5, **kwargs):
 #     super().__init__(name=name, **kwargs)
 #     self.thickness = thickness
 #     self.refractive_index = refractive_index
 #     self.freecad_model = model_lens
-    
+
 #   def update_draw_dict(self):
 #     super().update_draw_dict()
 #     self.draw_dict["Radius1"] = 0
@@ -68,8 +68,8 @@ farad.draw_mount()
 #     surface_vec = ray.normal -np.sum(ray.normal*self.normal)* self.normal
 #     surface_vec *= 1/np.linalg.norm(surface_vec)
 #     ray2.pos += - surface_vec*shift*np.sign(alpha)
-#     return ray2 
-  
+#     return ray2
+
 # tro = Transmission_Optic(thickness=60/2**0.5)
 # tro.aperture = 100
 # tro.set_geom(ref.get_geom())
@@ -81,14 +81,14 @@ farad.draw_mount()
 
 
 # class Transmission_Disk(Composition):
-#   def __init__(self, name="NewExtended_TFP", refractive_index=1.5, AOI=56, 
+#   def __init__(self, name="NewExtended_TFP", refractive_index=1.5, AOI=56,
 #                thickness=5, aperture = 2*inch, **kwargs):
 #     super().__init__(name=name, **kwargs)
 #     self.thickness = thickness
 #     self.aperture = aperture
 #     self.refractive_index = refractive_index
 #     self.angle_of_incidence = AOI
-    
+
 #     ref1 = Refractive_plane(relative_refractive_index=self.refractive_index)
 #     ref1.invisible = True
 #     ref2 = Refractive_plane(relative_refractive_index=1/self.refractive_index)
@@ -103,14 +103,14 @@ farad.draw_mount()
 #     self.add_on_axis(cosmetic)
 #     self.propagate(self.thickness/np.cos(self.angle_of_incidence*np.pi/180))
 #     self.add_on_axis(ref2)
-    
+
 #     ref1.rotate((0,0,1), self.angle_of_incidence*np.pi/180)
 #     ref2.rotate((0,0,1), self.angle_of_incidence*np.pi/180)
 #     cosmetic.rotate((0,0,1), self.angle_of_incidence*np.pi/180)
 #     # self.set_sequence([0,1])
 
 
-      
+
 # # =============================================================================
 # # drawing
 # # =============================================================================
@@ -123,7 +123,7 @@ farad.draw_mount()
 # tro.draw()
 # b3.draw()
 
-  
+
 # tfp = Transmission_Disk(thickness=THICKNESS)
 # # tfp = Transmission_Disk(thickness=7)
 # tfp.set_geom(tro.get_geom())
@@ -150,6 +150,15 @@ farad.draw_mount()
 
 # for ray in comp._optical_axis:
 #   ray.draw()
+
+
+from LaserCAD.non_interactings import LaserPointer
+
+las = LaserPointer()
+las.draw()
+las.draw_mount()
+b = Beam()
+b.draw()
 
 if freecad_da:
   setview()
