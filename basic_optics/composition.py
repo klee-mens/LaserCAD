@@ -180,7 +180,7 @@ class Composition(Geom_Object):
       counter += 1
       B = self._optical_axis[counter].length
       moment_propa = np.eye(4)
-      moment_propa[0,1] = B 
+      moment_propa[0,1] = B
       # moment_propa[0,1] = B *1e-3
       M = self._elements[ind].kostenbauder(inray = self._optical_axis[counter])
 
@@ -314,7 +314,7 @@ class Composition(Geom_Object):
       return [(name, xy_to_table_plus_offset(*xy) ) for (name, xy) in self.post_positions(verbose=True)]
     else:
       return [xy_to_table_plus_offset(*xy) for xy in self.post_positions(verbose=False)]
-      
+
 
   def __container_to_part(self, part, container):
     if freecad_da:
@@ -406,6 +406,98 @@ class Composition(Geom_Object):
     self._rearange_subobjects_axes(old_axes, new_axes, self._optical_axis)
     self._rearange_subobjects_axes(old_axes, new_axes, self.non_opticals)
 
+  def Kostenbauder_matrix(self, reference_ray=None, dimension=4):
+    if reference_ray:
+      ray0 = reference_ray
+    else:
+      ray0 = self._optical_axis[0]
+
+    DeltaR = 1e-3 # 1 um displace
+    DeltaPhi = 1e-6 # 1um rad
+    DeltaLambda = ray0.wavelength * 1e-3
+
+    z = np.array((0, 0, 1)) # Gravitanional axis
+    y0 = np.cross(z, ray0.normal)
+    if np.linalg.norm(y0) < 1-1e-3:
+      print("Warning in Kostenbauder computation:")
+      print("\t Starting ray is not in xy Plane.")
+      print("\t This may cause strange ABCD entries")
+
+    ray1 = deepcopy(ray0)
+    ray1.pos += DeltaR
+
+    ray2 = deepcopy(ray0)
+    ray2.rotate(vec=y0, phi=DeltaPhi)
+
+    ray3 = deepcopy(ray0)
+    ray3.wavelength += DeltaLambda
+
+    beam0 = Beam()
+    beam0.override_rays([ray0, ray1, ray2, ray3])
+
+    computed_beams = self.compute_beams(external_source=beam0)
+    endbeam = computed_beams[-1]
+    endrays = endbeam.get_all_rays()
+
+    # end triad
+    ye = np.cross(z, endrays[0].normal)
+    if np.linalg.norm(ye) < 1-1e-3:
+      print("Warning in Kostenbauder computation:")
+      print("\t End ray is not in xy Plane.")
+      print("\t This may cause strange ABCD entries")
+    ye *= 1/np.linalg.norm(ye) # by force in xy plane
+    xe = np.cross(ye, z) # by force in xy plane and most likely identical with endrays[0].normal
+
+    endplane = Geom_Object()
+    endplane.pos = endrays[0].endpoint()
+    endplane.normal = xe
+
+    dist1 = endrays[1].intersection(endplane) - endplane.pos
+    alpha1 = np.arcsin(np.sum(np.cross(endrays[1].normal, endrays[0].normal) * ye))
+    A = np.sum(dist1 * z) / DeltaR # si units
+    C = alpha1 / (DeltaR*1e-3) # si units
+
+    dist2 = endrays[2].intersection(endplane) - endplane.pos
+    alpha2 = np.arcsin(np.sum(np.cross(endrays[2].normal, endrays[0].normal) * ye))
+    B = np.sum(dist2 * z) * 1e-3 / DeltaPhi # si units
+    D = alpha2 / DeltaPhi # si units
+
+    dist3 = endrays[3].intersection(endplane) - endplane.pos
+    alpha3 = np.arcsin(np.sum(np.cross(endrays[3].normal, endrays[0].normal) * ye))
+    E = np.sum(dist3 * z) / DeltaLambda # si units
+    F = alpha3 / (DeltaLambda * 1e-3) # si units
+
+    # optical path lengths
+    s0, s1, s2, s3 = 0,0,0,0
+    for com in computed_beams:
+      crays = com.get_all_rays()
+      s0 += crays[0].length
+      s1 += crays[1].length
+      s2 += crays[2].length
+      s3 += crays[3].length
+
+    c = 3e8 # light speed in m / s
+    G = (s1 - s0)/c / DeltaR # si units
+    H = (s2 - s0)*1e-3/c / DeltaPhi # si units
+    I = (s3 - s0)/c / DeltaLambda # si units
+
+    # E *= -c / (ray0.wavelength**2) # Kostenbauder took frequency, not wavelength
+    # F *= -c / (ray0.wavelength**2)
+    # I *= -c / (ray0.wavelength**2)
+
+    KostenB = np.eye(4)
+    KostenB[0,0] = A
+    KostenB[0,1] = B
+    KostenB[1,0] = C
+    KostenB[1,1] = D
+    KostenB[0,3] = E
+    KostenB[1,3] = F
+    KostenB[2,0] = G
+    KostenB[2,1] = H
+    KostenB[2,3] = I
+
+    return KostenB
+
 """
   def Kostenbauder_matrix(self,shifting_distence=100):
     ray0 = self._optical_axis[0]
@@ -420,14 +512,14 @@ class Composition(Geom_Object):
     ls_dax = deepcopy(self._lightsource)
     ls_dax.rotate(self.get_coordinate_system()[2],0.5*np.pi/100)
     ls_group.append(ls_dax)
-    
+
     ls_dy = deepcopy(self._lightsource)
     ls_dy.pos = point_start_dy
     ls_group.append(ls_dy)
     ls_day = deepcopy(self._lightsource)
     ls_day.rotate(self.get_coordinate_system()[1],-0.5*np.pi/100)
     ls_group.append(ls_day)
-    
+
     ls_dlambda = deepcopy(self._lightsource)
     for ii in range(len(ls_dlambda.get_all_rays())):
       a=deepcopy(ls_dlambda.get_all_rays()[ii].wavelength)
@@ -452,12 +544,12 @@ class Composition(Geom_Object):
       comp = Composition()
       comp.set_geom(ls.get_geom())
       comp.set_light_source(ls)
-      
+
       for element in self._elements:
         comp.add_fixed_elm(element)
       comp.set_sequence(self._sequence)
       # comp.recompute_optical_axis()
-      # if len(ls.get_all_rays())%2 ==1:  
+      # if len(ls.get_all_rays())%2 ==1:
       #   comp.redefine_optical_axis(ls.get_all_rays()[int(len(ls.get_all_rays())/2)])
       # else:
       #   comp.redefine_optical_axis(ls.get_all_rays()[int(len(ls.get_all_rays())/2-1)])
@@ -473,14 +565,14 @@ class Composition(Geom_Object):
       length_group.append(length1-length0)
       point_group.append(comp._beams[-1].get_all_rays()[0].intersection(ip_b))
       point_group.append(comp._beams[-1].get_all_rays()[0].intersection(ip_f))
-      
+
       # point_group.append(comp.last_geom()[0])
       # comp.propagate(shifting_distence)
       # comp.compute_beams()
       # point_group.append(comp.last_geom()[0])
       # comp.draw_beams()
       del comp
-    
+
     # anyway, x, y = ip_b.get_coordinate_system()
     ii = -1
     point_group_new = []
@@ -500,17 +592,17 @@ class Composition(Geom_Object):
     I = (point_group[1][2]-point_group[0][2])/0.1
     Cx = -(point_group[1][1]-point_group[2][1])/100/0.1
     K = -(point_group[1][2]-point_group[2][2])/100/0.1
-    
+
     Bx = (point_group[3][1])/(0.5*np.pi/100)
     J = (point_group[3][2]-point_group[0][2])/(0.5*np.pi/100)
     Dx = -(point_group[3][1]-point_group[4][1])/(100*0.5*np.pi/100)
     L = -(point_group[3][2]-point_group[4][2])/(100*0.5*np.pi/100)
-    
+
     E = (point_group[5][1])/0.1
     Ay = (point_group[5][2]-point_group[0][2])/0.1
     G = -(point_group[5][1]-point_group[6][1])/(100*0.1)
     Cy = -(point_group[5][2]-point_group[6][2])/(100*0.1)
-    
+
     F = (point_group[7][1])/(0.5*np.pi/100)
     By = (point_group[7][2]-point_group[0][2])/(0.5*np.pi/100)
     H = -(point_group[7][1]-point_group[8][1])/(100*0.5*np.pi/100)
@@ -523,7 +615,7 @@ class Composition(Geom_Object):
     dyf = point_group[9][2]/df
     daxf = -(point_group[9][1]-point_group[10][1])/100/df
     dayf = -(point_group[9][2]-point_group[10][2])/100/df
-    
+
     length_lambda = deepcopy(length_group[-1])
     print(length_lambda)
     length_group[-1]=1
@@ -536,7 +628,7 @@ class Composition(Geom_Object):
                                     length_group,[0,0,0,0,0,1]])
     return kostenbauder_matrix
 """
-    
+
 def next_name(name, prefix=""):
   # generiert einen neuen namen aus dem alten Element
   ind = name.rfind("_")

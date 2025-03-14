@@ -213,7 +213,22 @@ Stretcher.propagate(13)
 
 Stretcher.set_geom(Seed.last_geom())
 
+# =============================================================================
+# GDD computation according to Springer p. 1062 and Kostenbauer Matrix
+# =============================================================================
+st_lambda = Stretcher._optical_axis[0].wavelength * 1e-3 # wavelength in m
+st_d = grating_const * 1e-3 # grating constant d in m
+st_c = 3e8 # light speed in m/s
+st_grat = Stretcher._elements[1] # stretcher grating
+st_diff_ray = Stretcher._optical_axis[2] # stretcher diffracted ray after grating
+st_theta = st_diff_ray.angle_to(st_grat)
+st_L = - seperation * 2 * 1e-3 # characteristic length stretcher in m
+st_gdd = - st_lambda**3 / (np.pi * st_c**2 * st_d**2 * np.cos(st_theta)**2) * st_L
+Stretcher.GDD = st_gdd
 
+st_kostenbauder_gdd = Stretcher.Kostenbauder_matrix()[2,3]
+st_kostenbauder_gdd *= - (st_lambda)**2 / (2*np.pi * st_c)
+Stretcher.KB_GDD = st_kostenbauder_gdd
 
 
 class Transmission_Disk(Composition):
