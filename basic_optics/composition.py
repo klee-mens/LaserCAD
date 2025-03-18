@@ -423,6 +423,7 @@ class Composition(Geom_Object):
       print("Warning in Kostenbauder computation:")
       print("\t Starting ray is not in xy Plane.")
       print("\t This may cause strange ABCD entries")
+    y0 *= 1/np.linalg.norm(y0)
 
     ray_z = deepcopy(ray0)
     ray_z.pos += DeltaR * z
@@ -447,7 +448,8 @@ class Composition(Geom_Object):
       print("\t End ray is not in xy Plane.")
       print("\t This may cause strange ABCD entries")
     ye *= 1/np.linalg.norm(ye) # by force in xy plane
-    xe = np.cross(ye, z) # by force in xy plane and most likely identical with endrays[0].normal
+    # xe = np.cross(ye, z) # by force in xy plane and most likely identical with endrays[0].normal
+    xe = endrays[0].normal # reference for all angular computations
 
     endplane = Geom_Object()
     endplane.pos = endrays[0].endpoint()
@@ -528,15 +530,18 @@ class Composition(Geom_Object):
         print("\t End ray is not in xy Plane.")
         print("\t This may cause strange ABCD entries")
       ye *= 1/np.linalg.norm(ye) # by force in xy plane
-      xe = np.cross(ye, z) # by force in xy plane and most likely identical with endrays[0].normal
+      # xe = np.cross(ye, z) # by force in xy plane and most likely identical with endrays[0].normal
+      xe = endrays[0].normal # reference for all angular computations
 
       endplane = Geom_Object()
       endplane.pos = endrays[0].endpoint()
       endplane.normal = xe
+      # print("xe:", xe)
+      # print("endray normal:", endrays[0].normal)
 
       dist_zray = endrays[1].intersection(endplane) - endplane.pos
       alpha_zz = np.arcsin(np.sum(np.cross(endrays[1].normal, xe) * ye))
-      alpha_zy = np.arcsin(np.sum(np.cross(endrays[1].normal, xe) * z))
+      alpha_zy = np.arcsin(np.sum(np.cross(endrays[1].normal, xe) * -z))
       dz2_dz= np.sum(dist_zray * z) / DeltaR # si units
       dy2_dz= np.sum(dist_zray * ye) / DeltaR # si units
       dphiz2_dz = alpha_zz / (DeltaR*1e-3) # si units
@@ -544,7 +549,7 @@ class Composition(Geom_Object):
 
       dist_phizray = endrays[2].intersection(endplane) - endplane.pos
       alpha_phizz = np.arcsin(np.sum(np.cross(endrays[2].normal, xe) * ye))
-      alpha_phizy = np.arcsin(np.sum(np.cross(endrays[2].normal, xe) * z))
+      alpha_phizy = np.arcsin(np.sum(np.cross(endrays[2].normal, xe) * -z))
       dz2_dphiz = np.sum(dist_phizray * z) * 1e-3 / DeltaPhi # si units
       dy2_dphiz = np.sum(dist_phizray * ye) * 1e-3 / DeltaPhi # si units
       dphiz2_dphiz = alpha_phizz / DeltaPhi # si units
@@ -552,7 +557,7 @@ class Composition(Geom_Object):
 
       dist_yray = endrays[3].intersection(endplane) - endplane.pos
       alpha_yz = np.arcsin(np.sum(np.cross(endrays[3].normal, xe) * ye))
-      alpha_yy = np.arcsin(np.sum(np.cross(endrays[3].normal, xe) * z))
+      alpha_yy = np.arcsin(np.sum(np.cross(endrays[3].normal, xe) * -z))
       dz2_dy = np.sum(dist_yray * z) / DeltaR # si units
       dy2_dy = np.sum(dist_yray * ye) / DeltaR # si units
       dphiz2_dy = alpha_yz / (DeltaR*1e-3) # si units
@@ -568,7 +573,7 @@ class Composition(Geom_Object):
 
       dist_lamray = endrays[5].intersection(endplane) - endplane.pos
       alpha_z_lam = np.arcsin(np.sum(np.cross(endrays[5].normal, xe) * ye))
-      alpha_y_lam = np.arcsin(np.sum(np.cross(endrays[5].normal, xe) * z))
+      alpha_y_lam = np.arcsin(np.sum(np.cross(endrays[5].normal, xe) * -z))
       dz2_dlam = np.sum(dist_lamray * z) / DeltaLambda # si units
       dy2_dlam = np.sum(dist_lamray * ye) / DeltaLambda # si units
       dphiz2_dlam = alpha_z_lam / (DeltaLambda * 1e-3) # si units

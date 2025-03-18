@@ -187,6 +187,7 @@ Stretcher.propagate(13)
 
 
 print(Stretcher.Kostenbauder_matrix())
+print()
 print(Stretcher.Kostenbauder_matrix(dimension=6))
 
 lam0 = lambda_mid * 1e-3
@@ -221,6 +222,8 @@ print("Now have a closer look on the 6x6 entries:")
 print()
 
 kb6 = Stretcher.Kostenbauder_matrix(dimension=6)
+
+
 dz2_dz = kb6[0,0]
 print("dz2_dz: ", dz2_dz, "| Magnification z-z, around 1")
 
@@ -237,7 +240,123 @@ dz2_dt = kb6[0,4] * 1e3
 print("dz2_dt: ", dz2_dt, "mm/s | Time dependence z-t, by definition 0")
 
 dz2_dlam = kb6[0,5] * - speed_of_light / lam0**2 * 1e3 / (1e9)
-print("dz2_dlam: ", dz2_dlam, "mm/nm | Spatial chirp z-lambda")
+print("dz2_dlam: ", dz2_dlam, "mm/nm | Spatial chirp z-lambda around 0")
+
+
+print()
+
+
+dalpha2_dz = kb6[1,0] * 1e-3 # 1/mm
+print("dalpha2_dz: ", dalpha2_dz, "1/mm | Focal power alpha-z, around 0")
+
+dalpha2_dalpha = kb6[1,1] # mm
+print("dalpha2_dalpha: ", dalpha2_dalpha, "| Angular magnification alpha-alpha, around 1")
+
+dalpha2_dy = kb6[1,2] * 1e-3
+print("dalpha2_dy: ", dalpha2_dy, "1/mm | Twisting focal power alpha-y, around 0")
+
+dalpha2_dbeta = kb6[1,3]
+print("dalpha2_dbeta: ", dalpha2_dbeta, "| Twisting angular magnification alpha-beta, around 0")
+
+dalpha2_dt = kb6[1,4]
+print("dalpha2_dt: ", dalpha2_dt, "rad/s | Time dependence alpha-t, by definition 0")
+
+dalpha2_dlam = kb6[1,5] * -speed_of_light / lam0**2 / 1e9
+print("dalpha2_dlam: ", dalpha2_dlam, "rad/nm | Angular chirp alpha-lambda around 0")
+
+
+print()
+
+
+dy2_dz = kb6[2,0]
+print("dy2_dz: ", dy2_dz, "| Twisting magnification y-z, around 0")
+
+dy2_dalpha = kb6[2,1] * 1e3 # mm
+print("dy2_dalpha: ", dy2_dalpha, "mm | Twisting propagation y-alpha, around 0")
+
+dy2_dy = kb6[2,2]
+print("dy2_dy: ", dy2_dy, "| Magnification y-y, around 1")
+
+dy2_dbeta = kb6[2,3] * 1e3
+print("dy2_dbeta: ", dy2_dbeta, "mm | Propagation y-beta, some hundred mm")
+
+dy2_dt = kb6[2,4] * 1e3
+print("dy2_dt: ", dy2_dt, "mm/s | Time dependence y-t, by definition 0")
+
+dy2_dlam = kb6[2,5] * - speed_of_light / lam0**2 * 1e3 / (1e9)
+print("dy2_dlam: ", dy2_dlam, "mm/nm | Spatial chirp y-lambda around 0")
+
+
+print()
+
+
+dbeta2_dz = kb6[3,0] * 1e-3 # 1/mm
+print("dbeta2_dz: ", dbeta2_dz, "1/mm | Focal power beta-z, around 0")
+
+dbeta2_dalpha = kb6[3,1] # mm
+print("dbeta2_dalpha: ", dbeta2_dalpha, "| Twisting angular magnification beta-alpha, around 0")
+
+dbeta2_dy = kb6[3,2] * 1e-3
+print("dbeta2_dy: ", dbeta2_dy, "1/mm | Focal power beta-y, around 0")
+
+dbeta2_dbeta = kb6[3,3]
+print("dbeta2_dbeta: ", dbeta2_dbeta, "| Angular magnification beta-beta, around 1")
+
+dbeta2_dt = kb6[3,4]
+print("dbeta2_dt: ", dbeta2_dt, "rad/s | Time dependence beta-t, by definition 0")
+
+dbeta2_dlam = kb6[3,5] * -speed_of_light / lam0**2 / 1e9
+print("dbeta2_dlam: ", dbeta2_dlam, "rad/nm | Angular chirp beta-lambda around 0")
+
+
+print()
+
+
+dt2_dz = kb6[4,0] * 1e15/1e3 # fs/mm
+print("dt2_dz: ", dt2_dz, "fs/mm | Spatial pulse front tilt t-z, around 0")
+
+dt2_dalpha = kb6[4,1] * 1e15/1e3 # fs/mrad
+print("dt2_dalpha: ", dt2_dalpha, "fs/mrad | Angular pulse front tilt t-alpha, around 0")
+
+dt2_dy = kb6[4,2] * 1e15/1e3 # fs/mm
+print("dt2_dy: ", dt2_dy, "fs/mm | Spatial pulse front tilt t-y, around 0")
+
+dt2_dbeta = kb6[4,3] * 1e15/1e3 # fs/mrad
+print("dt2_dbeta: ", dt2_dbeta, "fs/mrad | Angular pulse front tilt t-beta, around 0")
+
+dt2_dt = kb6[4,4]
+print("dt2_dt: ", dt2_dt, "Time dependence t-t, by definition 1")
+
+dt2_dlam = kb6[4,5] / (2*np.pi) * 1e30 # fs^2
+print("dt2_dlam: ", dt2_dlam, "fs^2 | Group delay dispersion about 6 orders fs^2")
+
+
+print()
+
+
+df2_dz = kb6[5,0]
+print("df2_dz: ", df2_dz, "f-z, by definition 0")
+
+df2_dalpha = kb6[5,1]
+print("df2_dalpha: ", df2_dalpha, "f-alpha, by definition 0")
+
+df2_dy = kb6[5,2]
+print("df2_dy: ", df2_dy, "f-y, by definition 0")
+
+df2_dbeta = kb6[5,3]
+print("df2_dbeta: ", df2_dbeta, "f-beta, by definition 0")
+
+df2_dt = kb6[5,4]
+print("df2_dt: ", df2_dt, "f-t, by definition 0")
+
+df2_dlam = kb6[5,5]
+print("df2_dlam: ", df2_dlam, "f-f, by definition 1")
+
+
+
+# =============================================================================
+# jetzt wäre es noch cool einen mathematischen beispielstrecker zu konstruieren und daran spatial chirp in y und pulse front zeug auszuprobieren...
+# =============================================================================
 
 # =============================================================================
 # Draw section just for fun
