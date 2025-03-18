@@ -10,12 +10,14 @@ from .ray import Ray
 from .beam import Beam
 from .geom_object import Geom_Object
 from .grating import Grating
-from .intersection_plane import Intersection_plane
+# from .intersection_plane import Intersection_plane
 from ..freecad_models import warning, freecad_da, initialize_composition, add_to_composition
 from ..freecad_models.freecad_model_element_holder import Model_element_holder
 from .constants import xy_to_table_plus_offset
 import numpy as np
 from copy import deepcopy
+from scipy.constants import speed_of_light
+# speed_of_light = 3e8
 
 
 class Composition(Geom_Object):
@@ -164,7 +166,7 @@ class Composition(Geom_Object):
     self._matrix = np.matmul(np.array([[1,self._last_prop], [0,1]]), self._matrix ) #last propagation
     return np.array(self._matrix)
 
-  def kostenbauder(self):
+  def kostenbauder_matmul(self):
     """
     computes the optical matrix of the system
     each iteration consists of a propagation given by the length of the nth
@@ -341,7 +343,6 @@ class Composition(Geom_Object):
         self._drawing_part = [self._elements_part, self._mounts_part,
                               self._beams_part, self._alignment_post_part]
 
-
   def set_light_source(self, ls):
     """
     setzt neue Lightsource (meistens ein Beam) für die Composition und passt
@@ -423,17 +424,17 @@ class Composition(Geom_Object):
       print("\t Starting ray is not in xy Plane.")
       print("\t This may cause strange ABCD entries")
 
-    ray1 = deepcopy(ray0)
-    ray1.pos += DeltaR
+    ray_z = deepcopy(ray0)
+    ray_z.pos += DeltaR * z
 
-    ray2 = deepcopy(ray0)
-    ray2.rotate(vec=y0, phi=DeltaPhi)
+    ray_phi_z = deepcopy(ray0)
+    ray_phi_z.rotate(vec=-y0, phi=DeltaPhi)
 
-    ray3 = deepcopy(ray0)
-    ray3.wavelength += DeltaLambda
+    ray_lam = deepcopy(ray0)
+    ray_lam.wavelength += DeltaLambda
 
     beam0 = Beam()
-    beam0.override_rays([ray0, ray1, ray2, ray3])
+    beam0.override_rays([ray0, ray_z, ray_phi_z, ray_lam])
 
     computed_beams = self.compute_beams(external_source=beam0)
     endbeam = computed_beams[-1]
@@ -452,51 +453,182 @@ class Composition(Geom_Object):
     endplane.pos = endrays[0].endpoint()
     endplane.normal = xe
 
-    dist1 = endrays[1].intersection(endplane) - endplane.pos
-    alpha1 = np.arcsin(np.sum(np.cross(endrays[1].normal, endrays[0].normal) * ye))
-    A = np.sum(dist1 * z) / DeltaR # si units
-    C = alpha1 / (DeltaR*1e-3) # si units
+    dist_zray = endrays[1].intersection(endplane) - endplane.pos
+    alpha_z = np.arcsin(np.sum(np.cross(endrays[1].normal, endrays[0].normal) * ye))
+    dz2_dz= np.sum(dist_zray * z) / DeltaR # si units
+    dphiz2_dz = alpha_z / (DeltaR*1e-3) # si units
 
-    dist2 = endrays[2].intersection(endplane) - endplane.pos
-    alpha2 = np.arcsin(np.sum(np.cross(endrays[2].normal, endrays[0].normal) * ye))
-    B = np.sum(dist2 * z) * 1e-3 / DeltaPhi # si units
-    D = alpha2 / DeltaPhi # si units
+    dist_phizray = endrays[2].intersection(endplane) - endplane.pos
+    alpha_phiz = np.arcsin(np.sum(np.cross(endrays[2].normal, endrays[0].normal) * ye))
+    dz2_dphiz = np.sum(dist_phizray * z) * 1e-3 / DeltaPhi # si units
+    dphiz2_dphiz = alpha_phiz / DeltaPhi # si units
 
-    dist3 = endrays[3].intersection(endplane) - endplane.pos
-    alpha3 = np.arcsin(np.sum(np.cross(endrays[3].normal, endrays[0].normal) * ye))
-    E = np.sum(dist3 * z) / DeltaLambda # si units
-    F = alpha3 / (DeltaLambda * 1e-3) # si units
+    dist_lamray = endrays[3].intersection(endplane) - endplane.pos
+    alpha_lam = np.arcsin(np.sum(np.cross(endrays[3].normal, endrays[0].normal) * ye))
+    dz2_dlam = np.sum(dist_lamray * z) / DeltaLambda # si units
+    dphiz2_dlam = alpha_lam / (DeltaLambda * 1e-3) # si units
 
     # optical path lengths
-    s0, s1, s2, s3 = 0,0,0,0
+    s0, sz, sphiz, slam = 0,0,0,0
     for com in computed_beams:
       crays = com.get_all_rays()
       s0 += crays[0].length
-      s1 += crays[1].length
-      s2 += crays[2].length
-      s3 += crays[3].length
+      sz += crays[1].length
+      sphiz += crays[2].length
+      slam += crays[3].length
 
-    c = 3e8 # light speed in m / s
-    G = (s1 - s0)/c / DeltaR # si units
-    H = (s2 - s0)*1e-3/c / DeltaPhi # si units
-    I = (s3 - s0)/c / DeltaLambda # si units
+    c = speed_of_light # light speed in m / s
+    dt_dz = (sz - s0)/c / DeltaR # si units
+    dt_dphiz = (sphiz - s0)*1e-3/c / DeltaPhi # si units
+    dt_dlam = (slam - s0)/c / DeltaLambda # si units
 
-    # E *= -c / (ray0.wavelength**2) # Kostenbauder took frequency, not wavelength
-    # F *= -c / (ray0.wavelength**2)
-    # I *= -c / (ray0.wavelength**2)
+    dlam_dfreq = - (ray0.wavelength*1e-3)**2 / c # Kostenbauder took frequency, not wavelength
 
     KostenB = np.eye(4)
-    KostenB[0,0] = A
-    KostenB[0,1] = B
-    KostenB[1,0] = C
-    KostenB[1,1] = D
-    KostenB[0,3] = E
-    KostenB[1,3] = F
-    KostenB[2,0] = G
-    KostenB[2,1] = H
-    KostenB[2,3] = I
+    KostenB[0,0] = dz2_dz # A
+    KostenB[0,1] = dz2_dphiz # B
+    KostenB[1,0] = dphiz2_dz # C
+    KostenB[1,1] = dphiz2_dphiz # D
+    KostenB[0,3] = dz2_dlam * dlam_dfreq # E
+    KostenB[1,3] = dphiz2_dlam * dlam_dfreq# F
+    KostenB[2,0] = dt_dz # G
+    KostenB[2,1] = dt_dphiz # H
+    KostenB[2,3] = dt_dlam * dlam_dfreq # I
 
-    return KostenB
+    if dimension == 4:
+      return KostenB
+
+    elif dimension == 6:
+      ray_z = deepcopy(ray0)
+      ray_z.pos += DeltaR * z
+
+      ray_y = deepcopy(ray0)
+      ray_y.pos += DeltaR * y0
+
+      ray_phi_z = deepcopy(ray0)
+      ray_phi_z.rotate(vec=-y0, phi=DeltaPhi)
+
+      ray_phi_y = deepcopy(ray0)
+      ray_phi_y.rotate(vec=z, phi=DeltaPhi)
+
+      ray_lam = deepcopy(ray0)
+      ray_lam.wavelength += DeltaLambda
+
+      beam0 = Beam()
+      beam0.override_rays([ray0, ray_z, ray_phi_z, ray_y, ray_phi_y, ray_lam])
+
+      computed_beams = self.compute_beams(external_source=beam0)
+      endbeam = computed_beams[-1]
+      endrays = endbeam.get_all_rays()
+
+      # end triad
+      ye = np.cross(z, endrays[0].normal)
+      if np.linalg.norm(ye) < 1-1e-3:
+        print("Warning in Kostenbauder computation:")
+        print("\t End ray is not in xy Plane.")
+        print("\t This may cause strange ABCD entries")
+      ye *= 1/np.linalg.norm(ye) # by force in xy plane
+      xe = np.cross(ye, z) # by force in xy plane and most likely identical with endrays[0].normal
+
+      endplane = Geom_Object()
+      endplane.pos = endrays[0].endpoint()
+      endplane.normal = xe
+
+      dist_zray = endrays[1].intersection(endplane) - endplane.pos
+      alpha_zz = np.arcsin(np.sum(np.cross(endrays[1].normal, xe) * ye))
+      alpha_zy = np.arcsin(np.sum(np.cross(endrays[1].normal, xe) * z))
+      dz2_dz= np.sum(dist_zray * z) / DeltaR # si units
+      dy2_dz= np.sum(dist_zray * ye) / DeltaR # si units
+      dphiz2_dz = alpha_zz / (DeltaR*1e-3) # si units
+      dphiy2_dz = alpha_zy / (DeltaR*1e-3) # si units
+
+      dist_phizray = endrays[2].intersection(endplane) - endplane.pos
+      alpha_phizz = np.arcsin(np.sum(np.cross(endrays[2].normal, xe) * ye))
+      alpha_phizy = np.arcsin(np.sum(np.cross(endrays[2].normal, xe) * z))
+      dz2_dphiz = np.sum(dist_phizray * z) * 1e-3 / DeltaPhi # si units
+      dy2_dphiz = np.sum(dist_phizray * ye) * 1e-3 / DeltaPhi # si units
+      dphiz2_dphiz = alpha_phizz / DeltaPhi # si units
+      dphiy2_dphiz = alpha_phizy / DeltaPhi # si units
+
+      dist_yray = endrays[3].intersection(endplane) - endplane.pos
+      alpha_yz = np.arcsin(np.sum(np.cross(endrays[3].normal, xe) * ye))
+      alpha_yy = np.arcsin(np.sum(np.cross(endrays[3].normal, xe) * z))
+      dz2_dy = np.sum(dist_yray * z) / DeltaR # si units
+      dy2_dy = np.sum(dist_yray * ye) / DeltaR # si units
+      dphiz2_dy = alpha_yz / (DeltaR*1e-3) # si units
+      dphiy2_dy = alpha_yy / (DeltaR*1e-3) # si units
+
+      dist_phiyray = endrays[4].intersection(endplane) - endplane.pos
+      alpha_phiyz = np.arcsin(np.sum(np.cross(endrays[4].normal, xe) * ye))
+      alpha_phiyy = np.arcsin(np.sum(np.cross(endrays[4].normal, xe) * -z))
+      dz2_dphiy = np.sum(dist_phiyray * z) * 1e-3 / DeltaPhi # si units
+      dy2_dphiy = np.sum(dist_phiyray * ye) * 1e-3 / DeltaPhi # si units
+      dphiz2_dphiy = alpha_phiyz / DeltaPhi # si units
+      dphiy2_dphiy = alpha_phiyy / DeltaPhi # si units
+
+      dist_lamray = endrays[5].intersection(endplane) - endplane.pos
+      alpha_z_lam = np.arcsin(np.sum(np.cross(endrays[5].normal, xe) * ye))
+      alpha_y_lam = np.arcsin(np.sum(np.cross(endrays[5].normal, xe) * z))
+      dz2_dlam = np.sum(dist_lamray * z) / DeltaLambda # si units
+      dy2_dlam = np.sum(dist_lamray * ye) / DeltaLambda # si units
+      dphiz2_dlam = alpha_z_lam / (DeltaLambda * 1e-3) # si units
+      dphiy2_dlam = alpha_y_lam / (DeltaLambda * 1e-3) # si units
+
+      # optical path lengths
+      s0, sz, sphiz, sy, sphiy, slam = 0,0,0,0,0,0
+      for com in computed_beams:
+        crays = com.get_all_rays()
+        s0 += crays[0].length
+        sz += crays[1].length
+        sphiz += crays[2].length
+        sy += crays[3].length
+        sphiy += crays[4].length
+        slam += crays[5].length
+
+      c = speed_of_light # light speed in m / s
+      dt_dz = (sz - s0)/c / DeltaR # si units
+      dt_dy = (sy - s0)/c / DeltaR # si units
+      dt_dphiz = (sphiz - s0)*1e-3/c / DeltaPhi # si units
+      dt_dphiy = (sphiy - s0)*1e-3/c / DeltaPhi # si units
+      dt_dlam = (slam - s0)/c / DeltaLambda # si units
+
+      dlam_dfreq = - (ray0.wavelength*1e-3)**2 / c # Kostenbauder took frequency, not wavelength
+
+      KostenB = np.eye(6)
+      KostenB[0,0] = dz2_dz # A
+      KostenB[0,1] = dz2_dphiz # B
+      KostenB[0,2] = dz2_dy
+      KostenB[0,3] = dz2_dphiy
+      KostenB[0,5] = dz2_dlam * dlam_dfreq
+
+      KostenB[1,0] = dphiz2_dz # C
+      KostenB[1,1] = dphiz2_dphiz # D
+      KostenB[1,2] = dphiz2_dy
+      KostenB[1,3] = dphiz2_dphiy
+      KostenB[1,5] = dphiz2_dlam * dlam_dfreq
+
+      KostenB[2,0] = dy2_dz # A
+      KostenB[2,1] = dy2_dphiz # B
+      KostenB[2,2] = dy2_dy
+      KostenB[2,3] = dy2_dphiy
+      KostenB[2,5] = dy2_dlam * dlam_dfreq
+
+      KostenB[3,0] = dphiy2_dz # C
+      KostenB[3,1] = dphiy2_dphiz # D
+      KostenB[3,2] = dphiy2_dy
+      KostenB[3,3] = dphiy2_dphiy
+      KostenB[3,5] = dphiy2_dlam * dlam_dfreq
+
+      KostenB[4,0] = dt_dz
+      KostenB[4,1] = dt_dphiz
+      KostenB[4,2] = dt_dy
+      KostenB[4,3] = dt_dphiy
+      KostenB[4,5] = dt_dlam * dlam_dfreq
+
+      return KostenB
+    else:
+      print("This dimension in not implemented. I don't know, try 4 or 6.")
+      return -1
 
 """
   def Kostenbauder_matrix(self,shifting_distence=100):

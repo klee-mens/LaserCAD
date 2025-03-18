@@ -6,33 +6,74 @@ Created on Tue Mar 12 13:42:19 2024
 """
 from LaserCAD.freecad_models import clear_doc, setview, freecad_da
 from LaserCAD.basic_optics import Mirror, Beam, Composition, inch
-from LaserCAD.basic_optics import Curved_Mirror, Ray
+from LaserCAD.basic_optics import Curved_Mirror, RainbowBeam
 from LaserCAD.basic_optics import Grating
 from LaserCAD.basic_optics.mirror import Stripe_mirror
 from LaserCAD.moduls import Make_RoofTop_Mirror
 from LaserCAD.basic_optics.mount import Unit_Mount, Composed_Mount
+from scipy.constants import speed_of_light
 import numpy as np
-import matplotlib.pyplot as plt
 
 
-if freecad_da:
-  clear_doc()
+# =============================================================================
+# Pure Propagation test
+# =============================================================================
+
+translation_comp = Composition()
+translation_comp.propagate(300)
+print(translation_comp.Kostenbauder_matrix())
+print(translation_comp.Kostenbauder_matrix(dimension=6))
+
+output1 = """
+[[1.  0.3 0.  0. ]
+ [0.  1.  0.  0. ]
+ [0.  0.  1.  0. ]
+ [0.  0.  0.  1. ]]
+[[1.  0.3 0.  0.  0.  0. ]
+ [0.  1.  0.  0.  0.  0. ]
+ [0.  0.  1.  0.3 0.  0. ]
+ [0.  0.  0.  1.  0.  0. ]
+ [0.  0.  0.  0.  1.  0. ]
+ [0.  0.  0.  0.  0.  1. ]]"""
+
+print()
+print()
+
+# =============================================================================
+# Flip Mirror Test
+# =============================================================================
+
+flip_mirror_comp = Composition()
+flip_mirror_comp.propagate(100)
+flip_mirror_comp.add_on_axis(Mirror(phi=90))
+flip_mirror_comp.propagate(200)
+print(np.round(flip_mirror_comp.Kostenbauder_matrix(), decimals=2))
+print(np.round(flip_mirror_comp.Kostenbauder_matrix(dimension=6), decimals=2))
+
+output2 = """
+[[1.  0.3 0.  0. ]
+ [0.  1.  0.  0. ]
+ [0.  0.  1.  0. ]
+ [0.  0.  0.  1. ]]
+[[ 1.   0.3  0.   0.   0.   0. ]
+ [ 0.   1.   0.   0.   0.   0. ]
+ [ 0.   0.  -1.  -0.3  0.   0. ]
+ [ 0.  -0.   0.  -1.   0.   0. ]
+ [ 0.   0.   0.   0.   1.   0. ]
+ [ 0.   0.   0.   0.   0.   1. ]]"""
+
+print()
+print("The - sign in the y quarter is correct (to our definition), since the mirror flips the y axis")
+
+print()
+print()
+
+
 
 # =============================================================================
 # Stretcher parameter
 # =============================================================================
 
-# def Make_Stretcher_chromeo():
-"""
-constructs an Offner Stretcher with an on axis helper composition
-Note: When drawing a rooftop mirror, we will draw apure_cosmetic mirror to
-confirm the position of the mount. The mirror's geom is the average of two
-flip mirror. And its aperture is the periscope_height.
-Returns
--------
-TYPE Composition
-  den gesamten, geraytracten Strecker...
-"""
 # defining parameters
 radius_concave = 1000 #radius of the big concave sphere
 aperture_concave = 6 * inch
@@ -47,7 +88,6 @@ delta_lamda = 200e-9*1e3 # full bandwith in mm
 number_of_rays = 20
 safety_to_stripe_mirror = 5 #distance first incomming ray to stripe_mirror in mm
 periscope_height = 15
-periscope_height = 0
 first_propagation = 20 # legnth of the first ray_bundle to flip mirror1 mm
 distance_flip_mirror1_grating = 300-85
 distance_roof_top_grating = 600
@@ -59,7 +99,6 @@ c = np.cos(seperation_angle)
 a = v/2
 b = np.sqrt(a**2 - (v**2 - s**2)/(2*(1+c)))
 sinB = a - b
-print(sinB)
 grating_normal = (np.sqrt(1-sinB**2), sinB, 0)
 
 Concav = Curved_Mirror(radius=radius_concave, name="Big_Concav_Mirror")
@@ -91,23 +130,7 @@ helper.propagate(radius_concave/2)
 helper.add_on_axis(StripeM)
 
 # setting the lightsource as an bundle of different coulered rays
-lightsource = Beam(radius=0, angle=0)
-wavels = np.linspace(lambda_mid-delta_lamda/2, lambda_mid+delta_lamda/2, number_of_rays)
-rays = []
-cmap = plt.cm.gist_rainbow
-for wavel in wavels:
-  rn = Ray()
-  # rn.normal = vec
-  # rn.pos = pos0
-  rn.wavelength = wavel
-  x = 1-(wavel - lambda_mid + delta_lamda/2) / delta_lamda
-  rn.draw_dict["color"] = cmap( x )
-  rays.append(rn)
-mid_ray = Ray() # add additionally the 2400 nm mid lambda beam to be the inner ray, just cause
-mid_ray.wavelength = lambda_mid
-rays = [mid_ray] + rays
-lightsource.override_rays(rays)
-lightsource.draw_dict['model'] = "ray_group"
+lightsource = RainbowBeam(wavelength=lambda_mid, bandwith=delta_lamda, ray_count=number_of_rays)
 
 # starting the real stretcher
 Stretcher = Composition(name="DerStrecker")
@@ -147,7 +170,7 @@ Stretcher.add_supcomposition_on_axis(Make_RoofTop_Mirror(height=periscope_height
 # note that pure cosmetic (pos6) is not in the sequence
 Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0])
 Stretcher.recompute_optical_axis()
-Stretcher.propagate(120)
+Stretcher.propagate(185)
 
 
 # last small flip mirror from stretcher with cosmetics
@@ -158,51 +181,70 @@ Stretcher.add_on_axis(FlipMirror_pp)
 FlipMirror_pp.pos += (0,0,flip_mirror_push_down)
 Stretcher.propagate(13)
 
-
 # =============================================================================
 # so far for the chromeo stretcher, now comes the calculation
 # =============================================================================
 
-from scipy.constants import speed_of_light as c
+
+print(Stretcher.Kostenbauder_matrix())
+print(Stretcher.Kostenbauder_matrix(dimension=6))
 
 lam0 = lambda_mid * 1e-3
 d0 = grating_const * 1e-3
-beams = Stretcher.compute_beams()
-b2 = beams[2]
-theta = b2.angle_to(Grat)
 sep = seperation * 1e-3
+diffracted_ray = Stretcher._optical_axis[2]
+grating = Stretcher._elements[1]
+theta = diffracted_ray.angle_to(grating)
 
-GDD = lam0**3 * sep / (np.pi * c**2 * d0**2 * np.cos(theta)**2) * 1e30 * 2
+GDD = lam0**3 * sep / (np.pi * speed_of_light**2 * d0**2 * np.cos(theta)**2) * 1e30 * 2
 
-kb = Stretcher.kostenbauder()
+kb4 = Stretcher.Kostenbauder_matrix()
 
 print()
-print("GDD to Srpinger in fs^2", np.round(GDD))
+print("GDD to Srpinger in fs^2", np.round(GDD), "fs^2")
 
 GDDTill = 4290465 #fs^2
 
 print()
-print("GDD to Till App in fs^2", GDDTill)
+print("GDD to Till App in fs^2", GDDTill, "fs^2")
+
+kostenbauder_gdd = kb4[2,3]
+# kostenbauder_gdd *= - (lam0)**2 / (2*np.pi * speed_of_light)
+kostenbauder_gdd *= 1 / (2*np.pi)
 
 print()
-print("My GDD: ", kb[2,3]/2/np.pi * 1e30)
+print("My GDD: ",  np.round(kostenbauder_gdd * 1e30), "fs^2")
 
 print()
-print("My Kostenbauder Stretcher:")
-print(kb)
+print()
+print("Now have a closer look on the 6x6 entries:")
+print()
 
+kb6 = Stretcher.Kostenbauder_matrix(dimension=6)
+dz2_dz = kb6[0,0]
+print("dz2_dz: ", dz2_dz, "| Magnification z-z, around 1")
 
-from LaserCAD.basic_optics import Geom_Object
-for ray in Stretcher._optical_axis:
-  geom = Geom_Object()
-  geom.set_geom(ray.get_geom())
-  geom.draw()
+dz2_dalpha = kb6[0,1] * 1e3 # mm
+print("dz2_dalpha: ", dz2_dalpha, "mm | Propagation z-alpha, some hundred mm")
 
+dz2_dy = kb6[0,2]
+print("dz2_dy: ", dz2_dy, "| Twisting z-y, around 0")
 
+dz2_dbeta = kb6[0,3] * 1e3
+print("dz2_dbeta: ", dz2_dbeta, "mm | Twisting propagation z-beta, around 0")
+
+dz2_dt = kb6[0,4] * 1e3
+print("dz2_dt: ", dz2_dt, "mm/s | Time dependence z-t, by definition 0")
+
+dz2_dlam = kb6[0,5] * - speed_of_light / lam0**2 * 1e3 / (1e9)
+print("dz2_dlam: ", dz2_dlam, "mm/nm | Spatial chirp z-lambda")
+
+# =============================================================================
+# Draw section just for fun
+# =============================================================================
 if freecad_da:
+  clear_doc()
   Stretcher.draw()
-
-
 
 if freecad_da:
   setview()

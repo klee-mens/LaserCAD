@@ -128,7 +128,6 @@ c = np.cos(seperation_angle)
 a = v/2
 b = np.sqrt(a**2 - (v**2 - s**2)/(2*(1+c)))
 sinB = a - b
-print(sinB)
 grating_normal = (np.sqrt(1-sinB**2), sinB, 0)
 
 Concav = Curved_Mirror(radius=radius_concave, name="Big_Concav_Mirror")
@@ -218,7 +217,7 @@ Stretcher.set_geom(Seed.last_geom())
 # =============================================================================
 st_lambda = Stretcher._optical_axis[0].wavelength * 1e-3 # wavelength in m
 st_d = grating_const * 1e-3 # grating constant d in m
-st_c = 3e8 # light speed in m/s
+st_c = 299792458 # light speed in m/s
 st_grat = Stretcher._elements[1] # stretcher grating
 st_diff_ray = Stretcher._optical_axis[2] # stretcher diffracted ray after grating
 st_theta = st_diff_ray.angle_to(st_grat)
@@ -227,7 +226,8 @@ st_gdd = - st_lambda**3 / (np.pi * st_c**2 * st_d**2 * np.cos(st_theta)**2) * st
 Stretcher.GDD = st_gdd
 
 st_kostenbauder_gdd = Stretcher.Kostenbauder_matrix()[2,3]
-st_kostenbauder_gdd *= - (st_lambda)**2 / (2*np.pi * st_c)
+# st_kostenbauder_gdd *= - (st_lambda)**2 / (2*np.pi * st_c)
+st_kostenbauder_gdd *= 1 / (2*np.pi)
 Stretcher.KB_GDD = st_kostenbauder_gdd
 
 
@@ -941,22 +941,22 @@ for n in range(2, len(Adjust_Laser_Pulsepicker._elements)):
 # =============================================================================
 
 Seed.draw()
-# Stretcher.draw()
-# AdaptTeles.draw()
+Stretcher.draw()
+AdaptTeles.draw()
 PulsePicker.draw()
 Adjust_Laser_Pulsepicker.draw()
-# Amplifier_I.draw()
-# klt_pump.draw()
+Amplifier_I.draw()
+klt_pump.draw()
 
-# Out_Beam0.draw()
-# Out_Beam1.draw()
+Out_Beam0.draw()
+Out_Beam1.draw()
 
-# Amp2.draw()
+Amp2.draw()
 
-# Pump.draw()
-# BigPump.draw()
+Pump.draw()
+BigPump.draw()
 Table().draw()
-# Compressor.draw()
+Compressor.draw()
 
 
 
