@@ -358,6 +358,9 @@ print("df2_dlam: ", df2_dlam, "f-f, by definition 1")
 # jetzt wäre es noch cool einen mathematischen beispielstrecker zu konstruieren und daran spatial chirp in y und pulse front zeug auszuprobieren...
 # =============================================================================
 
+
+
+
 # =============================================================================
 # Draw section just for fun
 # =============================================================================

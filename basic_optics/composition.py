@@ -409,7 +409,7 @@ class Composition(Geom_Object):
 
 
   def Kostenbauder_matrix(self, reference_ray=None, dimension=4,
-                           text_explanation=False):
+                           reference_axis="z", text_explanation=False):
     if reference_ray:
       ray0 = reference_ray
     else:
@@ -417,8 +417,7 @@ class Composition(Geom_Object):
 
     DeltaR = 1e-3 # 1 um displace
     DeltaPhi = 1e-6 # 1um rad
-    lam0 = ray0.wavelength
-    DeltaLambda = lam0 * 1e-3
+    DeltaLambda = ray0.wavelength * 1e-3
 
     z = np.array((0, 0, 1)) # Gravitanional axis
     y0 = np.cross(z, ray0.normal)
@@ -511,24 +510,90 @@ class Composition(Geom_Object):
     dt2_dbeta = (opl_beta - opl0)*1e-3/c / DeltaPhi # si units
     dt2_dlam = (opl_lam - opl0)/c / DeltaLambda # si units
 
-    dlam_dfreq = - (ray0.wavelength*1e-3)**2 / c # Kostenbauder took frequency, not wavelength
+    lam0 = ray0.wavelength * 1e-3
+    dlam_dfreq = - (lam0)**2 / c # Kostenbauder took frequency, not wavelength
 
     if dimension == 4:
-      KostenB = np.eye(4)
-      KostenB[0,0] = dz2_dz # A
-      KostenB[0,1] = dz2_dalpha # B
-      KostenB[1,0] = dalpha2_dz # C
-      KostenB[1,1] = dalpha2_dalpha # D
-      KostenB[0,3] = dz2_dlam * dlam_dfreq # E
-      KostenB[1,3] = dalpha2_dlam * dlam_dfreq# F
-      KostenB[2,0] = dt2_dz # G
-      KostenB[2,1] = dt2_dalpha # H
-      KostenB[2,3] = dt2_dlam * dlam_dfreq # I
-
-      return KostenB
+      if reference_axis == "z":
+        KostenB = np.eye(4)
+        KostenB[0,0] = dz2_dz # A
+        KostenB[0,1] = dz2_dalpha # B
+        KostenB[1,0] = dalpha2_dz # C
+        KostenB[1,1] = dalpha2_dalpha # D
+        KostenB[0,3] = dz2_dlam * dlam_dfreq # E
+        KostenB[1,3] = dalpha2_dlam * dlam_dfreq# F
+        KostenB[2,0] = dt2_dz # G
+        KostenB[2,1] = dt2_dalpha # H
+        KostenB[2,3] = dt2_dlam * dlam_dfreq # I
+        
+        if text_explanation:
+          txt = ""
+          def txtline(str1, obj, str2):
+            return str1 + str(obj) + str2
+          txt += txtline("dz2_dz: ", dz2_dz, "| Magnification z-z\n")
+          txt += txtline("dz2_dalpha: ", dz2_dalpha*1e3, "mm | Propagation z-alpha\n")
+          txt += txtline("dz2_dt: ", KostenB[0,2]*1e3, "mm/s | Time dependence z-t, by definition 0\n")
+          txt += txtline("dz2_dlam: ", dz2_dlam*1e3/(1e9), "mm/nm | Spatial chirp z-lambda\n")
+          txt += "\n"
+          txt += txtline("dalpha2_dz: ", dalpha2_dz*1e-3, "1/mm | Focal power alpha-z\n")
+          txt += txtline("dalpha2_dalpha: ", dalpha2_dalpha, "| Angular magnification alpha-alpha\n")
+          txt += txtline("dalpha2_dt: ", KostenB[1,2], "rad/s | Time dependence alpha-t, by definition 0\n")
+          txt += txtline("dalpha2_dlam: ", dalpha2_dlam/1e9, "rad/nm | Angular chirp alpha-lambda\n")
+          txt += "\n"
+          txt += txtline("dt2_dz: ", dt2_dz*1e15/1e3, "fs/mm | Spatial pulse front tilt t-z\n")
+          txt += txtline("dt2_dalpha: ", dt2_dalpha*1e15/1e3, "fs/mrad | Angular pulse front tilt t-alpha\n")
+          txt += txtline("dt2_dt: ", KostenB[2,2], "Time dependence t-t, by definition 1\n")
+          txt += txtline("dt2_dlam: ", dt2_dlam*dlam_dfreq/(2*np.pi)*1e30, "fs^2 | Group delay dispersion\n")
+          txt += "\n"
+          txt += txtline("df2_dz: ", KostenB[3,0], "f-z, by definition 0\n")
+          txt += txtline("df2_dalpha: ",KostenB[3,1], "f-alpha, by definition 0\n")
+          txt += txtline("df2_dt: ", KostenB[3,2], "f-t, by definition 0\n")
+          txt += txtline("df2_dlam: ", KostenB[3,3], "f-f, by definition 1\n")
+          return KostenB, txt
+        return KostenB
+      
+      elif reference_axis == "y":
+        KostenB = np.eye(4)
+        KostenB[0,0] = dy2_dy # A
+        KostenB[0,1] = dy2_dbeta # B
+        KostenB[1,0] = dbeta2_dy # C
+        KostenB[1,1] = dbeta2_dbeta # D
+        KostenB[0,3] = dy2_dlam * dlam_dfreq # E
+        KostenB[1,3] = dbeta2_dlam * dlam_dfreq# F
+        KostenB[2,0] = dt2_dy # G
+        KostenB[2,1] = dt2_dbeta # H
+        KostenB[2,3] = dt2_dlam * dlam_dfreq # I
+        
+        if text_explanation:
+          txt = ""
+          def txtline(str1, obj, str2):
+            return str1 + str(obj) + str2
+          txt += txtline("dy2_dy: ", dy2_dy, "| Magnification y-y\n")
+          txt += txtline("dy2_dbeta: ", dy2_dbeta*1e3, "mm | Propagation y-beta\n")
+          txt += txtline("dy2_dt: ", KostenB[0,2]*1e3, "mm/s | Time dependence y-t, by definition 0\n")
+          txt += txtline("dy2_dlam: ", dy2_dlam*1e3/(1e9), "mm/nm | Spatial chirp y-lambda\n")
+          txt += "\n"
+          txt += txtline("dbeta2_dy: ", dbeta2_dy*1e-3, "1/mm | Focal power beta-y\n")
+          txt += txtline("dbeta2_dbeta: ", dbeta2_dbeta, "| Angular magnification beta-beta\n")
+          txt += txtline("dbeta2_dt: ", KostenB[1,2], "rad/s | Time dependence beta-t, by definition 0\n")
+          txt += txtline("dbeta2_dlam: ", dbeta2_dlam/1e9, "rad/nm | Angular chirp beta-lambda\n")
+          txt += "\n"
+          txt += txtline("dt2_dy: ", dt2_dy*1e15/1e3, "fs/mm | Spatial pulse front tilt t-y\n")
+          txt += txtline("dt2_dbeta: ", dt2_dbeta*1e15/1e3, "fs/mrad | Angular pulse front tilt t-beta\n")
+          txt += txtline("dt2_dt: ", KostenB[2,2], "Time dependence t-t, by definition 1\n")
+          txt += txtline("dt2_dlam: ", dt2_dlam*dlam_dfreq/(2*np.pi)*1e30, "fs^2 | Group delay dispersion\n")
+          txt += "\n"
+          txt += txtline("df2_dy: ", KostenB[3,0], "f-y, by definition 0\n")
+          txt += txtline("df2_dbeta: ", KostenB[3,1], "f-beta, by definition 0\n")
+          txt += txtline("df2_dt: ", KostenB[3,2], "f-t, by definition 0\n")
+          txt += txtline("df2_dlam: ", KostenB[3,3], "f-f, by definition 1\n")
+          return KostenB, txt
+        return KostenB
+      else:
+        print("Usage: refrenece_axis = 'z' or 'y' when dimension = 4")
+        return -1
 
     elif dimension == 6:
-
       KostenB = np.eye(6)
       KostenB[0,0] = dz2_dz # A
       KostenB[0,1] = dz2_dalpha # B
@@ -561,62 +626,55 @@ class Composition(Geom_Object):
       KostenB[4,5] = dt2_dlam * dlam_dfreq
 
       if text_explanation:
-        print("dz2_dz: ", dz2_dz, "| Magnification z-z, around 1")
-        print("dz2_dalpha: ", dz2_dalpha*1e3, "mm | Propagation z-alpha, some hundred mm")
-        print("dz2_dy: ", dz2_dy, "| Twisting z-y, around 0")
-        print("dz2_dbeta: ", dz2_dbeta*1e3, "mm | Twisting propagation z-beta, around 0")
-        print("dz2_dt: ", KostenB[0,4]*1e3, "mm/s | Time dependence z-t, by definition 0")
-        print("dz2_dlam: ", dz2_dlam*-c/lam0**2*1e3/(1e9), "mm/nm | Spatial chirp z-lambda around 0")
-
-        print()
-
-        print("dalpha2_dz: ", dalpha2_dz*1e-3, "1/mm | Focal power alpha-z, around 0")
-        print("dalpha2_dalpha: ", dalpha2_dalpha, "| Angular magnification alpha-alpha, around 1")
-        print("dalpha2_dy: ", dalpha2_dy*1e-3, "1/mm | Twisting focal power alpha-y, around 0")
-        print("dalpha2_dbeta: ", dalpha2_dbeta, "| Twisting angular magnification alpha-beta, around 0")
-        print("dalpha2_dt: ", KostenB[1,4], "rad/s | Time dependence alpha-t, by definition 0")
-        print("dalpha2_dlam: ", dalpha2_dlam*-c/lam0**2/1e9, "rad/nm | Angular chirp alpha-lambda around 0")
-
-        print()
-
-        print("dy2_dz: ", dy2_dz, "| Twisting magnification y-z, around 0")
-        print("dy2_dalpha: ", dy2_dalpha*1e3, "mm | Twisting propagation y-alpha, around 0")
-        print("dy2_dy: ", dy2_dy, "| Magnification y-y, around 1")
-        print("dy2_dbeta: ", dy2_dbeta*1e3, "mm | Propagation y-beta, some hundred mm")
-        print("dy2_dt: ", KostenB[2,4]*1e3, "mm/s | Time dependence y-t, by definition 0")
-        print("dy2_dlam: ", dy2_dlam*-speed_of_light/lam0**2*1e3/(1e9), "mm/nm | Spatial chirp y-lambda around 0")
-
-        print()
-
-        print("dbeta2_dz: ", dbeta2_dz*1e-3, "1/mm | Focal power beta-z, around 0")
-        print("dbeta2_dalpha: ", dbeta2_dalpha, "| Twisting angular magnification beta-alpha, around 0")
-        print("dbeta2_dy: ", dbeta2_dy*1e-3, "1/mm | Focal power beta-y, around 0")
-        print("dbeta2_dbeta: ", dbeta2_dbeta, "| Angular magnification beta-beta, around 1")
-        print("dbeta2_dt: ", KostenB[3,4], "rad/s | Time dependence beta-t, by definition 0")
-        print("dbeta2_dlam: ", dbeta2_dlam*-speed_of_light/lam0**2/1e9, "rad/nm | Angular chirp beta-lambda around 0")
-
-        print()
-
-        print("dt2_dz: ", dt2_dz*1e15/1e3, "fs/mm | Spatial pulse front tilt t-z, around 0")
-        print("dt2_dalpha: ", dt2_dalpha*1e15/1e3, "fs/mrad | Angular pulse front tilt t-alpha, around 0")
-        print("dt2_dy: ", dt2_dy*1e15/1e3, "fs/mm | Spatial pulse front tilt t-y, around 0")
-        print("dt2_dbeta: ", dt2_dbeta*1e15/1e3, "fs/mrad | Angular pulse front tilt t-beta, around 0")
-        print("dt2_dt: ", KostenB[4,4], "Time dependence t-t, by definition 1")
-        print("dt2_dlam: ", dt2_dlam/(2*np.pi)*1e30, "fs^2 | Group delay dispersion about 6 orders fs^2")
-
-        print()
-
-        print("df2_dz: ", KostenB[5,0], "f-z, by definition 0")
-        print("df2_dalpha: ",KostenB[5,1], "f-alpha, by definition 0")
-        print("df2_dy: ", KostenB[5,2], "f-y, by definition 0")
-        print("df2_dbeta: ", KostenB[5,3], "f-beta, by definition 0")
-        print("df2_dt: ", KostenB[5,4], "f-t, by definition 0")
-        print("df2_dlam: ", KostenB[5,5], "f-f, by definition 1")
+        txt = ""
+        def txtline(str1, obj, str2):
+          return str1 + str(obj) + str2
+        txt += txtline("dz2_dz: ", dz2_dz, "| Magnification z-z\n")
+        txt += txtline("dz2_dalpha: ", dz2_dalpha*1e3, "mm | Propagation z-alpha\n")
+        txt += txtline("dz2_dy: ", dz2_dy, "| Twisting z-y\n")
+        txt += txtline("dz2_dbeta: ", dz2_dbeta*1e3, "mm | Twisting propagation z-beta\n")
+        txt += txtline("dz2_dt: ", KostenB[0,4]*1e3, "mm/s | Time dependence z-t, by definition 0\n")
+        txt += txtline("dz2_dlam: ", dz2_dlam*1e3/(1e9), "mm/nm | Spatial chirp z-lambda\n")
+        txt += "\n"
+        txt += txtline("dalpha2_dz: ", dalpha2_dz*1e-3, "1/mm | Focal power alpha-z\n")
+        txt += txtline("dalpha2_dalpha: ", dalpha2_dalpha, "| Angular magnification alpha-alpha\n")
+        txt += txtline("dalpha2_dy: ", dalpha2_dy*1e-3, "1/mm | Twisting focal power alpha-y\n")
+        txt += txtline("dalpha2_dbeta: ", dalpha2_dbeta, "| Twisting angular magnification alpha-beta\n")
+        txt += txtline("dalpha2_dt: ", KostenB[1,4], "rad/s | Time dependence alpha-t, by definition 0\n")
+        txt += txtline("dalpha2_dlam: ", dalpha2_dlam/1e9, "rad/nm | Angular chirp alpha-lambda\n")
+        txt += "\n"
+        txt += txtline("dy2_dz: ", dy2_dz, "| Twisting magnification y-z\n")
+        txt += txtline("dy2_dalpha: ", dy2_dalpha*1e3, "mm | Twisting propagation y-alpha\n")
+        txt += txtline("dy2_dy: ", dy2_dy, "| Magnification y-y\n")
+        txt += txtline("dy2_dbeta: ", dy2_dbeta*1e3, "mm | Propagation y-beta\n")
+        txt += txtline("dy2_dt: ", KostenB[2,4]*1e3, "mm/s | Time dependence y-t, by definition 0\n")
+        txt += txtline("dy2_dlam: ", dy2_dlam*1e3/(1e9), "mm/nm | Spatial chirp y-lambda\n")
+        txt += "\n"
+        txt += txtline("dbeta2_dz: ", dbeta2_dz*1e-3, "1/mm | Focal power beta-z\n")
+        txt += txtline("dbeta2_dalpha: ", dbeta2_dalpha, "| Twisting angular magnification beta-alpha\n")
+        txt += txtline("dbeta2_dy: ", dbeta2_dy*1e-3, "1/mm | Focal power beta-y\n")
+        txt += txtline("dbeta2_dbeta: ", dbeta2_dbeta, "| Angular magnification beta-beta\n")
+        txt += txtline("dbeta2_dt: ", KostenB[3,4], "rad/s | Time dependence beta-t, by definition 0\n")
+        txt += txtline("dbeta2_dlam: ", dbeta2_dlam/1e9, "rad/nm | Angular chirp beta-lambda\n")
+        txt += "\n"
+        txt += txtline("dt2_dz: ", dt2_dz*1e15/1e3, "fs/mm | Spatial pulse front tilt t-z\n")
+        txt += txtline("dt2_dalpha: ", dt2_dalpha*1e15/1e3, "fs/mrad | Angular pulse front tilt t-alpha\n")
+        txt += txtline("dt2_dy: ", dt2_dy*1e15/1e3, "fs/mm | Spatial pulse front tilt t-y\n")
+        txt += txtline("dt2_dbeta: ", dt2_dbeta*1e15/1e3, "fs/mrad | Angular pulse front tilt t-beta\n")
+        txt += txtline("dt2_dt: ", KostenB[4,4], "Time dependence t-t, by definition 1\n")
+        txt += txtline("dt2_dlam: ", dt2_dlam*dlam_dfreq/(2*np.pi)*1e30, "fs^2 | Group delay dispersion\n")
+        txt += "\n"
+        txt += txtline("df2_dz: ", KostenB[5,0], "f-z, by definition 0\n")
+        txt += txtline("df2_dalpha: ",KostenB[5,1], "f-alpha, by definition 0\n")
+        txt += txtline("df2_dy: ", KostenB[5,2], "f-y, by definition 0\n")
+        txt += txtline("df2_dbeta: ", KostenB[5,3], "f-beta, by definition 0\n")
+        txt += txtline("df2_dt: ", KostenB[5,4], "f-t, by definition 0\n")
+        txt += txtline("df2_dlam: ", KostenB[5,5], "f-f, by definition 1\n")
+        return KostenB, txt
       return KostenB
 
-
     else:
-      print("This dimension in not implemented. I don't know, try 4 or 6.")
+      print("This dimension in not implemented. I don't know, try dimension = 4 or 6.")
       return -1
 
 

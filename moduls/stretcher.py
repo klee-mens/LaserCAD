@@ -163,15 +163,6 @@ def Make_Stretcher(radius_concave = 1000, #radius of the big concave sphere
   Grat = Grating(grat_const=grating_const, name="Gitter", order=-1)
   Grat.normal = grating_normal
   
-  # incident = Ray()
-  # incident.wavelength = 800e-6
-  # incident.pos += (-80,0,0)
-  # outgoing = Grat.next_ray(incident)
-  
-  # Grat.draw()
-  # incident.draw()
-  # outgoing.draw()
-  
   #set the big sphere
   Concav = Curved_Mirror(radius=radius_concave,name="Concav_Mirror")
   Concav.aperture = aperture_concave
@@ -193,32 +184,8 @@ def Make_Stretcher(radius_concave = 1000, #radius of the big concave sphere
   helper.propagate(radius_concave/2)
   helper.add_on_axis(StripeM)
   
-  # helper.draw()
-  
-  # setting the lightsource as an bundle of different coulered rays
-  # lightsource = Beam(radius=0, angle=0)
-  # wavels = np.linspace(lambda_mid-band_width/2, lambda_mid+band_width/2, number_of_rays)
-  # rays = []
-  # cmap = plt.cm.gist_rainbow
-  # for wavel in wavels:
-  #   rn = Ray()
-  #   rn.wavelength = wavel
-  #   x = 1-(wavel - lambda_mid + band_width/2) / band_width
-  #   rn.draw_dict["color"] = cmap( x )
-  #   rays.append(rn)
-  # lightsource.override_rays(rays)
-  # lightsource.draw_dict['model'] = "ray_group"
-  
   lightsource = RainbowBeam(wavelength=lambda_mid, bandwith=band_width, ray_count=number_of_rays)
 
-  
-  # lightsource.pos += (-80,0,0)
-  # outgoing = Grat.next_beam(lightsource)
-  
-  # Grat.draw()
-  # lightsource.draw()
-  # outgoing.draw()
-  
   # starting the real stretcher
   Stretcher = Composition(name="DerStrecker")
   Stretcher.set_light_source(lightsource)
