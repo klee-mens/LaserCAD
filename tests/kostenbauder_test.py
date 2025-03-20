@@ -357,8 +357,89 @@ print("df2_dlam: ", df2_dlam, "f-f, by definition 1")
 # =============================================================================
 # jetzt wäre es noch cool einen mathematischen beispielstrecker zu konstruieren und daran spatial chirp in y und pulse front zeug auszuprobieren...
 # =============================================================================
+from LaserCAD.moduls import Make_Stretcher
 
 
+# plane_stretch = Make_Stretcher(seperation_angle=0,
+#                                height_stripe_mirror=0,
+#                                safety_to_stripe_mirror=0,
+#                                seperation=50)
+plane_stretch = Make_Stretcher(radius_concave = 1000, #radius of the big concave sphere
+    aperture_concave = 6 * inch,
+    height_stripe_mirror = 10, #height of the stripe mirror in mm
+    seperation_angle = 20 /180 *np.pi, # sep between in and outgoing middle ray
+    # incident_angle = seperation_angle + reflection_angle
+    grating_const = 1/1000, # in 1/mm
+    seperation = 100, # difference grating position und radius_concave
+    lambda_mid = 800e-9 * 1e3, # central wave length in mm
+    band_width = 20e-9*1e3, # full bandwith in mm
+    number_of_rays = 20,
+    safety_to_stripe_mirror = 5, #distance first incomming ray to stripe_mirror in mm
+    periscope_height = 10,
+    first_propagation = 120, # legnth of the first ray_bundle to flip mirror1 mm
+    distance_roof_top_grating = 600)
+
+grat_ps = plane_stretch._elements[0]
+
+
+kbps, txtps = plane_stretch.Kostenbauder_matrix(dimension=6, text_explanation=True)
+
+
+print()
+print("GDD plane stretcher:", np.round(plane_stretch.GDD*1e30), "fs^2")
+print()
+print(txtps)
+
+
+from LaserCAD.moduls import Make_Compressor
+
+# comp = Make_Compressor(seperation=100, seperation_angle=0, height_seperation=0)
+comp = Make_Compressor(seperation_angle = 20 /180 *np.pi, # sep between in and outgoing middle ray
+    grating_const = 1/1000, # in 1/mm
+    seperation = 200, # difference grating position und radius_concave
+    lambda_mid = 800e-9 * 1e3, # central wave length in mm
+    band_width = 20e-9*1e3, # full bandwith in mm
+    number_of_rays = 20,
+    height_seperation = 16, # seperation between incomming and outgoing beam,
+    first_propagation = 120, # legnth of the first ray_bundle to grating 1 mm
+    distance_roof_top_grating = 600,
+    grating1_dimensions = (25, 25, 5),
+    grating2_dimensions = (50, 50, 5))
+kbcomp, txtcomp = comp.Kostenbauder_matrix(dimension=6, text_explanation=True)
+
+print()
+print("GDD plane stretcher:", np.round(comp.GDD*1e30), "fs^2")
+print()
+print(txtcomp)
+
+
+print()
+print()
+
+kbps4 = plane_stretch.Kostenbauder_matrix(reference_axis="y")
+kbcomp4 = comp.Kostenbauder_matrix(reference_axis="y")
+
+print(kbps4)
+print()
+print(kbcomp4)
+print()
+print(np.matmul(kbcomp4, kbps4))
+
+from copy import deepcopy
+cpa_composition = deepcopy(plane_stretch)
+cpa_composition.propagate(1000)
+old_sequence = cpa_composition.get_sequence()
+cpa_composition.add_supcomposition_on_axis(comp)
+comp.rotate(vec=(1,0,0), phi=np.pi)
+cpa_composition.recompute_optical_axis()
+cpa_composition.set_sequence(old_sequence + [5, 6, 7, 8, 6, 5]) # trust me, im an engineer ;)
+cpa_composition.propagate(100)
+
+
+cpaK, cpaT = cpa_composition.Kostenbauder_matrix(reference_axis="y", text_explanation=True)
+print()
+print()
+print(cpaT)
 
 
 # =============================================================================
@@ -366,7 +447,16 @@ print("df2_dlam: ", df2_dlam, "f-f, by definition 1")
 # =============================================================================
 if freecad_da:
   clear_doc()
-  Stretcher.draw()
+  Stretcher.normal = (0,1,0)
+  # Stretcher.draw()
 
+  plane_stretch.pos += (0, 200, 0)
+  # plane_stretch.draw()
+
+  # comp.draw()
+
+  cpa_composition.draw()
+  # cpa_composition.draw_beams()
+  # cpa_composition.draw_elements()
 if freecad_da:
   setview()
