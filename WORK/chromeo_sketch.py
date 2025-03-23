@@ -9,7 +9,7 @@ import numpy as np
 from LaserCAD.freecad_models import clear_doc, setview, freecad_da
 from LaserCAD.basic_optics import Mirror, Beam, Composition, inch, RainbowBeam
 from LaserCAD.basic_optics import Curved_Mirror, Ray, Component
-from LaserCAD.basic_optics import LinearResonator, Lens
+from LaserCAD.basic_optics import LinearResonator, Lens, Refractive_plane
 from LaserCAD.basic_optics import Grating
 import matplotlib.pyplot as plt
 from LaserCAD.freecad_models.utils import thisfolder, load_STL
@@ -18,6 +18,8 @@ from LaserCAD.basic_optics.mirror import Stripe_mirror
 from LaserCAD.moduls import Make_RoofTop_Mirror
 from LaserCAD.basic_optics.mount import Unit_Mount, Composed_Mount, Post
 from LaserCAD.non_interactings.table import Table
+from LaserCAD.freecad_models import model_mirror
+
 
 if freecad_da:
   clear_doc()
@@ -126,7 +128,6 @@ c = np.cos(seperation_angle)
 a = v/2
 b = np.sqrt(a**2 - (v**2 - s**2)/(2*(1+c)))
 sinB = a - b
-print(sinB)
 grating_normal = (np.sqrt(1-sinB**2), sinB, 0)
 
 Concav = Curved_Mirror(radius=radius_concave, name="Big_Concav_Mirror")
@@ -211,9 +212,66 @@ Stretcher.propagate(13)
 
 Stretcher.set_geom(Seed.last_geom())
 
+# =============================================================================
+# GDD computation according to Springer p. 1062 and Kostenbauer Matrix
+# =============================================================================
+st_lambda = Stretcher._optical_axis[0].wavelength * 1e-3 # wavelength in m
+st_d = grating_const * 1e-3 # grating constant d in m
+st_c = 299792458 # light speed in m/s
+st_grat = Stretcher._elements[1] # stretcher grating
+st_diff_ray = Stretcher._optical_axis[2] # stretcher diffracted ray after grating
+st_theta = st_diff_ray.angle_to(st_grat)
+st_L = - seperation * 2 * 1e-3 # characteristic length stretcher in m
+st_gdd = - st_lambda**3 / (np.pi * st_c**2 * st_d**2 * np.cos(st_theta)**2) * st_L
+Stretcher.GDD = st_gdd
+
+st_kostenbauder_gdd = Stretcher.Kostenbauder_matrix()[2,3]
+# st_kostenbauder_gdd *= - (st_lambda)**2 / (2*np.pi * st_c)
+st_kostenbauder_gdd *= 1 / (2*np.pi)
+Stretcher.KB_GDD = st_kostenbauder_gdd
 
 
+class Transmission_Disk(Composition):
+  def __init__(self, name="NewExtended_TFP", refractive_index=1.5, AOI=56,
+               thickness=5, aperture = 2*inch, mount_reversed=False,
+               mount_flipped=False, **kwargs):
+    super().__init__(name=name, **kwargs)
+    self.thickness = thickness
+    self.aperture = aperture
+    self.refractive_index = refractive_index
+    self.__angle_of_incidence = AOI*np.pi/180
+    self.AOI = AOI
+    inside_angel = np.arcsin(np.sin(self.__angle_of_incidence) / self.refractive_index)
+    self.lateral = self.thickness * (np.tan(self.__angle_of_incidence) - np.tan(inside_angel))
 
+    ref1 = Refractive_plane(relative_refractive_index=self.refractive_index)
+    ref1.invisible = True
+    ref2 = Refractive_plane(relative_refractive_index=1/self.refractive_index)
+    ref2.invisible = True
+    cosmetic = Component(name="ShapeObject")
+    cosmetic.freecad_model = model_mirror
+    cosmetic.thickness = self.thickness
+    cosmetic.aperture = self.aperture
+    cosmetic.set_mount(Composed_Mount(unit_model_list=["KS2", "1inch_post"]))
+    cosmetic.draw_dict["color"] = (1.0, 0.0, 2.0)
+    self.add_on_axis(ref1)
+    self.add_on_axis(cosmetic)
+    self.propagate(self.thickness/np.cos(self.__angle_of_incidence))
+    self.add_on_axis(ref2)
+
+    ref1.rotate((0,0,1), self.__angle_of_incidence)
+    ref2.rotate((0,0,1), self.__angle_of_incidence)
+    cosmetic.rotate((0,0,1), self.__angle_of_incidence)
+    cosmetic.pos += - cosmetic.get_coordinate_system()[1]*self.lateral/2
+
+    if mount_reversed:
+      cosmetic.Mount.reverse()
+    if mount_flipped:
+      cosmetic.Mount.flip()
+
+TFP_out = Transmission_Disk(name="Output_to_Amp2", refractive_index=1.4316,
+                            AOI=+65, thickness=6.35, mount_reversed=True,
+                            mount_flipped=True)
 
 # =============================================================================
 # folded Resonator
@@ -248,7 +306,7 @@ class U100_A_Mirror(Mirror):
   def __init__(self, phi=180, theta=0, **kwargs):
     super().__init__(phi=phi, theta=theta, **kwargs)
     self.set_mount(Composed_Mount(["U100-A2K", "1inch_post"]))
-    
+
 
 cm0 = Curved_Mirror(radius=focal*2, phi = 180, name="Curved_Far")
 cm0.set_mount(Composed_Mount(["U100-A2K", "1inch_post"]))
@@ -307,7 +365,8 @@ Amplifier_I = simres
 # ppos, paxes = Pump.last_geom()
 
 Amplifier_I.set_input_coupler_index(5)# Einkopplung über TFP_Amp1
-TFP_Amp1.pos += -8*TFP_Amp1.get_coordinate_system()[1]
+# TFP_Amp1.pos += -TFP_Amp1.get_coordinate_system()[1] * TFP_out.lateral/2
+# TFP_Amp1.pos += -8*TFP_Amp1.get_coordinate_system()[1]
 # Amplifier_I.set_geom(Pump.last_geom())
 # Amplifier_I.pos = ppos
 
@@ -389,19 +448,19 @@ def complete_solver_del_b(a=1695.7, f=1029, r1=2045.3, r2=2165, z2=1045):
   v = r1/r2
   al = 1 - a/f
   ph = 1/f
-  
+
   p = al / (al**2 + ph**2 * r1**2)
   q = (1-v) / (al**2 + ph**2 * r1**2)
-  
+
   x1 = -p + np.sqrt(p**2 - q)
   x2 = -p - np.sqrt(p**2 - q)
   x = x1
-  
+
   bet1 = (z2*v +f*al*(1+al*x) + ph*x*r1**2) / ((1+al*x)**2*f + ph*x**2*r1**2 ) * -1
-  
+
   x = x2
   bet2 = (z2*v +f*al*(1+al*x) + ph*x*r1**2) / ((1+al*x)**2*f + ph*x**2*r1**2 ) * -1
-  
+
   delta1 = x1*f
   delta2 = x2*f
   b1 = f*(1-bet1)
@@ -465,13 +524,13 @@ class K1_Mirror(Mirror):
   def __init__(self, phi=180, theta=0, **kwargs):
     super().__init__(phi=phi, theta=theta, **kwargs)
     self.set_mount(Composed_Mount(["KS1", "1inch_post"]))
-    
+
+
 tfp_angle = 65 #tfp angle of incidence in degree
 flip_mirror_push_down = 8 # distance to push the first mirror out ouf the seed beam
 tfp_push_aside = 5 # distance in mm to push the TFP aside, so that the beam can pass through
 
 PulsePicker = Composition(name="PulsePicker")
-# PulsePicker.set_geom(Stretcher.last_geom())
 PulsePicker.set_geom(AdaptTeles.last_geom())
 
 # polarisation optics up to pockels cell
@@ -495,9 +554,7 @@ TFP_pp = Mirror(phi = 180-2*tfp_angle, name="TFP_p")
 TFP_pp.draw_dict["color"] = (1.0, 0.0, 2.0)
 TFP_pp.draw_dict["thickness"] = 4
 TFP_pp.aperture = 2*inch
-# TFP_pp.thickness = tfp_thickness
 TFP_pp.set_mount_to_default()
-# TFP_out.mount_dict["Flip90"]=True
 PulsePicker.add_on_axis(TFP_pp)
 x,y,z = TFP_pp.get_coordinate_system()
 TFP_pp.pos += y * tfp_push_aside
@@ -518,20 +575,20 @@ PulsePicker.propagate(60)
 PulsePicker.add_on_axis(K1_Mirror(phi=-90))
 PulsePicker.propagate(pp_delay_stage_length-60)
 FlipMirror_rev_pp = K1_Mirror(phi=90)
-FlipMirror_rev_pp.Mount.reverse()
+# FlipMirror_rev_pp.Mount.reverse()
 PulsePicker.add_on_axis(FlipMirror_rev_pp)
-FlipMirror_rev_pp.pos += 5*FlipMirror_rev_pp.get_coordinate_system()[1]
+# FlipMirror_rev_pp.pos += 5*FlipMirror_rev_pp.get_coordinate_system()[1]
 
 # PulsePicker.propagate(385)
 
 # Output Stage bevore the RegenAmp
 pp_dist_last_flip_mirror_to_lambda3 = 40
-pp_dist_lambda3_to_tfp_out = 100+15
-pp_dist_tfp_out_to_lambda4 = 70-10
-pp_dist_lambda4_to_faraday_rot = 50+15+25
-pp_dist_faraday_rot_to_regen_in = 150-20-25
+pp_dist_lambda3_to_tfp_out = 115+10
+pp_dist_tfp_out_to_faraday = 60-10
+pp_dist_lambda4_to_faraday_rot = 90-2
+pp_dist_last_lambda_to_regen_in = 105+2
 
-pp_last_prop = PropB - PulsePicker.optical_path_length() -adapt_a2b2 - pp_dist_last_flip_mirror_to_lambda3 - adapt_last_prop -pp_dist_lambda3_to_tfp_out - pp_dist_tfp_out_to_lambda4 - pp_dist_lambda4_to_faraday_rot - pp_dist_faraday_rot_to_regen_in
+pp_last_prop = PropB - PulsePicker.optical_path_length() -adapt_a2b2 - pp_dist_last_flip_mirror_to_lambda3 - adapt_last_prop -pp_dist_lambda3_to_tfp_out - pp_dist_tfp_out_to_faraday - pp_dist_lambda4_to_faraday_rot - pp_dist_last_lambda_to_regen_in
 PulsePicker.propagate(pp_last_prop)
 
 last_flip_pp = K1_Mirror(phi=90)
@@ -541,33 +598,31 @@ PulsePicker.propagate(pp_dist_last_flip_mirror_to_lambda3)
 PulsePicker.add_on_axis(Lambda_Plate())
 PulsePicker.propagate(pp_dist_lambda3_to_tfp_out)
 
-# Output TFP to send the beam to Amp2
-TFP_out = Mirror(phi = -180+2*tfp_angle, name="Output_to_Amp2")
-TFP_out.draw_dict["color"] = (1.0, 0.0, 2.0)
-TFP_out.draw_dict["thickness"] = 4
-TFP_out.aperture = 2*inch
-TFP_out.thickness = tfp_thickness
-TFP_out_Mount = Composed_Mount(["KS2", "1inch_post"])
-TFP_out.set_mount(TFP_out_Mount)
-TFP_out.Mount.mount_list[0].flip()
-TFP_out.next_ray = TFP_out.just_pass_through
-PulsePicker.add_on_axis(TFP_out)
-TFP_out.normal = TFP_pp.normal
-TFP_out.rotate((0,0,1), phi=np.pi/2)
-x,y,z = TFP_out.get_coordinate_system()
-TFP_out.pos += - y * tfp_push_aside
-PulsePicker.propagate(pp_dist_tfp_out_to_lambda4) # maybe just use the thickness of the energy detector everytime instead ...
+# TFP_out = Extended_TFP(name="Output_to_Amp2")
+TFP_out = Transmission_Disk(name="Output_to_Amp2", refractive_index=1.4316,
+                            AOI=+65, thickness=6.35, mount_reversed=True,
+                            mount_flipped=True)
+TFP_out.pos = PulsePicker.last_geom()[0]
+PulsePicker.add_supcomposition_on_axis(TFP_out)
+PulsePicker.recompute_optical_axis()
+PulsePicker.propagate(pp_dist_tfp_out_to_faraday) # maybe just use the thickness of the energy detector everytime instead ...
 
-Lambda2_2_pp = Lambda_Plate()
 FaradPP = Faraday_Isolator()
 PulsePicker.add_on_axis(FaradPP)
-PulsePicker.propagate(pp_dist_faraday_rot_to_regen_in)
-PulsePicker.add_on_axis(Lambda2_2_pp)
 PulsePicker.propagate(pp_dist_lambda4_to_faraday_rot)
+Lambda2_2_pp = Lambda_Plate()
+PulsePicker.add_on_axis(Lambda2_2_pp)
+PulsePicker.propagate(pp_dist_last_lambda_to_regen_in)
 
 
-PulsePicker._lightsource.draw_dict["model"] = "ray_group"
+invis_tfp = Transmission_Disk(name="Output_to_Amp2", refractive_index=1.4316,
+                            AOI=65, thickness=6.35, mount_reversed=True)
+PulsePicker.add_supcomposition_on_axis(invis_tfp)
+PulsePicker.recompute_optical_axis()
+PulsePicker.non_opticals.pop(-1) # invis tfp beeing invis
+PulsePicker.propagate(0.1)
 
+# PulsePicker._lightsource.draw_dict["model"] = "ray_group"
 
 Amplifier_I.set_geom(PulsePicker.last_geom())
 
@@ -579,15 +634,16 @@ Amplifier_I.set_geom(PulsePicker.last_geom())
 # Output Beam to Amp2
 # =============================================================================
 bs = PulsePicker.compute_beams()
-b_pp_end = bs[-1]
+b_pp_end = bs[-3]
 r_pp_end = b_pp_end.inner_ray()
 Out_Beam0 = Beam(radius=2, name="Beam_to_Amp2")
 Out_Beam0.draw_dict["color"] = (1.0, 0.5, 0.5)
 Out_Beam0.pos = r_pp_end.endpoint()
 Out_Beam0.normal = -b_pp_end.normal
 helper_mirror = Mirror()
-helper_mirror.set_geom(TFP_out.get_geom())
+helper_mirror.set_geom(TFP_out._elements[1].get_geom())
 Out_Beam1 = helper_mirror.next_beam(Out_Beam0)
+
 
 
 
@@ -603,30 +659,37 @@ bigcrys = Crystal(width=20, thickness=15, n=2.45)
 source = Beam(radius=1.4, angle=0)
 telesf1 = -75
 telesf2 = 270
-knee_shift_amp2 = -220
+# knee_shift_amp2 = -220
 # knee_shift_amp2 = 150
 
 #Telescope for beam widening
 Amp2 = Composition(name="RelayTyp2")
 Amp2.set_light_source(source)
 
-Amp2.propagate(270)
+Amp2.propagate(80)
 Amp2.add_on_axis(Mirror(phi=-90))
 
-Amp2.propagate(200)
+Amp2.propagate(50)
+# Amp2.add_on_axis(Mirror(phi=-90))
+# Amp2.propagate(50)
 teles_lens1 = Lens(f=telesf1)
 Amp2.add_on_axis(teles_lens1)
+# Amp2.propagate(100)
+
 Amp2.propagate(telesf1 + telesf2)
 teles_lens2 = Lens(f=telesf2)
 Amp2.add_on_axis(teles_lens2)
 
-
+Amp2.propagate(42)
+Amp2.add_on_axis(Mirror(phi=90))
+Amp2.propagate(275)
+Amp2.add_on_axis(Mirror(phi=-90))
 # # Knee for adjustments
 # Amp2.propagate(90)
 # Amp2.add_on_axis(Mirror(phi=90*np.sign(knee_shift_amp2)))
 # Amp2.propagate(np.abs(knee_shift_amp2))
 # Amp2.add_on_axis(Mirror(phi=-90*np.sign(knee_shift_amp2)))
-Amp2.propagate(680)
+Amp2.propagate(840)
 
 # AmpTyp2 with for passes, that will definitely fail
 Amp2.add_on_axis(bigcrys)
@@ -648,17 +711,17 @@ Amp2.add_on_axis(concave2)
 concave2.set_normal_with_2_points(end_concave.pos, active_mir.pos)
 
 # Amp2.set_sequence([0,1,2,3, 4,5,6,7,4   ])
-# Amp2.set_sequence([0,1,2,3,4, 5,6,7,8,5   ])
-Amp2.set_sequence([0,1,2, 3,4,5,6,3   ])
+Amp2.set_sequence([0,1,2,3,4, 5,6,7,8,5   ])
+# Amp2.set_sequence([0,1,2, 3,4,5,6,3   ])
 Amp2.recompute_optical_axis()
 
-a2_safe_angle_for_non_colliding_with_crystal = 2
+a2_safe_angle_for_non_colliding_with_crystal = 3
 Amp2.propagate(580)
-Amp2.add_on_axis(Mirror(phi=180 - sep_angle_A2 + a2_safe_angle_for_non_colliding_with_crystal-3))
+Amp2.add_on_axis(Mirror(phi=180 - sep_angle_A2 + a2_safe_angle_for_non_colliding_with_crystal))
 Amp2.propagate(580)
 
-Amp2.add_on_axis(Mirror(phi=90 - a2_safe_angle_for_non_colliding_with_crystal+3))
-Amp2.propagate(400)
+Amp2.add_on_axis(Mirror(phi=90 - a2_safe_angle_for_non_colliding_with_crystal))
+Amp2.propagate(350)
 Beam_Splitter = Mirror(phi=90, name="BeamSplitter")
 Beam_Splitter.aperture= 2*inch
 Beam_Splitter.set_mount_to_default() # should really automatize this...
@@ -667,36 +730,7 @@ Amp2.add_on_axis(Beam_Splitter)
 Amp2.propagate(20)
 
 Amp2.set_geom(Out_Beam1.get_geom())
-
-
-
-
-
-
-
-# =============================================================================
-# breadboards
-# =============================================================================
-# from LaserCAD.non_interactings import Breadboard
-# StartPos = (-700, -450, 0)
-# b1 = Breadboard()
-# b1.pos += StartPos
-# b1.draw()
-# b2= Breadboard()
-# b2.pos += b1.pos + (b2.Xdimension, 0, 0)
-# b2.draw()
-# b3= Breadboard()
-# b3.pos += b1.pos + (0, b2.Ydimension, 0)
-# b3.draw()
-# b4= Breadboard()
-# b4.pos += b1.pos + (b2.Xdimension, b2.Ydimension, 0)
-# b4.draw()
-# b5= Breadboard()
-# b5.pos += b1.pos + (0, -b2.Ydimension, 0)
-# b5.draw()
-# b6= Breadboard()
-# b6.pos += b1.pos + (b2.Xdimension, -b2.Ydimension, 0)
-# b6.draw()
+notused = Amp2._elements[0].next_beam(Out_Beam1)
 
 
 
@@ -804,15 +838,8 @@ Grat3 =Grating(grat_const=grating_const,order=-1)
 Grat3.pos = (Grat1.pos[0]-Grat2.pos[0]+Grat1.pos[0]-45-2*35*abs(Grat1.normal[0]),Grat2.pos[1],Grat2.pos[2])
 Grat3.normal = (Grat1.normal[0],-Grat1.normal[1],Grat1.normal[2])
 Grat4 =Grating(grat_const=grating_const,order=-1)
-
 Grat4.pos = (Grat2.pos[0]-Grat2.pos[0]+Grat1.pos[0]-45-2*35*abs(Grat1.normal[0]),Grat1.pos[1],Grat2.pos[2])
 Grat4.normal = (Grat2.normal[0],-Grat2.normal[1],Grat2.normal[2])
-# Grat3.pos += (1,0,0)
-# Grat4.pos -= (1,0,0)
-
-# Grat3.rotate((0,0,1), 0.01)
-# Grat4.rotate((0,0,1), 0.01)
-
 Grat1.height=Grat2.height=Grat3.height=Grat4.height=25
 Grat1.thickness=Grat2.thickness=Grat3.thickness=Grat4.thickness=9.5
 Grat1.set_mount_to_default()
@@ -837,14 +864,7 @@ Grat3.Mount.mount_list[1].docking_obj.pos = Grat3.Mount.mount_list[1].pos + Grat
 Grat3.Mount.mount_list[2].set_geom(Grat3.Mount.mount_list[1].docking_obj.get_geom())
 Grat4.Mount.mount_list[1].docking_obj.pos = Grat4.Mount.mount_list[1].pos + Grat4.Mount.mount_list[1].normal*17.1-np.array((0,0,1))*25.4
 Grat4.Mount.mount_list[2].set_geom(Grat4.Mount.mount_list[1].docking_obj.get_geom())
-# PM1=Post_Marker()
-# PM2=Post_Marker()
-# Grat2.Mount.add(PM1)
-# Grat3.Mount.add(PM2)
 
-# print("setting pos=",(Grat1.pos+Grat2.pos+Grat3.pos+Grat4.pos)/4)
-# ip = Intersection_plane()
-# ip.pos -= (100,0,0)
 Compressor.add_fixed_elm(Grat4)
 Compressor.add_fixed_elm(Grat3)
 Compressor.add_fixed_elm(Grat2)
@@ -882,6 +902,39 @@ klt_laser.rotate((0,0,1), np.pi)
 klt_pump.pos = regen_laser_crys.pos
 
 
+# =============================================================================
+# Pulsepicker Alignment Laser
+# =============================================================================
+from copy import deepcopy
+from LaserCAD.non_interactings import LaserPointer
+
+helper = Composition()
+b1 = PulsePicker.compute_beams()[1]
+helper.pos = b1.inner_ray().endpoint()
+helper.normal = -b1.normal
+helper.propagate(b1.length()*0.4)
+helper.add_on_axis(Mirror(phi=90))
+helper.propagate(200)
+helper.add_on_axis(Mirror(phi=90))
+helper.propagate(200)
+
+Adjust_Laser_Pulsepicker = Composition(name="Adjust_Pulsepicker")
+green_start = Beam()
+green_start.draw_dict["color"] = (0.0, 1.0, 0.0)
+Adjust_Laser_Pulsepicker.set_light_source(green_start)
+Adjust_Laser_Pulsepicker.add_on_axis(LaserPointer())
+Adjust_Laser_Pulsepicker.set_geom(helper.last_geom())
+Adjust_Laser_Pulsepicker.normal *= -1
+Adjust_Laser_Pulsepicker.add_fixed_elm(helper._elements[-1])
+Adjust_Laser_Pulsepicker.add_fixed_elm(helper._elements[-2])
+for n in range(1, len(PulsePicker._elements)):
+  Adjust_Laser_Pulsepicker.add_fixed_elm(deepcopy(PulsePicker._elements[n]))
+Adjust_Laser_Pulsepicker.recompute_optical_axis()
+Adjust_Laser_Pulsepicker.propagate(0.1)
+for n in range(2, len(Adjust_Laser_Pulsepicker._elements)):
+  Adjust_Laser_Pulsepicker._elements[n].invisible = True
+
+
 
 # =============================================================================
 # Draw Selection
@@ -891,6 +944,7 @@ Seed.draw()
 Stretcher.draw()
 AdaptTeles.draw()
 PulsePicker.draw()
+Adjust_Laser_Pulsepicker.draw()
 Amplifier_I.draw()
 klt_pump.draw()
 
@@ -904,8 +958,43 @@ BigPump.draw()
 Table().draw()
 Compressor.draw()
 
-# # PulsePicker.draw_alignment_posts()
 
+
+
+
+
+
+
+
+
+
+# =============================================================================
+# breadboards
+# =============================================================================
+# from LaserCAD.non_interactings import Breadboard
+# StartPos = (-700, -450, 0)
+# b1 = Breadboard()
+# b1.pos += StartPos
+# b1.draw()
+# b2= Breadboard()
+# b2.pos += b1.pos + (b2.Xdimension, 0, 0)
+# b2.draw()
+# b3= Breadboard()
+# b3.pos += b1.pos + (0, b2.Ydimension, 0)
+# b3.draw()
+# b4= Breadboard()
+# b4.pos += b1.pos + (b2.Xdimension, b2.Ydimension, 0)
+# b4.draw()
+# b5= Breadboard()
+# b5.pos += b1.pos + (0, -b2.Ydimension, 0)
+# b5.draw()
+# b6= Breadboard()
+# b6.pos += b1.pos + (b2.Xdimension, -b2.Ydimension, 0)
+# b6.draw()
+
+
+
+# # PulsePicker.draw_alignment_posts()
 
 # stretcher_out_obj.draw()
 # tm_big_obj.draw()

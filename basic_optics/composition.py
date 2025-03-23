@@ -447,7 +447,7 @@ class Composition(Geom_Object):
 
     computed_beams = self.compute_beams(external_source=beam0)
     endbeam = computed_beams[-1]
-    endray0, endray_z, endray_alpha, endray_y, endray_beta, endray_lam = endbeam.get_all_rays()
+    endray0, endray_z, endray_alpha, endray_y, endray_beta, endray_lam = endbeam.get_all_rays(by_reference=True)
 
     # end triad
     xe = endray0.normal # reference for all angular computations
