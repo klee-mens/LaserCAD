@@ -5,204 +5,234 @@ Created on Tue Mar 12 13:42:19 2024
 @author: mens
 """
 from LaserCAD.freecad_models import clear_doc, setview, freecad_da
-from LaserCAD.basic_optics import Mirror, Beam, Composition, inch
-from LaserCAD.basic_optics import Curved_Mirror, Ray
+from LaserCAD.basic_optics import Mirror, Beam, Composition, inch, Lens
+from LaserCAD.basic_optics import Curved_Mirror, RainbowBeam
 from LaserCAD.basic_optics import Grating
 from LaserCAD.basic_optics.mirror import Stripe_mirror
 from LaserCAD.moduls import Make_RoofTop_Mirror
 from LaserCAD.basic_optics.mount import Unit_Mount, Composed_Mount
+from scipy.constants import speed_of_light
 import numpy as np
-import matplotlib.pyplot as plt
 
 
+# =============================================================================
+# Pure Propagation test
+# =============================================================================
+
+translation_comp = Composition()
+translation_comp.propagate(300)
+print(translation_comp.Kostenbauder_matrix())
+print(translation_comp.Kostenbauder_matrix(dimension=6))
+
+output1 = """
+[[1.  0.3 0.  0. ]
+ [0.  1.  0.  0. ]
+ [0.  0.  1.  0. ]
+ [0.  0.  0.  1. ]]
+[[1.  0.3 0.  0.  0.  0. ]
+ [0.  1.  0.  0.  0.  0. ]
+ [0.  0.  1.  0.3 0.  0. ]
+ [0.  0.  0.  1.  0.  0. ]
+ [0.  0.  0.  0.  1.  0. ]
+ [0.  0.  0.  0.  0.  1. ]]"""
+
+print()
+print()
+
+# =============================================================================
+# Flip Mirror Test
+# =============================================================================
+
+flip_mirror_comp = Composition()
+flip_mirror_comp.propagate(100)
+flip_mirror_comp.add_on_axis(Mirror(phi=90))
+flip_mirror_comp.propagate(200)
+print(np.round(flip_mirror_comp.Kostenbauder_matrix(), decimals=2))
+print(np.round(flip_mirror_comp.Kostenbauder_matrix(dimension=6), decimals=2))
+
+output2 = """
+[[1.  0.3 0.  0. ]
+ [0.  1.  0.  0. ]
+ [0.  0.  1.  0. ]
+ [0.  0.  0.  1. ]]
+[[ 1.   0.3  0.   0.   0.   0. ]
+ [ 0.   1.   0.   0.   0.   0. ]
+ [ 0.   0.  -1.  -0.3  0.   0. ]
+ [ 0.  -0.   0.  -1.   0.   0. ]
+ [ 0.   0.   0.   0.   1.   0. ]
+ [ 0.   0.   0.   0.   0.   1. ]]"""
+
+print()
+print("The - sign in the y quarter is correct (to our definition), since the mirror flips the y axis")
+
+print()
+print()
+
+
+
+# =============================================================================
+# lens test
+# =============================================================================
+lens_comp = Composition()
+lens_comp.propagate(200)
+lens_comp.add_on_axis(Lens())
+lens_comp.propagate(200)
+
+
+
+# =============================================================================
+# grating Test
+# =============================================================================
+grat_comp = Composition()
+grat_comp.propagate(1e-6)
+test_grating = Grating(order=-1)
+
+test_grating.normal = (1,1,0)
+
+grat_comp.add_fixed_elm(test_grating)
+grat_comp.recompute_optical_axis()
+grat_comp.propagate(1e-6)
+
+grat_comp.compute_beams()
+
+r0 = grat_comp._optical_axis[0]
+r1 = grat_comp._optical_axis[1]
+ew = r0.angle_to(test_grating)
+aw = r1.angle_to(test_grating)
+A = - np.cos(aw) / np.cos(ew)
+D = 1/A
+F = r0.wavelength*1e-3 * (np.sin(aw) - np.sin(ew))/3e8/np.cos(aw)
+G = (np.sin(ew) - np.sin(aw)) / 3e8 / np.cos(ew) * 1e15 / 1e3
+
+df_dlam = -3e8 / (r0.wavelength *1e-3)**2
+F *= df_dlam / 1e9
+
+print()
+print()
+print()
+print()
+print()
+
+kb, tx = grat_comp.Kostenbauder_matrix(reference_axis="y", text_explanation=True)
+print(tx)
+
+print()
+print("A:", A)
+print("D:", D)
+print("F:", F)
+print("G:", G)
+
+
+print()
+print()
+print()
+print()
+print()
+
+
+
+
+# =============================================================================
+# jetzt wäre es noch cool einen mathematischen beispielstrecker zu konstruieren und daran spatial chirp in y und pulse front zeug auszuprobieren...
+# =============================================================================
+from LaserCAD.moduls import Make_Stretcher
+
+
+# plane_stretch = Make_Stretcher(seperation_angle=0,
+#                                height_stripe_mirror=0,
+#                                safety_to_stripe_mirror=0,
+#                                seperation=50)
+plane_stretch = Make_Stretcher(radius_concave = 1000, #radius of the big concave sphere
+    aperture_concave = 6 * inch,
+    height_stripe_mirror = 10, #height of the stripe mirror in mm
+    seperation_angle = 20 /180 *np.pi, # sep between in and outgoing middle ray
+    # incident_angle = seperation_angle + reflection_angle
+    grating_const = 1/1000, # in 1/mm
+    seperation = 100, # difference grating position und radius_concave
+    lambda_mid = 800e-9 * 1e3, # central wave length in mm
+    band_width = 20e-9*1e3, # full bandwith in mm
+    number_of_rays = 20,
+    safety_to_stripe_mirror = 5, #distance first incomming ray to stripe_mirror in mm
+    periscope_height = 10,
+    first_propagation = 120, # legnth of the first ray_bundle to flip mirror1 mm
+    distance_roof_top_grating = 600)
+
+grat_ps = plane_stretch._elements[0]
+
+
+kbps, txtps = plane_stretch.Kostenbauder_matrix(dimension=6, text_explanation=True)
+
+
+print()
+print("GDD plane stretcher:", np.round(plane_stretch.GDD*1e30), "fs^2")
+print()
+print(txtps)
+
+
+from LaserCAD.moduls import Make_Compressor
+
+# comp = Make_Compressor(seperation=100, seperation_angle=0, height_seperation=0)
+comp = Make_Compressor(seperation_angle = 20 /180 *np.pi, # sep between in and outgoing middle ray
+    grating_const = 1/1000, # in 1/mm
+    seperation = 200, # difference grating position und radius_concave
+    lambda_mid = 800e-9 * 1e3, # central wave length in mm
+    band_width = 20e-9*1e3, # full bandwith in mm
+    number_of_rays = 20,
+    height_seperation = 16, # seperation between incomming and outgoing beam,
+    first_propagation = 120, # legnth of the first ray_bundle to grating 1 mm
+    distance_roof_top_grating = 600,
+    grating1_dimensions = (25, 25, 5),
+    grating2_dimensions = (50, 50, 5))
+kbcomp, txtcomp = comp.Kostenbauder_matrix(dimension=6, text_explanation=True)
+
+print()
+print("GDD plane stretcher:", np.round(comp.GDD*1e30), "fs^2")
+print()
+print(txtcomp)
+
+
+print()
+print()
+
+kbps4 = plane_stretch.Kostenbauder_matrix(reference_axis="y")
+kbcomp4 = comp.Kostenbauder_matrix(reference_axis="y")
+
+print(kbps4)
+print()
+print(kbcomp4)
+print()
+print(np.matmul(kbcomp4, kbps4))
+
+from copy import deepcopy
+cpa_composition = deepcopy(plane_stretch)
+cpa_composition.propagate(1000)
+old_sequence = cpa_composition.get_sequence()
+cpa_composition.add_supcomposition_on_axis(comp)
+comp.rotate(vec=(1,0,0), phi=np.pi)
+cpa_composition.recompute_optical_axis()
+cpa_composition.set_sequence(old_sequence + [5, 6, 7, 8, 6, 5]) # trust me, im an engineer ;)
+cpa_composition.propagate(100)
+
+
+cpaK, cpaT = cpa_composition.Kostenbauder_matrix(reference_axis="y", text_explanation=True)
+print()
+print()
+print(cpaT)
+
+
+# =============================================================================
+# Draw section just for fun
+# =============================================================================
 if freecad_da:
   clear_doc()
 
-# =============================================================================
-# Stretcher parameter
-# =============================================================================
+  plane_stretch.pos += (0, 200, 0)
+  # plane_stretch.draw()
 
-# def Make_Stretcher_chromeo():
-"""
-constructs an Offner Stretcher with an on axis helper composition
-Note: When drawing a rooftop mirror, we will draw apure_cosmetic mirror to
-confirm the position of the mount. The mirror's geom is the average of two
-flip mirror. And its aperture is the periscope_height.
-Returns
--------
-TYPE Composition
-  den gesamten, geraytracten Strecker...
-"""
-# defining parameters
-radius_concave = 1000 #radius of the big concave sphere
-aperture_concave = 6 * inch
-height_stripe_mirror = 10 #height of the stripe mirror in mm
-width_stripe_mirror = 75 # in mm
-seperation_angle = 10 /180 *np.pi # sep between in and outgoing middle ray
-# incident_angle = seperation_angle + reflection_angle
-grating_const = 1/450 # in mm (450 lines per mm)
-seperation = 135 # difference grating position und radius_concave
-lambda_mid = 2400e-9 * 1e3 # central wave length in mm
-delta_lamda = 200e-9*1e3 # full bandwith in mm
-number_of_rays = 20
-safety_to_stripe_mirror = 5 #distance first incomming ray to stripe_mirror in mm
-periscope_height = 15
-periscope_height = 0
-first_propagation = 20 # legnth of the first ray_bundle to flip mirror1 mm
-distance_flip_mirror1_grating = 300-85
-distance_roof_top_grating = 600
+  # comp.draw()
 
-# calculated parameters according to the grating equation
-v = lambda_mid/grating_const
-s = np.sin(seperation_angle)
-c = np.cos(seperation_angle)
-a = v/2
-b = np.sqrt(a**2 - (v**2 - s**2)/(2*(1+c)))
-sinB = a - b
-print(sinB)
-grating_normal = (np.sqrt(1-sinB**2), sinB, 0)
-
-Concav = Curved_Mirror(radius=radius_concave, name="Big_Concav_Mirror")
-Concav.aperture = aperture_concave
-Concav.set_mount_to_default()
-
-StripeM = Stripe_mirror(radius= -radius_concave/2,thickness=25,  name="Stripe_Mirror")
-#Cosmetics
-StripeM.aperture = width_stripe_mirror
-StripeM.draw_dict["height"] = height_stripe_mirror
-StripeM.draw_dict["thickness"] = 25 # arbitrary
-# StripeM.thickness = 25
-StripeM.draw_dict["model_type"] = "Stripe"
-
-Grat = Grating(grat_const=grating_const, name="Gitter", order=-1)
-
-Grat.normal = grating_normal
-
-helper = Composition()
-helper_light_source = Beam(angle=0, wavelength=lambda_mid)
-helper.set_light_source(helper_light_source)
-#to adjust the wavelength of the oA
-helper.redefine_optical_axis(helper_light_source.inner_ray())
-helper.add_fixed_elm(Grat)
-helper.recompute_optical_axis()
-helper.propagate(radius_concave - seperation)
-helper.add_on_axis(Concav)
-helper.propagate(radius_concave/2)
-helper.add_on_axis(StripeM)
-
-# setting the lightsource as an bundle of different coulered rays
-lightsource = Beam(radius=0, angle=0)
-wavels = np.linspace(lambda_mid-delta_lamda/2, lambda_mid+delta_lamda/2, number_of_rays)
-rays = []
-cmap = plt.cm.gist_rainbow
-for wavel in wavels:
-  rn = Ray()
-  # rn.normal = vec
-  # rn.pos = pos0
-  rn.wavelength = wavel
-  x = 1-(wavel - lambda_mid + delta_lamda/2) / delta_lamda
-  rn.draw_dict["color"] = cmap( x )
-  rays.append(rn)
-mid_ray = Ray() # add additionally the 2400 nm mid lambda beam to be the inner ray, just cause
-mid_ray.wavelength = lambda_mid
-rays = [mid_ray] + rays
-lightsource.override_rays(rays)
-lightsource.draw_dict['model'] = "ray_group"
-
-# starting the real stretcher
-Stretcher = Composition(name="DerStrecker")
-Stretcher.set_light_source(lightsource)
-Stretcher.redefine_optical_axis(helper_light_source.inner_ray())
-
-Stretcher.propagate(first_propagation)
-FlipMirror_In_Out = Mirror(phi=100, name="FlipMirrorInOut")
-FlipMirror_In_Out.set_mount(Composed_Mount(unit_model_list = ["MH25_KMSS","1inch_post"]))
-
-mount=Composed_Mount()
-Mount1=Unit_Mount(model="MH25")
-Mount1.docking_obj.pos = Mount1.pos+(6.3,0,0)
-Mount1.docking_obj.normal = Mount1.normal
-Mount2=Unit_Mount(model="KMSS")
-mount.add(Mount1)
-mount.add(Mount2)
-FlipMirror_In_Out.mount = mount
-Stretcher.add_on_axis(FlipMirror_In_Out)
-FlipMirror_In_Out.pos += (0,0,-periscope_height/2)
-Stretcher.propagate(distance_flip_mirror1_grating)
-
-#adding the helper
-helper.set_geom(Stretcher.last_geom())
-helper.pos += (0,0, height_stripe_mirror/2 + safety_to_stripe_mirror)
-for element in helper._elements:
-  Stretcher.add_fixed_elm(element)
-
-Stretcher.set_sequence([0,1,2,3,2,1])
-Stretcher.recompute_optical_axis()
-
-# adding the rooftop mirror and it's cosmetics
-Stretcher.propagate(distance_roof_top_grating)
-Stretcher.add_supcomposition_on_axis(Make_RoofTop_Mirror(height=periscope_height, up=False))
-
-# setting the final sequence and the last propagation for visualization
-# note that pure cosmetic (pos6) is not in the sequence
-Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0])
-Stretcher.recompute_optical_axis()
-Stretcher.propagate(120)
-
-
-# last small flip mirror from stretcher with cosmetics
-FlipMirror_pp = Mirror(phi=-90, name="Small_Output_Flip")
-FlipMirror_pp.set_mount(Composed_Mount(unit_model_list = ["MH25_KMSS","1inch_post"]))
-flip_mirror_push_down = - 5 # distance to push the first mirror out ouf the seed beam
-Stretcher.add_on_axis(FlipMirror_pp)
-FlipMirror_pp.pos += (0,0,flip_mirror_push_down)
-Stretcher.propagate(13)
-
-
-# =============================================================================
-# so far for the chromeo stretcher, now comes the calculation
-# =============================================================================
-
-from scipy.constants import speed_of_light as c
-
-lam0 = lambda_mid * 1e-3
-d0 = grating_const * 1e-3
-beams = Stretcher.compute_beams()
-b2 = beams[2]
-theta = b2.angle_to(Grat)
-sep = seperation * 1e-3
-
-GDD = lam0**3 * sep / (np.pi * c**2 * d0**2 * np.cos(theta)**2) * 1e30 * 2
-
-kb = Stretcher.kostenbauder()
-
-print()
-print("GDD to Srpinger in fs^2", np.round(GDD))
-
-GDDTill = 4290465 #fs^2
-
-print()
-print("GDD to Till App in fs^2", GDDTill)
-
-print()
-print("My GDD: ", kb[2,3]/2/np.pi * 1e30)
-
-print()
-print("My Kostenbauder Stretcher:")
-print(kb)
-
-
-from LaserCAD.basic_optics import Geom_Object
-for ray in Stretcher._optical_axis:
-  geom = Geom_Object()
-  geom.set_geom(ray.get_geom())
-  geom.draw()
-
-
-if freecad_da:
-  Stretcher.draw()
-
-
-
+  cpa_composition.draw()
+  # cpa_composition.draw_beams()
+  # cpa_composition.draw_elements()
 if freecad_da:
   setview()

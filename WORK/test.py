@@ -4,125 +4,161 @@ Created on Mon Mar 18 14:01:12 2024
 
 @author: 12816
 """
-from LaserCAD.basic_optics import Mirror,Beam,Cylindrical_Mirror,Intersection_plane,Cylindrical_Mirror1,Curved_Mirror,Ray, Composition, Grating
-# from LaserCAD.basic_optics.mirror import 
-from LaserCAD.basic_optics import Unit_Mount,Composed_Mount
-from LaserCAD.non_interactings import Lambda_Plate
-from LaserCAD.basic_optics.mount import Stages_Mount
-from LaserCAD.freecad_models import clear_doc, setview, add_to_composition
-from LaserCAD.freecad_models import freecad_da
-from LaserCAD.moduls import Make_RoofTop_Mirror
-from LaserCAD.basic_optics.mount import Stripe_Mirror_Mount
+from LaserCAD.basic_optics import Beam, Refractive_plane
+from LaserCAD.freecad_models import freecad_da, clear_doc, setview
 import numpy as np
-
-# B=Beam(radius =5)
-# B.make_square_distribution (10)
-# C = Composition()
-# C.set_light_source(B)
-# C.propagate(100)
-# a= Cylindrical_Mirror(radius=100)
-# a.rotate(a.normal, np.pi/2)
-# a.Mount = Stripe_Mirror_Mount(mirror_thickness=a.thickness)
-# a.aperture = 75
-# a.pos += (100,0,0)
-# a.phi = -90
-# C.add_on_axis(a)
-# # C.recompute_optical_axis()
-# C.propagate(70.6)
-# IP = Intersection_plane()
-# C.add_on_axis(IP)
-# C.draw()
-# IP.draw()
-# IP.spot_diagram(C._beams[-1])
-
-# ray = Ray()
-# ray.draw()
-# B = Beam(radius=5)
-# B.pos += (0,100,0)
-# B.draw()
-# M = Mirror()
-# M.pos += (0,200,0)
-# M.draw()
-# M.draw_mount()
-# G = Grating()
-# G.pos += (0,300,0)
-# G.draw()
-# G.draw_mount()
+from LaserCAD.non_interactings import Faraday_Isolator
 
 if freecad_da:
   clear_doc()
 
-# M1 = Cylindrical_Mirror()
-# M1.pos += (100,0,0)
-# B = Beam()
-# B.normal = (1,0.1,0)
-# B1 = M1.next_beam(B)
-# B.draw()
-# B1.draw()
-# M1.draw()
+farad = Faraday_Isolator()
+farad.draw()
+farad.draw_mount()
 
-import matplotlib.pyplot as plt
-from LaserCAD.basic_optics import inch, Stripe_mirror
-from LaserCAD.moduls import Make_Stretcher
-from LaserCAD.basic_optics.beam import RainbowBeam
+# THICKNESS = 42
+
+# ref = Refractive_plane()
+
+# b0 = Beam(radius=1.5)
+
+# ref.pos += (60, 0 , 0)
+# ref.normal = (1,1,0)
+# # ref.normal = (0.1+np.random.rand(), np.random.rand(), np.random.rand())
+
+# b1 =  ref.next_beam(b0)
+
+# ref2 = Refractive_plane(relative_refractive_index=1/1.5)
+
+# # ref2.pos += (2*60, 0 , 0)
+# # ref2.normal = ref.normal
+# ref2.set_geom(ref.get_geom())
+# ref2.pos += ref.normal * THICKNESS
+
+# b2 = ref2.next_beam(b1)
 
 
-from LaserCAD.moduls import Make_Stretcher_chromeo, Make_Stretcher
 
-# Strecker = Make_Stretcher_chromeo()
-#Strecker = Make_Stretcher()
-#Strecker.draw()
+# from LaserCAD.basic_optics import Opt_Element, Composition, inch, Mirror
+# from LaserCAD.freecad_models import model_lens
+# from LaserCAD.basic_optics import TOLERANCE
+# from copy import deepcopy
+
+# class Transmission_Optic(Opt_Element):
+#   def __init__(self, name="NewTransmissionOptic", refractive_index=1.5,
+#                thickness=5, **kwargs):
+#     super().__init__(name=name, **kwargs)
+#     self.thickness = thickness
+#     self.refractive_index = refractive_index
+#     self.freecad_model = model_lens
+
+#   def update_draw_dict(self):
+#     super().update_draw_dict()
+#     self.draw_dict["Radius1"] = 0
+#     self.draw_dict["Radius2"] = 0
+
+#   def next_ray(self, ray):
+#     ray2 = deepcopy(ray)
+#     ray2.pos = self.intersection(ray)
+#     alpha = ray.angle_to(self)
+#     if np.abs(alpha) < TOLERANCE:
+#       return ray2
+#     beta = np.arcsin(np.sin(alpha)/self.refractive_index)
+#     shift = self.thickness*(np.tan(alpha) - np.tan(beta))
+#     surface_vec = ray.normal -np.sum(ray.normal*self.normal)* self.normal
+#     surface_vec *= 1/np.linalg.norm(surface_vec)
+#     ray2.pos += - surface_vec*shift*np.sign(alpha)
+#     return ray2
+
+# tro = Transmission_Optic(thickness=60/2**0.5)
+# tro.aperture = 100
+# tro.set_geom(ref.get_geom())
+# b3 = tro.next_beam(b0)
+# b3.set_length(410)
+
+# from LaserCAD.freecad_models import model_mirror
+# from LaserCAD.basic_optics import Composed_Mount, Component
+
+
+# class Transmission_Disk(Composition):
+#   def __init__(self, name="NewExtended_TFP", refractive_index=1.5, AOI=56,
+#                thickness=5, aperture = 2*inch, **kwargs):
+#     super().__init__(name=name, **kwargs)
+#     self.thickness = thickness
+#     self.aperture = aperture
+#     self.refractive_index = refractive_index
+#     self.angle_of_incidence = AOI
+
+#     ref1 = Refractive_plane(relative_refractive_index=self.refractive_index)
+#     ref1.invisible = True
+#     ref2 = Refractive_plane(relative_refractive_index=1/self.refractive_index)
+#     ref2.invisible = True
+#     cosmetic = Component(name="ShapeObject")
+#     cosmetic.freecad_model = model_mirror
+#     cosmetic.thickness = self.thickness
+#     cosmetic.aperture = self.aperture
+#     cosmetic.set_mount(Composed_Mount(unit_model_list=["KS2", "1inch_post"]))
+#     cosmetic.draw_dict["color"] = (1.0, 0.0, 2.0)
+#     self.add_on_axis(ref1)
+#     self.add_on_axis(cosmetic)
+#     self.propagate(self.thickness/np.cos(self.angle_of_incidence*np.pi/180))
+#     self.add_on_axis(ref2)
+
+#     ref1.rotate((0,0,1), self.angle_of_incidence*np.pi/180)
+#     ref2.rotate((0,0,1), self.angle_of_incidence*np.pi/180)
+#     cosmetic.rotate((0,0,1), self.angle_of_incidence*np.pi/180)
+#     # self.set_sequence([0,1])
 
 
 
+# # =============================================================================
+# # drawing
+# # =============================================================================
+# b0.draw()
+# ref.draw()
+# b1.draw()
+# ref2.draw()
+# b2.draw()
+
+# tro.draw()
+# b3.draw()
 
 
+# tfp = Transmission_Disk(thickness=THICKNESS)
+# # tfp = Transmission_Disk(thickness=7)
+# tfp.set_geom(tro.get_geom())
+# tfp._lightsource = b0
+# tfp.propagate(300)
+# tfp.draw()
+
+# comp = Composition()
+# comp.propagate(100)
+# comp.add_on_axis(Mirror(phi=90))
+# comp.propagate(200)
+# tfp = Transmission_Disk(AOI=-56, thickness=8)
+# comp.add_supcomposition_on_axis(tfp)
+# # tfp.rotate((0,0,1), -45*np.pi/180)
+# comp.recompute_optical_axis()
+# comp.propagate(400)
+# comp.add_on_axis(Mirror(phi=90))
+# comp.propagate(100)
+
+# tfp_shape = comp.non_opticals[0]
+# tfp_shape.Mount.reverse()
+
+# comp.draw()
+
+# for ray in comp._optical_axis:
+#   ray.draw()
 
 
-# Grating and Mirror test
-# ray = Ray()
-# ray.draw()
-# B = Beam(radius=5)
-# B.pos += (0,100,0)
-# B.draw()
-# M = Mirror()
-# M.pos += (0,200,0)
-# M.draw()
-# M.draw_mount()
-# G = Grating()
-# G.pos += (0,300,0)
-# G.draw()
-# G.draw_mount()
+from LaserCAD.non_interactings import LaserPointer
 
-# M1 = Mirror()
-# M1.pos = (50,10,100)
-# M1.normal = (1,1,0)
+las = LaserPointer()
+las.draw()
+las.draw_mount()
+b = Beam()
+b.draw()
 
-# M1.Mount = Stages_Mount(aperture=M1.aperture,elm_type = "Mirror",elm_thickness=M1.thickness)
-# M1.Mount.set_geom(M1.get_geom())
-
-# Mount1 = M1.Mount
-# M1.Mount = Stages_Mount(basic_mount=Mount1,x_aligned=False)
-# M1.Mount.set_geom(M1.get_geom())
-# M1.Mount.find_screw_hole()
-# M1.draw()
-# M1.draw_mount()
-# print(M1.Mount.mount_list[1]._lower_limit)
-
-# =============================================================================
-# U100-A2K Mirrors
-# =============================================================================
-
-class K1_Mirror(Mirror):
-  def __init__(self, phi=180, theta=0, **kwargs):
-    super().__init__(phi=phi, theta=theta, **kwargs)
-    self.set_mount(Composed_Mount(["KS1", "1inch_post"]))
-
-class U100_A2K(Mirror):
-  def __init__(self, phi=180, theta=0, **kwargs):
-    super().__init__(phi=phi, theta=theta, **kwargs)
-    self.set_mount(Composed_Mount(["U100-A2K", "1inch_post"]))
-    
-mir1 = U100_A2K()
-mir1.draw()
-mir1.draw_mount()
+if freecad_da:
+  setview()

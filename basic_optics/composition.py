@@ -10,12 +10,14 @@ from .ray import Ray
 from .beam import Beam
 from .geom_object import Geom_Object
 from .grating import Grating
-from .intersection_plane import Intersection_plane
+# from .intersection_plane import Intersection_plane
 from ..freecad_models import warning, freecad_da, initialize_composition, add_to_composition
 from ..freecad_models.freecad_model_element_holder import Model_element_holder
 from .constants import xy_to_table_plus_offset
 import numpy as np
 from copy import deepcopy
+from scipy.constants import speed_of_light
+# speed_of_light = 3e8
 
 
 class Composition(Geom_Object):
@@ -109,6 +111,14 @@ class Composition(Geom_Object):
       self.add_fixed_elm(element)
     for nonopt in subcomp.non_opticals:
       self.add_fixed_elm(nonopt)
+    # old_sequence = self._sequence
+    # sub_sequence = np.array(subcomp.get_sequence())
+    # sub_sequence += max(old_sequence)
+    # for element in subcomp._elements:
+    #   self.add_fixed_elm(element)
+    # for nonopt in subcomp.non_opticals:
+    #   self.add_fixed_elm(nonopt)
+    # self.set_sequence(old_sequence + list(sub_sequence))
 
   def redefine_optical_axis(self, ray):
     # zB wenn die wavelength angepasst werden muss
@@ -156,38 +166,38 @@ class Composition(Geom_Object):
     self._matrix = np.matmul(np.array([[1,self._last_prop], [0,1]]), self._matrix ) #last propagation
     return np.array(self._matrix)
 
-  def kostenbauder(self):
-    """
-    computes the optical matrix of the system
-    each iteration consists of a propagation given by the length of the nth
-    ray of the optical_axis followed by the matrix multiplication with the
-    seq[n] element
+  # def kostenbauder_matmul(self):
+  #   """
+  #   computes the optical matrix of the system
+  #   each iteration consists of a propagation given by the length of the nth
+  #   ray of the optical_axis followed by the matrix multiplication with the
+  #   seq[n] element
 
-    Returns the ABCD-matrix
-    """
-    self._kostenbauder = np.eye(4)
-    self.recompute_optical_axis()
-    counter = -1
-    for ind in self._sequence:
-      counter += 1
-      B = self._optical_axis[counter].length
-      moment_propa = np.eye(4)
-      moment_propa[0,1] = B 
-      # moment_propa[0,1] = B *1e-3
-      M = self._elements[ind].kostenbauder(inray = self._optical_axis[counter])
+  #   Returns the ABCD-matrix
+  #   """
+  #   self._kostenbauder = np.eye(4)
+  #   self.recompute_optical_axis()
+  #   counter = -1
+  #   for ind in self._sequence:
+  #     counter += 1
+  #     B = self._optical_axis[counter].length
+  #     moment_propa = np.eye(4)
+  #     moment_propa[0,1] = B
+  #     # moment_propa[0,1] = B *1e-3
+  #     M = self._elements[ind].kostenbauder(inray = self._optical_axis[counter])
 
-      print("Counter =", counter)
-      print(moment_propa)
-      print(M)
+  #     print("Counter =", counter)
+  #     print(moment_propa)
+  #     print(M)
 
-      self._kostenbauder = np.matmul( moment_propa, self._kostenbauder )
-      self._kostenbauder = np.matmul( M, self._kostenbauder )
+  #     self._kostenbauder = np.matmul( moment_propa, self._kostenbauder )
+  #     self._kostenbauder = np.matmul( M, self._kostenbauder )
 
-    last_propa = np.eye(4)
-    last_propa[0,1] = self._last_prop
-    # last_propa[0,1] = self._last_prop * 1e-3
-    self._kostenbauder = np.matmul( last_propa, self._kostenbauder ) #last propagation
-    return np.array(self._kostenbauder)
+  #   last_propa = np.eye(4)
+  #   last_propa[0,1] = self._last_prop
+  #   # last_propa[0,1] = self._last_prop * 1e-3
+  #   self._kostenbauder = np.matmul( last_propa, self._kostenbauder ) #last propagation
+  #   return np.array(self._kostenbauder)
 
   def get_sequence(self):
     return list(self._sequence)
@@ -210,6 +220,10 @@ class Composition(Geom_Object):
         beamcount += 1
         beam.name = self.name + "_beam_" + str(beamcount)
         beamlist.append(beam)
+    # if self._last_prop >= 0:
+      # beamlist[-1].set_length(self._last_prop)
+    # else:
+      # beamlist.pop(-1)
     beamlist[-1].set_length(self._last_prop)
     if not external_source:
       self._beams = beamlist
@@ -289,7 +303,7 @@ class Composition(Geom_Object):
         post = non_optical.Mount.mount_list[-1]
         xy = post.pos[0:2]
         if verbose:
-          post_coordinate_list.append((elm.name, xy))
+          post_coordinate_list.append((non_optical.name, xy))
         else:
           post_coordinate_list.append(xy)
       except:
@@ -302,7 +316,7 @@ class Composition(Geom_Object):
       return [(name, xy_to_table_plus_offset(*xy) ) for (name, xy) in self.post_positions(verbose=True)]
     else:
       return [xy_to_table_plus_offset(*xy) for xy in self.post_positions(verbose=False)]
-      
+
 
   def __container_to_part(self, part, container):
     if freecad_da:
@@ -328,7 +342,6 @@ class Composition(Geom_Object):
         self._alignment_post_part = []
         self._drawing_part = [self._elements_part, self._mounts_part,
                               self._beams_part, self._alignment_post_part]
-
 
   def set_light_source(self, ls):
     """
@@ -394,137 +407,297 @@ class Composition(Geom_Object):
     self._rearange_subobjects_axes(old_axes, new_axes, self._optical_axis)
     self._rearange_subobjects_axes(old_axes, new_axes, self.non_opticals)
 
-"""
-  def Kostenbauder_matrix(self,shifting_distence=100):
-    ray0 = self._optical_axis[0]
-    point_start=self.pos
-    point_end = self.last_geom()[0]
-    point_start_dx = point_start + 0.1*self.get_coordinate_system()[1]
-    point_start_dy = point_start + 0.1*self.get_coordinate_system()[2]
-    ls_group = []
-    ls_dx = deepcopy(self._lightsource)
-    ls_dx.pos = point_start_dx
-    ls_group.append(ls_dx)
-    ls_dax = deepcopy(self._lightsource)
-    ls_dax.rotate(self.get_coordinate_system()[2],0.5*np.pi/100)
-    ls_group.append(ls_dax)
+
+  def Kostenbauder_matrix(self, reference_ray=None, dimension=4,
+                           reference_axis="z", text_explanation=False):
+    if reference_ray:
+      ray0 = reference_ray
+    else:
+      ray0 = self._optical_axis[0]
+
+    DeltaR = 1e-3 # 1 um displace
+    DeltaPhi = 1e-6 # 1um rad
+    DeltaLambda = ray0.wavelength * 1e-3
+
+    z = np.array((0, 0, 1)) # Gravitanional axis
+    y0 = np.cross(z, ray0.normal)
+    if np.linalg.norm(y0) < 1-1e-3:
+      print("Warning in Kostenbauder computation:")
+      print("\t Starting ray is not in xy Plane.")
+      print("\t This may cause strange ABCD entries")
+    y0 *= 1/np.linalg.norm(y0) # better save than sorry
+
+    ray_z = deepcopy(ray0)
+    ray_z.pos += DeltaR * z
+
+    ray_alpha = deepcopy(ray0)
+    ray_alpha.rotate(vec=-y0, phi=DeltaPhi)
+
+    ray_y = deepcopy(ray0)
+    ray_y.pos += DeltaR * y0
+
+    ray_beta = deepcopy(ray0)
+    ray_beta.rotate(vec=z, phi=DeltaPhi)
+
+    ray_lam = deepcopy(ray0)
+    ray_lam.wavelength += DeltaLambda
+
+    beam0 = Beam()
+    beam0.override_rays([ray0, ray_z, ray_alpha, ray_y, ray_beta, ray_lam])
+
+    computed_beams = self.compute_beams(external_source=beam0)
+    endbeam = computed_beams[-1]
+    endray0, endray_z, endray_alpha, endray_y, endray_beta, endray_lam = endbeam.get_all_rays(by_reference=True)
+
+    # end triad
+    xe = endray0.normal # reference for all angular computations
+    ye = np.cross(z, xe)
+    if np.linalg.norm(ye) < 1-1e-3:
+      print("Warning in Kostenbauder computation:")
+      print("\t End ray is not in xy Plane.")
+      print("\t This may cause strange ABCD entries")
+    ye *= 1/np.linalg.norm(ye) # norming
+
+    endplane = Geom_Object()
+    endplane.pos = endray0.endpoint()
+    endplane.normal = xe
+
+    dist_z = endray_z.intersection(endplane) - endplane.pos
+    dist_y = endray_y.intersection(endplane) - endplane.pos
+    dist_alpha = endray_alpha.intersection(endplane) - endplane.pos
+    dist_beta = endray_beta.intersection(endplane) - endplane.pos
+    dist_lam = endray_lam.intersection(endplane) - endplane.pos
+
+    # optical path lengths
+    opl0, opl_z, opl_alpha, opl_y, opl_beta, opl_lam = 0,0,0,0,0,0
+    for com in computed_beams:
+      crays = com.get_all_rays()
+      opl0 += crays[0].length
+      opl_z += crays[1].length
+      opl_alpha += crays[2].length
+      opl_y += crays[3].length
+      opl_beta += crays[4].length
+      opl_lam += crays[5].length
+
+    dz2_dz = np.sum(dist_z * z) / DeltaR # si units
+    dz2_dalpha = np.sum(dist_alpha * z) * 1e-3 / DeltaPhi # si units
+    dz2_dy = np.sum(dist_y * z) / DeltaR # si units
+    dz2_dbeta = np.sum(dist_beta * z) * 1e-3 / DeltaPhi # si units
+    dz2_dlam = np.sum(dist_lam * z) / DeltaLambda # si units
+
+    dy2_dz = np.sum(dist_z * ye) / DeltaR # si units
+    dy2_dalpha = np.sum(dist_alpha * ye) * 1e-3 / DeltaPhi # si units
+    dy2_dy = np.sum(dist_y * ye) / DeltaR # si units
+    dy2_dbeta = np.sum(dist_beta * ye) * 1e-3 / DeltaPhi # si units
+    dy2_dlam = np.sum(dist_lam * ye) / DeltaLambda # si units
+
+    dalpha2_dz = np.arcsin(np.sum(np.cross(endray_z.normal, xe) * ye)) / (DeltaR*1e-3) # si units
+    dalpha2_dy = np.arcsin(np.sum(np.cross(endray_y.normal, xe) * ye)) / (DeltaR*1e-3) # si units
+    dalpha2_dalpha = np.arcsin(np.sum(np.cross(endray_alpha.normal, xe) * ye)) / DeltaPhi # si units
+    dalpha2_dbeta = np.arcsin(np.sum(np.cross(endray_beta.normal, xe) * ye)) / DeltaPhi # si units
+    dalpha2_dlam =  np.arcsin(np.sum(np.cross(endray_lam.normal, xe) * ye))/ (DeltaLambda * 1e-3) # si units
+
+    dbeta2_dz = np.arcsin(np.sum(np.cross(xe, endray_z.normal) * z)) / (DeltaR*1e-3) # si units
+    dbeta2_dy = np.arcsin(np.sum(np.cross(xe, endray_y.normal) * z)) / (DeltaR*1e-3) # si units
+    dbeta2_dalpha = np.arcsin(np.sum(np.cross(xe, endray_alpha.normal) * z)) / DeltaPhi # si units
+    dbeta2_dbeta = np.arcsin(np.sum(np.cross(xe, endray_beta.normal) * z)) / DeltaPhi # si units
+    dbeta2_dlam =  np.arcsin(np.sum(np.cross(xe, endray_lam.normal) * z)) / (DeltaLambda * 1e-3) # si units
+
+    c = speed_of_light # light speed in m / s
+    dt2_dz = (opl_z - opl0)/c / DeltaR # si units
+    dt2_dy = (opl_y - opl0)/c / DeltaR # si units
+    dt2_dalpha = (opl_alpha - opl0)*1e-3/c / DeltaPhi # si units
+    dt2_dbeta = (opl_beta - opl0)*1e-3/c / DeltaPhi # si units
+    dt2_dlam = (opl_lam - opl0)/c / DeltaLambda # si units
+
+    lam0 = ray0.wavelength * 1e-3
+    dlam_dfreq = - (lam0)**2 / c # Kostenbauder took frequency, not wavelength
+
+    # txt = ""
+    # def txtline(str1, obj, str2):
+    #   return str1 + str(obj) + str2
+    # txt += txtline("dz2_dz: ", dz2_dz, " | Magnification z-z\n")
+    # txt += txtline("dz2_dalpha: ", dz2_dalpha*1e3, " mm | Propagation z-alpha\n")
+    # txt += txtline("dz2_dy: ", dz2_dy, "| Twisting z-y\n")
+    # txt += txtline("dz2_dbeta: ", dz2_dbeta*1e3, " mm | Twisting propagation z-beta\n")
+    # txt += txtline("dz2_dt: ", 0, " mm/s | Time dependence z-t, by definition 0\n")
+    # txt += txtline("dz2_dlam: ", dz2_dlam*1e3/(1e9), " mm/nm | Spatial chirp z-lambda\n")
+    # txt += "\n"
+    # txt += txtline("dalpha2_dz: ", dalpha2_dz*1e-3, " /mm | Focal power alpha-z\n")
+    # txt += txtline("dalpha2_dalpha: ", dalpha2_dalpha, " | Angular magnification alpha-alpha\n")
+    # txt += txtline("dalpha2_dy: ", dalpha2_dy*1e-3, " /mm | Twisting focal power alpha-y\n")
+    # txt += txtline("dalpha2_dbeta: ", dalpha2_dbeta, " | Twisting angular magnification alpha-beta\n")
+    # txt += txtline("dalpha2_dt: ", 0, " mrad/s | Time dependence alpha-t, by definition 0\n")
+    # txt += txtline("dalpha2_dlam: ", dalpha2_dlam*1e3/1e9, " mrad/nm | Angular chirp alpha-lambda\n")
+    # txt += "\n"
+    # txt += txtline("dy2_dz: ", dy2_dz, " | Twisting magnification y-z\n")
+    # txt += txtline("dy2_dalpha: ", dy2_dalpha*1e3, " mm | Twisting propagation y-alpha\n")
+    # txt += txtline("dy2_dy: ", dy2_dy, " | Magnification y-y\n")
+    # txt += txtline("dy2_dbeta: ", dy2_dbeta*1e3, " mm | Propagation y-beta\n")
+    # txt += txtline("dy2_dt: ", 0, " mm/s | Time dependence y-t, by definition 0\n")
+    # txt += txtline("dy2_dlam: ", dy2_dlam*1e3/(1e9), " mm/nm | Spatial chirp y-lambda\n")
+    # txt += "\n"
+    # txt += txtline("dbeta2_dz: ", dbeta2_dz*1e-3, " /mm | Focal power beta-z\n")
+    # txt += txtline("dbeta2_dalpha: ", dbeta2_dalpha, " | Twisting angular magnification beta-alpha\n")
+    # txt += txtline("dbeta2_dy: ", dbeta2_dy*1e-3, " /mm | Focal power beta-y\n")
+    # txt += txtline("dbeta2_dbeta: ", dbeta2_dbeta, " | Angular magnification beta-beta\n")
+    # txt += txtline("dbeta2_dt: ", 0, " mrad/s | Time dependence beta-t, by definition 0\n")
+    # txt += txtline("dbeta2_dlam: ", dbeta2_dlam*1e3/1e9, " mrad/nm | Angular chirp beta-lambda\n")
+    # txt += "\n"
+    # txt += txtline("dt2_dz: ", dt2_dz*1e15/1e3, " fs/mm | Spatial pulse front tilt t-z\n")
+    # txt += txtline("dt2_dalpha: ", dt2_dalpha*1e15/1e3, " fs/mrad | Angular pulse front tilt t-alpha\n")
+    # txt += txtline("dt2_dy: ", dt2_dy*1e15/1e3, " fs/mm | Spatial pulse front tilt t-y\n")
+    # txt += txtline("dt2_dbeta: ", dt2_dbeta*1e15/1e3, " fs/mrad | Angular pulse front tilt t-beta\n")
+    # txt += txtline("dt2_dt: ", 1, " | Time dependence t-t, by definition 1\n")
+    # txt += txtline("dt2_dlam: ", dt2_dlam*dlam_dfreq/(2*np.pi)*1e30, " fs^2 | Group delay dispersion\n")
+    # txt += "\n"
+    # txt += txtline("df2_dz: ", 0, " f-z, by definition 0\n")
+    # txt += txtline("df2_dalpha: ", 0, " f-alpha, by definition 0\n")
+    # txt += txtline("df2_dy: ", 0, " f-y, by definition 0\n")
+    # txt += txtline("df2_dbeta: ", 0, " f-beta, by definition 0\n")
+    # txt += txtline("df2_dt: ", 0, " f-t, by definition 0\n")
+    # txt += txtline("df2_dlam: ", 1, " f-f, by definition 1\n")
     
-    ls_dy = deepcopy(self._lightsource)
-    ls_dy.pos = point_start_dy
-    ls_group.append(ls_dy)
-    ls_day = deepcopy(self._lightsource)
-    ls_day.rotate(self.get_coordinate_system()[1],-0.5*np.pi/100)
-    ls_group.append(ls_day)
-    
-    ls_dlambda = deepcopy(self._lightsource)
-    for ii in range(len(ls_dlambda.get_all_rays())):
-      a=deepcopy(ls_dlambda.get_all_rays()[ii].wavelength)
-      ls_dlambda.get_all_rays(by_reference=True)[ii].wavelength=a+a/1000
-    ls_group.append(ls_dlambda)
-    point_group = []
-    length_group = []
-    length0=0
-    com= deepcopy(self)
-    com.compute_beams()
-    for i in com._optical_axis:
-      length0+=i.length
-    dlambda_optical_axis = deepcopy(com._optical_axis[0])
-    dlambda_optical_axis.wavelength+=(dlambda_optical_axis.wavelength/1000)
-    point_group.append(point_end)
-    ip_b = Intersection_plane()
-    ip_b.set_geom(self.last_geom())
-    ip_f = Intersection_plane()
-    ip_f.set_geom(self.last_geom())
-    ip_f.pos += 100*ip_f.normal
-    for ls in ls_group:
-      comp = Composition()
-      comp.set_geom(ls.get_geom())
-      comp.set_light_source(ls)
+    textlines = []
+    def txtline(str1, obj, str2):
+      return str1 + str(obj) + str2
+    textlines.append(txtline("dz2_dz: ", dz2_dz, " | Magnification z-z\n"))
+    textlines.append(txtline("dz2_dalpha: ", dz2_dalpha*1e3, " mm | Propagation z-alpha\n"))
+    textlines.append(txtline("dz2_dy: ", dz2_dy, "| Twisting z-y\n"))
+    textlines.append(txtline("dz2_dbeta: ", dz2_dbeta*1e3, " mm | Twisting propagation z-beta\n"))
+    textlines.append(txtline("dz2_dt: ", 0, " mm/s | Time dependence z-t, by definition 0\n"))
+    textlines.append(txtline("dz2_dlam: ", dz2_dlam*1e3/(1e9), " mm/nm | Spatial chirp z-lambda\n"))
+    textlines.append("\n")
+    textlines.append(txtline("dalpha2_dz: ", dalpha2_dz*1e-3, " /mm | Focal power alpha-z\n"))
+    textlines.append(txtline("dalpha2_dalpha: ", dalpha2_dalpha, " | Angular magnification alpha-alpha\n"))
+    textlines.append(txtline("dalpha2_dy: ", dalpha2_dy*1e-3, " /mm | Twisting focal power alpha-y\n"))
+    textlines.append(txtline("dalpha2_dbeta: ", dalpha2_dbeta, " | Twisting angular magnification alpha-beta\n"))
+    textlines.append(txtline("dalpha2_dt: ", 0, " mrad/s | Time dependence alpha-t, by definition 0\n"))
+    textlines.append(txtline("dalpha2_dlam: ", dalpha2_dlam*1e3/1e9, " mrad/nm | Angular chirp alpha-lambda\n"))
+    textlines.append("\n")
+    textlines.append(txtline("dy2_dz: ", dy2_dz, " | Twisting magnification y-z\n"))
+    textlines.append(txtline("dy2_dalpha: ", dy2_dalpha*1e3, " mm | Twisting propagation y-alpha\n"))
+    textlines.append(txtline("dy2_dy: ", dy2_dy, " | Magnification y-y\n"))
+    textlines.append(txtline("dy2_dbeta: ", dy2_dbeta*1e3, " mm | Propagation y-beta\n"))
+    textlines.append(txtline("dy2_dt: ", 0, " mm/s | Time dependence y-t, by definition 0\n"))
+    textlines.append(txtline("dy2_dlam: ", dy2_dlam*1e3/1e9, " mm/nm | Spatial chirp y-lambda\n"))
+    textlines.append("\n")
+    textlines.append(txtline("dbeta2_dz: ", dbeta2_dz*1e-3, " /mm | Focal power beta-z\n"))
+    textlines.append(txtline("dbeta2_dalpha: ", dbeta2_dalpha, " | Twisting angular magnification beta-alpha\n"))
+    textlines.append(txtline("dbeta2_dy: ", dbeta2_dy*1e-3, " /mm | Focal power beta-y\n"))
+    textlines.append(txtline("dbeta2_dbeta: ", dbeta2_dbeta, " | Angular magnification beta-beta\n"))
+    textlines.append(txtline("dbeta2_dt: ", 0, " mrad/s | Time dependence beta-t, by definition 0\n"))
+    textlines.append(txtline("dbeta2_dlam: ", dbeta2_dlam*1e3/1e9, " mrad/nm | Angular chirp beta-lambda\n"))
+    textlines.append("\n")
+    textlines.append(txtline("dt2_dz: ", dt2_dz*1e15/1e3, " fs/mm | Spatial pulse front tilt t-z\n"))
+    textlines.append(txtline("dt2_dalpha: ", dt2_dalpha*1e15/1e3, " fs/mrad | Angular pulse front tilt t-alpha\n"))
+    textlines.append(txtline("dt2_dy: ", dt2_dy*1e15/1e3, " fs/mm | Spatial pulse front tilt t-y\n"))
+    textlines.append(txtline("dt2_dbeta: ", dt2_dbeta*1e15/1e3, " fs/mrad | Angular pulse front tilt t-beta\n"))
+    textlines.append(txtline("dt2_dt: ", 1, " | Time dependence t-t, by definition 1\n"))
+    textlines.append(txtline("dt2_dlam: ", dt2_dlam*dlam_dfreq/(2*np.pi)*1e30, " fs^2 | Group delay dispersion\n"))
+    textlines.append("\n")
+    textlines.append(txtline("df2_dz: ", 0, " f-z, by definition 0\n"))
+    textlines.append(txtline("df2_dalpha: ", 0, " f-alpha, by definition 0\n"))
+    textlines.append(txtline("df2_dy: ", 0, " f-y, by definition 0\n"))
+    textlines.append(txtline("df2_dbeta: ", 0, " f-beta, by definition 0\n"))
+    textlines.append(txtline("df2_dt: ", 0, " f-t, by definition 0\n"))
+    textlines.append(txtline("df2_dlam: ", 1, " f-f, by definition 1\n"))
+
+    if dimension == 4:
+      if reference_axis == "z":
+        KostenB = np.eye(4)
+        KostenB[0,0] = dz2_dz # A
+        KostenB[0,1] = dz2_dalpha # B
+        KostenB[1,0] = dalpha2_dz # C
+        KostenB[1,1] = dalpha2_dalpha # D
+        KostenB[0,3] = dz2_dlam * dlam_dfreq # E
+        KostenB[1,3] = dalpha2_dlam * dlam_dfreq# F
+        KostenB[2,0] = dt2_dz # G
+        KostenB[2,1] = dt2_dalpha # H
+        KostenB[2,3] = dt2_dlam * dlam_dfreq # I
+        
+        if text_explanation:
+          indices = [0, 1, 4, 5, 6]
+          indices.extend([7, 8, 11, 12, 13])
+          indices.extend([28, 29, 32, 33, 34])
+          indices.extend([35, 36, 39, 40])
+          txt4z = ""
+          for ind in indices:
+            txt4z += textlines[ind]
+          return KostenB, txt4z
+        return KostenB
       
-      for element in self._elements:
-        comp.add_fixed_elm(element)
-      comp.set_sequence(self._sequence)
-      # comp.recompute_optical_axis()
-      # if len(ls.get_all_rays())%2 ==1:  
-      #   comp.redefine_optical_axis(ls.get_all_rays()[int(len(ls.get_all_rays())/2)])
-      # else:
-      #   comp.redefine_optical_axis(ls.get_all_rays()[int(len(ls.get_all_rays())/2-1)])
-      if ls==ls_group[-1]:
-        comp.redefine_optical_axis(dlambda_optical_axis)
+      elif reference_axis == "y":
+        KostenB = np.eye(4)
+        KostenB[0,0] = dy2_dy # A
+        KostenB[0,1] = dy2_dbeta # B
+        KostenB[1,0] = dbeta2_dy # C
+        KostenB[1,1] = dbeta2_dbeta # D
+        KostenB[0,3] = dy2_dlam * dlam_dfreq # E
+        KostenB[1,3] = dbeta2_dlam * dlam_dfreq# F
+        KostenB[2,0] = dt2_dy # G
+        KostenB[2,1] = dt2_dbeta # H
+        KostenB[2,3] = dt2_dlam * dlam_dfreq # I
+        
+        if text_explanation:
+          indices = [16, 17, 18, 19, 20]
+          indices.extend([23, 24, 25, 26, 27])
+          indices.extend([30, 31, 32, 33, 34])
+          indices.extend([37, 38, 39, 40])
+          txt4y = ""
+          for ind in indices:
+            txt4y += textlines[ind]
+          return KostenB, txt4y
+        return KostenB
       else:
-        comp.redefine_optical_axis(com._optical_axis[0])
-      comp.propagate(self._last_prop)
-      comp.compute_beams()
-      length1 = 0
-      for ii in comp._optical_axis:
-        length1+= ii.length
-      length_group.append(length1-length0)
-      point_group.append(comp._beams[-1].get_all_rays()[0].intersection(ip_b))
-      point_group.append(comp._beams[-1].get_all_rays()[0].intersection(ip_f))
-      
-      # point_group.append(comp.last_geom()[0])
-      # comp.propagate(shifting_distence)
-      # comp.compute_beams()
-      # point_group.append(comp.last_geom()[0])
-      # comp.draw_beams()
-      del comp
-    
-    # anyway, x, y = ip_b.get_coordinate_system()
-    ii = -1
-    point_group_new = []
-    for point in point_group:
-      ii+=1
-      point-=self.last_geom()[0]
-      if ii ==2:
-        point-=100*ip_f.normal
-        ii=0
-      pos_diff1 = np.dot(point,ip_b.get_coordinate_system()[1])
-      pos_diff2 = np.dot(point,ip_b.get_coordinate_system()[2])
-      point1 = np.array([0,pos_diff1,pos_diff2])
-      point_group_new.append(point1)
-      # point = ip_b.get_axes() @ point
-    point_group=point_group_new
-    Ax = (point_group[1][1])/0.1
-    I = (point_group[1][2]-point_group[0][2])/0.1
-    Cx = -(point_group[1][1]-point_group[2][1])/100/0.1
-    K = -(point_group[1][2]-point_group[2][2])/100/0.1
-    
-    Bx = (point_group[3][1])/(0.5*np.pi/100)
-    J = (point_group[3][2]-point_group[0][2])/(0.5*np.pi/100)
-    Dx = -(point_group[3][1]-point_group[4][1])/(100*0.5*np.pi/100)
-    L = -(point_group[3][2]-point_group[4][2])/(100*0.5*np.pi/100)
-    
-    E = (point_group[5][1])/0.1
-    Ay = (point_group[5][2]-point_group[0][2])/0.1
-    G = -(point_group[5][1]-point_group[6][1])/(100*0.1)
-    Cy = -(point_group[5][2]-point_group[6][2])/(100*0.1)
-    
-    F = (point_group[7][1])/(0.5*np.pi/100)
-    By = (point_group[7][2]-point_group[0][2])/(0.5*np.pi/100)
-    H = -(point_group[7][1]-point_group[8][1])/(100*0.5*np.pi/100)
-    Dy = -(point_group[7][2]-point_group[8][2])/(100*0.5*np.pi/100)
-    df=299792458*1000/self._optical_axis[0].wavelength/1000
-    length_dev = np.array([0.1,0.5*np.pi/100,0.1,0.5*np.pi/100,1/(299792458*1000),
-                          df])
-    print(df)
-    dxf = point_group[9][1]/df
-    dyf = point_group[9][2]/df
-    daxf = -(point_group[9][1]-point_group[10][1])/100/df
-    dayf = -(point_group[9][2]-point_group[10][2])/100/df
-    
-    length_lambda = deepcopy(length_group[-1])
-    print(length_lambda)
-    length_group[-1]=1
-    length_group.append(length_lambda)
-    length_group = np.array(length_group)
-    print(length_group)
-    length_group=length_group/length_dev/(299792458*1000)
-    kostenbauder_matrix = np.array([[Ax,Bx,E,F,0,dxf],[Cx,Dx,G,H,0,daxf],
-                                    [I,J,Ay,By,0,dyf],[K,L,Cy,Dy,0,dayf],
-                                    length_group,[0,0,0,0,0,1]])
-    return kostenbauder_matrix
-"""
-    
+        print("Usage: refrenece_axis = 'z' or 'y' when dimension = 4")
+        return -1
+
+    elif dimension == 6:
+      KostenB = np.eye(6)
+      KostenB[0,0] = dz2_dz # A
+      KostenB[0,1] = dz2_dalpha # B
+      KostenB[0,2] = dz2_dy
+      KostenB[0,3] = dz2_dbeta
+      KostenB[0,5] = dz2_dlam * dlam_dfreq
+
+      KostenB[1,0] = dalpha2_dz # C
+      KostenB[1,1] = dalpha2_dalpha # D
+      KostenB[1,2] = dalpha2_dy
+      KostenB[1,3] = dalpha2_dbeta
+      KostenB[1,5] = dalpha2_dlam * dlam_dfreq
+
+      KostenB[2,0] = dy2_dz # A
+      KostenB[2,1] = dy2_dalpha # B
+      KostenB[2,2] = dy2_dy
+      KostenB[2,3] = dy2_dbeta
+      KostenB[2,5] = dy2_dlam * dlam_dfreq
+
+      KostenB[3,0] = dbeta2_dz # C
+      KostenB[3,1] = dbeta2_dalpha # D
+      KostenB[3,2] = dbeta2_dy
+      KostenB[3,3] = dbeta2_dbeta
+      KostenB[3,5] = dbeta2_dlam * dlam_dfreq
+
+      KostenB[4,0] = dt2_dz
+      KostenB[4,1] = dt2_dalpha
+      KostenB[4,2] = dt2_dy
+      KostenB[4,3] = dt2_dbeta
+      KostenB[4,5] = dt2_dlam * dlam_dfreq
+
+      if text_explanation:
+        txt6 = ""
+        for line in textlines:
+          txt6 += line
+        return KostenB, txt6
+      return KostenB
+        
+    else:
+      print("This dimension in not implemented. I don't know, try dimension = 4 or 6.")
+      return -1
+
+
+
 def next_name(name, prefix=""):
   # generiert einen neuen namen aus dem alten Element
   ind = name.rfind("_")

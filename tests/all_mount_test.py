@@ -6,16 +6,16 @@ Created on Wed May 22 14:40:39 2024
 """
 
 
-import sys
-# import os
+# import sys
+# # import os
 
-pfad = __file__
-pfad = pfad.replace("\\","/") #folder conventions windows linux stuff
-pfad = pfad.lower()
-ind = pfad.rfind("lasercad")
-pfad = pfad[0:ind-1]
-if not pfad in sys.path:
-  sys.path.append(pfad)
+# pfad = __file__
+# pfad = pfad.replace("\\","/") #folder conventions windows linux stuff
+# pfad = pfad.loweraasd
+# ind = pfad.rfind("lasercad")
+# pfad = pfad[0:ind-1]
+# if not pfad in sys.path:
+#   sys.path.append(pfad)
 
 from LaserCAD.freecad_models import clear_doc, setview, freecad_da
 from LaserCAD.basic_optics import Mirror, Beam, Composition, inch, Lens
