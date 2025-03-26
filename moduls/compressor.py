@@ -5,9 +5,8 @@ Created on Thu Mar 20 09:51:43 2025
 @author: mens
 """
 
-from .. basic_optics import Mirror, Beam, Composition, inch, Curved_Mirror, RainbowBeam
-from .. basic_optics import Grating, Unit_Mount, Composed_Mount
-from ..basic_optics.mirror import Stripe_mirror
+from .. basic_optics import Beam, Composition, RainbowBeam
+from .. basic_optics import Grating
 from .periscope import Make_RoofTop_Mirror
 import numpy as np
 

@@ -5,7 +5,7 @@ Created on Tue Mar 12 13:42:19 2024
 @author: mens
 """
 from LaserCAD.freecad_models import clear_doc, setview, freecad_da
-from LaserCAD.basic_optics import Mirror, Beam, Composition, inch
+from LaserCAD.basic_optics import Mirror, Beam, Composition, inch, Lens
 from LaserCAD.basic_optics import Curved_Mirror, RainbowBeam
 from LaserCAD.basic_optics import Grating
 from LaserCAD.basic_optics.mirror import Stripe_mirror
@@ -65,6 +65,67 @@ output2 = """
 print()
 print("The - sign in the y quarter is correct (to our definition), since the mirror flips the y axis")
 
+print()
+print()
+
+
+
+# =============================================================================
+# lens test
+# =============================================================================
+lens_comp = Composition()
+lens_comp.propagate(200)
+lens_comp.add_on_axis(Lens())
+lens_comp.propagate(200)
+
+
+
+# =============================================================================
+# grating Test
+# =============================================================================
+grat_comp = Composition()
+grat_comp.propagate(1e-6)
+test_grating = Grating(order=-1)
+
+test_grating.normal = (1,1,0)
+
+grat_comp.add_fixed_elm(test_grating)
+grat_comp.recompute_optical_axis()
+grat_comp.propagate(1e-6)
+
+grat_comp.compute_beams()
+
+r0 = grat_comp._optical_axis[0]
+r1 = grat_comp._optical_axis[1]
+ew = r0.angle_to(test_grating)
+aw = r1.angle_to(test_grating)
+A = - np.cos(aw) / np.cos(ew)
+D = 1/A
+F = r0.wavelength*1e-3 * (np.sin(aw) - np.sin(ew))/3e8/np.cos(aw)
+G = (np.sin(ew) - np.sin(aw)) / 3e8 / np.cos(ew) * 1e15 / 1e3
+
+df_dlam = -3e8 / (r0.wavelength *1e-3)**2
+F *= df_dlam / 1e9
+
+print()
+print()
+print()
+print()
+print()
+
+kb, tx = grat_comp.Kostenbauder_matrix(reference_axis="y", text_explanation=True)
+print(tx)
+
+print()
+print("A:", A)
+print("D:", D)
+print("F:", F)
+print("G:", G)
+
+
+print()
+print()
+print()
 print()
 print()
 
