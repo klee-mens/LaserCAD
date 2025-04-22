@@ -8,8 +8,8 @@ Created on Wed Aug 24 16:28:07 2022
 from .geom_object import TOLERANCE, NORM0
 from .ray import Ray
 from .optical_element import Opt_Element
-from .mount import Stripe_Mirror_Mount, Rooftop_Mirror_Mount, Unit_Mount
-from ..freecad_models import model_mirror, model_stripe_mirror, model_rooftop_mirror
+from .mount import Stripe_Mirror_Mount, Unit_Mount
+from ..freecad_models import model_mirror, model_stripe_mirror
 import numpy as np
 from copy import deepcopy
 

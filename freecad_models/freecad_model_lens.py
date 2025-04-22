@@ -5,14 +5,8 @@ Created on Thu Aug 18 19:55:00 2022
 
 @author: mens
 """
-import sys
-# sys.path.append(u'/home/mens/Nextcloud/FreeCAD/opticslib2/basic_objects/freecad_models')
-# sys.path.append(u"C:/Users/mens/Nextcloud/FreeCAD/opticslib2/basic_objects/freecad_models")
 
-# from .utils import freecad_da, update_geom_info
-from .utils import freecad_da, update_geom_info, get_DOC, thisfolder#, inch
-from .freecad_model_composition import initialize_composition_old, add_to_composition
-import numpy as np
+from .utils import freecad_da, update_geom_info, get_DOC
 #import math
 
 DEFALUT_MAX_ANGULAR_OFFSET = 10
@@ -20,11 +14,8 @@ DEFAULT_COLOR_LENS = (0/255,170/255,124/255)
 LENS_TRANSPARENCY = 50
 # LENS_TRANSPARENCY = 0
 
-import csv
 if freecad_da:
-  from FreeCAD import Vector, Placement, Rotation
-  import Mesh
-  import ImportGui
+  from FreeCAD import Vector
   import Part
   import Sketcher
   from math import pi
@@ -131,55 +122,7 @@ def model_lens(name="lens", dia=25, Radius1=300, Radius2=0, thickness=3, geom=No
   #DOC.recompute()
 
   return obj
-"""
 
-def lens_mount(mount_name="mirror_mount", dia=inch,  geom=None,
-                mount_type="DEFAULT", mesh=True, **kwargs):
-
-
-  if dia <= 0.51*inch:
-    kind = "MLH05_M"
-    offset = Vector(1,-9.5,-8.2)
-    place = Placement(offset, Rotation(Vector(-0.57735,0.57735,0.57735),240), Vector(0,0,0))
-  elif dia <= 1.01*inch:
-    kind = "LMR1_M"
-    offset = Vector(1,-9.5,-8.2)
-    place = Placement(offset, Rotation(Vector(-0.57735,0.57735,0.57735),240), Vector(0,0,0))
-  elif dia <= 1.51*inch:
-    kind = "LMR1.5_M"
-    offset = Vector(1,-9.5,-8.2)
-    place = Placement(offset, Rotation(Vector(-0.57735,0.57735,0.57735),240), Vector(0,0,0))
-  elif dia <= 2.01*inch:
-    kind = "LMR2_M"
-    offset = Vector(13,-31.2,32.4)
-    place = Placement(offset, Rotation(-90,2.22639e-14,90), Vector(0,0,0))
-
-  if not mount_type == "DEFAULT":
-    kind = mount_type #kind kann auf expliziten Wunsch überschireben werden
-    offset = Vector(13,-31.2,112.5)
-    place = Placement(offset, Rotation(-90,2.22639e-14,90), Vector(0,0,0))
-
-  # if kind == "LMR2_M":
-  datei = thisfolder + "mount_meshes/lens/" + kind
-  if mesh:
-    DOC = get_DOC()
-    obj = DOC.addObject("Mesh::Feature", mount_name)
-    datei += ".stl"
-    # obj.Mesh = Mesh.Mesh("/home/mens/projects/optics-workbench/basic_optics/freecad_models/mount_meshes/POLARIS-K1-Step.stl")
-    obj.Mesh = Mesh.Mesh(datei)
-  else:
-    datei += ".step"
-    # obj = ImportGui.insert(u"C:/Users/mens/Nextcloud/FreeCAD/opticslib/thorlabs/POLARIS-K1-Step.step","labor_116")
-    obj = ImportGui.insert(datei, "labor_116")
-
-  obj.Placement = place
-  update_geom_info(obj, geom, off0=offset)
-  obj.Label = mount_name
-
-  #DOC.recompute()
-  return obj
-
-"""
 
 # Test
 if __name__ == "__main__":
