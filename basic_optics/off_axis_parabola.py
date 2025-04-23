@@ -26,23 +26,23 @@ class Off_Axis_Parabola_Focus(Opt_Element):
     # example referes to https://www.thorlabs.com/thorproduct.cfm?partnumber=MPD129-M01
     self.Mount.pos += (+self._mount_shift() - 5.5, 0, 0) #hacky but works
     # self.Mount.pos += (+self._mount_shift() , 0, 0) #hacky but works
-    
+
   def parent_parabola_apex(self):
     x,y,z = self.get_coordinate_system()
     rfl = self.reflected_focal_length
     c = self.parent_parabola_curvature()
     sa = np.sin(self.angle/180 * np.pi)
     return self.pos + x*c*(sa*rfl)**2 + y*sa*rfl
-  
+
   def parent_parabola_curvature(self):
     ca = np.cos(self.angle/180 * np.pi)
     sa = np.sin(self.angle/180 * np.pi)
     rfl = self.reflected_focal_length
-    return np.sqrt( (ca/(2*sa**2*rfl))**2 + 1/(2*sa*rfl)**2 ) - ca/(2*sa**2*rfl) 
-  
+    return np.sqrt( (ca/(2*sa**2*rfl))**2 + 1/(2*sa*rfl)**2 ) - ca/(2*sa**2*rfl)
+
   def parent_focal_length(self):
     return 1 / (4 * self.parent_parabola_curvature())
-  
+
   def intersection(self, ray):
     # surface: x - ay² - az² = 0
     curv = self.parent_parabola_curvature()
@@ -55,7 +55,7 @@ class Off_Axis_Parabola_Focus(Opt_Element):
     a1 = np.dot(ns, y0)**2 + np.dot(ns, z0)**2
     b1 = np.dot(n0,ns)/curv - 2*np.dot(ns, y0)*np.dot(rel,y0) - 2*np.dot(ns,z0)*np.dot(rel,z0)
     c1 = np.dot(rel,n0)/curv - np.dot(rel,y0)**2 - np.dot(rel,z0)**2
-    
+
     if abs(a1) < TOLERANCE:
       s = -c1/b1
     else:
@@ -64,7 +64,7 @@ class Off_Axis_Parabola_Focus(Opt_Element):
       abs1 = np.linalg.norm(ray.pos + s1*ns - self.pos)
       abs2 = np.linalg.norm(ray.pos + s2*ns - self.pos)
       s = s1 if abs1 < abs2 else s2
-    
+
     ray.length = s
     return ray.endpoint()
 
@@ -80,14 +80,16 @@ class Off_Axis_Parabola_Focus(Opt_Element):
     gradient *= 1/np.linalg.norm(gradient)
     ray2.normal += -2 * np.dot(ray.normal, gradient) * gradient
     return ray2
-  
+
   def update_draw_dict(self):
     super().update_draw_dict()
     parentpos = self.parent_parabola_apex() - self.pos
-    self.draw_dict["parent_pos"] = parentpos[0:2]
+    # self.draw_dict["parent_pos"] = parentpos[0:2]
+    x,y,z = self.get_coordinate_system()
+    self.draw_dict["parent_pos"] = (np.dot(parentpos, x), np.dot(parentpos, y))
     self.draw_dict["parent_focal"] = self.parent_focal_length()
-    # model_off_axis_parabola(name="off_axis_parab", parent_pos=(25, 50), 
-                                # parent_focal=25, dia=25, thickness=30, 
+    # model_off_axis_parabola(name="off_axis_parab", parent_pos=(25, 50),
+                                # parent_focal=25, dia=25, thickness=30,
                                 # geom=None, **kwargs):
   def set_mount_to_default(self):
     self.Mount = Composed_Mount(unit_model_list=["POLARIS-K1", "0.5inch_post"])

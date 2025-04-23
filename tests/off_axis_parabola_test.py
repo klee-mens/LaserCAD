@@ -19,15 +19,14 @@ if freecad_da:
 oapf = Off_Axis_Parabola_Focus(angle=90)
 
 sb = SquareBeam(radius=5, ray_in_line=20)
-# sb.pos += (-50, 0, 0)
 
 
 comp = Composition()
 comp.set_light_source(sb)
 comp.propagate(50)
 comp.add_on_axis(oapf)
-#oapf.rotate(vec=oapf.normal, phi=np.pi)
-#comp.recompute_optical_axis()
+oapf.rotate(vec=oapf.normal, phi=np.pi)
+comp.recompute_optical_axis()
 comp.propagate(150)
 
 
@@ -35,6 +34,9 @@ comp.draw()
 
 # nb = oapf.next_beam(sb)
 
+# oapf.normal = (1,1,0)
+
+# oapf.draw()
 
 # sb.draw()
 # nb.draw()
