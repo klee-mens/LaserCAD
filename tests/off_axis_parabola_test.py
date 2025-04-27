@@ -5,10 +5,10 @@ Created on Tue Apr 22 14:57:21 2025
 @author: mens
 """
 
-from LaserCAD.basic_optics.off_axis_parabola import Off_Axis_Parabola_Focus
+# from LaserCAD.basic_optics.off_axis_parabola import Off_Axis_Parabola
 # from LaserCAD.basic_optics.off_axis_parabola import Off_Axis_Parabola_Colim
 from LaserCAD.basic_optics.beam import SquareBeam
-from LaserCAD.basic_optics import Composition, Ray, Mirror
+from LaserCAD.basic_optics import Composition, Ray, Mirror, Off_Axis_Parabola
 from LaserCAD.freecad_models import freecad_da, clear_doc, setview
 import numpy as np
 
@@ -19,8 +19,8 @@ if freecad_da:
 # focus
 # =============================================================================
 
-# oapf = Off_Axis_Parabola_Focus(angle=45)
-# oapf = Off_Axis_Parabola_Focus(angle=90)
+# oapf = Off_Axis_Parabola(angle=45)
+# oapf = Off_Axis_Parabola(angle=90)
 
 # sb = SquareBeam(radius=5, ray_in_line=3)
 
@@ -45,7 +45,7 @@ if freecad_da:
 # comp.normal = (1,2,0)
 # comp.set_light_source(SquareBeam(radius=5, ray_in_line=3))
 # comp.propagate(60)
-# comp.add_on_axis(Off_Axis_Parabola_Focus())
+# comp.add_on_axis(Off_Axis_Parabola())
 # comp.propagate(100)
 # comp.draw()
 
@@ -57,7 +57,7 @@ if freecad_da:
 # comp.normal = (1,2,0)
 # comp.set_light_source(SquareBeam(radius=5, ray_in_line=3))
 # comp.propagate(60)
-# oap = Off_Axis_Parabola_Focus()
+# oap = Off_Axis_Parabola()
 # comp.add_on_axis(oap)
 # comp.propagate(oap.reflected_focal_length)
 # comp.add_on_axis(Mirror())
@@ -74,7 +74,7 @@ if freecad_da:
 # # =============================================================================
 # ray0 = Ray()
 # ray0.pos += (-50, 0, 0)
-# oap1 = Off_Axis_Parabola_Focus()
+# oap1 = Off_Axis_Parabola()
 # ray1 = oap1.next_ray(ray0)
 
 # ray2 = Ray()
@@ -96,9 +96,9 @@ if freecad_da:
 
 # ray0 = Ray()
 # ray0.pos += (-50, 0, 0)
-# oap1 = Off_Axis_Parabola_Focus()
+# oap1 = Off_Axis_Parabola()
 # ray1 = oap1.next_ray(ray0)
-# oap2 = Off_Axis_Parabola_Focus()
+# oap2 = Off_Axis_Parabola()
 # oap2.pos += (0, 2*oap1.reflected_focal_length, 0)
 # oap2.rotate(vec=oap2.normal, phi=np.pi)
 # ray2 = oap2.next_ray(ray1)
@@ -107,9 +107,10 @@ if freecad_da:
 # telescope
 # =============================================================================
 
-oapf = Off_Axis_Parabola_Focus()
+oapf = Off_Axis_Parabola(theta=180)
 
-oap2 = Off_Axis_Parabola_Focus()
+# oap2 = Off_Axis_Parabola()
+oap2 = Off_Axis_Parabola(colim=True, theta=0)
 
 
 sb = SquareBeam(radius=5, ray_in_line=5)
@@ -121,16 +122,19 @@ comp2.propagate(50)
 comp2.add_on_axis(oapf)
 # comp2.propagate(oapf.reflected_focal_length)
 comp2.propagate(2*oapf.reflected_focal_length)
+
 comp2.add_on_axis(oap2)
-oap2.set_axes(oapf.get_axes())
-oap2.rotate(oap2.normal, np.pi)
+
+# comp2.add_on_axis(oap2)
+# oap2.set_axes(oapf.get_axes())
+# oap2.rotate(oap2.normal, np.pi)
+
 comp2.recompute_optical_axis()
 
 comp2.propagate(120)
 
 comp2.draw()
 # comp2.draw_beams()
-
 
 
 
