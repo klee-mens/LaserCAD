@@ -513,51 +513,6 @@ class Composition(Geom_Object):
     lam0 = ray0.wavelength * 1e-3
     dlam_dfreq = - (lam0)**2 / c # Kostenbauder took frequency, not wavelength
 
-    # txt = ""
-    # def txtline(str1, obj, str2):
-    #   return str1 + str(obj) + str2
-    # txt += txtline("dz2_dz: ", dz2_dz, " | Magnification z-z\n")
-    # txt += txtline("dz2_dalpha: ", dz2_dalpha*1e3, " mm | Propagation z-alpha\n")
-    # txt += txtline("dz2_dy: ", dz2_dy, "| Twisting z-y\n")
-    # txt += txtline("dz2_dbeta: ", dz2_dbeta*1e3, " mm | Twisting propagation z-beta\n")
-    # txt += txtline("dz2_dt: ", 0, " mm/s | Time dependence z-t, by definition 0\n")
-    # txt += txtline("dz2_dlam: ", dz2_dlam*1e3/(1e9), " mm/nm | Spatial chirp z-lambda\n")
-    # txt += "\n"
-    # txt += txtline("dalpha2_dz: ", dalpha2_dz*1e-3, " /mm | Focal power alpha-z\n")
-    # txt += txtline("dalpha2_dalpha: ", dalpha2_dalpha, " | Angular magnification alpha-alpha\n")
-    # txt += txtline("dalpha2_dy: ", dalpha2_dy*1e-3, " /mm | Twisting focal power alpha-y\n")
-    # txt += txtline("dalpha2_dbeta: ", dalpha2_dbeta, " | Twisting angular magnification alpha-beta\n")
-    # txt += txtline("dalpha2_dt: ", 0, " mrad/s | Time dependence alpha-t, by definition 0\n")
-    # txt += txtline("dalpha2_dlam: ", dalpha2_dlam*1e3/1e9, " mrad/nm | Angular chirp alpha-lambda\n")
-    # txt += "\n"
-    # txt += txtline("dy2_dz: ", dy2_dz, " | Twisting magnification y-z\n")
-    # txt += txtline("dy2_dalpha: ", dy2_dalpha*1e3, " mm | Twisting propagation y-alpha\n")
-    # txt += txtline("dy2_dy: ", dy2_dy, " | Magnification y-y\n")
-    # txt += txtline("dy2_dbeta: ", dy2_dbeta*1e3, " mm | Propagation y-beta\n")
-    # txt += txtline("dy2_dt: ", 0, " mm/s | Time dependence y-t, by definition 0\n")
-    # txt += txtline("dy2_dlam: ", dy2_dlam*1e3/(1e9), " mm/nm | Spatial chirp y-lambda\n")
-    # txt += "\n"
-    # txt += txtline("dbeta2_dz: ", dbeta2_dz*1e-3, " /mm | Focal power beta-z\n")
-    # txt += txtline("dbeta2_dalpha: ", dbeta2_dalpha, " | Twisting angular magnification beta-alpha\n")
-    # txt += txtline("dbeta2_dy: ", dbeta2_dy*1e-3, " /mm | Focal power beta-y\n")
-    # txt += txtline("dbeta2_dbeta: ", dbeta2_dbeta, " | Angular magnification beta-beta\n")
-    # txt += txtline("dbeta2_dt: ", 0, " mrad/s | Time dependence beta-t, by definition 0\n")
-    # txt += txtline("dbeta2_dlam: ", dbeta2_dlam*1e3/1e9, " mrad/nm | Angular chirp beta-lambda\n")
-    # txt += "\n"
-    # txt += txtline("dt2_dz: ", dt2_dz*1e15/1e3, " fs/mm | Spatial pulse front tilt t-z\n")
-    # txt += txtline("dt2_dalpha: ", dt2_dalpha*1e15/1e3, " fs/mrad | Angular pulse front tilt t-alpha\n")
-    # txt += txtline("dt2_dy: ", dt2_dy*1e15/1e3, " fs/mm | Spatial pulse front tilt t-y\n")
-    # txt += txtline("dt2_dbeta: ", dt2_dbeta*1e15/1e3, " fs/mrad | Angular pulse front tilt t-beta\n")
-    # txt += txtline("dt2_dt: ", 1, " | Time dependence t-t, by definition 1\n")
-    # txt += txtline("dt2_dlam: ", dt2_dlam*dlam_dfreq/(2*np.pi)*1e30, " fs^2 | Group delay dispersion\n")
-    # txt += "\n"
-    # txt += txtline("df2_dz: ", 0, " f-z, by definition 0\n")
-    # txt += txtline("df2_dalpha: ", 0, " f-alpha, by definition 0\n")
-    # txt += txtline("df2_dy: ", 0, " f-y, by definition 0\n")
-    # txt += txtline("df2_dbeta: ", 0, " f-beta, by definition 0\n")
-    # txt += txtline("df2_dt: ", 0, " f-t, by definition 0\n")
-    # txt += txtline("df2_dlam: ", 1, " f-f, by definition 1\n")
-    
     textlines = []
     def txtline(str1, obj, str2):
       return str1 + str(obj) + str2
@@ -615,7 +570,7 @@ class Composition(Geom_Object):
         KostenB[2,0] = dt2_dz # G
         KostenB[2,1] = dt2_dalpha # H
         KostenB[2,3] = dt2_dlam * dlam_dfreq # I
-        
+
         if text_explanation:
           indices = [0, 1, 4, 5, 6]
           indices.extend([7, 8, 11, 12, 13])
@@ -626,7 +581,7 @@ class Composition(Geom_Object):
             txt4z += textlines[ind]
           return KostenB, txt4z
         return KostenB
-      
+
       elif reference_axis == "y":
         KostenB = np.eye(4)
         KostenB[0,0] = dy2_dy # A
@@ -638,7 +593,7 @@ class Composition(Geom_Object):
         KostenB[2,0] = dt2_dy # G
         KostenB[2,1] = dt2_dbeta # H
         KostenB[2,3] = dt2_dlam * dlam_dfreq # I
-        
+
         if text_explanation:
           indices = [16, 17, 18, 19, 20]
           indices.extend([23, 24, 25, 26, 27])
@@ -691,7 +646,7 @@ class Composition(Geom_Object):
           txt6 += line
         return KostenB, txt6
       return KostenB
-        
+
     else:
       print("This dimension in not implemented. I don't know, try dimension = 4 or 6.")
       return -1

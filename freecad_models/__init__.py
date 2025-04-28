@@ -25,6 +25,7 @@ from .freecad_model_mounts import mirror_mount,lens_mount,model_table, model_lam
 # from .freecad_inputoutput_test import input_output_test
 from .freecad_model_crystal import model_crystal,model_crystal_mount
 from .freecad_model_geom_object import model_geom_object
+from .freecad_model_off_axis_parabola import model_off_axis_parabola
 pfad = __file__[0:-11]
 
 
