@@ -133,7 +133,8 @@ print()
 
 
 # =============================================================================
-# jetzt wäre es noch cool einen mathematischen beispielstrecker zu konstruieren und daran spatial chirp in y und pulse front zeug auszuprobieren...
+# jetzt wäre es noch cool einen mathematischen beispielstrecker zu konstruieren
+# und daran spatial chirp in y und pulse front zeug auszuprobieren...
 # =============================================================================
 from LaserCAD.moduls import Make_Stretcher
 
@@ -218,6 +219,116 @@ cpaK, cpaT = cpa_composition.Kostenbauder_matrix(reference_axis="y", text_explan
 print()
 print()
 print(cpaT)
+
+
+
+
+
+# =============================================================================
+# stretcher with spatial chirp due to missaligned öffner stretcher, see Zedi
+# =============================================================================
+
+delta_z = np.linspace(-5, 5, 11)
+spatial_chirp = []
+
+for delta in delta_z:
+
+
+  radius_concave = 1000 #radius of the big concave sphere
+  aperture_concave = 6 * inch
+  height_stripe_mirror = 10 #height of the stripe mirror in mm
+  seperation_angle = 10 /180 *np.pi # sep between in and outgoing middle ray
+  grating_const = 1/1000 # in 1/mm
+  seperation = 50 # difference grating position und radius_concave
+  lambda_mid = 800e-9 * 1e3 # central wave length in mm
+  band_width = 100e-9*1e3 # full bandwith in mm
+  number_of_rays = 20
+  safety_to_stripe_mirror = 5 #distance first incomming ray to stripe_mirror in mm
+  periscope_height = 10
+  first_propagation = 120 # legnth of the first ray_bundle to flip mirror1 mm
+  distance_roof_top_grating = 600
+
+  # calculated parameters according to the grating equation and set the grating
+  v = lambda_mid/grating_const
+  s = np.sin(seperation_angle)
+  c = np.cos(seperation_angle)
+  a = v/2
+  b = np.sqrt(a**2 - (v**2 - s**2)/(2*(1+c)))
+  sinB = a - b
+  grating_normal = (np.sqrt(1-sinB**2), sinB, 0)
+  Grat = Grating(grat_const=grating_const, name="Gitter", order=-1)
+  Grat.normal = grating_normal
+
+  #set the big sphere
+  Concav = Curved_Mirror(radius=radius_concave,name="Concav_Mirror")
+  Concav.aperture = aperture_concave
+  Concav.set_mount_to_default()
+
+  # set the convex stripe mirror and its cosmetics
+  StripeM = Stripe_mirror(radius= -radius_concave/2)
+
+  # prepare the helper Composition
+  helper = Composition()
+  helper_light_source = Beam(angle=0, wavelength=lambda_mid)
+  helper.set_light_source(helper_light_source)
+  #to adjust the wavelength of the oA and set everything on axis
+  helper.redefine_optical_axis(helper_light_source.inner_ray())
+  helper.add_fixed_elm(Grat)
+  helper.recompute_optical_axis()
+  helper.propagate(radius_concave - seperation)
+  helper.add_on_axis(Concav)
+  helper.propagate(radius_concave/2 + delta)
+  helper.add_on_axis(StripeM)
+
+  lightsource = RainbowBeam(wavelength=lambda_mid, bandwith=band_width, ray_count=number_of_rays)
+
+  # starting the real stretcher
+  Stretcher_missal = Composition(name="DerStrecker_withSpatChirp")
+  Stretcher_missal.set_light_source(lightsource)
+  Stretcher_missal.redefine_optical_axis(helper_light_source.inner_ray())
+
+  Stretcher_missal.propagate(first_propagation)
+  #adding the helper
+  helper.set_geom(Stretcher_missal.last_geom())
+  helper.pos += (0,0, height_stripe_mirror/2 + safety_to_stripe_mirror)
+  Stretcher_missal.add_supcomposition_fixed(helper)
+
+  Stretcher_missal.set_sequence([0,1,2,1,0])
+  Stretcher_missal.recompute_optical_axis()
+  # Stretcher_missal.draw()
+
+  # adding the rooftop mirror and it's cosmetics
+  Stretcher_missal.propagate(distance_roof_top_grating)
+  RoofTopMirror = Make_RoofTop_Mirror(height=periscope_height, up=False)
+
+  Stretcher_missal.add_supcomposition_on_axis(RoofTopMirror)
+  Stretcher_missal.set_sequence([0,1,2,1,0, 3,4, 0,1,2,1,0]) # believe me :)
+  Stretcher_missal.recompute_optical_axis()
+  Stretcher_missal.propagate(100)
+
+  kb = Stretcher_missal.Kostenbauder_matrix(reference_axis="y")
+  spatial_chirp.append(kb[0,3])
+
+spatial_chirp = np.array(spatial_chirp)
+import matplotlib.pyplot as plt
+
+plt.figure()
+plt.title("Spatial chirp missaligned Öffner Telescope")
+plt.plot(delta_z, spatial_chirp)
+plt.xlabel("Delta z in mm")
+plt.ylabel("Spatial chirp in mm/Hz")
+plt.grid()
+
+
+
+# print("---------------------------------")
+# print()
+# kb, txt = Stretcher_missal.Kostenbauder_matrix(reference_axis="y", text_explanation=True)
+# print(txt)
+# print()
+# print("---------------------------------")
+
+
 
 
 # =============================================================================
