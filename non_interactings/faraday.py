@@ -10,7 +10,7 @@ Created on Sat Aug 19 13:13:11 2023
 from ..freecad_models.utils import thisfolder, load_STL, freecad_da, update_geom_info, get_DOC
 from ..freecad_models.freecad_model_composition import initialize_composition_old, add_to_composition
 from ..freecad_models import model_crystal
-from LaserCAD.basic_optics.component import Component
+from LaserCAD.basic_optics import Component, Post
 import numpy as np
 
 import csv
@@ -32,9 +32,12 @@ class Faraday_Isolator(Component):
     self.draw_dict["color"]=(10/255, 20/255, 230/255)
     # self.draw_dict["color"]=(84/255, 84/255, 84/255)
     self.freecad_model = load_STL
+    post = Post(model="big_post")
+    post.pos += (32, 0, -20)
+    self.Mount = post
     
-  def draw_mount_fc(self):
-    new_pos = self.pos
-    new_pos[2] = new_pos[2]/2-8
-    obj = model_crystal(width=40,height=new_pos[2]*2,thickness=65,color=DEFALUT_HOLDER_COLOR,Transparency=0,geom=(new_pos,self.normal))
-    return obj
+  # def draw_mount_fc(self):
+  #   new_pos = self.pos
+  #   new_pos[2] = new_pos[2]/2-8
+  #   obj = model_crystal(width=40,height=new_pos[2]*2,thickness=65,color=DEFALUT_HOLDER_COLOR,Transparency=0,geom=(new_pos,self.normal))
+  #   return obj

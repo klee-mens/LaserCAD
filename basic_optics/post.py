@@ -52,7 +52,7 @@ class Post_and_holder(Geom_Object):
     self.draw_dict["holder_color"] = self.holder_color
     if self.elm_type == "dont_draw":
       return None
-    print(self.name,"'s position = ",self.pos)
+    # print(self.name,"'s position = ",self.pos)
     # return draw_post_part(**self.draw_dict)
     if self.post_type == "1inch_post":
       return self.find_1inch_post()
@@ -138,7 +138,7 @@ def draw_post_part(name="post_part", base_exists=False,
         post1 = draw_post_base(name="BA1L",  geom=geom)
   else:
     post1 = None
-  print(name,"'s height=",NORMAL[2]+post_length)
+  # print(name,"'s height=",NORMAL[2]+post_length)
   part = initialize_composition_old(name=name)
   container = post,post1,post2
   add_to_composition(part, container)

@@ -141,7 +141,8 @@ class LinearResonator(Composition):
     self.set_sequence([x for x in range(1, len(self._elements)-1)])
     super().compute_beams(external_source)
     for beam in self._beams:
-      beam.draw_dict["model"] = self.draw_dict["beam_model"]
+      # beam.draw_dict["model"] = self.draw_dict["beam_model"]
+      beam.draw_dict["model"] = "Gaussian"
         
     
   def transform_gauss_to_cone_beams(self):
@@ -152,7 +153,54 @@ class LinearResonator(Composition):
     return cones
 
     
-
+class CircularResonator(LinearResonator):
+  
+  def __init__(self, **kwargs):
+    super().__init__(**kwargs)
+    
+  def Setting_last_element(self):
+    item = self._elements[-1]
+    if type(item) == type(Mirror()):
+      p0 = self._elements[-2].pos
+      p1 = self._elements[0].pos
+      item.set_normal_with_2_points(p0, p1)
+      # p0 = self._elements[-1].pos
+      # p1 = self._elements[1].pos
+      # self._elements[0].set_normal_with_2_points(p0, p1)
+    else:
+      print("The last element must be a mirror")
+      return -1
+  
+  def compute_eigenmode(self, start_index=0):
+    noe = len(self._elements)
+    seq = [x for x in range(noe)]
+    seq.extend([0])
+    prop = np.linalg.norm(self._elements[-1].pos-self._elements[0].pos)
+    self._last_prop = prop
+    self.set_sequence(seq)
+    matrix = self.matrix()
+    A = matrix[0,0]
+    B = matrix[0,1]
+    C = matrix[1,0]
+    D = matrix[1,1]
+    z = (A-D)/(2*C)
+    E = -B/C - z**2
+    if E < 0:
+      print("Resonator is unstable")
+      return -1
+    ### set Lightsource accordingly
+    z0 = np.sqrt(E)
+    q_para = (z +1j*z0)
+    gb00 = Gaussian_Beam(wavelength=self.wavelength) #der -1 strahl
+    gb00.q_para = q_para
+    gb00.set_geom(self._elements[0].get_geom())
+    lsgb = self._elements[0].next_beam(gb00)
+    self._lightsource = lsgb
+    # set sequence for compute beams
+    # self.set_sequence([x for x in range(1, noe)])
+    prop = np.linalg.norm(self._elements[-1].pos-self._elements[-2].pos)
+    self._last_prop = prop
+    return q_para
   # def draw_with_cones(self):
   #   self.draw_elements()
   #   self.draw_mounts()

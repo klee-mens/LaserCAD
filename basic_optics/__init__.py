@@ -15,18 +15,17 @@ Erstellen der 3D Obejkte in FreeCAD
 
 from .geom_object import Geom_Object, TOLERANCE
 from .ray import Ray
-from .beam import Beam, Gaussian_Beam
+from .beam import Beam, CircularRayBeam, Gaussian_Beam, RainbowBeam, SquareBeam
 from .optical_element import Opt_Element
 from .lens import Lens
-from .mirror import Mirror, Curved_Mirror, Cylindrical_Mirror
+from .mirror import Mirror, Curved_Mirror, Cylindrical_Mirror,Cylindrical_Mirror1,Stripe_mirror
 from .composition import Composition
 from .constants import inch
 from .grating import Grating
 from .intersection_plane import Intersection_plane
 from .resonator import LinearResonator
-from .crystal import Crystal
 from .component import Component
 from .mount import Unit_Mount, Grating_Mount, Composed_Mount, Stripe_Mirror_Mount, Rooftop_Mirror_Mount, Post
 from .post import Post_and_holder
-
-
+from .refractive_plane import Refractive_plane
+from .off_axis_parabola import Off_Axis_Parabola

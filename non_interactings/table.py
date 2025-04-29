@@ -14,7 +14,8 @@ class Table(Geom_Object):
     # stl_file=thisfolder+"\post\optical_breadboard.stl"
     # self.draw_dict["stl_file"]=stl_file
     # self.freecad_model = load_STL
-    self.pos = (-1500,-800,0)
+    # self.pos = (-1500,-800,0)
+    self.pos = (0,0,-10)
     self.length=length
     self.width=width
     self.height = height

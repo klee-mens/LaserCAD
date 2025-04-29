@@ -8,38 +8,38 @@ Created on Wed Aug 24 16:28:07 2022
 from .geom_object import TOLERANCE, NORM0
 from .ray import Ray
 from .optical_element import Opt_Element
-from .mount import Stripe_Mirror_Mount, Rooftop_Mirror_Mount, Unit_Mount
-from ..freecad_models import model_mirror, model_stripe_mirror, model_rooftop_mirror
+from .mount import Stripe_Mirror_Mount, Unit_Mount
+from ..freecad_models import model_mirror, model_stripe_mirror
 import numpy as np
 from copy import deepcopy
 
 
 class Mirror(Opt_Element):
   """
-  Spiegelklasse, erbit von <Opt_Element>, nimmt einen ray und transformiert 
+  Spiegelklasse, erbit von <Opt_Element>, nimmt einen ray und transformiert
   ihn entsprechend des Reflexionsgesetzes
   Anwendung wie folgt:
-    
+
   m = Mirror(phi=90)
   r = Ray()
   m.set_geom(r.get_geom())
   nr = m.next_ray(r)
-  
-  dreht <r> in der xy-Ebene um den Winkel <phi> €[-180,180] und dreht um 
-  <theta> € [-90,90] aus der xy-Ebene heraus, wenn man die normale voher mit 
+
+  dreht <r> in der xy-Ebene um den Winkel <phi> €[-180,180] und dreht um
+  <theta> € [-90,90] aus der xy-Ebene heraus, wenn man die normale voher mit
   set_geom() einstellt
   """
-  def __init__(self, phi=180, theta=0, **kwargs):
-    super().__init__(**kwargs)
+  def __init__(self, phi=180, theta=0, name="NewMirror", **kwargs):
+    super().__init__(name=name, **kwargs)
     self.__incident_normal = np.array(NORM0) # default von Strahl von x
     self.__theta = theta
     self.__phi = phi
     self.update_normal()
     self.freecad_model = model_mirror
-  
+
   def update_normal(self):
     """
-    aktualisiert die Normale des Mirrors entsprechend der __incident_normal, 
+    aktualisiert die Normale des Mirrors entsprechend der __incident_normal,
     phi und theta
     """
     phi = self.__phi/180*np.pi
@@ -66,7 +66,7 @@ class Mirror(Opt_Element):
 
   def set_geom(self, geom):
     """
-    setzt <pos> und __incident_normal auf <geom> und akturalisiert dann die 
+    setzt <pos> und __incident_normal auf <geom> und akturalisiert dann die
     eigene <normal> entsprechend <phi> und <theta>
 
     Parameters
@@ -83,7 +83,7 @@ class Mirror(Opt_Element):
   @property
   def phi(self):
     """
-    beschreibt den Winkel <phi> um den der Mirror einen Strahl in 
+    beschreibt den Winkel <phi> um den der Mirror einen Strahl in
     <__incident_normal> Richtung in der xy-Ebene durch Reflexion weiter dreht
     (mathematisch positive Drehrichtung)
     stellt über Setter sicher, dass die normale entsprechend aktualisiert wird
@@ -91,14 +91,14 @@ class Mirror(Opt_Element):
     return self.__phi
   @phi.setter
   def phi(self, x):
-    
+
     self.__phi = x
     self.update_normal()
 
   @property
   def theta(self):
     """
-    beschreibt den Winkel <theta> um den der Mirror einen Strahl in 
+    beschreibt den Winkel <theta> um den der Mirror einen Strahl in
     <__incident_normal> Richtung aus der xy-Ebene durch Reflexion weiter dreht
     (mathematisch positive Drehrichtung)
     stellt über Setter sicher, dass die normale entsprechend aktualisiert wird
@@ -108,13 +108,51 @@ class Mirror(Opt_Element):
   def theta(self, x):
     self.__theta = x
     self.update_normal()
+    
+  def reflection(self, ray):
+    """
+    erzeugt den nächsten Strahl aus <Ray> mit Hilfe des Reflexionsgesetzes
+    (man beachte die umgedrehte <normal> im Gegensatz zur Konvention in z.B.
+    Springer Handbook of Optics and Lasers S. 68)
+  
+    Parameters
+    ----------
+    ray : Ray()
+      incident ray
+  
+    Returns
+    -------
+    reflected ray
+    """
+    ray2 = deepcopy(ray)
+    ray2.pos = self.intersection(ray) #dadruch wird ray.length verändert(!)
+    k = ray2.normal
+    km = -self.normal
+    scpr = np.sum(km*k)
+    newk = k-2*scpr*km
+    ray2.normal = newk
+    # print("REFL", k, km, scpr, newk, ray2.normal)
+    return ray2
 
   def next_ray(self, ray):
     return self.reflection(ray)
+  
+  def through_out_beam(self, beam):
+    newb = deepcopy(beam)
+    newb.name = "next_" + beam.name
+    rays = beam.get_all_rays(by_reference=True)
+    newrays = []
+    for ray in rays:
+      nr = self.just_pass_through(ray)
+      if not nr:
+        return False 
+      newrays.append(nr)
+    newb.override_rays(newrays)
+    return newb
 
   def set_incident_normal(self, vec):
     """
-    setzt neue <__incident_normal> und berechnet daraus mit <phi> und <theta> 
+    setzt neue <__incident_normal> und berechnet daraus mit <phi> und <theta>
     die neue <normal>
     """
     vec = vec / np.linalg.norm(vec)
@@ -143,7 +181,7 @@ class Mirror(Opt_Element):
       if scalar >= 0:
         phi = phi0
       else:
-        phi = -180 - phi0 if (phi0 < 0) else 180 - phi0 
+        phi = -180 - phi0 if (phi0 < 0) else 180 - phi0
     v3 = np.array((np.linalg.norm(xy1), vec1[2]))
     v4 = np.array((np.linalg.norm(xy2), vec2[2]))
     teiler = np.linalg.norm(v3) * np.linalg.norm(v4)
@@ -167,6 +205,29 @@ class Mirror(Opt_Element):
     # print("nextnormal", (inc - refl)/np.linalg.norm(inc - refl))
     self.normal = inc - refl
     self.__phi, self.__theta =  self.recompute_angles()
+    
+  def set_normal_with_output_direction(self, output_vec=(0,1,0)):
+    """
+    sets the normal of the mirror using its __incident_normal and a direction 
+    where the reflected beam should go
+    
+    Example 
+    m = Mirror()
+    m.set_normal_with_output_direction(output_vec=(0,1,0))
+    
+    Parameters
+    ----------
+    output_vec : TYPE, optional
+      DESCRIPTION. The default is (0,1,0).
+
+    Returns
+    -------
+    None.
+
+    """
+    p0 = self.pos - self.__incident_normal
+    p1 = self.pos + output_vec
+    self.set_normal_with_2_points(p0, p1)
 
   def __repr__(self):
     n = len(self.class_name())
@@ -179,6 +240,12 @@ class Mirror(Opt_Element):
     super().update_draw_dict()
     self.draw_dict["dia"]=self.aperture
     self.draw_dict["Radius"] = 0
+
+  def kostenbauder(self, inray=Ray()):
+    kmatrix = np.eye(4)
+    # kmatrix[0:2, 0:2] = self.matrix(inray=inray)
+    kmatrix[0:2, 0:2] = -self.matrix(inray=inray)
+    return np.array(kmatrix)
 
 
 
@@ -200,13 +267,7 @@ class Curved_Mirror(Mirror):
 
   def focal_length(self):
     return self.radius/2
- 
-  def next_ray(self, ray):
-    # r1 = self.refraction(ray)
-    # r2 = self.reflection(r1)
-    r2 = self.next_ray_trace(ray)
-    return r2
-  
+
   def __repr__(self):
     n = len(self.class_name())
     txt = self.class_name() + '(radius=' + repr(self.radius)
@@ -218,8 +279,41 @@ class Curved_Mirror(Mirror):
     self.draw_dict["Radius"] = self.radius
     self.draw_dict["dia"]=self.aperture
     # self.draw_dict["Radius1"] = self.radius
-      
-  def next_ray_trace(self, ray):
+
+  def intersection(self, ray):
+    """
+    ermittelt den Schnittpunkt vom Strahl mit einer Spähre, die durch 
+    <center> € R^3 und <radius> € R definiert ist
+    und setzt seine Länge auf den Abstand self.pos--element.pos (bedenken!)
+    siehe Springer Handbook of Lasers and Optics Seite 66 f
+
+    Parameters
+    ----------
+    center : TYPE 3D-array
+      Mittelpunkt der Sphäre 
+
+    radius : TYPE float
+      Radius der Sphäre; >0 für konkave Spiegel (Fokus), <0 für konvexe
+
+    Returns
+    -------
+    endpoint : TYPE 3D-array
+    """
+    diffvec = self.pos - self.radius*self.normal - ray.pos
+    k = np.sum( diffvec * ray.normal )
+    w = np.sqrt(k**2 - np.sum(diffvec**2) + self.radius**2)
+    s1 = k + w
+    s2 = k - w
+    #Fallunterscheidung
+    if self.radius < 0 and s2 > 0:
+      dist = s2
+    else:
+      dist = s1
+    ray.length = dist
+    endpoint = ray.endpoint()
+    return endpoint
+  
+  def next_ray(self, ray):
     """
     erzeugt den nächsten Ray auf Basis der analytischen Berechung von Schnitt-
     punkt von Sphere mit ray und dem vektoriellen Reflexionsgesetz
@@ -238,10 +332,11 @@ class Curved_Mirror(Mirror):
     """
     ray2 = deepcopy(ray)
     ray2.name = "next_" + ray.name
-    
+
     center = self.pos - self.radius * self.normal
-    p0 = ray.intersect_with_sphere(center, self.radius) #Auftreffpunkt p0
-    surface_norm = p0 - center #Normale auf Spiegeloberfläche in p0 
+    # p0 = ray.intersect_with_sphere(center, self.radius) #Auftreffpunkt p0
+    p0 = self.intersection(ray) #Auftreffpunkt p0
+    surface_norm = p0 - center #Normale auf Spiegeloberfläche in p0
     surface_norm *= 1/np.linalg.norm(surface_norm) #normieren
     ray2.normal = ray.normal - 2*np.sum(ray.normal*surface_norm)*surface_norm
     ray2.pos = p0
@@ -257,18 +352,18 @@ class Stripe_mirror(Curved_Mirror):
     self.height = 10
     self.freecad_model = model_stripe_mirror
     self.set_mount_to_default()
-    
+
   def set_mount_to_default(self):
     smm = Stripe_Mirror_Mount(mirror_thickness=self.thickness)
     smm.set_geom(self.get_geom())
     # smm.pos += self.normal * self.thickness
     self.Mount = smm
-    
+
   def update_draw_dict(self):
     super().update_draw_dict()
     self.draw_dict["height"] = self.height
     self.draw_dict["model_type"] = "Stripe"
-    
+
 def stripe_mirror_draw_test():
   sm = Stripe_mirror()
   sm.pos = (130, 89, 120)
@@ -284,7 +379,7 @@ def stripe_mirror_draw_test():
 #     super().__init__(**kwargs)
 #     self.freecad_model = model_rooftop_mirror
 #     self.set_mount_to_default()
-    
+
 #   def set_mount_to_default(self):
 #     smm = Rooftop_Mirror_Mount()
 #     smm.set_geom(self.get_geom())
@@ -294,7 +389,7 @@ def stripe_mirror_draw_test():
 #   def update_draw_dict(self):
 #     super().update_draw_dict()
 #     self.draw_dict["dia"] = self.aperture
-#     self.draw_dict["model_type"] = "Rooftop"    
+#     self.draw_dict["model_type"] = "Rooftop"
 
 
 # def Rooftop_mirror_draw_test():
@@ -308,16 +403,16 @@ def stripe_mirror_draw_test():
 
   # def set_mount_to_default(self):
   #   self.mount = Composed_Mount()
-    
+
     # self.mount.set_geom(self.get_geom())
-  
+
   # def _update_mount_dict(self):
   #   super()._update_mount_dict()
   #   self.mount_dict["model"] = "Stripe mirror mount"
   #   self.mount_dict["name"] = self.name + "_mount"
   #   # self.mount_dict["aperture"] = self.aperture
   #   self.mount_dict["thickness"] = self.thickness
-  
+
   # def draw_fc(self):
   #   self.update_draw_dict()
   #   self.draw_dict["dia"]=self.aperture
@@ -327,12 +422,12 @@ def stripe_mirror_draw_test():
   #   self.draw_dict["model_type"] = "Stripe"
   #   obj = model_mirror(**self.draw_dict)
   #   return obj
-  
+
   # def __repr__(self):
   #   n = len(self.class_name())
   #   txt = 'Stripe_mirror(' + super().__repr__()[n+1::]
   #   return txt
-  
+
   # def draw_mount(self):
   #   # self.update_mount()
   #   self._update_mount_dict()
@@ -356,7 +451,7 @@ class Cylindrical_Mirror(Stripe_mirror):
     radius: The curvature of the mirror
     height: The vertical thickness of the mirror
     thickness: The horizontal thickness of the mirror
-  The default mirror is placed horizontally, which means the cylinder_center 
+  The default mirror is placed horizontally, which means the cylinder_center
   points tp the z-axis. Use rotate function if you want to rotate the mirror.
   """
   def __init__(self, radius=200,height=10, thickness=25, **kwargs):
@@ -375,7 +470,7 @@ class Cylindrical_Mirror(Stripe_mirror):
   @radius.setter
   def radius(self, x):
     """
-    This part is incorrect. Since I don't know the matrix of Cylindrical_Mirror 
+    This part is incorrect. Since I don't know the matrix of Cylindrical_Mirror
     Parameters
     ----------
     x : TYPE
@@ -427,8 +522,8 @@ class Cylindrical_Mirror(Stripe_mirror):
   #   # vec = default.cross(zz)
   #   # rotate(obj, vec, angle, off0=0)
   #   return obj
-  
-  def next_ray_tracing(self, ray):
+
+  def next_ray(self, ray):
     """
     erzeugt den nächsten Ray auf Basis der analytischen Berechung von Schnitt-
     punkt von Sphere mit ray und dem vektoriellen Reflexionsgesetz
@@ -454,7 +549,7 @@ class Cylindrical_Mirror(Stripe_mirror):
     ray_direction = ray2.normal
     cylinder_center = center
     cylinder_axis = zz
-    
+
     ray_origin = np.array(ray_origin)
     ray_direction = np.array(ray_direction)
     cylinder_center = np.array(cylinder_center)
@@ -464,8 +559,8 @@ class Cylindrical_Mirror(Stripe_mirror):
     a = np.dot(middle_vec2 , middle_vec2)
     b = 2 * np.dot(middle_vec2 , middle_vec)
     c = np.dot(middle_vec , middle_vec) - self.radius **2
-    
-    
+
+
     # Compute discriminant
     discriminant = b**2 - 4 * a * c
 
@@ -494,11 +589,11 @@ class Cylindrical_Mirror(Stripe_mirror):
     else:
       t = min(t1, t2)
     # Compute intersection point
-    
+
     intersection_point = ray_origin + ray_direction * t
     p0 = intersection_point
     new_center = cylinder_center + cylinder_axis * (np.dot(p0,cylinder_axis)-np.dot(cylinder_center,cylinder_axis))
-    surface_norm = p0 - new_center #Normale auf Spiegeloberfläche in p0 
+    surface_norm = p0 - new_center #Normale auf Spiegeloberfläche in p0
     surface_norm *= 1/np.linalg.norm(surface_norm) #normieren
     #Reflektionsgesetz
     # print(cylinder_center,new_center)
@@ -508,7 +603,7 @@ class Cylindrical_Mirror(Stripe_mirror):
     ray.length=np.sqrt(dist[0]**2+dist[1]**2+dist[2]**2)
     return ray2
 
-  
+
 class Cylindrical_Mirror1(Cylindrical_Mirror):
   @property
   def radius(self):
@@ -516,7 +611,7 @@ class Cylindrical_Mirror1(Cylindrical_Mirror):
   @radius.setter
   def radius(self, x):
     """
-    This part is incorrect. Since I don't know the matrix of Cylindrical_Mirror 
+    This part is incorrect. Since I don't know the matrix of Cylindrical_Mirror
     Parameters
     ----------
     x : TYPE
@@ -534,7 +629,7 @@ class Cylindrical_Mirror1(Cylindrical_Mirror):
 
    # obj = model_mirror(**self.draw_dict)
    # return obj
- 
+
  # def draw_mount(self):
    # self.update_mount()
    # if self.Mount.elm_type != "dont_draw":
@@ -548,11 +643,11 @@ class Cylindrical_Mirror1(Cylindrical_Mirror):
    #   self.Mount.model = self.mount_dict['model']
    #   self.Mount.post_type = self.mount_dict["post_type"]
    # return (self.Mount.draw())
- 
+
  # def draw_mount_fc(self):
    # self.update_draw_dict()
    # self.draw_dict["dia"]=self.aperture
-   # now we will use the old geom definition with (pos, norm) in a dirty, 
+   # now we will use the old geom definition with (pos, norm) in a dirty,
    # hacky way, because I don't want to fix the 10.000 usages of geom in
    # the mirror_mount function manually, no, I don't
    # helper_dict = dict(self.draw_dict)

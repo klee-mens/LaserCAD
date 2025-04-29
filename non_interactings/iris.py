@@ -5,32 +5,20 @@ Created on Sat Aug 19 13:12:01 2023
 @author: mens
 """
 
-from ..freecad_models import model_iris_diaphragms,iris_post
-# from ..basic_optics import Component
-from LaserCAD.basic_optics.component import Component
+from ..freecad_models.utils import load_STL, thisfolder
+from ..basic_optics import Component, Composed_Mount
 
 
 class Iris(Component):
 
-  def __init__(self, dia = 20, name = "New_iris_diaphragms",**kwargs):
-    super().__init__(name=name, **kwargs)
-    self.aperture = dia
-    self.draw_dict["thickness"] = 5
-    self.draw_dict["Radius1"] = dia/2
-    self.draw_dict["Radius2"] = 25
-    self.draw_dict["height"] = dia/2 + 10
+  def __init__(self, name = "New_iris", **kwargs):
+    super().__init__(name, **kwargs)
+    stl_file=thisfolder+"misc_meshes/Iris_ID12M.stl"
+    self.draw_dict["stl_file"]=stl_file
+    self.draw_dict["color"]=(33/255, 33/255, 33/255)
+    self.freecad_model = load_STL
+    self.distance_to_post = 12.8
+    self.set_mount(Composed_Mount(unit_model_list=["0.5inch_post"]))
+    self.Mount.pos += (-2, 0, -self.distance_to_post)
 
-
-  def draw_fc(self):
-    self.update_draw_dict()
-    return model_iris_diaphragms(**self.draw_dict)
-
-  def draw_mount_fc(self):
-    return iris_post(**self.draw_dict)
-
-  def __repr__(self):
-    n = len(self.Klassenname())
-    txt = 'Iris(dia=' + repr(self.aperture)
-    txt += ', ' + super().__repr__()[n+1::]
-    return txt
 

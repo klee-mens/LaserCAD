@@ -69,9 +69,10 @@ class Rooftop_Mirror_Component(Component):
   but does not actually interact with the beam. It sits in the middle between
   the two invisible mirrors of the real RoofTopMirror Composition.
   """
-  def __init__(self, **kwargs):
+  def __init__(self, aperture=25.4,**kwargs):
     super().__init__(**kwargs)
     self.freecad_model = model_rooftop_mirror
+    self.aperture = aperture
     self.set_mount_to_default()
     
   def set_mount_to_default(self):
@@ -114,7 +115,7 @@ def Make_RoofTop_Mirror(name="RoofTopMirror", height=20, up=True):
   m1.invisible = True
   m2.invisible = True
 
-  pure_cosmetic = Rooftop_Mirror_Component(name="RoofTop_Mirror")
+  pure_cosmetic = Rooftop_Mirror_Component(name="RoofTop_Mirror",aperture=height)
   if up:
     pure_cosmetic.pos += (0,0,height/2)
   else:

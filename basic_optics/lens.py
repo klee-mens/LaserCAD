@@ -29,7 +29,7 @@ class Lens(Opt_Element):
       self._matrix[1,0] = -1/x
 
   def next_ray(self, ray):
-    return self.refraction(ray)
+    return self.ABCD_refraction(ray)
 
   def update_draw_dict(self):
     super().update_draw_dict()

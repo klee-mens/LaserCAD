@@ -12,3 +12,4 @@ from .type_I_Amplifier import Make_Amplifier_Typ_I_Mirror, Make_Amplifier_Typ_I_
 from .type_II_Amplifier import Make_Amplifier_Typ_II_simple, Make_Amplifier_Typ_II_Mirror
 from .type_II_Amplifier import Make_Amplifier_Typ_II_UpDown
 from .white_cell import Make_White_Cell
+from .compressor import Make_Compressor

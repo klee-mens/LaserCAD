@@ -4,15 +4,6 @@ Created on Thu Jun 22 10:53:52 2023
 
 @author: 12816
 """
-
-import sys
-pfad = __file__
-pfad = pfad.replace("\\","/") #folder conventions windows linux stuff
-pfad = pfad.lower()
-ind = pfad.rfind("lasercad")
-pfad = pfad[0:ind-1]
-if not pfad in sys.path:
-  sys.path.append(pfad)
 from LaserCAD.moduls import Make_Amplifier_Typ_I_simple,Make_Amplifier_Typ_I_Mirror
 from LaserCAD.moduls import Make_Amplifier_Typ_II_simple,Make_Amplifier_Typ_II_Mirror
 from LaserCAD.moduls import Make_Amplifier_Typ_II_UpDown
@@ -47,6 +38,9 @@ if __name__ == "__main__":
   # Amplifter_Typ_II_test()
   from LaserCAD.moduls.type_II_Amplifier import Make_Amplifier_Typ_II_plane
   amp = Make_Amplifier_Typ_II_plane(roundtrips2=2)
+  from LaserCAD.basic_optics import Beam
+  # amp._lightsource = Beam(radius=10)
+  # amp._lightsource.draw_dict["model"] = "ray_group"
   amp.draw()
 
 if freecad_da:

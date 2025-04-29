@@ -411,7 +411,8 @@ class Geom_Object(object):
     by text, returns the text as str
     """
     self.update_draw_dict()
-    txt = "The geometric object <" + self.class_name() + ":" + self.name
+    # txt = "The geometric object <" + self.class_name() + ":" + self.name
+    txt = "<" + self.class_name() + ":" + self.name
     txt += "> is drawn to the position"
     txt += vec2str(self.pos) + " with the direction " + vec2str(self.normal)
     return txt

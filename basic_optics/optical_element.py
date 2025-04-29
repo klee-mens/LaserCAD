@@ -37,8 +37,33 @@ class Opt_Element(Component):
     self._matrix = np.eye(2)
     self.length = 0 #Länge in mm, die meisten opt Elemente sind 2D, also 0
 
-  def matrix(self):
+  def matrix(self, inray=Ray()):
     return np.array(self._matrix)
+
+  def kostenbauder(self, inray=Ray()):
+    kmatrix = np.eye(4)
+    kmatrix[0:2, 0:2] = self.matrix(inray=inray)
+    return np.array(kmatrix)
+
+  def intersection(self, ray):
+    """
+    ermittelt den Schnittpunkt vom Strahl mit der ebene eines opt Elements
+
+    Parameters
+    ----------
+    element : Geom_Object
+      Element mit dessen Ebene der Schnittpunkt berechnet wird
+
+    Returns
+    -------
+    endpoint
+
+    """
+    # delta_p = self.pos - ray.pos 
+    # s = np.sum(delta_p*ray.normal) / np.sum(self.normal * ray.normal)
+    # ray.length = s
+    # return ray.endpoint()
+    return ray.intersection(self)
 
   def next_ray(self, ray):
     """
@@ -56,37 +81,37 @@ class Opt_Element(Component):
 
   def just_pass_through(self, ray):
     ray2 = deepcopy(ray)
-    ray2.pos = ray.intersect_with(self) #dadruch wird ray.length verändert(!)
+    ray2.pos = self.intersection(ray) #dadruch wird ray.length verändert(!)
     return ray2
 
-  def reflection(self, ray):
-    """
-    erzeugt den nächsten Strahl aus <Ray> mit Hilfe des Reflexionsgesetzes
-    (man beachte die umgedrehte <normal> im Gegensatz zur Konvention in z.B.
-    Springer Handbook of Optics and Lasers S. 68)
+  # def reflection(self, ray):
+  #   """
+  #   erzeugt den nächsten Strahl aus <Ray> mit Hilfe des Reflexionsgesetzes
+  #   (man beachte die umgedrehte <normal> im Gegensatz zur Konvention in z.B.
+  #   Springer Handbook of Optics and Lasers S. 68)
 
-    Parameters
-    ----------
-    ray : Ray()
-      incident ray
+  #   Parameters
+  #   ----------
+  #   ray : Ray()
+  #     incident ray
 
-    Returns
-    -------
-    reflected ray
-    """
+  #   Returns
+  #   -------
+  #   reflected ray
+  #   """
+  #   ray2 = deepcopy(ray)
+  #   ray2.pos = self.intersection(ray) #dadruch wird ray.length verändert(!)
+  #   k = ray2.normal
+  #   km = -self.normal
+  #   scpr = np.sum(km*k)
+  #   newk = k-2*scpr*km
+  #   ray2.normal = newk
+  #   # print("REFL", k, km, scpr, newk, ray2.normal)
+  #   return ray2
+
+  def ABCD_refraction(self, ray):
     ray2 = deepcopy(ray)
-    ray2.pos = ray.intersect_with(self) #dadruch wird ray.length verändert(!)
-    k = ray2.normal
-    km = -self.normal
-    scpr = np.sum(km*k)
-    newk = k-2*scpr*km
-    ray2.normal = newk
-    # print("REFL", k, km, scpr, newk, ray2.normal)
-    return ray2
-
-  def refraction(self, ray):
-    ray2 = deepcopy(ray)
-    ray2.pos = ray.intersect_with(self) #dadruch wird ray.length verändert(!)
+    ray2.pos = self.intersection(ray) #dadruch wird ray.length verändert(!)
     norm = ray2.normal
     radial_vec = ray2.pos - self.pos
     radius = np.linalg.norm(radial_vec) #Radius im sinne der parax Optik

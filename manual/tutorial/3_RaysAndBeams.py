@@ -18,6 +18,7 @@ if not pfad in sys.path:
   sys.path.append(pfad)
 
 from LaserCAD.basic_optics import Mirror, Curved_Mirror, Lens, Beam, Ray, Gaussian_Beam
+from LaserCAD.basic_optics import SquareBeam,CircularRayBeam, RainbowBeam
 from LaserCAD.freecad_models import freecad_da, clear_doc, setview
 
 # =============================================================================
@@ -59,12 +60,12 @@ b1.draw()
 print()
 print()
 
-b2 = Beam()
+b2 = SquareBeam()
 b2.pos += (0,-100,0)
 b2.make_square_distribution(10)
 b2.draw()
 
-b3 = Beam()
+b3 = CircularRayBeam()
 b3.pos += (0,-200,0)
 b3.make_circular_distribution(5)
 b3.draw()
@@ -73,6 +74,10 @@ b4 = Gaussian_Beam()
 b4.pos += (0,-300,0)
 b4.draw()
 
+b6= RainbowBeam(spatial_chirp=1E-15)
+# b6.make_rainbow_distribution(spatial_chirp=0.1)
+b6.pos += (0,-400,0)
+b6.draw()
 
 """
 Now let's have a look at the inner structure of the beam

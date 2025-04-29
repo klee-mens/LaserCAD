@@ -18,53 +18,253 @@ class Grating(Opt_Element):
   """
   Klasse für Gitter
   """
-  def __init__(self, grat_const=0.005, order=1, **kwargs):
+  def __init__(self, grat_const=0.005, order=-1, **kwargs):
     self.height = 60
     self.thickness = 8
     super().__init__(**kwargs)
-    self.grating_constant = grat_const
+    self.grating_constant = grat_const # lines per millimeter
     self.width = 50
     self.diffraction_order = order
+    self.G = 2*np.pi / self.grating_constant * self.get_coordinate_system()[1] 
     self.update_draw_dict()
     self.freecad_model = model_grating
     self.set_mount_to_default()
 
-  def next_ray(self, ray, order=None):
+  # def next_ray(self, ray, order=None):
+  #   """
+  #   Beugung entsprechend des Gittergesetzes g(sinA + sinB) = m*lam
+  #   m = order
+  #   """
+  #   if order == None:
+  #     order = self.diffraction_order
+  #   norm, gratAx, sagit = self.get_coordinate_system() # Normale, Gitterachse, Sagitalvector
+  #   norm *= -1 #selbe Konvention wie beim Spiegel, 1,0,0 heißt Reflektion von 1,0,0
+  #   gratAx *= -1 #selbe Konvention wie beim Spiegel, 1,0,0 heißt Reflektion von 1,0,0
+  #   r1 = ray.normal #einfallender Strahl
+  #   pos = ray.intersection(self)
+  #   sagital_component = np.sum(r1 * sagit)
+  #   sinA = np.sum( sagit * np.cross(r1, norm) )
+  #   sinB = order * ray.wavelength/ self.grating_constant - sinA
+  #   if abs(sinB)>1:
+  #     ray2 = self.reflection(ray)
+  #     print("Warning, there is no diffraction of this order, retun next ray as a reflection")
+  #     return ray2
+  #   ray2 = deepcopy(ray)
+  #   ray2.name = "next_" + ray.name
+  #   ray2.pos = pos
+  #   ray2.normal = (np.sqrt(1-sinB**2) * norm + sinB * gratAx) * np.sqrt(1-sagital_component**2) + sagital_component * sagit
+  #   k_prop = np.cross(norm,np.cross(ray.normal*2*np.pi/ray.wavelength,norm))
+  #   k_p_out = k_prop+order*2*np.pi/self.grating_constant*gratAx
+  #   k_r = k_p_out + abs(np.sqrt((2*np.pi/ray.wavelength)**2-np.linalg.norm(k_p_out)**2))*norm
+  #   n_r = k_r/np.linalg.norm(k_r)
+  #   ray2.normal = n_r
+  #   return ray2
+  
+  def next_ray(self, ray, alternative_order=None):
     """
-    Beugung entsprechend des Gittergesetzes g(sinA + sinB) = m*lam
-    m = order
+    computes the diffracted beam by adding <diffraction_order> times a
+    reciprocal grating vector to the parallel wave vector
+    computes the diffraction in an alternative_order if given
+    if there is now diffraction in this order, it gives out a standard Ray()
+    and a warning, which should definitely be seen in the model as a huge error
+
+    Parameters
+    ----------
+    ray : TYPE
+      DESCRIPTION.
+    alternative_order : TYPE, optional
+      DESCRIPTION. The default is None.
+
+    Returns
+    -------
+    ray2 : TYPE
+      DESCRIPTION.
+
     """
-    if order == None:
-      order = self.diffraction_order
-    norm, gratAx, sagit = self.get_coordinate_system() # Normale, Gitterachse, Sagitalvector
-    norm *= -1 #selbe Konvention wie beim Spiegel, 1,0,0 heißt Reflektion von 1,0,0
-    gratAx *= -1 #selbe Konvention wie beim Spiegel, 1,0,0 heißt Reflektion von 1,0,0
-    r1 = ray.normal #einfallender Strahl
-    pos = ray.intersect_with(self)
-    sagital_component = np.sum(r1 * sagit)
-    sinA = np.sum( sagit * np.cross(r1, norm) )
-    sinB = order * ray.wavelength/ self.grating_constant - sinA
     ray2 = deepcopy(ray)
-    ray2.name = "next_" + ray.name
-    ray2.pos = pos
-    ray2.normal = (np.sqrt(1-sinB**2) * norm + sinB * gratAx) * np.sqrt(1-sagital_component**2) + sagital_component * sagit
-    k_prop = np.cross(norm,np.cross(ray.normal*2*np.pi/ray.wavelength,norm))
-    k_p_out = k_prop+order*2*np.pi/self.grating_constant*gratAx
-    k_r = k_p_out + abs(np.sqrt((2*np.pi/ray.wavelength)**2-np.linalg.norm(k_p_out)**2))*norm
-    n_r = k_r/np.linalg.norm(k_r)
-    ray2.normal = n_r
+    intersec = ray.intersection(self)
+    ray2.pos = intersec
+    
+    if alternative_order:
+      m = alternative_order
+    else:
+      m = self.diffraction_order
+    
+    # reciprocal grating vector G perpindicular to lines, by default parallel to y-axis
+    G = 2*np.pi / self.grating_constant * self.get_coordinate_system()[1]    
+    k1 = ray.normal * 2 * np.pi / ray.wavelength # wave vector 1
+    k1p = k1 - self.normal * np.sum(k1 * self.normal) # k1 in grating plane, = nx(k1xn)
+    direction_sign = np.sign(np.sum(k1p * G) + 1e-12) # +1 if G and k1p in same direction
+    k2p = k1p + m * direction_sign * G
+    if np.linalg.norm(k2p) > np.linalg.norm(k1):
+      print("Warning, there is no diffraction of this order, return next ray as Ray()")
+      return Ray()
+    k2 = k2p - self.normal * np.sqrt(np.sum(k1*k1) - np.sum(k2p * k2p))
+    ray2.normal = k2 
     return ray2
+
+  
+    # def next_ray(self, ray, alternative_order=None):
+    #   """
+    #   computes the diffracted beam by adding <diffraction_order> times a
+    #   reciprocal grating vector to the parallel wave vector
+    #   computes the diffraction in an alternative_order if given
+    #   if there is now diffraction in this order, it gives out a standard Ray()
+    #   and a warning, which should definitely be seen in the model as a huge error
+  
+    #   Parameters
+    #   ----------
+    #   ray : TYPE
+    #     DESCRIPTION.
+    #   alternative_order : TYPE, optional
+    #     DESCRIPTION. The default is None.
+  
+    #   Returns
+    #   -------
+    #   ray2 : TYPE
+    #     DESCRIPTION.
+    #   """
+    #   ray2 = deepcopy(ray)
+    #   intersec = ray.intersection(self)
+    #   ray2.pos = intersec
+      
+    #   if alternative_order:
+    #     m = alternative_order
+    #   else:
+    #     m = self.diffraction_order
+      
+    #   # reciprocal grating vector G perpindicular to lines, by default parallel to y-axis
+    #   G = 2*np.pi / self.grating_constant * self.get_coordinate_system()[1]    
+    #   k1 = ray.normal * 2 * np.pi / ray.wavelength # wave vector 1
+    #   k1p = k1 - self.normal * np.sum(k1 * self.normal) # k1 in grating plane, = nx(k1xn)
+    #   direction_sign = np.sign(np.sum(k1p * G) + 1e-12) # +1 if G and k1p in same direction
+    #   k2p = k1p + m * direction_sign * G
+    #   if np.linalg.norm(k2p) > np.linalg.norm(k1):
+    #     print("Warning, there is no diffraction of this order, return next ray as Ray()")
+    #     return Ray()
+    #   k2 = k2p - self.normal * np.sqrt(np.sum(k1*k1) - np.sum(k2p * k2p))
+    #   ray2.normal = k2 
+    #   return ray2
+
 
   def update_draw_dict(self):
     super().update_draw_dict()
     self.draw_dict["dimensions"] = (self.width, self.height, self.thickness)
-  
+
   def set_mount_to_default(self):
     smm = Grating_Mount(height=self.height,thickness=self.thickness)
     smm.set_geom(self.get_geom())
     self.Mount = smm
 
+  def angle_of_incidence(self, ray=Ray()):
+    """
+    calulates the AOI of an incident or outgoing ray
+    The angle is defined as the angle to the normal of the grating, the ray
+    is projected in a plane of the grating normal and the grating vector
+    (which is perpendicular to its lines/grooves)
 
+    Parameters
+    ----------
+    ray : Ray
+      incident or outgoing ray
+
+    Returns
+    -------
+    anlge in radiants, can be between -pi/2 to plus pi/2
+    """
+    xvec, yvec, zvec = self.get_coordinate_system()
+    rx = np.sum( ray.normal * xvec )
+    ry = np.sum( ray.normal * yvec )
+    # rz = np.sum( ray.normal * zvec )
+    return np.arctan(ry / rx) # only in plane with normal and grat vector (perp to lines)
+    # return np.arctan(np.abs(rx / ry)) # only in plane with normal and grat vector (perp to lines)
+
+  def matrix(self, inray=Ray()):
+    # optical matrix, see https://www.brown.edu/research/labs/mittleman/sites/brown.edu.research.labs.mittleman/files/uploads/lecture11.pdf
+    omatrix = np.eye(2)
+    angleIN = self.angle_of_incidence(inray)
+    try:
+      outray = self.next_ray(inray)
+    except:
+      outray = Ray()
+      print("Irgendwas bei Matrix Gitter Berechnung falsch gelaufen")
+    angleOUT = self.angle_of_incidence(outray)
+    A = np.cos(angleOUT) / np.cos(angleIN)
+    # A = np.sin(angleOUT) / np.sin(angleIN)
+    A *= 1 #??? Steht so in den Folien
+    omatrix[0,0] = A
+    omatrix[1,1] = 1/A
+    return omatrix
+
+
+
+  def kostenbauder(self, inray=Ray()):
+    # kostenbauder matrix, see https://www.brown.edu/research/labs/mittleman/sites/brown.edu.research.labs.mittleman/files/uploads/lecture11.pdf
+    kmatrix = np.eye(4)
+    aoi = self.angle_of_incidence(inray)
+    # angleIN = aoi + np.pi/2 if aoi < 0 else aoi
+    # angleIN = aoi + np.pi if aoi < 0 else aoi
+    angleIN = aoi
+
+    # aoi = self.angle_to(inray)
+    # angleIN = np.pi/2 - aoi if aoi > 0 else aoi
+    # angleIN = np.pi/2 - aoi
+    # angleIN = np.abs(angleIN)
+    try:
+      outray = self.next_ray(inray)
+    except:
+      outray = Ray()
+      print("Irgendwas bei Matrix Gitter Berechnung falsch gelaufen")
+    # aoo = outray.angle_to(self)
+    # angleOUT = np.pi/2 + aoo if aoo > 0 else aoo #?1
+    # angleOUT = 90 + aoo
+    # angleOUT = np.abs(angleOUT)
+    # angleOUT = np.pi - angleOUT
+    theta = inray.wavelength/self.grating_constant
+    # angleOUT = np.arccos(np.cos(angleIN) + theta)
+    angleOUT = np.arcsin(theta*self.diffraction_order - np.sin(angleIN))
+
+    # angleOUT = self.angle_of_incidence(outray)
+    A = np.cos(angleOUT) / np.cos(angleIN)
+    # A = np.sin(angleOUT) / np.sin(angleIN)
+    A *= -1 #??? Steht so in den Folien
+    c = 299792458 * 1e3 # speed of light in mm / s
+    # c = 299792458 # speed of light in m / s
+    # c = 299792458 * 1e-12 # speed of light in mm / fs
+
+    kmatrix[0,0] = A
+    kmatrix[1,1] = 1/A
+    
+    # wl = inray.wavelength * 1e-3 # wavelength in m
+    # sign_factor = np.sign( np.sum(self.get_coordinate_system()[2] * inray.get_coordinate_system()[2] ) * np.sum(self.get_coordinate_system()[1] * inray.get_coordinate_system()[1] ))
+    # sign_factor = np.sign( np.sum(self.get_coordinate_system()[2] * inray.get_coordinate_system()[2] ) * np.sum(self.get_coordinate_system()[1] * inray.get_coordinate_system()[1] ))
+    sign_factor_y = np.sign( np.sum(self.get_coordinate_system()[1] * inray.get_coordinate_system()[1] ))
+    sign_factor_z = np.sign( np.sum(self.get_coordinate_system()[2] * inray.get_coordinate_system()[2] ))
+    wl = inray.wavelength * 1 # wavelength in mm
+    D = inray.wavelength**2 / (c * self.grating_constant * np.cos(angleOUT)) * -1 * self.diffraction_order
+    # D = inray.wavelength * (np.sin(angleOUT) - np.sin(angleIN)) / (c * np.cos(angleOUT))
+    # D = - wl * (np.sin(angleOUT) + np.sin(angleIN)) / (c * np.cos(angleOUT))
+    # kmatrix[1,3] = inray.wavelength * (np.cos(angleOUT) - np.cos(angleIN)) / (c * np.sin(angleOUT))
+    # kmatrix[2,0] = (np.cos(angleIN) - np.cos(angleOUT)) / (c * np.sin(angleIN))
+
+    kmatrix[1,3] = D 
+    kmatrix[2,0] = A*D / wl
+
+    print()
+    print("AlphaIN =", angleIN*180/np.pi)
+    print("AlphaOUT =", angleOUT*180/np.pi)
+    print("A, 1/A", A, 1/A)
+    print("D, D*A", D, A*D)
+    print("SignFactorY", sign_factor_y)
+    print("SignFactorZ", sign_factor_z)
+    # print("sinIN =", np.sin(angleIN),"AlphaIN =", angleIN*180/np.pi)
+    # print("sinOUT =", np.sin(angleOUT), "AlphaOUT =", angleOUT*180/np.pi)
+    # print("cosIN =", np.cos(angleIN))
+    # print("cosOUT =", np.cos(angleOUT))
+    print()
+
+    self._kostenbauder = kmatrix
+    return kmatrix
 
 def grating_test1():
   grat = Grating()

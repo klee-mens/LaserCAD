@@ -10,7 +10,13 @@ Created on Tue Jul 11 13:15:19 2023
 import sys
 import os
     
-sys.path.append('E:\Programme\Spyder\pkgs')
+pfad = __file__
+pfad = pfad.replace("\\","/") #folder conventions windows linux stuff
+pfad = pfad.lower()
+ind = pfad.rfind("lasercad")
+pfad = pfad[0:ind-1]
+if not pfad in sys.path:
+  sys.path.append(pfad)
 
 from LaserCAD import basic_optics
 

@@ -11,7 +11,7 @@ Created on Tue Jul 11 15:14:57 2023
 >>>>>>> he_experimantal
 """
 
-from . import basic_optics
-from . import freecad_models
-from . import moduls
-from . import tests
+# from . import basic_optics
+# from . import freecad_models
+# from . import moduls
+# from . import tests

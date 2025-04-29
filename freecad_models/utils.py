@@ -244,7 +244,7 @@ def update_geom_info(obj, geom_info, off0=0):
 
 
 def load_STL(stl_file, name="new_mesh", geom=None, off0=0,
-             color=(0.90,0.90,0.90), **kwargs):
+             color=(0.90,0.90,0.90), transparency=0, **kwargs):
   if "dont_draw" in stl_file:
     return None
   DOC = get_DOC()
@@ -253,6 +253,7 @@ def load_STL(stl_file, name="new_mesh", geom=None, off0=0,
   obj.Label = name
   update_geom_info(obj, geom, off0)
   obj.ViewObject.ShapeColor = color
+  obj.ViewObject.Transparency = transparency
   ##DOC.recompute()
   return obj
 
