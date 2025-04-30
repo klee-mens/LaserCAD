@@ -22,8 +22,8 @@ pfad = pfad[0:ind-1]
 ind = pfad.rfind("/")
 pfad = pfad[0:ind]
 if not pfad in sys.path:
+  print(pfad)
   sys.path.append(pfad)
-
 
 from LaserCAD.freecad_models import clear_doc, setview, freecad_da,add_to_composition
 from LaserCAD.basic_optics import Mirror, Beam, Composition, Component, inch, Curved_Mirror, Ray, Geom_Object
@@ -40,11 +40,14 @@ if freecad_da:
 def rad(angle):
     return np.pi/180*angle
 
+def deg(angle):
+    return 180/np.pi*angle
+
 def dont():
     return None
 
 def get_TFP_distances(TFP_ydist, TFP_angle):
-    TFP_xdist = TFP_ydist*np.tan(rad(2*TFP_angle-90))
+    TFP_xdist = TFP_ydist*np.tan(TFP_angle)
     TFP_dist = np.sqrt(TFP_ydist**2 + TFP_xdist**2)
     TFP_delta = TFP_dist - TFP_ydist - TFP_xdist
     
@@ -124,72 +127,97 @@ beam = Beam(radius=5, angle=0)
 beam.pos=[0,0,0]
 
 if UsePolRotator:
-    g = 350 # object distance
+    g = 350 # object distance: distance between the pump region and the first curved mirror
     length_diff = 192.066 - PD_length
     if UseNormalDesign: g -= 20
 else: 
-    g = 450
+    g = 550
     length_diff = 0
     if UseNormalDesign: g-=100
 
+# Calculation of the image distance
 b = ((f1-g)*f2**2 + f1**2 * f2) / (f1**2)
 
+
+pump_angle = 90   # input-output angle on the pump mirrors, standard: 90
 tele_angle1 = 5   # opening angle for coupling into telescope
-tele_angle2 = 3   # opening angle for couling into telescope
-tele_cut_d1 = 150 # cut mirror x-distance from spherical mirrors
-tele_cut_d2 = 400 # cut mirror y-distance from spherical mirrors
+tele_angle2 = 5   # opening angle for couling into telescope
 
-tele_cut_dist1 = tele_cut_d1 / np.cos(rad(tele_angle1)) # propagation distance to first spherical mirror
-tele_cut_dist2 = tele_cut_d2 / np.cos(rad(tele_angle2)) # propagation distance to first spherical mirror
+xdist_R2_M1 = 300 # cut mirror x-distance from spherical mirrors
+ydist_R2_M2 = 300 # cut mirror y-distance from spherical mirrors
 
-tele_cut_y1 = np.sqrt(tele_cut_dist1**2 - tele_cut_d1**2);
-tele_cut_y2 = np.sqrt(tele_cut_dist2**2 - tele_cut_d2**2);
+dist_R1_M1 = xdist_R2_M1 / np.cos(rad(tele_angle1)) # propagation distance to first spherical mirror
+dist_R2_M2 = ydist_R2_M2 / np.cos(rad(tele_angle2)) # propagation distance to second spherical mirror
+
+ydist_R1_M1 = np.sqrt(dist_R1_M1**2 - xdist_R2_M1**2)
+xdist_R2_M2 = np.sqrt(dist_R2_M2**2 - ydist_R2_M2**2)
 
 TFP_angle = 66
-alpha = rad(2*TFP_angle - 90)
-delta = 100 - length_diff # propagation difference to ideal imaging (after roundtrip)
+TFP_angle = rad(2*TFP_angle - 90)
 
-col_len = g + b + delta
+difference_to_ideal_imaging = 100 - length_diff # propagation difference to ideal imaging (after roundtrip)
+            
+cavity_length = f1 + f2 + g + b + difference_to_ideal_imaging           # total cavity length, g-object distance, b-image distance
+            
+pump_dist = 150    # 150            # length of pump section
+d1 = g-dist_R1_M1-pump_dist/2       # distance from P2 to M1
+d2 = 200                            # x-distance from M3 to TFP1
+dist_vacuum_tube = xdist_R2_M1 + 70
+
+x_correction_by_angled_pump = d1 * np.cos(rad(180-pump_angle))  
 
 if UseNormalDesign:
+    d2 /= 4
     TFP_ydist = 175
     TFP_dist, TFP_xdist, TFP_delta, TFP_Lam, Lam_PC, PC_TFP = get_TFP_distances(TFP_ydist, TFP_angle)
     
-    xdist = f1 + f2 - tele_cut_d1 - tele_cut_d2
-    ydist = 0.5*(col_len - TFP_delta - xdist - (tele_cut_dist1 + tele_cut_dist2 + tele_cut_y1 + tele_cut_y2))
+    xdist_P2_TFP1 = f1 + f2 - xdist_R2_M1 - ydist_R2_M2
+    ydist = 0.5*(cavity_length - TFP_delta - xdist_P2_TFP1 - (dist_R1_M1 + dist_R2_M2 + ydist_R1_M1 + xdist_R2_M2))
     M2 = Mirror(phi=-90-tele_angle2) # cut mirror 2
     M3 = Mirror(phi=90) # mirror to TFP1
     
 elif UseCompactDesign:
-    y = 100 
-    xdist = f1 + f2 + tele_cut_y2 - tele_cut_dist2 - tele_cut_d1
-    TFP_ydist = (col_len - xdist - (tele_cut_y1 + tele_cut_dist1) - tele_cut_d2) / (1 + 1/np.cos(alpha)- np.tan(alpha))
-    TFP_dist, TFP_xdist, TFP_delta, TFP_Lam, Lam_PC, PC_TFP = get_TFP_distances(TFP_ydist, TFP_angle)
+    # ydist: difference between beam y-position at the pump medium vs entrance TFP
+    # ydist_M2_M3: y-distance between M2 and M3
+    # ydist_P2_TFP1: y-distance between pump mirror P2 and TFP1
+    # xdist_P2_TFP1: x-distance between pump mirror P2 and TFP1
+    ydist_M2_M3 = 100
+    pump_angle_rad = rad(180-pump_angle)
     
-    ydist = TFP_ydist + y
+    # is 1 for a pump angle of 90°
+    pump_angle_correction_factor = 1/np.tan(pump_angle_rad) + 1/np.sin(pump_angle_rad)
+    
+    
+    ydist_P2_TFP1 = (d1 * np.sin(rad(180-pump_angle)) - ydist_R1_M1 - ydist_M2_M3) * pump_angle_correction_factor
+    xdist_P2_TFP1 = f1 + f2 + xdist_R2_M2 - dist_R2_M2 - xdist_R2_M1 + x_correction_by_angled_pump - pump_dist - d2
+    
+    distance_to_TFP1 = g + f1 + f2 + ydist_R2_M2 - ydist_M2_M3 + d2
+
+    TFP_ydist = (cavity_length - xdist_P2_TFP1 - distance_to_TFP1 - pump_dist/2 + ydist_P2_TFP1) / (1/np.cos(TFP_angle)- np.tan(TFP_angle) + pump_angle_correction_factor)
+    TFP_dist, TFP_xdist, TFP_delta, TFP_Lam, Lam_PC, PC_TFP = get_TFP_distances(TFP_ydist, TFP_angle)
+    print(f"TFP_ydist = {TFP_ydist}")
+    ydist = TFP_ydist + ydist_M2_M3
+    
     M2 = Mirror(phi=90-tele_angle2) # cut mirror 2
     M3 = Mirror(phi=-90) # mirror to TFP1
-    print(TFP_xdist)
 
 
-pump_dist = 100                         # length of pump section
-d1 = g-tele_cut_dist1-pump_dist/2       # distance from DM to cut mirror
-d2 = 50                                 # x-distance from M3 to TFP1
-if UseCompactDesign: d2 *= 4
-d3 = xdist - TFP_xdist - pump_dist - d2 # TFP2 to M4
-d4 = ydist - d1 + tele_cut_y1           # M4 to PM1
+d4 = (ydist - d1*np.sin(rad(180-pump_angle)) + ydist_R1_M1) / np.sin(rad(pump_angle))  # M4 to P1 (pump mirror 1)
+d3 = xdist_P2_TFP1 - TFP_xdist + d4 * np.cos(rad(180-pump_angle)) # TFP2 to M4
 
-P1 = Mirror(phi=-90)
-P2 = Mirror(phi=90)
+print(f"total length = {cavity_length}, distance_to_TFP1 = {distance_to_TFP1}, remainder = {cavity_length-distance_to_TFP1}, b = {b}, g={g}, Delta={difference_to_ideal_imaging}")
+print(f"TFP_dist = {TFP_dist}, TFP_xdist = {TFP_xdist}, xdist_P2_TFP1 = {xdist_P2_TFP1}, d3 = {d3}, d4={d4}")
+P1 = Mirror(phi=-pump_angle)
+P2 = Mirror(phi=pump_angle)
 PM1 = Mirror()  # pump mirror
 PM2 = Mirror()  # pump mirror 2
-M1 = Mirror(phi=-90-tele_angle1) # cut mirror 1
+M1 = Mirror(phi=-pump_angle-tele_angle1) # cut mirror 1
 
-M4 = Mirror(phi=90) # mirror after TFP2
+M4 = Mirror(phi=pump_angle) # mirror after TFP2
 R1 = Curved_Mirror(phi=-180+tele_angle1, radius=r1)
 R2 = Curved_Mirror(phi=-180+tele_angle2, radius=r2)
-TFP1 = Mirror(phi=-180+2*TFP_angle)
-TFP2 = Mirror(phi=180-2*TFP_angle)
+TFP1 = Mirror(phi=-90+deg(TFP_angle))
+TFP2 = Mirror(phi=90-deg(TFP_angle))
 
 
 Setup = Composition()
@@ -199,33 +227,34 @@ Setup.propagate(pump_dist/2)
 Setup.add_on_axis(P2)
 Setup.propagate(d1)
 Setup.add_on_axis(M1)
-Setup.propagate(tele_cut_dist1)
+Setup.propagate(dist_R1_M1)
 Setup.add_on_axis(R1)
-Setup.propagate(250)
+Setup.propagate(dist_vacuum_tube)
 Setup.add_on_axis(vacuum_tube)
 
 if UseNormalDesign:    
-    Setup.propagate(f1+f2-250)
+    Setup.propagate(f1+f2-dist_vacuum_tube)
     Setup.add_on_axis(R2)
-    Setup.propagate(tele_cut_dist2)
+    Setup.propagate(dist_R2_M2)
     Setup.add_on_axis(M2)
-    Setup.propagate(tele_cut_y2+ydist-TFP_ydist)
-    print(f"Image Distance = {tele_cut_dist2+tele_cut_y2+ydist-TFP_ydist + d2 + TFP_dist + d3+ d4 + pump_dist/2 - delta} = {b}")
+    Setup.propagate(xdist_R2_M2+ydist-TFP_ydist)
+    print(f"Image Distance = {dist_R2_M2+xdist_R2_M2+ydist-TFP_ydist + d2 + TFP_dist + d3+ d4 + pump_dist/2 - difference_to_ideal_imaging} = {b}")
     
 
 elif UseCompactDesign: 
-    Setup.propagate(f1+f2-250-tele_cut_dist2)
+    Setup.propagate(f1+f2-dist_vacuum_tube-dist_R2_M2)
     Setup.add_on_axis(M2)
-    Setup.propagate(tele_cut_dist2)
+    Setup.propagate(dist_R2_M2)
     Setup.add_on_axis(R2)
-    Setup.propagate(tele_cut_d2-y)
-    print(f"Image Distance = {tele_cut_d2-y+d2+TFP_dist+d3+d4+pump_dist/2 - delta} = {b}")
-    # Setup.propagate(tele_cut_d2-ydist+TFP_ydist)
+    Setup.propagate(ydist_R2_M2-ydist_M2_M3)
+    print(f"Image Distance = {ydist_R2_M2-ydist_M2_M3+d2+TFP_dist+d3+d4+pump_dist/2 - difference_to_ideal_imaging} = {b}")
+    # Setup.propagate(ydist_R2_M2-ydist+TFP_ydist)
 
     
 Setup.add_on_axis(M3)
 Setup.propagate(d2)
 Setup.add_on_axis(TFP1)
+
 Setup.propagate(TFP_Lam)
 # Polarisationsdreher %%%%%%%%%%%
 if UsePolRotator:
@@ -244,6 +273,9 @@ Setup.propagate(d4)
 Setup.add_on_axis(P1)
 Setup.propagate(pump_dist/2)
 
+
+print(f"optical path length = {Setup.optical_path_length()}, cavity length = {cavity_length}")
+
 P1.aperture = P2.aperture = TFP1.aperture = TFP2.aperture = 25.4*2
 for elements in Setup._elements:
   elements.set_mount_to_default()
@@ -258,22 +290,28 @@ Setup.draw()
 Pump Setup
 """
 
-focal_length1 = 125
-focal_length2 = 175
+focal_length1 = 150
+focal_length2 = 225
 
-beam1 = Beam(radius=7.5,angle=2.08*np.pi/180,wavelength=960E-6)
+pump_module_separation = 300
+pump_module_xoffset = 100
+pump_module_lens_dist = 100
+
+distance_lens_to_mirror = (2*focal_length2-pump_module_separation)/2
+
+beam1 = Beam(radius=7.5,angle=2.08*np.pi/180,wavelength=940E-6)
 beam1.draw_dict["color"] = (255/256,255/256,0.0)
 
-beam2 = Beam(radius=7.5,angle=2.08*np.pi/180,wavelength=960E-6)
+beam2 = Beam(radius=7.5,angle=2.08*np.pi/180,wavelength=940E-6)
 beam2.draw_dict["color"] = (255/256,255/256,0.0)
 
 Comp = Composition()
 Comp.set_light_source(beam1)
-Comp.pos -= (75+focal_length1,0,0)
+Comp.pos -= (pump_module_xoffset+focal_length1,0,0)
 
 Comp2 = Composition()
 Comp2.set_light_source(beam2)
-Comp2.pos -= (75+focal_length1,250,0)
+Comp2.pos -= (pump_module_xoffset+focal_length1,pump_module_separation,0)
 
 Laser_Head_in = Component()
 stl_file = thisfolder+"\misc_meshes\PM19_2.stl"
@@ -303,21 +341,21 @@ M2 = deepcopy(M1)
 # Comp.rotate((0,0,1), rotate_axis)
 Comp.pos += offset_axis
 Comp.add_on_axis(Laser_Head_in)
-Comp.propagate(75)
+Comp.propagate(pump_module_lens_dist)
 Comp.add_on_axis(lens1)
 Comp.propagate(focal_length1)
 
 Comp2.pos += offset_axis
 Comp2.add_on_axis(Laser_Head_out)
-Comp2.propagate(75)
+Comp2.propagate(pump_module_lens_dist)
 Comp2.add_on_axis(lens4)
-Comp2.propagate(300)
+Comp2.propagate(focal_length1+focal_length2)
 Comp2.add_on_axis(lens3)
-Comp2.propagate(50)
+Comp2.propagate(distance_lens_to_mirror)
 Comp2.add_on_axis(M2)
-Comp2.propagate(250)
+Comp2.propagate(pump_module_separation)
 Comp2.add_on_axis(M1)
-Comp2.propagate(50)
+Comp2.propagate(distance_lens_to_mirror)
 Comp2.add_on_axis(lens2)
 Comp2.propagate(focal_length2)
 # Laser_Head_out.normal = -Laser_Head_out.normal
