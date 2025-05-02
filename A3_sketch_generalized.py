@@ -159,7 +159,7 @@ difference_to_ideal_imaging = 100 - length_diff # propagation difference to idea
             
 cavity_length = f1 + f2 + g + b + difference_to_ideal_imaging           # total cavity length, g-object distance, b-image distance
             
-pump_dist = 150    # 150            # length of pump section
+pump_dist = 125    # 150            # length of pump section
 d1 = g-dist_R1_M1-pump_dist/2       # distance from P2 to M1
 d2 = 200                            # x-distance from M3 to TFP1
 dist_vacuum_tube = xdist_R2_M1 + 70
@@ -290,12 +290,12 @@ Setup.draw()
 Pump Setup
 """
 
-focal_length1 = 150
-focal_length2 = 225
+focal_length1 = 125
+focal_length2 = 250
 
 pump_module_separation = 300
-pump_module_xoffset = 100
-pump_module_lens_dist = 100
+pump_module_xoffset = focal_length1
+pump_module_lens_dist = focal_length1
 
 distance_lens_to_mirror = (2*focal_length2-pump_module_separation)/2
 
