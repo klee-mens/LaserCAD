@@ -18,8 +18,17 @@ class Component(Geom_Object):
   """
   def __init__(self, name="Component", **kwargs):
     super().__init__(name, **kwargs)
-    self.aperture = 1*inch # Aperture in mm for drawing, Mount and clipping (not yet implemented)
+    self._aperture = 1*inch # Aperture in mm for drawing, Mount and clipping (not yet implemented)
     self.thickness = 5 # Thickness in mm, importent for mount placing and drawing
+    self.set_mount_to_default()
+   
+  @property
+  def aperture(self):
+    return self._aperture
+  
+  @aperture.setter
+  def aperture(self, x):
+    self._aperture = x
     self.set_mount_to_default()
     
   def set_mount_to_default(self):
