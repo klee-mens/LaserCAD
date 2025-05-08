@@ -34,8 +34,6 @@ from LaserCAD.non_interactings import Faraday_Isolator, Pockels_Cell, Lambda_Pla
 from LaserCAD.basic_optics import Composed_Mount,Unit_Mount,Lens,Post
 from copy import deepcopy
 
-if freecad_da:
-  clear_doc()
 
 def rad(angle):
     return np.pi/180*angle
@@ -58,7 +56,7 @@ def get_TFP_distances(TFP_ydist, TFP_angle):
     return TFP_dist, TFP_xdist, TFP_delta, TFP_Lam, Lam_PC, PC_TFP
     
 rotate_axis = np.pi
-offset_axis = (-250,-300,0)
+offset_axis = (950,500,20+100)
 
 pockels_cell = Component()
 pockels_cell.draw_dict["stl_file"]= thisfolder+"\mount_meshes\A2_mounts\Pockels_cell.stl"
@@ -97,9 +95,9 @@ Pol_Rotator_elm.draw_dict["stl_file"]="dont_draw"
 Pol_Rotator_elm.freecad_model = load_STL
 Pol_Rotator_elm.Mount = Rotator_box
 
-PDM1 = Mirror()
-PDM2 = Mirror()
-PDM3 = Mirror()
+PDM1 = Mirror(name="Polarisationsdreher M1")
+PDM2 = Mirror(name="Polarisationsdreher M2")
+PDM3 = Mirror(name="Polarisationsdreher M3")
 PDM2.pos += (start_length + sep/2, L*np.cos(PD_theta), L*np.sin(PD_theta))
 PDM3.pos += (start_length + sep,0,0)
 Pol_Rotater = Composition(name="Polarisationsdreher")
@@ -131,7 +129,7 @@ if UsePolRotator:
     length_diff = 192.066 - PD_length
     if UseNormalDesign: g -= 20
 else: 
-    g = 550
+    g = 520
     length_diff = 0
     if UseNormalDesign: g-=100
 
@@ -173,15 +171,15 @@ if UseNormalDesign:
     
     xdist_P2_TFP1 = f1 + f2 - xdist_R2_M1 - ydist_R2_M2
     ydist = 0.5*(cavity_length - TFP_delta - xdist_P2_TFP1 - (dist_R1_M1 + dist_R2_M2 + ydist_R1_M1 + xdist_R2_M2))
-    M2 = Mirror(phi=-90-tele_angle2) # cut mirror 2
-    M3 = Mirror(phi=90) # mirror to TFP1
+    M2 = Mirror(phi=-90-tele_angle2, name="M2") # cut mirror 2
+    M3 = Mirror(phi=90, name="M3") # mirror to TFP1
     
 elif UseCompactDesign:
     # ydist: difference between beam y-position at the pump medium vs entrance TFP
     # ydist_M2_M3: y-distance between M2 and M3
     # ydist_P2_TFP1: y-distance between pump mirror P2 and TFP1
     # xdist_P2_TFP1: x-distance between pump mirror P2 and TFP1
-    ydist_M2_M3 = 100
+    ydist_M2_M3 = 120
     pump_angle_rad = rad(180-pump_angle)
     
     # is 1 for a pump angle of 90°
@@ -198,8 +196,8 @@ elif UseCompactDesign:
     print(f"TFP_ydist = {TFP_ydist}")
     ydist = TFP_ydist + ydist_M2_M3
     
-    M2 = Mirror(phi=90-tele_angle2) # cut mirror 2
-    M3 = Mirror(phi=-90) # mirror to TFP1
+    M2 = Mirror(phi=90-tele_angle2, name="M2") # cut mirror 2
+    M3 = Mirror(phi=-90, name="M3") # mirror to TFP1
 
 
 d4 = (ydist - d1*np.sin(rad(180-pump_angle)) + ydist_R1_M1) / np.sin(rad(pump_angle))  # M4 to P1 (pump mirror 1)
@@ -207,17 +205,15 @@ d3 = xdist_P2_TFP1 - TFP_xdist + d4 * np.cos(rad(180-pump_angle)) # TFP2 to M4
 
 print(f"total length = {cavity_length}, distance_to_TFP1 = {distance_to_TFP1}, remainder = {cavity_length-distance_to_TFP1}, b = {b}, g={g}, Delta={difference_to_ideal_imaging}")
 print(f"TFP_dist = {TFP_dist}, TFP_xdist = {TFP_xdist}, xdist_P2_TFP1 = {xdist_P2_TFP1}, d3 = {d3}, d4={d4}")
-P1 = Mirror(phi=-pump_angle)
-P2 = Mirror(phi=pump_angle)
-PM1 = Mirror()  # pump mirror
-PM2 = Mirror()  # pump mirror 2
-M1 = Mirror(phi=-pump_angle-tele_angle1) # cut mirror 1
+P1 = Mirror(name="pump mirror 1", phi=-pump_angle) # pump mirror 1
+P2 = Mirror(name="pump mirror 2", phi=pump_angle)  # pump mirror 2
+M1 = Mirror(name="M1", phi=-pump_angle-tele_angle1) # cut mirror 1
 
-M4 = Mirror(phi=pump_angle) # mirror after TFP2
-R1 = Curved_Mirror(phi=-180+tele_angle1, radius=r1)
-R2 = Curved_Mirror(phi=-180+tele_angle2, radius=r2)
-TFP1 = Mirror(phi=-90+deg(TFP_angle))
-TFP2 = Mirror(phi=90-deg(TFP_angle))
+M4 = Mirror(name="M4", phi=pump_angle) # mirror after TFP2
+R1 = Curved_Mirror(name=f"R1, f={f1}", phi=-180+tele_angle1, radius=r1)
+R2 = Curved_Mirror(name=f"R1, f={f2}", phi=-180+tele_angle2, radius=r2)
+TFP1 = Mirror(name="TFP1 (Input)", phi=-90+deg(TFP_angle))
+TFP2 = Mirror(name="TFP2 (Outpu)", phi=90-deg(TFP_angle))
 
 
 Setup = Composition()
@@ -284,7 +280,7 @@ M2.Mount.mount_list[0].flip(90)
 PDM1.set_mount(Unit_Mount())
 PDM2.set_mount(Unit_Mount())
 PDM3.set_mount(Unit_Mount())
-Setup.draw()
+
 
 """
 Pump Setup
@@ -361,6 +357,34 @@ Comp2.propagate(focal_length2)
 # Laser_Head_out.normal = -Laser_Head_out.normal
 
 
-Comp.draw()
-Comp2.draw()
+from LaserCAD.non_interactings import Breadboard, Crystal 
 
+# breadboard = Breadboard()
+# breadboard.pos = (0,0,0)
+# breadboard.draw()
+
+table = Crystal(width=900,height=10,thickness=1500)
+table.pos = (0,450,-5)
+table.draw_dict["Transparency"] = 0
+table.draw_dict["color"] = (0.3,0.3,0.3)
+table.draw()
+
+
+table2 = Crystal(width=750,height=10,thickness=900)
+table2.pos = (-900,375,-5)
+table2.draw_dict["Transparency"] = 0
+table2.draw_dict["color"] = (0.3,0.3,0.3)
+
+
+
+if freecad_da:
+    clear_doc()
+    Setup.draw()
+    Comp.draw()
+    Comp2.draw()
+    table.draw()
+    table2.draw()
+    setview()
+
+Setup.post_positions(verbose=True)
+print(Laser_Head_in.pos)
