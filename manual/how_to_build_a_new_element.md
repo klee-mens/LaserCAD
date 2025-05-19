@@ -319,6 +319,45 @@ And here is the result. An optical setup with style ;)
 <img src="images/How-to-new-Element/3_Mirror_spartan.png" alt="StretcherStuff" title="" />
 
 
+Hint: You can regulary include your mount to the availabe lists (see:
+LaserCAD.basic_optics.mount MIRROR_LIST). In this case you can use it like the 
+other mounts as string argument in the Composed_Mount unit_model_list. To do so
+you have to drag the stl file in the freecad_model.mount_meshes.mirror folder 
+and update the mirrormounts.csv file. This simply contains all the information
+about name, docking position, direction and color in the follwing way:
+```
+name,aperture,DockingX,DockingY,DockingZ,DockNormalX,DockNormalY,DockNormalZ,color
+```
+So in our case, we add the 2 lines
+```
+,,,,,,,,
+Spartan,25.4,24,2,-35,0,0,1,"0.2,0.2,0.2"
+```
+to the end of the csv. That means we give LaserCAD the information, that the 
+mirror mount 'Spartan' exists, its docking position is (24, 2, -35), its docking
+dircetion is in z direction (0,0,1) and its color is blackish "(0.2, 0.2, 0,2)".
+Done that you can now use the following code to use and place your new mount:
+```python
+from LaserCAD.basic_optics import Mirror, Composed_Mount
+from LaserCAD.freecad_models import freecad_da, clear_doc, setview
+
+if freecad_da:
+  clear_doc()
+  
+mir = Mirror()
+mir.aperture = 25
+mir.set_mount(Composed_Mount(unit_model_list=["Spartan", "1inch_post"]))
+
+mir.draw()
+mir.draw_mount()
+  
+if freecad_da:
+  setview()
+```
+And again we get our nice and robust mount on the screen:
+<img src="images/How-to-new-Element/Spartan_by_table.png" alt="StretcherStuff" title="" />
+
+
 ## Custom Optical Element and next ray function
 
 Here we are going to creat a new optical element and give it a functionality
