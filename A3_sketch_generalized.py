@@ -13,19 +13,20 @@ UsePolRotator = False
 ##################################
 
 import numpy as np
+import matplotlib.pyplot as plt
 import sys
 
-pfad = __file__
-pfad = pfad.replace("\\","/") #folder conventions windows linux stuff
-ind = pfad.rfind("/")
-pfad = pfad[0:ind-1]
-ind = pfad.rfind("/")
-pfad = pfad[0:ind]
-if not pfad in sys.path:
-  print(pfad)
-  sys.path.append(pfad)
+# pfad = __file__
+# pfad = pfad.replace("\\","/") #folder conventions windows linux stuff
+# ind = pfad.rfind("/")
+# pfad = pfad[0:ind-1]
+# ind = pfad.rfind("/")
+# pfad = pfad[0:ind]
+# if not pfad in sys.path:
+#   print(pfad)
+#   sys.path.append(pfad)pyth
 
-from LaserCAD.freecad_models import clear_doc, setview, freecad_da,add_to_composition
+from LaserCAD.freecad_models import clear_doc, setview, freecad_da, model_mirror, add_to_composition
 from LaserCAD.basic_optics import Mirror, Beam, Composition, Component, inch, Curved_Mirror, Ray, Geom_Object
 from LaserCAD.basic_optics import Grating, Opt_Element
 import matplotlib.pyplot as plt
@@ -56,14 +57,14 @@ def get_TFP_distances(TFP_ydist, TFP_angle):
     return TFP_dist, TFP_xdist, TFP_delta, TFP_Lam, Lam_PC, PC_TFP
     
 rotate_axis = np.pi
-offset_axis = (950,500,20+100)
+offset_axis = (950,500,20)
 
 pockels_cell = Component()
-pockels_cell.draw_dict["stl_file"]= thisfolder+"\mount_meshes\A2_mounts\Pockels_cell.stl"
+pockels_cell.draw_dict["stl_file"]= rf"{thisfolder}\mount_meshes\A2_mounts\Pockels_cell.stl"
 pockels_cell.freecad_model = load_STL
 
 vacuum_tube = Component()
-vacuum_tube.draw_dict["stl_file"]= thisfolder+"\mount_meshes\special_mount\Vacuum_Tube.stl"
+vacuum_tube.draw_dict["stl_file"]= rf"{thisfolder}\mount_meshes\special_mount\Vacuum_Tube.stl"
 vacuum_tube.freecad_model = load_STL
 
 
@@ -79,12 +80,9 @@ PD_length = sep + 2*start_length
 length_diff = 192.066 - PD_length
 
 Housing = Unit_Mount("Polarization_rotator-Fusion")
-#stl_file=thisfolder+"mount_meshes\special_mount\Polarization_rotator-Fusion.stl"
-#Housing.draw_dict["stl_file"]=stl_file
 Housing.draw_dict["color"]=(239/255, 239/255, 239/255)
 Housing.docking_obj.pos += (28.65,38.89, -41.89)
 Housing.docking_obj.normal = (0,0,1)
-#Housing.freecad_model = load_STL
 
 
 Rotator_box = Composed_Mount()
@@ -310,12 +308,12 @@ Comp2.set_light_source(beam2)
 Comp2.pos -= (pump_module_xoffset+focal_length1,pump_module_separation,0)
 
 Laser_Head_in = Component()
-stl_file = thisfolder+"\misc_meshes\PM19_2.stl"
+stl_file = rf"{thisfolder}\misc_meshes\PM19_2.stl"
 Laser_Head_in.draw_dict["stl_file"]=stl_file
 Laser_Head_in.freecad_model = load_STL
 
 Laser_Head_out = Component()
-stl_file = thisfolder+"\misc_meshes\PM19_2.stl"
+stl_file = rf"{thisfolder}\misc_meshes\PM19_2.stl"
 Laser_Head_out.draw_dict["stl_file"]=stl_file
 Laser_Head_out.freecad_model = load_STL
 
@@ -375,7 +373,21 @@ table2.pos = (-900,375,-5)
 table2.draw_dict["Transparency"] = 0
 table2.draw_dict["color"] = (0.3,0.3,0.3)
 
+class Cylindric_Crystal(Component):
+  def _init_(self, name="LaserCrystal", aperture=6, thickness=3, **kwargs):
+    super()._init_(name=name, **kwargs)
+    self.aperture = aperture
+    self.thickness = thickness
+    self.draw_dict["color"] = (0.8, 0.3, 0.1)
+    self.freecad_model = model_mirror
 
+LiMgAS_crystal1 = Cylindric_Crystal(name="LiMgAs", aperture=10, thickness=11)
+LiMgAS_crystal1.pos += offset_axis
+
+
+# LiMgAS_crystal2 = Cylindric_Crystal(name="LiMgAs2", aperture=10, thickness=11)
+# LiMgAS_crystal2.pos += offset_axis
+# LiMgAS_crystal2.draw()
 
 if freecad_da:
     clear_doc()
@@ -384,7 +396,9 @@ if freecad_da:
     Comp2.draw()
     table.draw()
     table2.draw()
+    LiMgAS_crystal1.draw()
     setview()
 
 Setup.post_positions(verbose=True)
 print(Laser_Head_in.pos)
+print(Laser_Head_out.pos)

@@ -153,3 +153,5 @@ mir_big_pos.draw_mount()
 
 if freecad_da:
   setview()
+
+print(MIRROR_LIST)
