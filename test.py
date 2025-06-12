@@ -8,42 +8,59 @@ Created on Wed Dec 13 14:35:32 2023
 import numpy as np
 import sys
 
-pfad = __file__
-pfad = pfad.replace("\\","/") #folder conventions windows linux stuff
-ind = pfad.rfind("/")
-pfad = pfad[0:ind-1]
-ind = pfad.rfind("/")
-pfad = pfad[0:ind]
-if not pfad in sys.path:
-  sys.path.append(pfad)
+# pfad = __file__
+# pfad = pfad.replace("\\","/") #folder conventions windows linux stuff
+# ind = pfad.rfind("/")
+# pfad = pfad[0:ind-1]
+# ind = pfad.rfind("/")
+# pfad = pfad[0:ind]
+# if not pfad in sys.path:
+#   sys.path.append(pfad)
 
+# sys.path.append(rf"D:\Martin\GitHub\LaserCAD\venv\Lib\site-packages")
+# sys.path.append(rf"D:\Martin\GitHub\LaserCAD\LaserCAD")
+# sys.path.append(rf"D:\Martin\GitHub\LaserCAD")
+
+#for p in sys.path:
+#	print(p)
 
 from LaserCAD.freecad_models import clear_doc, setview, freecad_da, model_mirror
 from LaserCAD.basic_optics import Mirror, Beam, Composition, Component, inch, Curved_Mirror, Ray, Geom_Object
-from LaserCAD.basic_optics import Grating, Opt_Element
-import matplotlib.pyplot as plt
-from LaserCAD.freecad_models.utils import thisfolder, load_STL
-from LaserCAD.non_interactings import Faraday_Isolator, Pockels_Cell, Lambda_Plate
-from LaserCAD.freecad_models.utils import thisfolder, load_STL
+# from LaserCAD.basic_optics import Grating, Opt_Element
+# import matplotlib.pyplot as plt
+# from LaserCAD.freecad_models.utils import thisfolder, load_STL
+from LaserCAD.non_interactings import Crystal, Faraday_Isolator, Pockels_Cell, Lambda_Plate
+# from LaserCAD.freecad_models.utils import thisfolder, load_STL
+
 if freecad_da:
   clear_doc()
   
+
   
-beam = Beam(radius=1, angle=0)
-beam.pos = [0,0,0]
-beam.draw()
+# beam = Beam(radius=1, angle=0)
+# beam.pos = [0,0,0]
+# beam.draw()
 
 class Cylindric_Crystal(Component):
-  def _init_(self, name="LaserCrystal", aperture=6, thickness=3, **kwargs):
-    super()._init_(name=name, **kwargs)
+  def __init__(self, name="LaserCrystal", aperture=6, thickness=3, **kwargs):
+    print("AAAAAAAAAAAAAAAAAAAAAAAAAA")
+    super().__init__(name=name, **kwargs)
     self.aperture = aperture
+    print("AAAAAAAAAAAAAAA", self.aperture)
     self.thickness = thickness
     self.draw_dict["color"] = (0.8, 0.3, 0.1)
     self.freecad_model = model_mirror
 
+
 LiMgAS_crystal1 = Cylindric_Crystal(name="LiMgAs", aperture=10, thickness=11)
 # LiMgAS_crystal1.pos += offset_axis
 LiMgAS_crystal1.draw()
+
+table = Crystal(width=900,height=10,thickness=1500)
+table.pos = (0,450,-5)
+table.draw_dict["Transparency"] = 0
+table.draw_dict["color"] = (0.3,0.3,0.3)
+table.draw()
 
 # Setup = Composition()
 

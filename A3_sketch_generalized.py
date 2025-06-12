@@ -194,8 +194,8 @@ elif UseCompactDesign:
     print(f"TFP_ydist = {TFP_ydist}")
     ydist = TFP_ydist + ydist_M2_M3
     
-    M2 = Mirror(phi=90-tele_angle2, name="M2") # cut mirror 2
-    M3 = Mirror(phi=-90, name="M3") # mirror to TFP1
+    M2 = Mirror(phi=90-tele_angle2, name="M2, cut mirror 2") # cut mirror 2
+    M3 = Mirror(phi=-90, name="M3, mirror towards TFP1") # mirror to TFP1
 
 
 d4 = (ydist - d1*np.sin(rad(180-pump_angle)) + ydist_R1_M1) / np.sin(rad(pump_angle))  # M4 to P1 (pump mirror 1)
@@ -205,9 +205,9 @@ print(f"total length = {cavity_length}, distance_to_TFP1 = {distance_to_TFP1}, r
 print(f"TFP_dist = {TFP_dist}, TFP_xdist = {TFP_xdist}, xdist_P2_TFP1 = {xdist_P2_TFP1}, d3 = {d3}, d4={d4}")
 P1 = Mirror(name="pump mirror 1", phi=-pump_angle) # pump mirror 1
 P2 = Mirror(name="pump mirror 2", phi=pump_angle)  # pump mirror 2
-M1 = Mirror(name="M1", phi=-pump_angle-tele_angle1) # cut mirror 1
+M1 = Mirror(name="M1, cut mirror 1", phi=-pump_angle-tele_angle1) # cut mirror 1
 
-M4 = Mirror(name="M4", phi=pump_angle) # mirror after TFP2
+M4 = Mirror(name="M4, mirror after TFP2", phi=pump_angle) # mirror after TFP2
 R1 = Curved_Mirror(name=f"R1, f={f1}", phi=-180+tele_angle1, radius=r1)
 R2 = Curved_Mirror(name=f"R1, f={f2}", phi=-180+tele_angle2, radius=r2)
 TFP1 = Mirror(name="TFP1 (Input)", phi=-90+deg(TFP_angle))
@@ -307,7 +307,7 @@ Comp2 = Composition()
 Comp2.set_light_source(beam2)
 Comp2.pos -= (pump_module_xoffset+focal_length1,pump_module_separation,0)
 
-Laser_Head_in = Component()
+Laser_Head_in = Component(name="Pump Module PM19 top")
 stl_file = rf"{thisfolder}\misc_meshes\PM19_2.stl"
 Laser_Head_in.draw_dict["stl_file"]=stl_file
 Laser_Head_in.freecad_model = load_STL
@@ -317,10 +317,10 @@ stl_file = rf"{thisfolder}\misc_meshes\PM19_2.stl"
 Laser_Head_out.draw_dict["stl_file"]=stl_file
 Laser_Head_out.freecad_model = load_STL
 
-lens1 = Lens(f=focal_length1)
+lens1 = Lens(f=focal_length1, name="Pump Lens 1, f={focal_length1}mm")
 lens1.aperture = 25.4*2
 lens1.set_mount_to_default()
-lens2 = Lens(f=focal_length2)
+lens2 = Lens(f=focal_length2, name="telescope lens 1, f={focal_length2}mm")
 lens2.aperture = 25.4*2
 lens2.set_mount_to_default()
 lens3 = deepcopy(lens2)
@@ -374,20 +374,20 @@ table2.draw_dict["Transparency"] = 0
 table2.draw_dict["color"] = (0.3,0.3,0.3)
 
 class Cylindric_Crystal(Component):
-  def _init_(self, name="LaserCrystal", aperture=6, thickness=3, **kwargs):
-    super()._init_(name=name, **kwargs)
+  def __init__(self, name="LaserCrystal", aperture=6, thickness=3, **kwargs):
+    super().__init__(name=name, **kwargs)
     self.aperture = aperture
     self.thickness = thickness
     self.draw_dict["color"] = (0.8, 0.3, 0.1)
     self.freecad_model = model_mirror
 
-LiMgAS_crystal1 = Cylindric_Crystal(name="LiMgAs", aperture=10, thickness=11)
+LiMgAS_crystal1 = Cylindric_Crystal(name="LiMgAs", aperture=15, thickness=11)
 LiMgAS_crystal1.pos += offset_axis
+LiMgAS_crystal1.pos += (1,0,0)
 
-
-# LiMgAS_crystal2 = Cylindric_Crystal(name="LiMgAs2", aperture=10, thickness=11)
-# LiMgAS_crystal2.pos += offset_axis
-# LiMgAS_crystal2.draw()
+LiMgAS_crystal2 = Cylindric_Crystal(name="LiMgAs2", aperture=15, thickness=11)
+LiMgAS_crystal2.pos += offset_axis
+LiMgAS_crystal2.pos += (-12, 0, 0)
 
 if freecad_da:
     clear_doc()
@@ -396,6 +396,7 @@ if freecad_da:
     Comp2.draw()
     table.draw()
     table2.draw()
+    LiMgAS_crystal2.draw()
     LiMgAS_crystal1.draw()
     setview()
 
