@@ -57,7 +57,7 @@ def get_TFP_distances(TFP_ydist, TFP_angle):
     return TFP_dist, TFP_xdist, TFP_delta, TFP_Lam, Lam_PC, PC_TFP
     
 rotate_axis = np.pi
-offset_axis = (950,500,20)
+offset_axis = (950+110,500,20)
 
 pockels_cell = Component()
 pockels_cell.draw_dict["stl_file"]= rf"{thisfolder}\mount_meshes\A2_mounts\Pockels_cell.stl"
@@ -157,7 +157,7 @@ cavity_length = f1 + f2 + g + b + difference_to_ideal_imaging           # total 
             
 pump_dist = 125    # 150            # length of pump section
 d1 = g-dist_R1_M1-pump_dist/2       # distance from P2 to M1
-d2 = 200                            # x-distance from M3 to TFP1
+d2 = 100                            # x-distance from M3 to TFP1
 dist_vacuum_tube = xdist_R2_M1 + 70
 
 x_correction_by_angled_pump = d1 * np.cos(rad(180-pump_angle))  
@@ -284,28 +284,32 @@ PDM3.set_mount(Unit_Mount())
 Pump Setup
 """
 
-focal_length1 = 125
+focal_length1 = 75 # 125
 focal_length2 = 250
 
+object_distance = 182 
+image_distance = 128
+image_plane_to_pump_module_distance = 50
+
 pump_module_separation = 300
-pump_module_xoffset = focal_length1
-pump_module_lens_dist = focal_length1
+pump_module_xoffset = object_distance + image_plane_to_pump_module_distance + image_distance
+pump_module_lens_dist = object_distance + image_plane_to_pump_module_distance
 
 distance_lens_to_mirror = (2*focal_length2-pump_module_separation)/2
 
-beam1 = Beam(radius=7.5,angle=2.08*np.pi/180,wavelength=940E-6)
+beam1 = Beam(radius=7.5,angle=0*2.08*np.pi/180,wavelength=940E-6)
 beam1.draw_dict["color"] = (255/256,255/256,0.0)
 
-beam2 = Beam(radius=7.5,angle=2.08*np.pi/180,wavelength=940E-6)
+beam2 = Beam(radius=7.5,angle=0*2.08*np.pi/180,wavelength=940E-6)
 beam2.draw_dict["color"] = (255/256,255/256,0.0)
 
 Comp = Composition()
 Comp.set_light_source(beam1)
-Comp.pos -= (pump_module_xoffset+focal_length1,0,0)
+Comp.pos -= (pump_module_xoffset,0,0)
 
 Comp2 = Composition()
 Comp2.set_light_source(beam2)
-Comp2.pos -= (pump_module_xoffset+focal_length1,pump_module_separation,0)
+Comp2.pos -= (pump_module_xoffset,pump_module_separation,0)
 
 Laser_Head_in = Component(name="Pump Module PM19 top")
 stl_file = rf"{thisfolder}\misc_meshes\PM19_2.stl"
@@ -321,7 +325,7 @@ lens1 = Lens(f=focal_length1, name="Pump Lens 1, f={focal_length1}mm")
 lens1.aperture = 25.4*2
 lens1.set_mount_to_default()
 lens2 = Lens(f=focal_length2, name="telescope lens 1, f={focal_length2}mm")
-lens2.aperture = 25.4*2
+lens2.aperture = 25.4*3
 lens2.set_mount_to_default()
 lens3 = deepcopy(lens2)
 lens4 = deepcopy(lens1)
@@ -337,13 +341,14 @@ Comp.pos += offset_axis
 Comp.add_on_axis(Laser_Head_in)
 Comp.propagate(pump_module_lens_dist)
 Comp.add_on_axis(lens1)
-Comp.propagate(focal_length1)
+Comp.propagate(image_distance)
 
 Comp2.pos += offset_axis
 Comp2.add_on_axis(Laser_Head_out)
 Comp2.propagate(pump_module_lens_dist)
 Comp2.add_on_axis(lens4)
-Comp2.propagate(focal_length1+focal_length2)
+# Comp2.propagate(focal_length1+focal_length2)
+Comp2.propagate(image_distance+focal_length2)
 Comp2.add_on_axis(lens3)
 Comp2.propagate(distance_lens_to_mirror)
 Comp2.add_on_axis(M2)
@@ -352,6 +357,7 @@ Comp2.add_on_axis(M1)
 Comp2.propagate(distance_lens_to_mirror)
 Comp2.add_on_axis(lens2)
 Comp2.propagate(focal_length2)
+# Comp2.propagate(focal_length2+focal_length1-image_distance)
 # Laser_Head_out.normal = -Laser_Head_out.normal
 
 
