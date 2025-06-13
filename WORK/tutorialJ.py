@@ -5,46 +5,56 @@ Created on Mon Mar 24 16:13:57 2025
 
 @author: mens
 """
-
-from LaserCAD.basic_optics import Beam, Lens, Composition, Mirror
 from LaserCAD.freecad_models import freecad_da, clear_doc, setview
 
 if freecad_da:
   clear_doc()
 
-b1 = Beam(2, 0.1, ray_count=10)
-l1 = Lens(100, name='L1')
-l1.pos += (50, 0, 0) 
-b2 = l1.next_beam(b1)
-l2 = Lens(50, name= 'L2')
-l2.pos = l1.pos+(100,0,5)
-b3 = l2.next_beam(b2)
+# =============================================================================
+# Square Beam Lenses
+# =============================================================================
+import LaserCAD.basic_optics as LC
 
+sb = LC.SquareBeam(radius=5, ray_in_line=5)
+lens1 = LC.Lens(f=100)
+lens2 = LC.Lens(f=200)
+lens2.aperture = 50.8
+kt = LC.Composition()
+kt.set_light_source(sb)
+kt.propagate(100)
+kt.add_on_axis(lens1)
+kt.propagate(100+200)
+kt.add_on_axis(lens2)
+kt.propagate(200)
+kt.pos = (10, 20, 120)
+# kt.draw()
 
-comp1 = Composition('Teleskop')
-comp1.set_light_source(b1)
-comp1.propagate(50)
-comp1.add_on_axis(l1)
-comp1.propagate(100)
-comp1.add_on_axis(l2)
-l2.pos += (0,0,5)
-comp1.recompute_optical_axis()
-comp1.propagate(100)
-comp1.add_on_axis(Mirror(90))
-comp1.propagate(100)
+# =============================================================================
+# Anastigmatic Mirror Telescope
+# =============================================================================
+
+mir1 = LC.Curved_Mirror(radius=250, phi=180-8)
+mir2 = LC.Curved_Mirror(radius=250, phi=0,
+                        theta=180-8)
+mir2.set_mount(LC.Composed_Mount(
+  unit_model_list=["KS1", "0.5inch_post"]))
+
+mt = LC.Composition()
+mt.set_light_source(LC.Beam(radius=2))
+mt.propagate(350)
+mt.add_on_axis(mir1)
+mt.propagate(250)
+mt.add_on_axis(mir2)
+mt.propagate(350)
+mt.draw()
 
 
 # =============================================================================
 # draw section
 # =============================================================================
-# b1.draw()
-# l1.draw()
-# l1.draw_mount()
-# b2.draw()
-# l2.draw()
-# l2.draw_mount()
-# b3.draw()
-comp1.draw() 
+kt.draw()
+# mt.draw()
+
 
 if freecad_da:
   setview()
