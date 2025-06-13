@@ -35,7 +35,7 @@ class Lens(Opt_Element):
     super().update_draw_dict()
     self.draw_dict["Radius1"] = 300
     self.draw_dict["Radius2"] = 0
-    
+
   def __repr__(self):
     n = len(self.class_name())
     txt = 'Lens(f=' + repr(self.focal_length)

@@ -30,7 +30,7 @@ class Beam(Geom_Object):
   average_divegence = ?
 
   """
-  def __init__(self, radius=1, angle=0, name="NewBeam", wavelength=1030E-6, 
+  def __init__(self, radius=1, angle=0, name="NewBeam", wavelength=1030E-6,
                ray_count = 2, **kwargs):
     super().__init__(name=name, **kwargs)
     self._ray_count = ray_count
@@ -125,7 +125,7 @@ class Beam(Geom_Object):
   def set_length(self, x):
     for ray in self._rays:
       ray.length = x
-      
+
   def set_wavelength(self, wl):
     for ray in self._rays:
       ray.length = wl
@@ -171,7 +171,7 @@ class Beam(Geom_Object):
     self.draw_dict["length"] = self.length()
     self.draw_dict["radius"] = radius
     self.draw_dict["angle"] = angle
-  
+
   def draw_freecad(self):
     if self.draw_dict["model"] == "cone":
       # radius, angle = self.radius_angle()
@@ -226,11 +226,11 @@ class SquareBeam(Beam):
         self._rays[ray_counting].wavelength = self._Bwavelength
         ray_counting+=1
     self._ray_count = ray_counting
-    
+
     for n in range(1, len(self._rays)):
       self._rays[n].name = self.name + "_Ray" + str(n)
     self._rays[0].name = self.name + "_inner_Ray"
-    
+
 
 
 class CircularRayBeam(Beam):
@@ -298,7 +298,7 @@ class RainbowBeam(Beam):
     self.make_rainbow_distribution(ray_count)
     self._distribution = "rainbow"
     self.draw_dict["model"] = "ray_group"
-    
+
   def make_rainbow_distribution(self, ray_count=11):
     self._ray_count = ray_count
     # wavels = np.linspace(self._Bwavelength - self.bandwith/2, self._Bwavelength + self.bandwith/2, ray_count)
@@ -306,9 +306,9 @@ class RainbowBeam(Beam):
     rc_red = ray_count + 1 - rc_blue
     blue = np.linspace(self._Bwavelength - self._bandwith/2, self._Bwavelength, rc_blue)
     reds = np.linspace(self._Bwavelength, self._Bwavelength + self._bandwith/2, rc_red)
-  
+
     wavels = [self._Bwavelength] # middle ray hat wavelength
-    wavels += list(blue[0:-1]) # then all blue wavelength except middle 
+    wavels += list(blue[0:-1]) # then all blue wavelength except middle
     wavels += list(reds[1::]) # then all red wavelength except middle
     rays = []
     cmap = plt.cm.gist_rainbow
@@ -323,100 +323,27 @@ class RainbowBeam(Beam):
     for n in range(1, len(self._rays)):
       self._rays[n].name = self.name + "_Ray" + str(n)
     self._rays[0].name = self.name + "_inner_Ray"
-  
 
 
-
-# class Rainbow(Beam):
-#   def __init__(self, separation=0, angle=0,ray_count=15, name="NewBeam",wavelength_range=(1000E-6,1060E-6), **kwargs):
-#     super().__init__(name = name, **kwargs)
-#     self.draw_dict['model'] = "ray_group"
-#     self._ray_count = ray_count
-#     self._wavelength_group = np.linspace(wavelength_range[0], wavelength_range[1],ray_count)
-#     shifting_group = np.linspace(-separation/2, separation/2,ray_count)
-#     self._rays = []
-#     cmap = plt.cm.gist_rainbow
-#     for i in range(ray_count):
-#       ray = Ray()
-#       ray.wavelength = self._wavelength_group[i]
-#       x = 1-(self._wavelength_group[i] -min(wavelength_range[0],wavelength_range[1])) / abs(wavelength_range[1]-wavelength_range[0])
-#       ray.draw_dict["color"] = cmap( x )
-#       ray.set_geom(self.get_geom())
-#       ray.pos += (0,shifting_group[i],0)
-#       self._rays.append(ray)
-  # def _pos_changed(self, old_pos, new_pos):
-  #   """
-  #   wird aufgerufen, wen die Position von <self> verändert wird
-  #   ändert die Position aller __rays mit
-
-  #   is called when the position of <self> is changed
-  #   changes the position of all __rays with
-  #   """
-  #   super()._pos_changed(old_pos, new_pos)
-  #   self._rearange_subobjects_pos(old_pos, new_pos, self._rays)
+class Ray_Distribution(SquareBeam):
+  """
+  creates a ray distribution in all directions with opening angle <angle> and
+  radius <radius> consisting of steps^3 + 1 rays
+  """
+  def __init__(self, name="NewRayDist", radius=3, steps=3, angle=0.05, **kwargs):
+    super().__init__(name=name, **kwargs)
+    alphas = np.linspace(-angle, angle, steps)
+    betas = np.linspace(-angle, angle, steps)
+    allrays = [Ray()]
+    for al in alphas:
+      for bet in betas:
+        sq = SquareBeam(radius=radius, ray_in_line=steps)
+        sq.rotate(vec=(0,0,1), phi=al)
+        sq.rotate(vec=(0,1,0), phi=bet)
+        allrays.extend(sq.get_all_rays())
+    self.override_rays(allrays)
 
 
-  # def _axes_changed(self, old_axes, new_axes):
-  #   """
-  #   wird aufgerufen, wen das KooSys <_axes> von <self> verändert wird
-  #   dreht die KooSys aller __rays mit
-
-  #   dreht außerdem das eigene Koordiantensystem
-
-  #   is called when the KooSys <_axes> is changed from <self>.
-  #   rotates the KooSys of all __rays as well
-
-  #   also rotates the own coordiante system
-  #   """
-  #   super()._axes_changed(old_axes, new_axes)
-  #   self._rearange_subobjects_axes(old_axes, new_axes, self._rays)
-
-
-  # def draw_freecad(self):
-  #   if self.draw_dict["model"] == "Gaussian":
-  #     return model_Gaussian_beam(name=self.name, q_para=self.q_para,
-  #                                wavelength=self.wavelength,
-  #                                prop=self.get_all_rays()[0].length,
-  #                                geom_info=self.get_geom())
-  #   elif self.draw_dict["model"] == "cone":
-  #     radius, angle = self.radius_angle()
-  #     # return model_beam(name=self.name, dia=2*radius, prop=self.length(),
-  #          # f=self.focal_length(), geom_info=self.get_geom(), **self.draw_dict)
-  #     return model_beam(dia=2*radius, prop=self.length(), f=self.focal_length(),
-  #                       geom_info=self.get_geom(), **self.draw_dict)
-  #     # return model_beam_new(radius=radius, length=self.length(),  angle=angle,
-  #                           # geom_info=self.get_geom(),**self.draw_dict)
-  #     # return model_Gaussian_beam(name=self.name, dia=2*radius, prop=self.length(),
-  #     #      f=self.focal_length(), geom_info=self.get_geom())
-  #   else:
-  #     part = initialize_composition_old(name="ray group")
-  #     container = []
-  #     for nn in range(self._ray_count):
-  #       our=self._rays[nn]
-  #       obj = our.draw_freecad()
-  #       container.append(obj)
-  #     add_to_composition(part, container)
-  #     return part
-
-# class Rainbow(Beam):
-#   def __init__(self, separation=0, angle=0,ray_count=15, name="NewBeam",wavelength_range=(1000E-6,1060E-6), **kwargs):
-#     super().__init__(name = name, **kwargs)
-#     self.draw_dict['model'] = "ray_group"
-#     self._ray_count = ray_count
-#     self._wavelength_group = np.linspace(wavelength_range[0], wavelength_range[1],ray_count)
-#     shifting_group = np.linspace(-separation/2, separation/2,ray_count)
-#     self._rays = []
-#     cmap = plt.cm.gist_rainbow
-#     for i in range(ray_count):
-#       ray = Ray()
-#       ray.wavelength = self._wavelength_group[i]
-#       x = 1-(self._wavelength_group[i] -min(wavelength_range[0],wavelength_range[1])) / abs(wavelength_range[1]-wavelength_range[0])
-#       ray.draw_dict["color"] = cmap( x )
-#       ray.set_geom(self.get_geom())
-#       ray.pos += (0,shifting_group[i],0)
-#       self._rays.append(ray)
-    
-    
 
 class Gaussian_Beam(Ray):
 # class Gaussian_beam(Geom_Object):
@@ -438,7 +365,7 @@ class Gaussian_Beam(Ray):
   def set_length(self, length):
     # needed for consitency in next_beam function
     self.length = length
-		
+
   def waist(self):
     return np.sqrt( self.wavelength / np.pi * np.imag(self.q_para) )
 
@@ -457,7 +384,7 @@ class Gaussian_Beam(Ray):
       # return model_Gaussian_beam(name=self.name, q_para=self.q_para,
       #                             wavelength=self.wavelength,prop=self.length,
       #                             geom_info=self.get_geom())
-      
+
     if self.draw_dict["model"] == "cone":
       self.update_draw_dict()
       self.draw_dict["q_para"] = self.q_para
@@ -473,23 +400,23 @@ class Gaussian_Beam(Ray):
       #                   geom_info=self.get_geom(), color=col, **self.draw_dict)
     else:
       return -1
-    
+
   def update_draw_dict(self):
     self.draw_dict["name"] = self.name
     self.draw_dict["wavelength"] = self.wavelength
     self.draw_dict["prop"] = self.length
     self.draw_dict["geom"] = self.get_geom()
-     
+
   def radius(self):
     z = np.real(self.q_para)
     zr = np.imag(self.q_para)
     return self.waist() * np.sqrt(1 + (z/zr)**2)
-  
+
   def divergence(self):
     z = np.real(self.q_para)
     zr = np.imag(self.q_para)
     return np.sign(z) * self.waist() / zr
-    
+
   def transform_to_cone_beam(self):
     cone = Beam(name=self.name, radius=self.radius(), angle=self.divergence())
     cone.set_geom(self.get_geom())
@@ -503,7 +430,7 @@ class Gaussian_Beam(Ray):
     ray.wavelength = self.wavelength
     ray.length = self.length
     return [ray]
-  
+
   def draw_gaussian_profile(self,center_intensity= 2,norm=True):
     sig = self.radius()
     fs = 24
@@ -525,7 +452,7 @@ class Gaussian_Beam(Ray):
 
   def inner_ray(self):
     return self.get_all_rays()[0]
-  
+
 if __name__ == "__main__":
   b = Beam(name = "Strahlo", radius=2)
   print(b)

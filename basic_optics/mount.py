@@ -43,7 +43,7 @@ for i in LENS_LIST1:
   a,b,c = str.partition(i, ".")
   if "stl" in c:
     LENS_LIST.append(a)
-  
+
 SPECIAL_LIST1 = os.listdir(DEFALUT_SPEIAL_MOUNT_PATH)
 SPECIAL_LIST = []
 for i in SPECIAL_LIST1:
@@ -63,6 +63,10 @@ def get_mount_by_aperture_and_element(aperture, elm_type, elm_thickness):
       model = "LMR1.5_M"
     elif aperture <=25.4*2:
       model = "LMR2_M"
+    elif aperture <=25.4*3:
+      model = "LMR3_M"
+    elif aperture <=25.4*4:
+      model = "LMR4_M"
     post = "0.5inch_post"
   elif elm_type == "Mirror" or elm_type == "Curved_Mirror":
     post = "1inch_post"
@@ -83,11 +87,11 @@ def get_mount_by_aperture_and_element(aperture, elm_type, elm_thickness):
       post = "big_post"
   else:
     return Unit_Mount()
-  
+
   Output_mount = Composed_Mount(unit_model_list=[model,post])
   Output_mount.mount_list[0].element_thickness = elm_thickness
   Output_mount.mount_list[0].aperture = aperture
-  
+
   if aperture>25.4*4:
     first = Output_mount.mount_list[0]
     x,y,z = first.get_coordinate_system()
@@ -135,7 +139,7 @@ class Unit_Mount(Geom_Object):
       self._axes_changed(old_axes, self.get_axes())
     else:
       super().set_axes(new_axes)
-    
+
   def set_by_table(self):
     """
     sets the docking object and the model by reading the "the file.csv"
@@ -149,16 +153,16 @@ class Unit_Mount(Geom_Object):
     buf = []
     mount_in_database = False
     if self.model in MIRROR_LIST:
-        model_type ="mirror" 
+        model_type ="mirror"
     elif self.model in LENS_LIST:
         model_type="lens"
     else:
         model_type = "special_mount"
         # return False
     folder = thisfolder+"mount_meshes/"+model_type+"/"
-    with open(folder+model_type+"mounts.csv") as csvfile: 
+    with open(folder+model_type+"mounts.csv") as csvfile:
       reader = csv.DictReader(csvfile)
-      
+
       for row in reader:
         buf.append(row)
     for mount_loop in buf:
@@ -184,15 +188,15 @@ class Unit_Mount(Geom_Object):
     self.docking_obj.normal = docking_normal
     self.path = folder
     return True
-  
+
   def reverse(self):
     x,y,z = self.get_coordinate_system()
     self.rotate(z, np.pi)
     self.pos += x * self.element_thickness
-    
+
   def flip(self, angle=90):
     self.flip_angle = angle
-  
+
 
   def update_draw_dict(self):
     super().update_draw_dict()
@@ -200,11 +204,11 @@ class Unit_Mount(Geom_Object):
     modified_axes = np.matmul(rotation_matrix(self.normal, self.flip_angle/180*np.pi), modified_axes)
     self.draw_dict["geom"] = (self.pos, modified_axes)
     self.draw_dict["stl_file"] = self.path + self.model + ".stl"
-    
+
   def draw_text(self):
     txt = super().draw_text()
     txt += " and the model " + self.model
-  
+
   def __repr__(self):
     txt = super().__repr__()
     ind = txt.index(",")
@@ -213,7 +217,7 @@ class Unit_Mount(Geom_Object):
 
   def _pos_changed(self, old_pos, new_pos):
     self._rearange_subobjects_pos( old_pos, new_pos, [self.docking_obj])
-  
+
   def _axes_changed(self, old_axes, new_axes):
     self._rearange_subobjects_axes( old_axes, new_axes, [self.docking_obj])
 
@@ -227,13 +231,13 @@ class Post(Geom_Object):
     self.draw_dict["holder_color"] = DEFALUT_HOLDER_COLOR
     self.model=model
     self.docking_obj = Geom_Object()
-  
+
   def set_axes(self, new_axes):
     if self.axis_fixed:
       self._axes = np.eye(3)
     else:
       super().set_axes(new_axes)
-  
+
   def find_1inch_post(self):
     height = self.pos[2] - self._lower_limit
     if height<12.5:
@@ -250,13 +254,13 @@ class Post(Geom_Object):
         height_difference = height - default_post_height[i]
     return draw_1inch_post(name=model,h_diff = height_difference,ll=self._lower_limit,
                             color=self.draw_dict["post_color"],geom = self.get_geom())
-  
-  def draw_post_part(self,name="post_part", base_exists=False, 
+
+  def draw_post_part(self,name="post_part", base_exists=False,
                      post_color=DEFALUT_POST_COLOR,holder_color=DEFALUT_HOLDER_COLOR, geom=None):
     """
     Draw the post part, including post, post holder and base
     Assuming that all optics are placed in the plane of z = 0.
-  
+
     Parameters
     ----------
     name : String, optional
@@ -265,16 +269,16 @@ class Post(Geom_Object):
       distance from the center of the mirror to the bottom of the mount.
       The default is 12.
     xshift : float/int, optional
-      distance from the center of the mirror to the cavity at the bottom of the 
+      distance from the center of the mirror to the cavity at the bottom of the
       mount. The default is 0.
     geom : TYPE, optional
       mount geom. The default is None.
-  
+
     Returns
     -------
     part : TYPE
       A part which includes the post, the post holder and the slotted bases.
-  
+
     """
     POS = geom[0]
     POS[2]-=self._lower_limit
@@ -334,17 +338,17 @@ class Post(Geom_Object):
     container = post,post1,post2
     add_to_composition(part, container)
     return part
-  
+
   def set_lower_limit(self,lower_limit):
     self._lower_limit = lower_limit
     self.docking_obj.pos = np.array((self.pos[0],self.pos[1],self._lower_limit))
-  
+
   def _pos_changed(self, old_pos, new_pos):
     self.docking_obj.pos = np.array((self.pos[0],self.pos[1],self._lower_limit))
-  
+
   def draw_freecad(self, **kwargs):
     self.draw_dict["geom"]=self.get_geom()
-    self.draw_dict["name"] = self.name 
+    self.draw_dict["name"] = self.name
     if self.model == "dont_draw":
       return None
     # print(self.name,"'s position = ",self.pos)
@@ -362,7 +366,7 @@ class Composed_Mount(Geom_Object):
   This one is for compositions of mulitple mounts stacked togehter
   The add function drags every new mount to the docking position of the old one
   and as usual all are moved correctly when the Composed_Mount is moved.
-  
+
   Example: cm = Composed_Mount(unit_model_list=["KS1", "1inch_post"])
   """
   def __init__(self, unit_model_list=[], **kwargs):
@@ -378,15 +382,15 @@ class Composed_Mount(Geom_Object):
         newmount = Post(model=model)
       elif "Angular" in model:
         newmount = Adaptive_Angular_Mount()
-      else:  
+      else:
         newmount = Unit_Mount(model=model)
       self.add(newmount)
-    
+
   def add(self, mount):
     mount.set_geom(self.docking_obj.get_geom())
     self.mount_list.append(mount)
     self.docking_obj.set_geom(mount.docking_obj.get_geom())
-    
+
   def draw_freecad(self):
     part = initialize_composition_old(name="mount, post and base")
     container = []
@@ -395,30 +399,30 @@ class Composed_Mount(Geom_Object):
       container.append(mount.draw())
     add_to_composition(part, container)
     return part
-  
+
   def reverse(self):
     first = self.mount_list[0]
     first.reverse()
     self.set_geom(self.get_geom()) # to adjust the other elements
-    
+
   def flip(self):
     first = self.mount_list[0]
     first.flip()
-    
+
   def __repr__(self):
    txt = super().__repr__()
    ind = txt.index(",")
    modellist = str([um.model for um in self.mount_list])
    txt2 = txt[0:ind] + ', unit_model_list=' + modellist + txt[ind::]
    return txt2
-    
+
   def _pos_changed(self, old_pos, new_pos):
     self._rearange_subobjects_pos(old_pos, new_pos,[self.mount_list[0]])
     for mount_number in range(len(self.mount_list)-1):
       first = self.mount_list[mount_number]
       second = self.mount_list[mount_number+1]
       second.pos = first.docking_obj.pos
-  
+
   def _axes_changed(self, old_axes, new_axes):
     self._rearange_subobjects_axes( old_axes, new_axes, [self.mount_list[0]])
     for mount_number in range(len(self.mount_list)-1):
@@ -433,7 +437,7 @@ class Composed_Mount(Geom_Object):
 class Stages_Mount(Composed_Mount):
   """
   class for a Composed mount with x stage.
-  
+
   """
   def __init__(self, stages_height=23.1,aperture=25.4,elm_type = "Mirror",
                elm_thickness=10,basic_mount=None,x_aligned=True,stage_name="XR25C",**kwargs):
@@ -445,14 +449,14 @@ class Stages_Mount(Composed_Mount):
       self.add(mou)
     self.add(Unit_Mount("XR25C"))
     self.x_aligned = x_aligned
-    if not self.x_aligned:  
+    if not self.x_aligned:
       self.mount_list[-1].normal = self.mount_list[0].normal
-  
+
   def _axes_changed(self, old_axes, new_axes):
     super()._axes_changed(old_axes, new_axes)
-    if not self.x_aligned:  
+    if not self.x_aligned:
       self.mount_list[-1].normal = self.mount_list[0].normal
-  
+
   def find_screw_hole(self):
     angle=np.arccos(self.mount_list[-1].normal[0])
     hole = (25.4,95.3/2,self.mount_list[-1].pos[2])
@@ -462,8 +466,8 @@ class Stages_Mount(Composed_Mount):
     shifted_pos = (int(hole_pos[0]/25)*25,int(hole_pos[1]/25)*25,0)
     shifting_vec = hole_pos-shifted_pos
     self.mount_list[-1].pos -= shifting_vec
-  
-  
+
+
 class Stripe_Mirror_Mount(Composed_Mount):
   def __init__(self, mirror_thickness=10,**kwargs):
     super().__init__(**kwargs)
@@ -472,8 +476,8 @@ class Stripe_Mirror_Mount(Composed_Mount):
     self.add(stripe)
     self.add(Unit_Mount("POLARIS-K2"))
     self.add(Post())
-  
-    
+
+
 class Rooftop_Mirror_Mount(Composed_Mount):
   def __init__(self, **kwargs):
     super().__init__(**kwargs)
@@ -503,7 +507,7 @@ class Grating_Mount(Composed_Mount):
     self.add(gratingmount)
     self.add(Unit_Mount("POLARIS-K1"))
     self.add(Post())
-    
+
 
 class Post_Marker(Unit_Mount):
   def __init__(self, name="Post_Marker",size=3,**kwargs):
@@ -522,7 +526,7 @@ class Post_Marker(Unit_Mount):
     if self.h1[1]+(25*size)-self.pos[1]<16:
       self.h1=(self.h1[0],self.h1[1]+25)
     self.freecad_model = model_Post_Marker
-    
+
   def _pos_changed(self, old_pos, new_pos):
     self.quot_x = math.floor(new_pos[0]/(25*self.size))
     self.quot_y = math.floor(new_pos[1]/(25*self.size))
@@ -535,7 +539,7 @@ class Post_Marker(Unit_Mount):
       self.h1=(self.h1[0]+25,self.h1[1])
     if self.h1[1]+(25*self.size)-new_pos[1]<16:
       self.h1=(self.h1[0],self.h1[1]+25)
-  
+
   def update_draw_dict(self):
     super().update_draw_dict()
     self.draw_dict["h1"] = self.h1
@@ -558,12 +562,12 @@ class Adaptive_Angular_Mount(Unit_Mount):
     self.docking_obj.pos = self.pos+self.normal * (dia_l/(2*np.tan(self.rot_angle/180*np.pi))+1.5)
     self.docking_obj.normal = self.normal
     self.freecad_model = model_mirror_holder
-    
+
   def update_draw_dict(self):
     super().update_draw_dict()
     self.draw_dict["dia"] = self.aperture
     self.draw_dict["angle"] = self.rot_angle
-  
+
   def set_axes(self, new_axes):
     if abs(new_axes[2][0])>0:
       z=-new_axes[2][0]
@@ -571,10 +575,10 @@ class Adaptive_Angular_Mount(Unit_Mount):
       dia_l = int(self.aperture/10+1)*10
       self.docking_obj.normal = self.normal
       if self.angle>0:
-        self.rot_angle = (90-self.angle) 
+        self.rot_angle = (90-self.angle)
         self.docking_obj.pos = self.pos+self.normal * (dia_l/(2*np.tan(self.rot_angle/180*np.pi))+1.5)
       else:
-        self.rot_angle = (-90-self.angle) 
+        self.rot_angle = (-90-self.angle)
         self.docking_obj.pos = self.pos+self.normal * (dia_l/(2*np.tan(-self.rot_angle/180*np.pi))+1.5)
     elif new_axes[2][0]>0:
       z=new_axes[2][0]
@@ -584,5 +588,5 @@ class Adaptive_Angular_Mount(Unit_Mount):
       self.docking_obj.pos = self.pos+self.normal * (dia_l/(2*np.tan(self.rot_angle/180*np.pi))+1.5)
       self.docking_obj.normal = self.normal
     super().set_axes(new_axes)
-    
-    
+
+

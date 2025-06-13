@@ -6,55 +6,40 @@ Created on Mon Mar 24 16:13:57 2025
 @author: mens
 """
 from LaserCAD.freecad_models import freecad_da, clear_doc, setview
+from LaserCAD.basic_optics import Beam, Lens, SquareBeam, Ray, Composition, Ray_Distribution
+import numpy as np
 
 if freecad_da:
   clear_doc()
 
-# =============================================================================
-# Square Beam Lenses
-# =============================================================================
-import LaserCAD.basic_optics as LC
+alphas = np.linspace(-0.05, 0.05, 3)
+betas = np.linspace(-0.05, 0.05, 3)
 
-sb = LC.SquareBeam(radius=5, ray_in_line=5)
-lens1 = LC.Lens(f=100)
-lens2 = LC.Lens(f=200)
-lens2.aperture = 50.8
-kt = LC.Composition()
-kt.set_light_source(sb)
-kt.propagate(100)
-kt.add_on_axis(lens1)
-kt.propagate(100+200)
-kt.add_on_axis(lens2)
-kt.propagate(200)
-kt.pos = (10, 20, 120)
-# kt.draw()
+allrays = [Ray()]
 
-# =============================================================================
-# Anastigmatic Mirror Telescope
-# =============================================================================
+for al in alphas:
+  for bet in betas:
+    sq = SquareBeam(radius=5, ray_in_line=3)
+    sq.rotate(vec=(0,0,1), phi=al)
+    sq.rotate(vec=(0,1,0), phi=bet)
+    allrays.extend(sq.get_all_rays())
 
-mir1 = LC.Curved_Mirror(radius=250, phi=180-8)
-mir2 = LC.Curved_Mirror(radius=250, phi=0,
-                        theta=180-8)
-mir2.set_mount(LC.Composed_Mount(
-  unit_model_list=["KS1", "0.5inch_post"]))
+bigbundel = SquareBeam()
+bigbundel.override_rays(allrays)
 
-mt = LC.Composition()
-mt.set_light_source(LC.Beam(radius=2))
-mt.propagate(350)
-mt.add_on_axis(mir1)
-mt.propagate(250)
-mt.add_on_axis(mir2)
-mt.propagate(350)
-mt.draw()
+focal = 100
 
+raydist = Ray_Distribution(radius=5, angle=0.05, steps=3)
 
-# =============================================================================
-# draw section
-# =============================================================================
-kt.draw()
-# mt.draw()
+comp = Composition("BigRayTeles")
+comp.set_light_source(raydist)
+comp.propagate(100)
+comp.add_on_axis(Lens(f=100))
+comp.propagate(100*2)
+comp.add_on_axis(Lens(f=100))
+comp.propagate(100)
 
+comp.draw()
 
 if freecad_da:
   setview()
