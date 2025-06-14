@@ -33,6 +33,7 @@ raydist = Ray_Distribution(radius=5, angle=0.05, steps=3)
 
 comp = Composition("BigRayTeles")
 comp.set_light_source(raydist)
+# comp.set_light_source(Beam(radius=5, angle=0.05))
 comp.propagate(100)
 comp.add_on_axis(Lens(f=100))
 comp.propagate(100*2)
