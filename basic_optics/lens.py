@@ -14,7 +14,7 @@ class Lens(Opt_Element):
   def __init__(self, f=100, name="NewLens", **kwargs):
     super().__init__(name=name, **kwargs)
     self.focal_length = f
-    self.thickness = 3
+    self.thickness = 4
     self.freecad_model = model_lens
 
   @property
@@ -33,9 +33,9 @@ class Lens(Opt_Element):
 
   def update_draw_dict(self):
     super().update_draw_dict()
-    self.draw_dict["Radius1"] = 300
+    self.draw_dict["Radius1"] = 400
     self.draw_dict["Radius2"] = 0
-    
+
   def __repr__(self):
     n = len(self.class_name())
     txt = 'Lens(f=' + repr(self.focal_length)
