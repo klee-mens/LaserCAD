@@ -18,7 +18,7 @@ from .ray import Ray
 from .beam import Beam, CircularRayBeam, Gaussian_Beam, RainbowBeam, SquareBeam, Ray_Distribution
 from .optical_element import Opt_Element
 from .lens import Lens
-from .mirror import Mirror, Curved_Mirror, Cylindrical_Mirror,Cylindrical_Mirror1,Stripe_mirror
+from .mirror import Mirror, Curved_Mirror, Cylindrical_Mirror,Cylindrical_Mirror1,Stripe_mirror, Beamsplitter
 from .composition import Composition
 from .constants import inch
 from .grating import Grating

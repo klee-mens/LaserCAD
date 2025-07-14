@@ -68,7 +68,7 @@ def get_mount_by_aperture_and_element(aperture, elm_type, elm_thickness):
     elif aperture <=25.4*4:
       model = "LMR4_M"
     post = "0.5inch_post"
-  elif elm_type == "Mirror" or elm_type == "Curved_Mirror":
+  elif elm_type in ["Mirror", "Curved_Mirror", "Beamsplitter"]:
     post = "1inch_post"
     if aperture<= 25.4/2:
       model = "POLARIS-K05"
