@@ -131,6 +131,64 @@ print()
 
 
 
+# =============================================================================
+# Half Compressor with Spatial Chrip
+# =============================================================================
+from copy import deepcopy
+half_comp = Composition()
+half_comp.propagate(1e-6)
+test_grating2 = Grating(order=-1)
+
+test_grating2.normal = (1,1,0)
+test_grating3 = deepcopy(test_grating2)
+
+half_comp.add_fixed_elm(test_grating2)
+half_comp.recompute_optical_axis()
+half_comp.propagate(1e-6)
+
+kbmat1 = half_comp.Kostenbauder_matrix(reference_axis="y")
+half_comp.propagate(300)
+
+half_comp.add_on_axis(test_grating3)
+test_grating3.normal = -1 * test_grating2.normal
+half_comp.recompute_optical_axis()
+half_comp.propagate(1e-6)
+
+M1 = kbmat1[0,0]
+D1 = kbmat1[1,3]
+wl0 = half_comp._optical_axis[0].wavelength * 1e-3
+kbmat3 = np.eye(4)
+kbmat3[0,0] = 1/M1
+kbmat3[1,1] = M1
+kbmat3[1,3] = -M1*D1
+kbmat3[2,0] = -D1/wl0
+
+kbmat2 = np.eye(4)
+kbmat2[0,1] = 300 / 1e3
+
+kbmat = np.matmul(kbmat3, kbmat2)
+kbmat = np.matmul(kbmat1, kbmat)
+
+
+
+print()
+print()
+print()
+print()
+print()
+
+print(half_comp.Kostenbauder_matrix(reference_axis="y"))
+
+print()
+print(kbmat)
+
+print()
+print()
+print()
+print()
+print()
+
+
 
 # =============================================================================
 # jetzt wäre es noch cool einen mathematischen beispielstrecker zu konstruieren
@@ -187,7 +245,7 @@ comp = Make_Compressor(seperation_angle = 20 /180 *np.pi, # sep between in and o
 kbcomp, txtcomp = comp.Kostenbauder_matrix(dimension=6, text_explanation=True)
 
 print()
-print("GDD plane stretcher:", np.round(comp.GDD*1e30), "fs^2")
+print("GDD plane compressor:", np.round(comp.GDD*1e30), "fs^2")
 print()
 print(txtcomp)
 
@@ -222,13 +280,33 @@ print(cpaT)
 
 
 
+# =============================================================================
+# 3rd OD test
+# =============================================================================
+stretcher3 = Make_Stretcher()
+kb31 = stretcher3.Kostenbauder_matrix()
+gdd31 = kb31[2,3] /(2*np.pi)
+refray = stretcher3._optical_axis[0]
+refray2 = deepcopy(refray)
+deltalam3 = refray2.wavelength * 1e-4
+refray2.wavelength += deltalam3
+kb32 = stretcher3.Kostenbauder_matrix(reference_ray=refray2)
+gdd32 = kb32[2,3] /(2*np.pi)
+trdod = (gdd31-gdd32)/ (deltalam3*1e-3)
+wl = refray.wavelength * 1e-3
+trdod *= wl**2 / 3e8 / (2*np.pi)
+
+print("--------")
+print("Third order dipersion calc:", stretcher3.TOD)
+print("Third order dipersion ray trace:", trdod)
+print("--------")
 
 
 # =============================================================================
 # stretcher with spatial chirp due to missaligned öffner stretcher, see Zedi
 # =============================================================================
 
-delta_z = np.linspace(-5, 5, 11)
+delta_z = np.linspace(-8, 8, 17)
 spatial_chirp = []
 
 for delta in delta_z:
@@ -337,12 +415,13 @@ plt.grid()
 if freecad_da:
   clear_doc()
 
-  plane_stretch.pos += (0, 200, 0)
+  half_comp.draw()
+  # plane_stretch.pos += (0, 200, 0)
   # plane_stretch.draw()
 
   # comp.draw()
 
-  cpa_composition.draw()
+  # cpa_composition.draw()
   # cpa_composition.draw_beams()
   # cpa_composition.draw_elements()
 if freecad_da:

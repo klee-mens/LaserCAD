@@ -25,21 +25,23 @@ from LaserCAD.basic_optics.mount import MIRROR_LIST,LENS_LIST
 
 if freecad_da:
   clear_doc()
-  
+
 for i in range(len(MIRROR_LIST)):
   M = Composed_Mount(unit_model_list=[MIRROR_LIST[i],"1inch_post"])
   aperture = M.mount_list[0].aperture
   mir= Mirror()
   mir.aperture = aperture
   mir.Mount = M
-  mir.pos = (i*85, 0, 50+i*10)
-  mir.normal = (-1, 0.5, 0)
   if mir.aperture > 25.4*4:
     mir.pos -= (50, 0, 0)
     mir.Mount.pos += mir.normal*mir.thickness
-  mir.draw()
-  mir.Mount.draw()
-  
+  comp = Composition()
+  comp.pos = (i*85, 0, 50+i*10)
+  comp.normal = (-1, 0.5, 0)
+  comp.add_on_axis(mir)
+  comp.draw_elements()
+  comp.draw_mounts()
+
 for i in range(len(LENS_LIST)):
   M = Composed_Mount(unit_model_list=[LENS_LIST[i],"0.5inch_post"])
   aperture = M.mount_list[0].aperture
@@ -51,7 +53,7 @@ for i in range(len(LENS_LIST)):
   lens.draw()
   lens.Mount.draw()
 
-#   The above code is just a demonstration of how the mount is drawn. The next 
+#   The above code is just a demonstration of how the mount is drawn. The next
 # step is to demonstrate the practical use of the mount.
 
 
@@ -59,7 +61,7 @@ for i in range(len(LENS_LIST)):
 mir = Mirror()
 mir.pos += (0,-200,0)
 mir.aperture = 1.75* inch
-mir.set_mount_to_default() 
+mir.set_mount_to_default()
 mir.draw()
 mir.Mount.draw()
 
@@ -75,7 +77,7 @@ mir.Mount.draw()
 
 
 # case3: Adaptive_Angular_Mount
-mir = Mirror() 
+mir = Mirror()
 M = Composed_Mount(unit_model_list=["Adaptive_Angular_Mount","KS1","1inch_post"])
 mir.pos = (0,100,80)
 mir.normal = (1,1,-2)
