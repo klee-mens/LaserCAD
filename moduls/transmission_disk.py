@@ -5,7 +5,7 @@ Created on Tue Jul 22 09:47:13 2025
 @author: mens
 """
 
-from ..basic_optics import Composition, Refractive_plane, inch, Component, Composed_Mount
+from ..basic_optics import Composition, Refractive_plane, inch, Component, Composed_Mount, Mirror
 from ..freecad_models import model_mirror
 import numpy as np
 
@@ -46,3 +46,8 @@ class Transmission_Disk(Composition):
       cosmetic.Mount.reverse()
     if mount_flipped:
       cosmetic.Mount.flip()
+
+  def reflected_beam(self, beam):
+    mir = Mirror()
+    mir.set_geom(self._elements[0].get_geom())
+    return mir.next_beam(beam)

@@ -5,9 +5,10 @@ Created on Wed Jul 23 10:08:41 2025
 @author: mens
 """
 
-from LaserCAD.basic_optics.beam_splitter import ThinBeamsplitter, ThickBeamplitter, TFP56
+from LaserCAD.basic_optics import ThinBeamsplitter, ThickBeamsplitter, TFP56
 from LaserCAD.basic_optics import Beam, Composition, inch, Composed_Mount
 from LaserCAD.freecad_models import freecad_da, clear_doc
+from LaserCAD.moduls.transmission_disk import Transmission_Disk
 import numpy as np
 
 if freecad_da:
@@ -16,6 +17,13 @@ if freecad_da:
 # =============================================================================
 # ThinBeamsplitter() test
 # =============================================================================
+"""
+creates a 2 inch thin beam splitter, e.g. 2 dimenional (so no internal
+refraction or lateral shift)
+inserts in a Composition
+creates the reflected beam in yellow by chaging the .transmission property
+"""
+
 
 tnbs = ThinBeamsplitter(angle_of_incidence=45, transmission=True, name="ThinBS")
 tnbs.aperture = 2*inch
@@ -40,10 +48,16 @@ refl.draw()
 
 
 # =============================================================================
-# ThickBeamplitter() test
+# ThickBeamsplitter() test
 # =============================================================================
+"""
+creates a 2 inch thick beam splitter, e.g. not 2 dimenional (so with internal
+refraction and lateral shift)
+inserts in a Composition
+creates the reflected beam in yellow by chaging the .transmission property
+"""
 
-thbs = ThickBeamplitter(angle_of_incidence=45, transmission=True, name="ThinBS")
+thbs = ThickBeamsplitter(angle_of_incidence=45, transmission=True, name="ThinBS")
 thbs.aperture = 2*inch
 thbs.thickness = 6 # 6mm thick
 # thbs.set_mount(Composed_Mount(["KS2", "1inch_post"])) # proper Mount, or not
@@ -70,6 +84,19 @@ refl.draw()
 # =============================================================================
 # TFP56 tests (mostly mount alignement)
 # =============================================================================
+"""
+OK, the only thing special about the TFP56 is its mount (Thorlabs) and the ways
+to arange it.
+By all other meanings it is a Thick BS.
+There are 3 different True Falls properties, resulting in 8 different ways to
+place TFP and Mount.
+The default is
+tb56.angle_positiv = True
+tb56.flip_mount = False
+tb56.revers_mount = False
+
+all 8 variants are drawn and labeled
+"""
 def arguemntlist_to_srting(angpos=True, flipmount=True, revermount=True):
   st = "AOI"
   if angpos:
@@ -119,3 +146,32 @@ for angpos in truefalse:
       br.draw()
 
       tfplist.append(tb56)
+
+
+
+# =============================================================================
+# Transmission Disk
+# =============================================================================
+"""
+If you really want to see the inner ray of a thick TFP (because you are into it
+or maybe because you want to calculate the exact length of an optical axis
+including the inner beam (in fact you would have to divide by n, yeah, anyway))
+so if that is true, you can use the subcomposition Transmission Disk.
+"""
+
+trdisk = Transmission_Disk(name="TMD", refractive_index=1.45,
+                           AOI=-56, thickness=6, aperture=2*inch)
+
+trdiskbeam = Beam(radius=2)
+
+trdiskcomp = Composition(name="ThickCompositionTFP")
+trdiskcomp.set_light_source(trdiskbeam)
+trdiskcomp.pos = (300, 200, 100)
+trdiskcomp.propagate(85)
+trdiskcomp.add_supcomposition_on_axis(trdisk)
+trdiskcomp.propagate(85)
+trdiskcomp.draw()
+
+reflec = trdisk.reflected_beam(trdiskbeam)
+reflec.draw_dict["color"] = (0.6, 0.8, 0.2)
+reflec.draw()

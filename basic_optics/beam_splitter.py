@@ -27,7 +27,7 @@ class ThinBeamsplitter(Mirror):
     return self.reflection(ray)
 
 
-class ThickBeamplitter(ThinBeamsplitter):
+class ThickBeamsplitter(ThinBeamsplitter):
   def __init__(self, angle_of_incidence=45, thickness=5, transmission=True,
                refractive_index=1.45, name="ThickSplitter", **kwargs):
     super().__init__(angle_of_incidence=angle_of_incidence,
@@ -54,7 +54,7 @@ class ThickBeamplitter(ThinBeamsplitter):
 
 
 
-class TFP56(ThickBeamplitter):
+class TFP56(ThickBeamsplitter):
   def __init__(self, name="NewTFP56", **kwargs):
     super().__init__(name=name, angle_of_incidence=56, **kwargs)
     self.angle_of_incidence = 56
@@ -97,4 +97,3 @@ class TFP56_Mount(Unit_Mount):
     self.docking_obj.rotate(vec=(0,0,1), phi=self.angle_of_incidence*np.pi/180)
     self.is_horizontal = False
     self.draw_dict["color"] = (45/255, 45/255, 45/255)
-    
