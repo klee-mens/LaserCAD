@@ -108,18 +108,18 @@ class Mirror(Opt_Element):
   def theta(self, x):
     self.__theta = x
     self.update_normal()
-    
+
   def reflection(self, ray):
     """
     erzeugt den nächsten Strahl aus <Ray> mit Hilfe des Reflexionsgesetzes
     (man beachte die umgedrehte <normal> im Gegensatz zur Konvention in z.B.
     Springer Handbook of Optics and Lasers S. 68)
-  
+
     Parameters
     ----------
     ray : Ray()
       incident ray
-  
+
     Returns
     -------
     reflected ray
@@ -136,7 +136,7 @@ class Mirror(Opt_Element):
 
   def next_ray(self, ray):
     return self.reflection(ray)
-  
+
   def through_out_beam(self, beam):
     newb = deepcopy(beam)
     newb.name = "next_" + beam.name
@@ -145,7 +145,7 @@ class Mirror(Opt_Element):
     for ray in rays:
       nr = self.just_pass_through(ray)
       if not nr:
-        return False 
+        return False
       newrays.append(nr)
     newb.override_rays(newrays)
     return newb
@@ -205,16 +205,16 @@ class Mirror(Opt_Element):
     # print("nextnormal", (inc - refl)/np.linalg.norm(inc - refl))
     self.normal = inc - refl
     self.__phi, self.__theta =  self.recompute_angles()
-    
+
   def set_normal_with_output_direction(self, output_vec=(0,1,0)):
     """
-    sets the normal of the mirror using its __incident_normal and a direction 
+    sets the normal of the mirror using its __incident_normal and a direction
     where the reflected beam should go
-    
-    Example 
+
+    Example
     m = Mirror()
     m.set_normal_with_output_direction(output_vec=(0,1,0))
-    
+
     Parameters
     ----------
     output_vec : TYPE, optional
@@ -282,7 +282,7 @@ class Curved_Mirror(Mirror):
 
   def intersection(self, ray):
     """
-    ermittelt den Schnittpunkt vom Strahl mit einer Spähre, die durch 
+    ermittelt den Schnittpunkt vom Strahl mit einer Spähre, die durch
     <center> € R^3 und <radius> € R definiert ist
     und setzt seine Länge auf den Abstand self.pos--element.pos (bedenken!)
     siehe Springer Handbook of Lasers and Optics Seite 66 f
@@ -290,7 +290,7 @@ class Curved_Mirror(Mirror):
     Parameters
     ----------
     center : TYPE 3D-array
-      Mittelpunkt der Sphäre 
+      Mittelpunkt der Sphäre
 
     radius : TYPE float
       Radius der Sphäre; >0 für konkave Spiegel (Fokus), <0 für konvexe
@@ -312,7 +312,7 @@ class Curved_Mirror(Mirror):
     ray.length = dist
     endpoint = ray.endpoint()
     return endpoint
-  
+
   def next_ray(self, ray):
     """
     erzeugt den nächsten Ray auf Basis der analytischen Berechung von Schnitt-
@@ -343,21 +343,6 @@ class Curved_Mirror(Mirror):
     return ray2
 
 
-
-class Beamsplitter(Mirror):
-  def __init__(self, angle_of_incidence=45, transmission=True, 
-               name="BeamSplitter", **kwargs):
-    super().__init__(phi=180-2*angle_of_incidence, name=name, **kwargs)
-    self.transmission = transmission
-    self.thickness = 3
-    self.draw_dict["color"] = (0.8, 0.0, 0.9)
-
-  def next_ray(self, ray):
-    if self.transmission:
-      return self.just_pass_through(ray)
-    return self.reflection(ray)
-
-  
 
 class Stripe_mirror(Curved_Mirror):
   def __init__(self, **kwargs):

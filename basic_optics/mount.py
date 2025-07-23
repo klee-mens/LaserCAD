@@ -131,8 +131,9 @@ class Unit_Mount(Geom_Object):
       newx, newy, newz = new_axes[:,0], new_axes[:,1], new_axes[:,2]
       newx = np.array((newx[0],newx[1],0))
       newx *= 1/np.linalg.norm(newx)
-      newz = np.array((0,0,1))
-      newy = np.cross(newz, newx)
+      newy = np.array((newy[0],newy[1],0))
+      newy *= 1/np.linalg.norm(newy)
+      newz = np.cross(newx, newy)
       self._axes[:,0] = newx
       self._axes[:,1] = newy
       self._axes[:,2] = newz
@@ -220,6 +221,7 @@ class Unit_Mount(Geom_Object):
 
   def _axes_changed(self, old_axes, new_axes):
     self._rearange_subobjects_axes( old_axes, new_axes, [self.docking_obj])
+
 
 
 class Post(Geom_Object):
@@ -432,8 +434,6 @@ class Composed_Mount(Geom_Object):
 
 
 
-
-
 class Stages_Mount(Composed_Mount):
   """
   class for a Composed mount with x stage.
@@ -468,6 +468,7 @@ class Stages_Mount(Composed_Mount):
     self.mount_list[-1].pos -= shifting_vec
 
 
+
 class Stripe_Mirror_Mount(Composed_Mount):
   def __init__(self, mirror_thickness=10,**kwargs):
     super().__init__(**kwargs)
@@ -478,6 +479,7 @@ class Stripe_Mirror_Mount(Composed_Mount):
     self.add(Post())
 
 
+
 class Rooftop_Mirror_Mount(Composed_Mount):
   def __init__(self, **kwargs):
     super().__init__(**kwargs)
@@ -485,6 +487,7 @@ class Rooftop_Mirror_Mount(Composed_Mount):
     self.add(roof)
     self.add(Unit_Mount("POLARIS-K2"))
     self.add(Post())
+
 
 
 class Grating_Mount(Composed_Mount):
@@ -507,6 +510,7 @@ class Grating_Mount(Composed_Mount):
     self.add(gratingmount)
     self.add(Unit_Mount("POLARIS-K1"))
     self.add(Post())
+
 
 
 class Post_Marker(Unit_Mount):
@@ -549,6 +553,7 @@ class Post_Marker(Unit_Mount):
     # print(self.name," holes' pos=",self.h1,(self.h1[0]+(25*self.size),self.h1[1]),
     #       (self.h1[0]+(25*self.size),self.h1[1]+(25*self.size)),
     #       (self.h1[0],self.h1[1]+(25*self.size)))
+
 
 
 class Adaptive_Angular_Mount(Unit_Mount):
