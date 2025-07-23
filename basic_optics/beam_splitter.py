@@ -7,7 +7,8 @@ Created on Wed Jul 23 10:53:41 2025
 
 from .mirror import Mirror
 from .refractive_plane import Refractive_plane
-from .mount import Unit_Mount
+from .mount import Unit_Mount, Composed_Mount, Post
+# from .post import Post_and_holder
 from ..freecad_models.utils import thisfolder
 import numpy as np
 
@@ -74,29 +75,16 @@ class TFP56(ThickBeamplitter):
       self.phi = 2*self.angle_of_incidence - 180
 
   def update_mount(self):
-    self.set_mount(TFP56_Mount())
+    m56 = TFP56_Mount()
+    cm = Composed_Mount()
+    cm.add(m56)
     if self.flip_mount:
-     m = self.Mount
-     m.rotate(vec=m.normal, phi=np.pi)
+      m56.rotate(vec=m56.normal, phi=np.pi)
+    cm.add(Unit_Mount("POLARIS-K1"))
+    cm.add(Post())
+    self.set_mount(cm)
     if self.revers_mount:
-      self.Mount.reverse()
-
-  # def next_ray(self, ray):
-  #   if self.transmission:
-  #     surface = Refractive_plane(relative_refractive_index=self.refractive_index)
-  #     surface.set_geom(self.get_geom())
-  #     backside = Refractive_plane(relative_refractive_index=1/self.refractive_index)
-  #     backside.set_axes(self.get_axes())
-  #     backside.pos = self.pos + self.thickness*self.normal
-  #     if np.dot(self.normal, ray.normal) > 0:
-  #       first_ray = surface.next_ray(ray)
-  #       second_ray = backside.next_ray(first_ray)
-  #     else:
-  #       first_ray = backside.next_ray(ray)
-  #       second_ray = surface.next_ray(first_ray)
-  #     return second_ray
-  #   return self.reflection(ray)
-
+      cm.reverse()
 
 
 class TFP56_Mount(Unit_Mount):
@@ -107,3 +95,6 @@ class TFP56_Mount(Unit_Mount):
     self.path = thisfolder + "mount_meshes/special_mount/"
     self.docking_obj.pos += (21.20, 24.85, 0)
     self.docking_obj.rotate(vec=(0,0,1), phi=self.angle_of_incidence*np.pi/180)
+    self.is_horizontal = False
+    self.draw_dict["color"] = (45/255, 45/255, 45/255)
+    

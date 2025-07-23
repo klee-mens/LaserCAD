@@ -70,13 +70,30 @@ refl.draw()
 # =============================================================================
 # TFP56 tests (mostly mount alignement)
 # =============================================================================
+def arguemntlist_to_srting(angpos=True, flipmount=True, revermount=True):
+  st = "AOI"
+  if angpos:
+    st += "+"
+  else:
+    st += "-"
+  if flipmount:
+    st += "_Flip"
+  else:
+    st += "_NoFlip"
+  if revermount:
+    st += "_Revers"
+  else:
+    st += "_NoReverse"
+  return st
+
+
 tfplist = []
 
-trfal = [True, False]
-pos = np.array((190,-120,0))
-for angpos in trfal:
-  for flipmount in trfal:
-    for revermount in trfal:
+truefalse = [True, False]
+pos = np.array((210,-200,0))
+for angpos in truefalse:
+  for flipmount in truefalse:
+    for revermount in truefalse:
       tb56 = TFP56()
       tb56.angle_positiv = angpos
       tb56.flip_mount = flipmount
@@ -84,19 +101,21 @@ for angpos in trfal:
       tb56.update_phi()
       tb56.update_mount()
 
-      comp56 = Composition(name="tb65_in_action")
-      pos += (0, 80, 0)
+      comp56 = Composition(name="tb56"+arguemntlist_to_srting(angpos, flipmount, revermount))
+      pos += (0, 150, 0)
       comp56.pos += pos
       comp56.propagate(70)
       comp56.add_on_axis(tb56)
       comp56.propagate(70)
 
-      r0 = comp56._beams[0].inner_ray()
-      rr = tb56.reflection(r0)
-      rr.length = 60
+      b0 = comp56._lightsource
+      tb56.transmission = False
+      br = tb56.next_beam(b0)
+      tb56.transmission = True
+      br.draw_dict["color"] = (1.0, 1.0, 0.1)
+      br.set_length(60)
 
       comp56.draw()
-      rr.draw()
+      br.draw()
 
       tfplist.append(tb56)
-

@@ -131,9 +131,11 @@ class Unit_Mount(Geom_Object):
       newx, newy, newz = new_axes[:,0], new_axes[:,1], new_axes[:,2]
       newx = np.array((newx[0],newx[1],0))
       newx *= 1/np.linalg.norm(newx)
-      newy = np.array((newy[0],newy[1],0))
-      newy *= 1/np.linalg.norm(newy)
-      newz = np.cross(newx, newy)
+      # newy = np.array((newy[0],newy[1],0))
+      # newy *= 1/np.linalg.norm(newy)
+      # newz = np.cross(newx, newy)
+      newz = np.array((0,0,1))
+      newy = np.cross(newz, newx)
       self._axes[:,0] = newx
       self._axes[:,1] = newy
       self._axes[:,2] = newz
