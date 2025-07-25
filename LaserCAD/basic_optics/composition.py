@@ -286,7 +286,7 @@ class Composition(Geom_Object):
     self.draw_beams()
     self.draw_mounts()
 
-  def post_positions(self, verbose=False):
+  def post_positions(self, verbose=False, print_errors=True):
     post_coordinate_list = []
     for elm in self._elements:
       try:
@@ -297,7 +297,7 @@ class Composition(Geom_Object):
         else:
           post_coordinate_list.append(xy)
       except:
-        print("No Post found for Element", elm.name)
+        if print_errors: print("No Post found for Element", elm.name)
     for non_optical in self.non_opticals:
       try:
         post = non_optical.Mount.mount_list[-1]
@@ -307,7 +307,7 @@ class Composition(Geom_Object):
         else:
           post_coordinate_list.append(xy)
       except:
-        print("No Post found for Element", non_optical.name)
+        if print_errors: print("No Post found for Element", non_optical.name)
     return post_coordinate_list
 
   def posts_pq_on_table(self, verbose=True):
