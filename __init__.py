@@ -30,6 +30,9 @@ from .basic_optics.post import Post_and_holder
 from .basic_optics.refractive_plane import Refractive_plane
 from .basic_optics.off_axis_parabola import Off_Axis_Parabola
 from .basic_optics.beam_splitter import ThinBeamsplitter, ThickBeamsplitter, TFP56
+from .basic_optics.non_linear_crystal import NLO_Crystal
+
+from .non_interactings import Breadboard, Crystal, Cylindric_Crystal, Detector, Faraday_Isolator, Iris, Lambda_Plate, LaserPointer, Pockels_Cell, Table
 
 # from . import basic_optics
 # from . import moduls

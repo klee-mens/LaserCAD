@@ -130,6 +130,8 @@ class Beam(Geom_Object):
     for ray in self._rays:
       ray.length = wl
 
+  def wavelength(self):
+    return self._rays[0].wavelength
 
   def _pos_changed(self, old_pos, new_pos):
     """

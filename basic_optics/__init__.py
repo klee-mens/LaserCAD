@@ -30,3 +30,4 @@ from .post import Post_and_holder
 from .refractive_plane import Refractive_plane
 from .off_axis_parabola import Off_Axis_Parabola
 from .beam_splitter import ThinBeamsplitter, ThickBeamsplitter, TFP56
+from .non_linear_crystal import NLO_Crystal
