@@ -9,8 +9,9 @@ from .iris import Iris
 from .lambda_plate import Lambda_Plate
 from .faraday import Faraday_Isolator
 from .pockels_cell import Pockels_Cell
-from .crystal import Crystal
+from .crystal import Crystal, Cylindric_Crystal
 from .breadboard import Breadboard
 from .table import Table
 from .laser_pointer import LaserPointer
+from .detector import Detector
 # from .mount import Unit_Mount, Grating_Mount, Composed_Mount, Stripe_Mirror_Mount, Rooftop_Mirror_Mount, Post

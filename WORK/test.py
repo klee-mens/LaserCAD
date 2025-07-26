@@ -4,161 +4,157 @@ Created on Mon Mar 18 14:01:12 2024
 
 @author: 12816
 """
-from LaserCAD.basic_optics import Beam, Refractive_plane
 from LaserCAD.freecad_models import freecad_da, clear_doc, setview
-import numpy as np
-from LaserCAD.non_interactings import Faraday_Isolator
+from LaserCAD import Composition, Beam, ThinBeamsplitter, Mirror, Composed_Mount, ThickBeamsplitter
+
 
 if freecad_da:
   clear_doc()
 
-farad = Faraday_Isolator()
-farad.draw()
-farad.draw_mount()
+# =============================================================================
+# Michelson Interferometer with Thin Beamsplitter
+# =============================================================================
 
-# THICKNESS = 42
+startbeam = Beam(radius=1)
+thinBS_t = ThinBeamsplitter(transmission=True)
+# thinBS_t.set_mount(Composed_Mount(["KS1", "1inch_post"]))
 
-# ref = Refractive_plane()
-
-# b0 = Beam(radius=1.5)
-
-# ref.pos += (60, 0 , 0)
-# ref.normal = (1,1,0)
-# # ref.normal = (0.1+np.random.rand(), np.random.rand(), np.random.rand())
-
-# b1 =  ref.next_beam(b0)
-
-# ref2 = Refractive_plane(relative_refractive_index=1/1.5)
-
-# # ref2.pos += (2*60, 0 , 0)
-# # ref2.normal = ref.normal
-# ref2.set_geom(ref.get_geom())
-# ref2.pos += ref.normal * THICKNESS
-
-# b2 = ref2.next_beam(b1)
+invis_thinBS_r = ThinBeamsplitter(transmission=False, angle_of_incidence=0)
+invis_thinBS_r.invisible = True
+invis_thinBS_r.Mount.invisible = True
 
 
-
-# from LaserCAD.basic_optics import Opt_Element, Composition, inch, Mirror
-# from LaserCAD.freecad_models import model_lens
-# from LaserCAD.basic_optics import TOLERANCE
-# from copy import deepcopy
-
-# class Transmission_Optic(Opt_Element):
-#   def __init__(self, name="NewTransmissionOptic", refractive_index=1.5,
-#                thickness=5, **kwargs):
-#     super().__init__(name=name, **kwargs)
-#     self.thickness = thickness
-#     self.refractive_index = refractive_index
-#     self.freecad_model = model_lens
-
-#   def update_draw_dict(self):
-#     super().update_draw_dict()
-#     self.draw_dict["Radius1"] = 0
-#     self.draw_dict["Radius2"] = 0
-
-#   def next_ray(self, ray):
-#     ray2 = deepcopy(ray)
-#     ray2.pos = self.intersection(ray)
-#     alpha = ray.angle_to(self)
-#     if np.abs(alpha) < TOLERANCE:
-#       return ray2
-#     beta = np.arcsin(np.sin(alpha)/self.refractive_index)
-#     shift = self.thickness*(np.tan(alpha) - np.tan(beta))
-#     surface_vec = ray.normal -np.sum(ray.normal*self.normal)* self.normal
-#     surface_vec *= 1/np.linalg.norm(surface_vec)
-#     ray2.pos += - surface_vec*shift*np.sign(alpha)
-#     return ray2
-
-# tro = Transmission_Optic(thickness=60/2**0.5)
-# tro.aperture = 100
-# tro.set_geom(ref.get_geom())
-# b3 = tro.next_beam(b0)
-# b3.set_length(410)
-
-# from LaserCAD.freecad_models import model_mirror
-# from LaserCAD.basic_optics import Composed_Mount, Component
+michelson_thin = Composition(name="MichelsonThinBS")
+michelson_thin.propagate(75)
+michelson_thin.add_on_axis(thinBS_t)
+michelson_thin.propagate(80)
+michelson_thin.add_on_axis(Mirror())
+michelson_thin.propagate(80)
+invis_thinBS_r.set_geom(thinBS_t.get_geom())
+michelson_thin.add_fixed_elm(invis_thinBS_r)
+michelson_thin.recompute_optical_axis()
+michelson_thin.propagate(100)
 
 
-# class Transmission_Disk(Composition):
-#   def __init__(self, name="NewExtended_TFP", refractive_index=1.5, AOI=56,
-#                thickness=5, aperture = 2*inch, **kwargs):
-#     super().__init__(name=name, **kwargs)
-#     self.thickness = thickness
-#     self.aperture = aperture
-#     self.refractive_index = refractive_index
-#     self.angle_of_incidence = AOI
+mir = Mirror()
+mir.set_geom(thinBS_t.get_geom())
+mthin_arm2_ls = mir.next_beam(startbeam)
+mthin_arm2_ls.draw_dict["color"] = (1.0, 0.3, 0.0)
 
-#     ref1 = Refractive_plane(relative_refractive_index=self.refractive_index)
-#     ref1.invisible = True
-#     ref2 = Refractive_plane(relative_refractive_index=1/self.refractive_index)
-#     ref2.invisible = True
-#     cosmetic = Component(name="ShapeObject")
-#     cosmetic.freecad_model = model_mirror
-#     cosmetic.thickness = self.thickness
-#     cosmetic.aperture = self.aperture
-#     cosmetic.set_mount(Composed_Mount(unit_model_list=["KS2", "1inch_post"]))
-#     cosmetic.draw_dict["color"] = (1.0, 0.0, 2.0)
-#     self.add_on_axis(ref1)
-#     self.add_on_axis(cosmetic)
-#     self.propagate(self.thickness/np.cos(self.angle_of_incidence*np.pi/180))
-#     self.add_on_axis(ref2)
+invis_thinBS_t = ThinBeamsplitter(transmission=True, angle_of_incidence=0)
+invis_thinBS_t.invisible = True
+invis_thinBS_t.Mount.invisible = True
+invis_thinBS_t.set_geom(thinBS_t.get_geom())
 
-#     ref1.rotate((0,0,1), self.angle_of_incidence*np.pi/180)
-#     ref2.rotate((0,0,1), self.angle_of_incidence*np.pi/180)
-#     cosmetic.rotate((0,0,1), self.angle_of_incidence*np.pi/180)
-#     # self.set_sequence([0,1])
+mthin_arm2 = Composition()
+mthin_arm2.set_geom(mthin_arm2_ls.get_geom())
+mthin_arm2.set_light_source(mthin_arm2_ls)
+mthin_arm2.propagate(90)
+mthin_arm2.add_on_axis(Mirror())
+mthin_arm2.propagate(90)
+mthin_arm2.add_fixed_elm(invis_thinBS_t)
+mthin_arm2.recompute_optical_axis()
+mthin_arm2.propagate(100)
 
 
+michelson_thin.draw()
+mthin_arm2.draw()
+
+
+
+# =============================================================================
+# Mach Zehnder
+# =============================================================================
+mzpos = (300, 100, 90)
+mz_firstprop = 70
+mz_horiz = 180
+mz_vert = 80
+mz_lastprop = 75
+
+machzehnder1 = Composition(name="MachZehnder")
+machzehnder1.pos = mzpos
+machzehnder1.propagate(mz_firstprop)
+machzehnder1.add_on_axis(ThinBeamsplitter(transmission=True, angle_of_incidence=-45))
+machzehnder1.propagate(mz_horiz)
+machzehnder1.add_on_axis(Mirror(phi=-90))
+machzehnder1.propagate(mz_vert)
+machzehnder1.add_on_axis(ThinBeamsplitter(transmission=False, angle_of_incidence=45))
+machzehnder1.propagate(mz_lastprop)
+
+mz_arm2_bs1 = ThinBeamsplitter(transmission=False, angle_of_incidence=-45)
+mz_arm2_bs1.invisible = True
+mz_arm2_bs1.Mount.invisible = True
+
+mz_arm2_bs2 = ThinBeamsplitter(transmission=True, angle_of_incidence=-45)
+mz_arm2_bs2.invisible = True
+mz_arm2_bs2.Mount.invisible = True
+
+mach_arm2 = Composition()
+mach_arm2.set_geom(machzehnder1.get_geom())
+mach_arm2.propagate(mz_firstprop)
+mach_arm2.add_on_axis(mz_arm2_bs1)
+mach_arm2.propagate(mz_vert)
+mach_arm2.add_on_axis(Mirror(phi=+90))
+mach_arm2.propagate(mz_horiz)
+mach_arm2.add_on_axis(mz_arm2_bs2)
+mach_arm2.propagate(mz_lastprop)
+
+machzehnder1.draw()
+mach_arm2.draw()
 
 # # =============================================================================
-# # drawing
+# # Michelson Interferometer with Thick Beamsplitter
 # # =============================================================================
-# b0.draw()
-# ref.draw()
-# b1.draw()
-# ref2.draw()
-# b2.draw()
 
-# tro.draw()
-# b3.draw()
+# startbeam = Beam(radius=1)
+# thickBS_t = ThickBeamsplitter(transmission=True)
+# # thickBS_t.set_mount(Composed_Mount(["KS1", "1inch_post"]))
 
-
-# tfp = Transmission_Disk(thickness=THICKNESS)
-# # tfp = Transmission_Disk(thickness=7)
-# tfp.set_geom(tro.get_geom())
-# tfp._lightsource = b0
-# tfp.propagate(300)
-# tfp.draw()
-
-# comp = Composition()
-# comp.propagate(100)
-# comp.add_on_axis(Mirror(phi=90))
-# comp.propagate(200)
-# tfp = Transmission_Disk(AOI=-56, thickness=8)
-# comp.add_supcomposition_on_axis(tfp)
-# # tfp.rotate((0,0,1), -45*np.pi/180)
-# comp.recompute_optical_axis()
-# comp.propagate(400)
-# comp.add_on_axis(Mirror(phi=90))
-# comp.propagate(100)
-
-# tfp_shape = comp.non_opticals[0]
-# tfp_shape.Mount.reverse()
-
-# comp.draw()
-
-# for ray in comp._optical_axis:
-#   ray.draw()
+# invis_thickBS_r = ThickBeamsplitter(transmission=False, angle_of_incidence=0)
+# invis_thickBS_r.invisible = True
+# invis_thickBS_r.Mount.invisible = True
 
 
-from LaserCAD.non_interactings import LaserPointer
+# michelson_thick = Composition(name="MichelsonthickBS")
+# michelson_thick.propagate(75)
+# michelson_thick.add_on_axis(thickBS_t)
+# michelson_thick.propagate(80)
+# michelson_thick.add_on_axis(Mirror())
+# michelson_thick.propagate(80)
+# invis_thickBS_r.set_geom(thickBS_t.get_geom())
+# michelson_thick.add_fixed_elm(invis_thickBS_r)
+# michelson_thick.recompute_optical_axis()
+# michelson_thick.propagate(100)
 
-las = LaserPointer()
-las.draw()
-las.draw_mount()
-b = Beam()
-b.draw()
+
+# mir = Mirror()
+# mir.set_geom(thickBS_t.get_geom())
+# mthick_arm2_ls = mir.next_beam(startbeam)
+# mthick_arm2_ls.draw_dict["color"] = (1.0, 0.3, 0.0)
+
+# invis_thickBS_t = ThickBeamsplitter(transmission=True, angle_of_incidence=0)
+# invis_thickBS_t.invisible = True
+# invis_thickBS_t.Mount.invisible = True
+# invis_thickBS_t.set_geom(thickBS_t.get_geom())
+
+# mthick_arm2 = Composition()
+# mthick_arm2.set_geom(mthick_arm2_ls.get_geom())
+# mthick_arm2.set_light_source(mthick_arm2_ls)
+# mthick_arm2.propagate(90)
+# mthick_arm2.add_on_axis(Mirror())
+# mthick_arm2.propagate(90)
+# mthick_arm2.add_fixed_elm(invis_thickBS_t)
+# mthick_arm2.recompute_optical_axis()
+# mthick_arm2.propagate(100)
+
+
+# michelson_thick.pos += (200, 50, 0)
+# mthick_arm2.pos += (200, 50, 0)
+
+# michelson_thick.draw()
+# mthick_arm2.draw()
+
+
 
 if freecad_da:
   setview()

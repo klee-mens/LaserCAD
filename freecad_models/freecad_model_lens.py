@@ -21,7 +21,9 @@ if freecad_da:
   from math import pi
 
 
-def model_lens(name="lens", dia=25, Radius1=300, Radius2=0, thickness=3, geom=None, **kwargs):
+def model_lens(name="lens", dia=25, Radius1=300, Radius2=0, thickness=3, 
+               color=DEFAULT_COLOR_LENS, transparency=LENS_TRANSPARENCY,
+               geom=None, **kwargs):
   """
     Build a lens.
 
@@ -116,8 +118,8 @@ def model_lens(name="lens", dia=25, Radius1=300, Radius2=0, thickness=3, geom=No
   rev.Reversed = 1
   sketch.Visibility = False
 
-  obj.ViewObject.ShapeColor = DEFAULT_COLOR_LENS
-  obj.ViewObject.Transparency = LENS_TRANSPARENCY
+  obj.ViewObject.ShapeColor = color
+  obj.ViewObject.Transparency = transparency
   update_geom_info(obj, geom)
   #DOC.recompute()
 
