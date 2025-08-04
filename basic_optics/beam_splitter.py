@@ -8,9 +8,10 @@ Created on Wed Jul 23 10:53:41 2025
 from .mirror import Mirror
 from .refractive_plane import Refractive_plane
 from .mount import Unit_Mount, Composed_Mount, Post
-# from .post import Post_and_holder
+from .beam import Beam
 from ..freecad_models.utils import thisfolder
 import numpy as np
+from copy import deepcopy
 
 
 class ThinBeamsplitter(Mirror):
@@ -21,10 +22,54 @@ class ThinBeamsplitter(Mirror):
     self.thickness = 3
     self.draw_dict["color"] = (0.8, 0.1, 0.5) #cosmetic
 
+    self._output_beam = Beam()
+    self._input_beam = Beam()
+    self._alternative_beam = Beam()
+
   def next_ray(self, ray):
     if self.transmission:
       return self.just_pass_through(ray)
     return self.reflection(ray)
+  
+  def next_beam(self, beam):
+    self._input_beam = deepcopy(beam)
+    output_beam = super().next_beam(beam)
+    self._output_beam = output_beam
+    self.transmission = not self.transmission
+    self._alternative_beam = super().next_beam(beam)
+    self.transmission = not self.transmission
+    return output_beam
+    
+  def get_input_beam(self):
+    return deepcopy(self._input_beam)
+  
+  def get_output_beam(self):
+    return deepcopy(self._output_beam)
+
+  def get_alternative_beam(self):
+    return deepcopy(self._alternative_beam)
+
+  # def _pos_changed(self, old_pos, new_pos):
+    # """
+    # wird aufgerufen, wen die Position von <self> verändert wird
+    # ändert die Position aller __rays mit
+    # """
+    # super()._pos_changed(old_pos, new_pos)
+    # self._rearange_subobjects_pos(old_pos, new_pos, self._input_beam)
+    # self._rearange_subobjects_pos(old_pos, new_pos, self._output_beam) #sonst wird ls doppelt geshifted
+    # self._rearange_subobjects_pos(old_pos, new_pos, self._alternative_beam)
+  
+  # def _axes_changed(self, old_axes, new_axes):
+  #   """
+  #   wird aufgerufen, wen die axese von <self> verändert wird
+  #   dreht die axese aller __rays mit
+  
+  #   dreht außerdem das eigene Koordiantensystem
+  #   """
+  #   super()._axes_changed(old_axes, new_axes)
+  #   self._rearange_subobjects_axes(old_axes, new_axes, self._input_beam)
+  #   self._rearange_subobjects_axes(old_axes, new_axes, self._output_beam)
+  #   self._rearange_subobjects_axes(old_axes, new_axes, self._alternative_beam)
 
 
 class ThickBeamsplitter(ThinBeamsplitter):
