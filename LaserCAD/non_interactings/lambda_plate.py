@@ -25,5 +25,5 @@ class Lambda_Plate(Component):
   def set_mount_to_default(self):
     self.Mount = Composed_Mount()
     self.Mount.add(Unit_Mount("lambda_mirror_mount"))
-    self.Mount.add(Post())
+    self.Mount.add(Post(model="0.5inch_post"))
     self.Mount.set_geom(self.get_geom())
