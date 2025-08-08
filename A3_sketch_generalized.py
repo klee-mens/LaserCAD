@@ -16,24 +16,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 import sys
 
-# pfad = __file__
-# pfad = pfad.replace("\\","/") #folder conventions windows linux stuff
-# ind = pfad.rfind("/")
-# pfad = pfad[0:ind-1]
-# ind = pfad.rfind("/")
-# pfad = pfad[0:ind]
-# if not pfad in sys.path:
-#   print(pfad)
-#   sys.path.append(pfad)pyth
-
 from LaserCAD.freecad_models import clear_doc, setview, freecad_da, model_mirror, add_to_composition
 from LaserCAD.basic_optics import Mirror, Beam, Ray_Distribution, Composition, Component, inch, Curved_Mirror, Ray, Geom_Object
 from LaserCAD.basic_optics import Grating, Opt_Element
 import matplotlib.pyplot as plt
 from LaserCAD.freecad_models.utils import thisfolder, load_STL
-from LaserCAD.non_interactings import Crystal, Lambda_Plate
-from LaserCAD.basic_optics import Composed_Mount,Unit_Mount,Lens,Post
+from LaserCAD.non_interactings import Crystal, Lambda_Plate, Pockels_Cell
+from LaserCAD.basic_optics import Composed_Mount,Unit_Mount,Lens,Post, export_to_TikZ, print_post_positions
 from copy import deepcopy
+from LaserCAD.moduls import Polarization_Rotator
 
 
 def rad(angle):
@@ -52,14 +43,6 @@ def get_TFP_distances(TFP_ydist, TFP_angle):
     PC_TFP = TFP_dist - TFP_Lam - Lam_PC
     
     return TFP_dist, TFP_xdist, TFP_delta, TFP_Lam, Lam_PC, PC_TFP
-
-def print_post_positions(Composition, max_tabs = 5):
-    post_positions = Composition.post_positions(verbose=True, print_errors=False)
-    for post, position in post_positions:
-        padd = "\t" * max(1, max_tabs- len(post) // 8)
-        print(f"name = {post},{padd} post position = ({position[0]/10:.1f}cm,{position[1]/10:.1f}cm)")
-    
-    return post_positions
 
 rotate_axis = np.pi
 offset_axis = (950+110-15,500,20)
@@ -113,64 +96,19 @@ class Cylindric_Crystal(Component):
     self.freecad_model = model_mirror
     self.pos += offset_axis
 
-pockels_cell = Component(name="Pockels Cell")
-pockels_cell.draw_dict["stl_file"]= rf"{thisfolder}\mount_meshes\A2_mounts\Pockels_cell.stl"
-pockels_cell.freecad_model = load_STL
+# pockels_cell = Component(name="Pockels Cell")
+# pockels_cell.draw_dict["stl_file"]= rf"{thisfolder}\mount_meshes\A2_mounts\Pockels_cell.stl"
+# pockels_cell.freecad_model = load_STL
 
 vacuum_tube = Component(name="Vacuum Tube")
 vacuum_tube.draw_dict["stl_file"]= rf"{thisfolder}\mount_meshes\special_mount\Vacuum_Tube_1300mm.stl"
 vacuum_tube.freecad_model = load_STL
 
-
-"""
-Polarisationsdreher
-"""
-
-sep = 28.3
-PD_theta = 45*np.pi/180
-L = 80.3
-start_length = 14.496
-PD_length = sep + 2*start_length
-length_diff = 192.066 - PD_length
-
-Housing = Unit_Mount("Polarization_rotator-Fusion")
-Housing.draw_dict["color"]=(239/255, 239/255, 239/255)
-Housing.docking_obj.pos += (28.65,38.89, -41.89)
-Housing.docking_obj.normal = (0,0,1)
-
-
-Rotator_box = Composed_Mount()
-Rotator_box.add(Housing)
-Rotator_box.add(Post())
-Pol_Rotator_elm=Component()
-Pol_Rotator_elm.draw_dict["stl_file"]="dont_draw"
-Pol_Rotator_elm.freecad_model = load_STL
-Pol_Rotator_elm.Mount = Rotator_box
-
-PDM1 = Mirror(name="Polarisationsdreher M1")
-PDM2 = Mirror(name="Polarisationsdreher M2")
-PDM3 = Mirror(name="Polarisationsdreher M3")
-PDM2.pos += (start_length + sep/2, L*np.cos(PD_theta), L*np.sin(PD_theta))
-PDM3.pos += (start_length + sep,0,0)
-Pol_Rotater = Composition(name="Polarisationsdreher")
-Pol_Rotater.add_on_axis(Pol_Rotator_elm)
-Pol_Rotater.propagate(start_length)
-Pol_Rotater.add_on_axis(PDM1)
-PDM1.set_normal_with_2_points(Pol_Rotater.pos-(1,0,0), PDM2.pos)
-Pol_Rotater.add_fixed_elm(PDM2)
-PDM2.set_normal_with_2_points(PDM1.pos, PDM3.pos)
-Pol_Rotater.add_fixed_elm(PDM3)
-PDM3.set_normal_with_2_points(PDM2.pos, PDM3.pos + (1,0,0))
-Pol_Rotater.propagate(start_length)
-
-PDM1.set_mount(Unit_Mount())
-PDM2.set_mount(Unit_Mount())
-PDM3.set_mount(Unit_Mount())
-
 """
 Simulation of the amplifier cavity
 """
 
+Pol_Rotater = Polarization_Rotator()
 r1 = 2000 
 r2 = 2500
 
@@ -182,7 +120,7 @@ beam.pos=[0,0,0]
 
 if UsePolRotator:
     g = 500 # object distance: distance between the pump region and the first curved mirror
-    length_diff = 192.066 - PD_length
+    length_diff = Pol_Rotater.length_diff
     if UseNormalDesign: g -= 20
 else: 
     g = 520#520
@@ -273,7 +211,7 @@ R1 = Newport_Curved_Mirror(name=f"R1, f={f1:.0f}mm", phi=-180+tele_angle1, radiu
 R2 = Newport_Curved_Mirror(name=f"R1, f={f2:.0f}mm", phi=-180+tele_angle2, radius=r2)
 TFP1 = Newport_Mirror(name="TFP1 (Input)", phi=-90+deg(TFP_angle), aperture=25.4*2)
 TFP2 = Newport_Mirror(name="TFP2 (Output)", phi=90-deg(TFP_angle), aperture=25.4*2)
-
+pockels_cell = Pockels_Cell(name="Pockels Cell", mount_name="Pockels_cell")
 
 Setup = Composition(name="A3")
 Setup.set_light_source(beam)
@@ -369,14 +307,14 @@ beam1.draw_dict["color"] = (255/256,255/256,0.0)
 beam2 = Ray_Distribution(radius=pump_spot_size/2,angle=0*2.08*np.pi/180,wavelength=940E-6, steps=3)
 beam2.draw_dict["color"] = (255/256,255/256,0.0)
 
-Comp = Composition(name="PM19 top")
-Comp.set_light_source(beam1)
-Comp.pos -= (pump_module_xoffset,0,0)
+Pump_top = Composition(name="PM19 top")
+Pump_top.set_light_source(beam1)
+Pump_top.pos -= (pump_module_xoffset,0,0)
 
 
-Comp2 = Composition(name="PM19 bot")
-Comp2.set_light_source(beam2)
-Comp2.pos -= (pump_module_xoffset,pump_module_separation,0)
+Pump_bot = Composition(name="PM19 bot")
+Pump_bot.set_light_source(beam2)
+Pump_bot.pos -= (pump_module_xoffset,pump_module_separation,0)
 
 Laser_Head_in = Component(name="Pump Module PM19 bot")
 stl_file = rf"{thisfolder}\misc_meshes\PM19_2.stl"
@@ -404,32 +342,29 @@ M3_1 = Newport_Mirror(phi=90, name="3inch mirror", aperture=25.4*3)
 M3_2 = deepcopy(M3_1)
 M3_2.name = "3inch mirror 2"
 
-# Comp.rotate((0,0,1), rotate_axis)
-Comp.pos += offset_axis
-print(f"PM19 top position = ({Comp.pos[0]/10:.1f}cm, {Comp.pos[1]/10:.1f}cm, {Comp.pos[2]/10:.1f}cm)")
-Comp.add_on_axis(Laser_Head_in)
-Comp.propagate(pump_module_lens_dist)
-Comp.add_on_axis(lens1)
-Comp.propagate(image_distance)
+# Pump_top.rotate((0,0,1), rotate_axis)
+Pump_top.pos += offset_axis
+print(f"PM19 top position = ({Pump_top.pos[0]/10:.1f}cm, {Pump_top.pos[1]/10:.1f}cm, {Pump_top.pos[2]/10:.1f}cm)")
+Pump_top.add_on_axis(Laser_Head_in)
+Pump_top.propagate(pump_module_lens_dist)
+Pump_top.add_on_axis(lens1)
+Pump_top.propagate(image_distance)
 
-Comp2.pos += offset_axis
-print(f"PM19 bot position = ({Comp2.pos[0]/10:.1f}cm, {Comp2.pos[1]/10:.1f}cm, {Comp2.pos[2]/10:.1f}cm)")
-Comp2.add_on_axis(Laser_Head_out)
-Comp2.propagate(pump_module_lens_dist)
-Comp2.add_on_axis(lens4)
-# Comp2.propagate(focal_length1+focal_length2)
-Comp2.propagate(image_distance+focal_length2)
-Comp2.add_on_axis(lens3)
-Comp2.propagate(distance_lens_to_mirror)
-Comp2.add_on_axis(M3_2)
-Comp2.propagate(pump_module_separation)
-Comp2.add_on_axis(M3_1)
-Comp2.propagate(distance_lens_to_mirror)
-Comp2.add_on_axis(lens2)
-Comp2.propagate(focal_length2)
-# Comp2.propagate(focal_length2+focal_length1-image_distance)
-# Laser_Head_out.normal = -Laser_Head_out.normal
-
+Pump_bot.pos += offset_axis
+print(f"PM19 bot position = ({Pump_bot.pos[0]/10:.1f}cm, {Pump_bot.pos[1]/10:.1f}cm, {Pump_bot.pos[2]/10:.1f}cm)\n")
+Pump_bot.add_on_axis(Laser_Head_out)
+Pump_bot.propagate(pump_module_lens_dist)
+Pump_bot.add_on_axis(lens4)
+# Pump_bot.propagate(focal_length1+focal_length2)
+Pump_bot.propagate(image_distance+focal_length2)
+Pump_bot.add_on_axis(lens3)
+Pump_bot.propagate(distance_lens_to_mirror)
+Pump_bot.add_on_axis(M3_2)
+Pump_bot.propagate(pump_module_separation)
+Pump_bot.add_on_axis(M3_1)
+Pump_bot.propagate(distance_lens_to_mirror)
+Pump_bot.add_on_axis(lens2)
+Pump_bot.propagate(focal_length2)
 
 table = Table(name="Right Table", width=900, height=10, thickness=1500)
 table.pos = (0,450,-5)
@@ -453,74 +388,11 @@ LiMgAS_crystal1.pos += (1,0,0)
 LiMgAS_crystal2 = Cylindric_Crystal(name="LiMgAs2", aperture=15, thickness=11)
 LiMgAS_crystal2.pos += (-12, 0, 0)
 
-def replace_string(string):
-    return string.replace(" ", "_").replace(",", "_").replace("(", "").replace(")", "").replace("__", "_")
-
-def calc_tikz_angle(mirror):
-    """Calculate the angle for TikZ drawing based on the mirror's normal vector."""
-    return np.arctan2(mirror.normal[1], mirror.normal[0]) * 180 / np.pi
-
-def export_to_TikZ(Setup, draw_rays = False, draw_beams = False, beam_color="black"):
-    start_coordinate = f"{Setup.pos[0]/100:.1f}, {Setup.pos[1]/100:.1f}"
-    start_name = "Start_" + replace_string(Setup.name)
-    coordinates_string = f"\\coordinate ({start_name}) at ({start_coordinate});\n"
-    mirror_string = ""
-    ray_string = f"\\draw[thick] ({start_coordinate})--"
-    beam_string = ""
-
-    names = [replace_string(mirror.name) for mirror in Setup._elements]
-    angles = [calc_tikz_angle(mirror) for mirror in Setup._elements]
-    positions = [f"{mirror.pos[0]/100:.1f}, {mirror.pos[1]/100:.1f}" for mirror in Setup._elements]
-
-    for i, mirror in enumerate(Setup._elements):
-        mirror_name = "mirror" 
-        if hasattr(mirror, "radius"): mirror_name = "curvedmirror"
-        if "TFP" in mirror.name: mirror_name = "TFP"
-        if "lens" in mirror.name or "Lens" in mirror.name: mirror_name = "convexlens"
-        coordinates_string += f"\\coordinate ({names[i]}) at ({positions[i]});\n"
-        mirror_string += f"\\{mirror_name}[angle={angles[i]:.1f}, width={mirror.aperture/50.8:.1f}] at ({names[i]});\n"
-        ray_string += f"({names[i]})--"
-
-        if i > 0:
-            angle_prev = angles[i-1]
-            name_prev = names[i-1]
-        else:
-            angle_prev = angles[i] + 180
-            name_prev = start_name
-
-        beam_string += f"\\drawbeam[0.5][0.5][{beam_color}]{{{name_prev}}}{{{names[i]}}}{{{angle_prev:.1f}}}{{{angles[i]:.1f}}};\n"
-
-    for element in Setup.non_opticals:
-        angle = calc_tikz_angle(element)
-        name = replace_string(element.name)
-        if "Lambda" in element.name: element_name = "tinysplitter"
-        elif "Pockels" in element.name: element_name = "pockelscell"
-        elif "PM19" in element.name: 
-            element_name = "laser"
-            angle += 180
-        else: continue
-
-        coordinates_string += f"\\coordinate ({name}) at ({element.pos[0]/100:.1f}, {element.pos[1]/100:.1f});\n"
-        mirror_string += f"\\{element_name}[angle={angle:.1f}] at ({name});\n"
-
-    endpoint = Setup.compute_beams()[-1].inner_ray().endpoint()
-    ray_string += f"({endpoint[0]/100:.1f}, {endpoint[1]/100:.1f});"
-    beam_string += f"\\drawbeam[0.5][0.5][{beam_color}]{{{names[-1]}}}{{{endpoint[0]/100:.1f}, {endpoint[1]/100:.1f}}}{{{angle_prev:.1f}}}{{{angle:.1f}}};\n"
-
-    print(f"%%%%% {Setup.name} %%%%%")
-    print(coordinates_string)
-    if draw_rays: print(ray_string)
-    if draw_beams: print(beam_string)  
-    print(mirror_string)
-
-
-from LaserCAD.basic_optics.mount import MIRROR_LIST,LENS_LIST
-
 if freecad_da:
     clear_doc()
     Setup.draw()
-    Comp.draw()
-    Comp2.draw()
+    Pump_top.draw()
+    Pump_bot.draw()
     table.draw()
     table2.draw()
     Housing.draw()
@@ -530,12 +402,10 @@ if freecad_da:
     # setview()
 
 else:
-    # print_post_positions(Setup) 
-    # print_post_positions(Comp)
-    # print_post_positions(Comp2)
-    export_to_TikZ(Comp, draw_beams=True, beam_color="optikzred")
-    export_to_TikZ(Comp2, draw_beams=True, beam_color="optikzred")
-    export_to_TikZ(Setup, draw_rays=True)
-    # beam1 = Setup.compute_beams()
-    # print(Setup.compute_beams())
-    # print(beam1[-1].inner_ray().endpoint())
+    print_post_positions(Setup) 
+    print_post_positions(Pump_top)
+    print_post_positions(Pump_bot)
+
+    # export_to_TikZ(Pump_top, draw_beams=True, beam_color="optikzred")
+    # export_to_TikZ(Pump_bot, draw_beams=True, beam_color="optikzred")
+    # export_to_TikZ(Setup, draw_rays=True)

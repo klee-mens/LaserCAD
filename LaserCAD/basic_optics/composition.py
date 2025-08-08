@@ -664,4 +664,99 @@ def next_name(name, prefix=""):
   return prefix + name[0:ind] + "_" + suffix
 
 
+# Print Post positions
+def print_post_positions(Composition, max_tabs = 5):
+    """Prints the post positions of the given Composition object.
+    The positions are printed in a formatted way with tabs for alignment.
+    """
+    post_positions = Composition.post_positions(verbose=True, print_errors=False)
+    for post, position in post_positions:
+        padd = "\t" * max(1, max_tabs- len(post) // 8)
+        print(f"name = {post},{padd} post position = ({position[0]/10:.1f}cm,{position[1]/10:.1f}cm)")
+    
+    return post_positions
+
+# Export to TikZ 
+
+# Helper functions for TikZ export
+def replace_string(string):
+    """Replace spaces and commas in a string with underscores, and remove parentheses."""
+    return string.replace(" ", "_").replace(",", "_").replace("(", "").replace(")", "").replace("__", "_")
+
+def strip_zeros(value, precision=2):
+    """Strip trailing zeros from a float value and return as a string."""
+    return f"{value:.{precision}f}".rstrip('0').rstrip('.')
+
+def calc_tikz_angle(mirror):
+    """Calculate the angle for TikZ drawing based on the mirror's normal vector."""
+    return np.arctan2(mirror.normal[1], mirror.normal[0]) * 180 / np.pi
+
+def export_to_TikZ(Setup, draw_rays = False, draw_beams = False, beam_color="black", scale=10, filename=None):
+  scale *= 10  # convert mm to cm for TikZ
+  start_coordinate = f"{Setup.pos[0]/scale:.2f}, {Setup.pos[1]/scale:.2f}"
+  start_name = "Start_" + replace_string(Setup.name)
+  coordinates_string = f"\\coordinate ({start_name}) at ({start_coordinate});\n"
+  mirror_string = ""
+  ray_string = f"\\draw[thick] ({start_coordinate})--"
+  beam_string = ""
+
+  names = [replace_string(mirror.name) for mirror in Setup._elements]
+  angles = [strip_zeros(calc_tikz_angle(mirror)) for mirror in Setup._elements]
+  positions = [f"{mirror.pos[0]/scale:.2f}, {mirror.pos[1]/scale:.2f}" for mirror in Setup._elements]
+
+  for i, mirror in enumerate(Setup._elements):
+      mirror_name = "mirror"
+      # function to image 1inch -> 0.66, 2inch -> 1, 3inch -> 1.5
+      mirror_width = f"{(mirror.aperture/25.4)**2/12+(mirror.aperture/25.4)/12 + 0.5:.2f}".rstrip('0').rstrip('.') 
+      if hasattr(mirror, "radius"): mirror_name = "curvedmirror"
+      if "TFP" in mirror.name: mirror_name = "TFP"
+      if "lens" in mirror.name or "Lens" in mirror.name: mirror_name = "convexlens"
+      coordinates_string += f"\\coordinate ({names[i]}) at ({positions[i]});\n"
+      mirror_string += f"\\{mirror_name}[angle={angles[i]}, width={mirror_width}] at ({names[i]});\n"
+      ray_string += f"({names[i]})--"
+
+      if i > 0:
+          angle_prev = angles[i-1]
+          name_prev = names[i-1]
+      else:
+          angle_prev = strip_zeros(calc_tikz_angle(mirror)+180)
+          name_prev = start_name
+
+      beam_string += f"\\drawbeam[0.5][0.5][{beam_color}]{{{name_prev}}}{{{names[i]}}}{{{angle_prev}}}{{{angles[i]}}};\n"
+
+  for element in Setup.non_opticals:
+      angle = calc_tikz_angle(element)
+      name = replace_string(element.name)
+      if "Lambda_Plate" == element.class_name: element_name = "tinysplitter"
+      elif "Pockels" in element.name or "Pockels_Cell" == element.class_name: element_name = "pockelscell"
+      elif "laser" in element.name: 
+          element_name = "laser"
+          angle += 180
+      elif "camera" in element.name or "Camera" == element.class_name:  element_name = "camera"
+      elif "diode" in element.name or "Diode" == element.class_name:  element_name = "diode"
+      else: continue
+
+      coordinates_string += f"\\coordinate ({name}) at ({element.pos[0]/100:.1f}, {element.pos[1]/100:.1f});\n"
+      mirror_string += f"\\{element_name}[angle={angle:.1f}] at ({name});\n"
+
+  endpoint = Setup.compute_beams()[-1].inner_ray().endpoint()
+  ray_string += f"({endpoint[0]/100:.1f}, {endpoint[1]/100:.1f});"
+  try:
+      beam_string += f"\\drawbeam[0.5][0.5][{beam_color}]{{{names[-1]}}}{{{endpoint[0]/100:.1f}, {endpoint[1]/100:.1f}}}{{{angle_prev}}}{{{angles[-1]}}};\n"
+  except:
+      pass
+
+  print(f"%%%%% {Setup.name} %%%%%")
+  print(coordinates_string)
+  if draw_rays: print(ray_string)
+  if draw_beams: print(beam_string)  
+  print(mirror_string)
+
+  if filename:
+    with open(filename, "a") as f:
+        f.write(f"%%%%% {Setup.name} %%%%%\n")
+        f.write(coordinates_string)
+        if draw_rays: f.write(ray_string)
+        if draw_beams: f.write(beam_string)
+        f.write(mirror_string)
 
