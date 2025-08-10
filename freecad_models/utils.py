@@ -258,9 +258,9 @@ def load_STL(stl_file, name="new_mesh", geom=None, off0=0,
   return obj
 
 def load_STEP(step_file, name="new_step", geom=None, off0=0, **kwargs):
-  DOC = get_DOC()
+  # DOC = get_DOC()
   obj = ImportGui.insert(step_file, DOC_NAME)
-  obj.Label = name
+  # obj.Label = name
   update_geom_info(obj, geom, off0)
   ##DOC.recompute()
   return obj

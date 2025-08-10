@@ -436,6 +436,9 @@ class Composed_Mount(Geom_Object):
 
 
 
+
+
+
 class Stages_Mount(Composed_Mount):
   """
   class for a Composed mount with x stage.
@@ -597,3 +600,33 @@ class Adaptive_Angular_Mount(Unit_Mount):
     super().set_axes(new_axes)
 
 
+class KM100C(Composed_Mount):
+  def __init__(self, name="KM100C", aperture=15, side_shift=0, post="1inch_post", **kwargs):
+    super().__init__(name=name, **kwargs)
+    self.aperture = aperture
+    self.side_shift = side_shift
+    self.post_model = post
+
+    upper = Unit_Mount()
+    upper.model = "KM100C_upper"
+    upper.path = thisfolder + "misc_meshes/"
+    upper.draw_dict["color"] = (0.18,0.18,0.18)
+    upper.docking_obj.pos += (2, 0, -aperture-1)
+    self.add(upper)
+    upper.pos += (2,0,aperture/2)
+
+    extension = Unit_Mount()
+    extension.model = "KM100C_extension"
+    extension.path = thisfolder + "misc_meshes/"
+    self.add(extension)
+
+    lower = Unit_Mount()
+    lower.model = "KM100C_lower"
+    lower.path = thisfolder + "misc_meshes/"
+    lower.draw_dict["color"] = (0.18,0.18,0.18)
+    lower.docking_obj.pos += -9,13.55,-17.65
+    # lower.docking_obj.pos += -9,13.55,-17.65 -aperture/2
+    self.add(lower)
+    # lower.pos += (0,0,-aperture/2)
+
+    self.add(Post(model=post))

@@ -40,7 +40,7 @@ comp.propagate(100*2)
 comp.add_on_axis(Lens(f=100))
 comp.propagate(100)
 
-comp.draw()
+# comp.draw()
 
 if freecad_da:
   setview()
