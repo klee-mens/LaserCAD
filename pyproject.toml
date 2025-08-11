@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "LaserCAD"
+version = "1.1.0"
+description = "Procrastination next level"
+authors = ["Clemens Anschütz <clemens.anschuetz@uni-jena.de>", "Martin Beyer <m.beyer@uni-jena.de>", "He Zhuang"]
+license = "MIT"
+readme = "README.md"
+packages = [{include = "LaserCAD"}]
+
+[tool.poetry.dependencies]
+python = "^3.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
