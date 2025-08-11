@@ -9,10 +9,6 @@ publish_to_pypi:
   script:
     # this will implicitly call poetry with the default settings on server  
     - poetry_default
-  artifacts:
-    paths:
-      - dist/  # Save the 'dist' directory containing the built package
-    expire_in: 1 week  # Artifacts will be deleted after 1 week
   only:
     - tags  # Publish only on tagged commits
 
