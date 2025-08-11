@@ -9,7 +9,7 @@ from .geom_object import TOLERANCE, NORM0
 from .ray import Ray
 from .optical_element import Opt_Element
 from .mount import Stripe_Mirror_Mount, Unit_Mount
-from ..freecad_models import model_mirror, model_stripe_mirror
+from ..freecad_models import model_mirror, model_stripe_mirror, model_crystal
 import numpy as np
 from copy import deepcopy
 
@@ -502,24 +502,40 @@ class Cylindrical_Mirror(Stripe_mirror):
     return ray2
 
 
-class Cylindrical_Mirror1(Cylindrical_Mirror):
-  @property
-  def radius(self):
-    return self.__radius
-  @radius.setter
-  def radius(self, x):
-    """
-    This part is incorrect. Since I don't know the matrix of Cylindrical_Mirror
-    Parameters
-    ----------
-    x : TYPE
-      DESCRIPTION.
-    """
-    self.__radius = x
-    if x == 0:
-      self._matrix[1,0] = 0
-    else:
-      self._matrix[1,0] = 0
+class Rectangular_Mirror(Mirror):
+  def __init__(self, name="NewRectMirror", height=25, width=25, phi=180, theta=0, **kwargs):
+    super().__init__(phi=phi, theta=theta, name=name)
+    self.height = height
+    self.width = width
+    # self.thickness = thickness
+    self.freecad_model = model_crystal
+    # self.draw_dict["color"] = (131/255,27/255,44/255)
+
+  def update_draw_dict(self):
+    super().update_draw_dict()
+    self.draw_dict["height"] = self.height
+    self.draw_dict["width"] = self.width
+    self.draw_dict["thickness"] = self.thickness
+
+
+# class Cylindrical_Mirror1(Cylindrical_Mirror):
+#   @property
+#   def radius(self):
+#     return self.__radius
+#   @radius.setter
+#   def radius(self, x):
+#     """
+#     This part is incorrect. Since I don't know the matrix of Cylindrical_Mirror
+#     Parameters
+#     ----------
+#     x : TYPE
+#       DESCRIPTION.
+#     """
+#     self.__radius = x
+#     if x == 0:
+#       self._matrix[1,0] = 0
+#     else:
+#       self._matrix[1,0] = 0
 
 
  # def draw_fc(self):

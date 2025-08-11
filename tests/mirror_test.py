@@ -6,10 +6,11 @@ Created on Mon Jul  1 11:01:45 2024
 @author: mens
 """
 
-from LaserCAD.basic_optics import Mirror, Composition, Beamsplitter, Composed_Mount, inch
+from LaserCAD.basic_optics import Mirror, Composition, Composed_Mount, inch
 from LaserCAD.freecad_models import freecad_da, clear_doc, setview
-from LaserCAD.basic_optics.mirror import ThickBeamplitter
+from LaserCAD.basic_optics import ThickBeamsplitter, ThinBeamsplitter, TFP56
 from LaserCAD.basic_optics.mount import Adaptive_Angular_Mount, Composed_Mount, Unit_Mount, Post
+
 import numpy as np
 
 if freecad_da:
@@ -100,7 +101,7 @@ c.draw()
 # =============================================================================
 # thick beam splitter
 # =============================================================================
-tbs = ThickBeamplitter()
+tbs = ThickBeamsplitter()
 # tbs.aperture = 1*inch
 # tbs.thickness = 5
 tbsmount = Composed_Mount()

@@ -601,32 +601,41 @@ class Adaptive_Angular_Mount(Unit_Mount):
 
 
 class KM100C(Composed_Mount):
-  def __init__(self, name="KM100C", aperture=15, side_shift=0, post="1inch_post", **kwargs):
+  def __init__(self, name="KM100C", height=15, width=0, post="1inch_post", **kwargs):
     super().__init__(name=name, **kwargs)
-    self.aperture = aperture
-    self.side_shift = side_shift
+    self.height = height
+    self.side_shift = 0 if width < 25 else (25-width)/2
     self.post_model = post
-
+    self.docking_obj.rotate(vec=(0,0,1), phi=np.pi)
+    self.docking_obj.pos += (4, self.side_shift, height/2)
+    
     upper = Unit_Mount()
     upper.model = "KM100C_upper"
     upper.path = thisfolder + "misc_meshes/"
     upper.draw_dict["color"] = (0.18,0.18,0.18)
-    upper.docking_obj.pos += (2, 0, -aperture-1)
+    upper.docking_obj.pos += (0, 0, -height-0.7)
     self.add(upper)
-    upper.pos += (2,0,aperture/2)
 
-    extension = Unit_Mount()
-    extension.model = "KM100C_extension"
-    extension.path = thisfolder + "misc_meshes/"
-    self.add(extension)
-
+    self.number_of_extensions = int((self.height+5) // (1.5*25.4)) + 1
+    for n in range(self.number_of_extensions):
+      extension = Unit_Mount()
+      extension.model = "KM100C_extension"
+      extension.path = thisfolder + "misc_meshes/"
+      extension.docking_obj.pos += (0, 0, +1.5*25.4)
+      self.add(extension)
+    
+    invis = Unit_Mount()
+    invis.invisible = True
+    invis.docking_obj.pos += (0, 0, -1.5*25.4*self.number_of_extensions)
+    self.add(invis)
+    
     lower = Unit_Mount()
+    print("lower pos", lower.pos)
     lower.model = "KM100C_lower"
     lower.path = thisfolder + "misc_meshes/"
     lower.draw_dict["color"] = (0.18,0.18,0.18)
-    lower.docking_obj.pos += -9,13.55,-17.65
-    # lower.docking_obj.pos += -9,13.55,-17.65 -aperture/2
+    lower.docking_obj.pos += (-9, 13.55, -17.65)
     self.add(lower)
-    # lower.pos += (0,0,-aperture/2)
+    print("lower pos", lower.pos)
 
     self.add(Post(model=post))
