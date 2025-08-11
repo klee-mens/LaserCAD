@@ -146,5 +146,14 @@ M.set_geom(mir1.get_geom())
 mir1.draw()
 mir1.draw_mount()
 
+mir_big_pos = Mirror()
+mir_big_pos.pos += (0,630,0)
+M = Composed_Mount(unit_model_list=["KS1","big_post"])
+mir_big_pos.set_mount(M)
+mir_big_pos.draw()
+mir_big_pos.draw_mount()
+
 if freecad_da:
   setview()
+
+print(MIRROR_LIST)
