@@ -7,4 +7,4 @@ teles = Make_Telescope()
 # Folder = os.path.dirname(os.path.abspath(__file__))
 
 export_to_TikZ(teles)
-# export_to_TikZ(teles, filename=os.path.join(Folder, "telescope.tex"))
+export_to_TikZ(teles, filename="telescope.tex")

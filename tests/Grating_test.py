@@ -7,7 +7,7 @@ Created on Fri Mar 15 09:57:01 2024
 
 from copy import deepcopy
 
-from LaserCAD.basic_optics import Mirror,Beam,Cylindrical_Mirror,Intersection_plane,Cylindrical_Mirror1,Curved_Mirror,Ray, Composition, Grating
+from LaserCAD.basic_optics import Mirror,Beam,Cylindrical_Mirror,Intersection_plane,Curved_Mirror,Ray, Composition, Grating
 # from LaserCAD.basic_optics.mirror import 
 from LaserCAD.basic_optics import Unit_Mount,Composed_Mount
 from LaserCAD.non_interactings import Lambda_Plate

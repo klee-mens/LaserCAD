@@ -18,8 +18,9 @@ Created on Wed May 22 14:40:39 2024
 #   sys.path.append(pfad)
 
 from LaserCAD.freecad_models import clear_doc, setview, freecad_da
-from LaserCAD.basic_optics import Mirror, Beam, Composition, inch, Lens
-from LaserCAD.basic_optics.mount import Composed_Mount
+# from LaserCAD.basic_optics import Mirror, Beam, Composition, inch, Lens
+# from LaserCAD.basic_optics.mount import Composed_Mount
+from LaserCAD import Composed_Mount, Mirror, Beam, Composition, inch, Lens, Rectangular_Mirror, KM100C
 from LaserCAD.basic_optics.mount import MIRROR_LIST,LENS_LIST
 
 
@@ -152,6 +153,20 @@ M = Composed_Mount(unit_model_list=["KS1","big_post"])
 mir_big_pos.set_mount(M)
 mir_big_pos.draw()
 mir_big_pos.draw_mount()
+
+rect = Rectangular_Mirror(height=80, width=60, name="BigRectangular")
+rect.pos += (120, 550 , 50)
+rect.normal = (1,2,0)
+rect.set_mount(KM100C(height=rect.height, width=rect.width) )
+rect.draw()
+rect.draw_mount()
+
+rect2 = Rectangular_Mirror(height=30, width=40, name="SmallRectangular")
+rect2.pos += (250, 550 , 0)
+rect2.normal = (1,-2,0)
+rect2.set_mount(KM100C(height=rect2.height, width=rect2.width, post="0.5inch_post"))
+rect2.draw()
+rect2.draw_mount()
 
 if freecad_da:
   setview()
