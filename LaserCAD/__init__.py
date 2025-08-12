@@ -23,8 +23,9 @@ from .basic_optics.mount import Unit_Mount, Grating_Mount, Composed_Mount, Strip
 from .basic_optics.post import Post_and_holder
 from .basic_optics.refractive_plane import Refractive_plane
 from .basic_optics.off_axis_parabola import Off_Axis_Parabola
-from .basic_optics.beam_splitter import ThinBeamsplitter, ThickBeamsplitter, TFP56
+from .basic_optics.beam_splitter import ThinBeamsplitter, ThickBeamsplitter, TFP56, Rectangular_Beamsplitter, Rectangular_Thin_Beamsplitter
 from .basic_optics.non_linear_crystal import NLO_Crystal
+from .basic_optics.multi_beam_line_composition import Multi_Beamline_Composition
 
 from .non_interactings import Breadboard, Crystal, Cylindric_Crystal, Detector, Faraday_Isolator, Iris, Lambda_Plate, LaserPointer, Pockels_Cell, Table
 

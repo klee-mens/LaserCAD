@@ -30,5 +30,6 @@ from .post import Post_and_holder
 from .refractive_plane import Refractive_plane
 from .off_axis_parabola import Off_Axis_Parabola
 from .composition import export_to_TikZ, print_post_positions
-from .beam_splitter import ThinBeamsplitter, ThickBeamsplitter, TFP56
+from .beam_splitter import ThinBeamsplitter, ThickBeamsplitter, TFP56, Rectangular_Beamsplitter, Rectangular_Thin_Beamsplitter
 from .non_linear_crystal import NLO_Crystal
+from .multi_beam_line_composition import Multi_Beamline_Composition

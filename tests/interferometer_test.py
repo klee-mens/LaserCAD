@@ -7,18 +7,17 @@ Created on Fri Jul 25 11:25:25 2025
 """
 
 from LaserCAD import freecad_da, clear_doc
-from LaserCAD.moduls.interferometer import Make_Michelson_Interferomter
-from LaserCAD.moduls.interferometer import Make_Machzehnder_Interferomater
+from LaserCAD.moduls.interferometer import Make_Michelson_Interferometer
+from LaserCAD.moduls.interferometer import Make_Machzehnder_Interferometer
 
 if freecad_da:
   clear_doc()
-  
-  
-mich_arm1, mich_arm2 = Make_Michelson_Interferomter()
-
-mich_arm1.draw()
-mich_arm2.draw()
 
 
-mz_arm1, mz_arm2 = Make_Machzehnder_Interferomater()
+mi = Make_Michelson_Interferometer()
+mi.draw()
 
+
+mz_new = Make_Machzehnder_Interferometer()
+mz_new.pos = (300, 100, 90)
+mz_new.draw()

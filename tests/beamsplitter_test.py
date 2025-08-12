@@ -5,10 +5,10 @@ Created on Wed Jul 23 10:08:41 2025
 @author: mens
 """
 
-from LaserCAD.basic_optics import ThinBeamsplitter, ThickBeamsplitter, TFP56
-from LaserCAD.basic_optics import Beam, Composition, inch, Composed_Mount
-from LaserCAD.freecad_models import freecad_da, clear_doc
-from LaserCAD.moduls.transmission_disk import Transmission_Disk
+from LaserCAD import ThinBeamsplitter, ThickBeamsplitter, TFP56, Rectangular_Beamsplitter, Rectangular_Thin_Beamsplitter
+from LaserCAD import Beam, Composition, inch, Composed_Mount
+from LaserCAD import freecad_da, clear_doc
+from LaserCAD.moduls import Transmission_Disk
 import numpy as np
 
 if freecad_da:
@@ -62,7 +62,7 @@ thbs.aperture = 2*inch
 thbs.thickness = 6 # 6mm thick
 # thbs.set_mount(Composed_Mount(["KS2", "1inch_post"])) # proper Mount, or not
 
-# Transmission ThinBeamsplitter
+# Transmission ThickBeamsplitter
 ls = Beam(radius=1.5) #LightSource = starting beam
 compthbs = Composition(name="ThinBSComp")
 compthbs.pos = (30, 95, 100)
@@ -80,6 +80,51 @@ refl.draw_dict["color"] = (1.0, 0.8, 0.0) # cosmetic
 refl.draw()
 
 
+# =============================================================================
+# Rectangular Beamsplitter
+# =============================================================================
+rect = Rectangular_Beamsplitter(name="NewRectBS", height=25, width=40, angle_of_incidence=45,
+             thickness=5, refractive_index=1.45)
+
+# Transmission ThickBeamsplitter
+ls = Beam(radius=1.5) #LightSource = starting beam
+comprect = Composition(name="ThinBSComp")
+comprect.pos = (30, 270, 100)
+comprect.set_light_source(ls)
+comprect.propagate(80)
+comprect.add_on_axis(rect)
+comprect.propagate(80)
+comprect.draw()
+
+# Reflected Beam
+rect.transmission = False
+refl = rect.next_beam(ls)
+rect.transmission = True
+refl.draw_dict["color"] = (1.0, 0.8, 0.0) # cosmetic
+refl.draw()
+
+
+# =============================================================================
+# Rectangular Thin Beamsplitter
+# =============================================================================
+thnect = Rectangular_Thin_Beamsplitter(name="NewRectBS", height=25, width=35, angle_of_incidence=45)
+
+# Transmission ThickBeamsplitter
+ls = Beam(radius=1.5) #LightSource = starting beam
+compthnect = Composition(name="ThinBSComp")
+compthnect.pos = (30, 400, 100)
+compthnect.set_light_source(ls)
+compthnect.propagate(80)
+compthnect.add_on_axis(thnect)
+compthnect.propagate(80)
+compthnect.draw()
+
+# Reflected Beam
+thnect.transmission = False
+refl = thnect.next_beam(ls)
+thnect.transmission = True
+refl.draw_dict["color"] = (1.0, 0.8, 0.0) # cosmetic
+refl.draw()
 
 # =============================================================================
 # TFP56 tests (mostly mount alignement)

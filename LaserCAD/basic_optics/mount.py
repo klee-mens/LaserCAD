@@ -608,7 +608,7 @@ class KM100C(Composed_Mount):
     self.post_model = post
     self.docking_obj.rotate(vec=(0,0,1), phi=np.pi)
     self.docking_obj.pos += (4, self.side_shift, height/2)
-    
+
     upper = Unit_Mount()
     upper.model = "KM100C_upper"
     upper.path = thisfolder + "misc_meshes/"
@@ -623,19 +623,19 @@ class KM100C(Composed_Mount):
       extension.path = thisfolder + "misc_meshes/"
       extension.docking_obj.pos += (0, 0, +1.5*25.4)
       self.add(extension)
-    
+
     invis = Unit_Mount()
     invis.invisible = True
     invis.docking_obj.pos += (0, 0, -1.5*25.4*self.number_of_extensions)
     self.add(invis)
-    
+
     lower = Unit_Mount()
-    print("lower pos", lower.pos)
+    # print("lower pos", lower.pos)
     lower.model = "KM100C_lower"
     lower.path = thisfolder + "misc_meshes/"
     lower.draw_dict["color"] = (0.18,0.18,0.18)
     lower.docking_obj.pos += (-9, 13.55, -17.65)
     self.add(lower)
-    print("lower pos", lower.pos)
+    # print("lower pos", lower.pos)
 
     self.add(Post(model=post))

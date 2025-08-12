@@ -7,9 +7,10 @@ Created on Wed Jul 23 10:53:41 2025
 
 from .mirror import Mirror
 from .refractive_plane import Refractive_plane
-from .mount import Unit_Mount, Composed_Mount, Post
+from .mount import Unit_Mount, Composed_Mount, Post, KM100C
 from .beam import Beam
 from ..freecad_models.utils import thisfolder
+from ..freecad_models import model_crystal
 import numpy as np
 from copy import deepcopy
 
@@ -30,7 +31,7 @@ class ThinBeamsplitter(Mirror):
     if self.transmission:
       return self.just_pass_through(ray)
     return self.reflection(ray)
-  
+
   def next_beam(self, beam):
     self._input_beam = deepcopy(beam)
     output_beam = super().next_beam(beam)
@@ -39,10 +40,10 @@ class ThinBeamsplitter(Mirror):
     self._alternative_beam = super().next_beam(beam)
     self.transmission = not self.transmission
     return output_beam
-    
+
   def get_input_beam(self):
     return deepcopy(self._input_beam)
-  
+
   def get_output_beam(self):
     return deepcopy(self._output_beam)
 
@@ -58,12 +59,12 @@ class ThinBeamsplitter(Mirror):
     # self._rearange_subobjects_pos(old_pos, new_pos, self._input_beam)
     # self._rearange_subobjects_pos(old_pos, new_pos, self._output_beam) #sonst wird ls doppelt geshifted
     # self._rearange_subobjects_pos(old_pos, new_pos, self._alternative_beam)
-  
+
   # def _axes_changed(self, old_axes, new_axes):
   #   """
   #   wird aufgerufen, wen die axese von <self> verändert wird
   #   dreht die axese aller __rays mit
-  
+
   #   dreht außerdem das eigene Koordiantensystem
   #   """
   #   super()._axes_changed(old_axes, new_axes)
@@ -142,3 +143,44 @@ class TFP56_Mount(Unit_Mount):
     self.docking_obj.rotate(vec=(0,0,1), phi=self.angle_of_incidence*np.pi/180)
     self.is_horizontal = False
     self.draw_dict["color"] = (45/255, 45/255, 45/255)
+
+
+
+class Rectangular_Beamsplitter(ThickBeamsplitter):
+  def __init__(self, name="NewRectBS", height=25, width=25, angle_of_incidence=45,
+               thickness=5, refractive_index=1.45, **kwargs):
+    self.height = height
+    self.width = width
+    self.thickness = thickness
+    super().__init__(angle_of_incidence=angle_of_incidence, thickness=thickness,
+                     refractive_index=refractive_index, name=name, **kwargs)
+    self.freecad_model = model_crystal
+    # self.draw_dict["color"] = (131/255,27/255,44/255)
+
+  def set_mount_to_default(self):
+    self.set_mount(KM100C(height=self.height, width=self.width))
+
+  def update_draw_dict(self):
+    super().update_draw_dict()
+    self.draw_dict["height"] = self.height
+    self.draw_dict["width"] = self.width
+    self.draw_dict["thickness"] = self.thickness
+
+
+class Rectangular_Thin_Beamsplitter(ThinBeamsplitter):
+  def __init__(self, name="NewRectThinBS", height=25, width=25, angle_of_incidence=45, **kwargs):
+    self.height = height
+    self.width = width
+    self.thickness = 3
+    super().__init__(angle_of_incidence=angle_of_incidence, name=name, **kwargs)
+    self.freecad_model = model_crystal
+    # self.draw_dict["color"] = (131/255,27/255,44/255)
+
+  def set_mount_to_default(self):
+    self.set_mount(KM100C(height=self.height, width=self.width))
+
+  def update_draw_dict(self):
+    super().update_draw_dict()
+    self.draw_dict["height"] = self.height
+    self.draw_dict["width"] = self.width
+    self.draw_dict["thickness"] = self.thickness
