@@ -452,7 +452,9 @@ class Stages_Mount(Composed_Mount):
     basic_mount.mount_list[-1].set_lower_limit(stages_height)
     for mou in basic_mount.mount_list:
       self.add(mou)
-    self.add(Unit_Mount("XR25C"))
+    XR25C = Unit_Mount("XR25C")
+    XR25C.draw_dict["color"] = (0.2, 0.2, 0.2)
+    self.add(XR25C)
     self.x_aligned = x_aligned
     if not self.x_aligned:
       self.mount_list[-1].normal = self.mount_list[0].normal
