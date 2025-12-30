@@ -10,7 +10,6 @@ from ..freecad_models.freecad_model_composition import initialize_composition_ol
 from ..freecad_models.freecad_model_mounts import mirror_mount,DEFAULT_MOUNT_COLOR,DEFAULT_MAX_ANGULAR_OFFSET,model_Post_Marker,rotate_vector
 from ..freecad_models.freecad_model_grating import grating_mount
 from .geom_object import Geom_Object, rotation_matrix
-from .post import Post_and_holder
 from ..freecad_models.freecad_model_mounts import draw_post,draw_post_holder,draw_post_base,draw_1inch_post,draw_large_post,model_mirror_holder
 # from .mirror import Mirror
 
@@ -610,7 +609,7 @@ class KM100C(Composed_Mount):
     self.post_model = post
     self.docking_obj.rotate(vec=(0,0,1), phi=np.pi)
     self.docking_obj.pos += (4, self.side_shift, height/2)
-    
+
     upper = Unit_Mount()
     upper.model = "KM100C_upper"
     upper.path = thisfolder + "misc_meshes/"
@@ -625,12 +624,12 @@ class KM100C(Composed_Mount):
       extension.path = thisfolder + "misc_meshes/"
       extension.docking_obj.pos += (0, 0, +1.5*25.4)
       self.add(extension)
-    
+
     invis = Unit_Mount()
     invis.invisible = True
     invis.docking_obj.pos += (0, 0, -1.5*25.4*self.number_of_extensions)
     self.add(invis)
-    
+
     lower = Unit_Mount()
     print("lower pos", lower.pos)
     lower.model = "KM100C_lower"
