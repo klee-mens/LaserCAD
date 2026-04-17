@@ -18,3 +18,11 @@ class Pockels_Cell(Component):
     # self.draw_dict["color"]=(100/255, 100/255, 100/255)
     self.freecad_model = load_STL
 
+class Pockels_Cell_Thick(Component):
+  def __init__(self, name="Pockels_Cell", mount_name = "Pockels_cell_thick", **kwargs):
+    super().__init__(name, **kwargs)
+    stl_file=thisfolder+"misc_meshes/"+mount_name+".stl"
+    self.draw_dict["stl_file"]=stl_file
+    self.draw_dict["color"]=(239/255, 239/255, 239/255)
+    # self.draw_dict["color"]=(100/255, 100/255, 100/255)
+    self.freecad_model = load_STL

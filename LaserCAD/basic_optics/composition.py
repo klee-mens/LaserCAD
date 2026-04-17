@@ -671,8 +671,8 @@ def print_post_positions(Composition, max_tabs = 5):
     """
     post_positions = Composition.post_positions(verbose=True, print_errors=False)
     for post, position in post_positions:
-        padd = "\t" * max(1, max_tabs- len(post) // 8)
-        print(f"name = {post},{padd} post position = ({position[0]/10:.1f}cm,{position[1]/10:.1f}cm)")
+        padd = "\t" * max(1, max_tabs- (len(post)+1) // 8)
+        print(f"{post},{padd} post position = ({position[0]/10:.1f}cm,{position[1]/10:.1f}cm)")
     
     return post_positions
 
@@ -700,9 +700,12 @@ def export_to_TikZ(Setup, draw_rays = False, draw_beams = False, beam_color="bla
   ray_string = f"\\draw[thick] ({start_coordinate})--"
   beam_string = ""
 
+  beam_radius, _ = zip(*[beam.radius_angle() for beam in Setup.compute_beams()])
+  beam_radius = [strip_zeros(radius) for radius in np.array(beam_radius) / 25.4]
   names = [replace_string(mirror.name) for mirror in Setup._elements]
   angles = [strip_zeros(calc_tikz_angle(mirror)) for mirror in Setup._elements]
   positions = [f"{mirror.pos[0]/scale:.2f}, {mirror.pos[1]/scale:.2f}" for mirror in Setup._elements]
+  mirror_name_prev = "mirror"
 
   for i, mirror in enumerate(Setup._elements):
       mirror_name = "mirror"
@@ -710,7 +713,11 @@ def export_to_TikZ(Setup, draw_rays = False, draw_beams = False, beam_color="bla
       mirror_width = f"{(mirror.aperture/25.4)**2/12+(mirror.aperture/25.4)/12 + 0.5:.2f}".rstrip('0').rstrip('.') 
       if hasattr(mirror, "radius"): mirror_name = "curvedmirror"
       if "TFP" in mirror.name: mirror_name = "TFP"
-      if "lens" in mirror.name or "Lens" in mirror.name: mirror_name = "convexlens"
+      if "lens" in str.lower(mirror.name) or "Lens" == mirror.class_name: 
+         if mirror.focal_length < 0:
+            mirror_name = "concavelens"
+         else:
+            mirror_name = "convexlens"
       coordinates_string += f"\\coordinate ({names[i]}) at ({positions[i]});\n"
       mirror_string += f"\\{mirror_name}[angle={angles[i]}, width={mirror_width}] at ({names[i]});\n"
       ray_string += f"({names[i]})--"
@@ -722,18 +729,26 @@ def export_to_TikZ(Setup, draw_rays = False, draw_beams = False, beam_color="bla
           angle_prev = strip_zeros(calc_tikz_angle(mirror)+180)
           name_prev = start_name
 
-      beam_string += f"\\drawbeam[0.5][0.5][{beam_color}]{{{name_prev}}}{{{names[i]}}}{{{angle_prev}}}{{{angles[i]}}};\n"
+      # for non-reflective optics the angle must be reversed
+      if mirror_name_prev != "mirror" and mirror_name_prev != "curvedmirror":
+          # if the current element is not a lens (in a telescope we dont want to reverse the angle)
+          if not "lens" in mirror_name:
+              angle_prev = strip_zeros(float(angle_prev) + 180)
+
+      beam_string += f"\\drawbeam[{beam_radius[i]}][{beam_radius[i+1]}][{beam_color}]{{{name_prev}}}{{{names[i]}}}{{{angle_prev}}}{{{angles[i]}}};\n"
+      mirror_name_prev = mirror_name
+
 
   for element in Setup.non_opticals:
       angle = calc_tikz_angle(element)
       name = replace_string(element.name)
       if "Lambda_Plate" == element.class_name: element_name = "tinysplitter"
-      elif "Pockels" in element.name or "Pockels_Cell" == element.class_name: element_name = "pockelscell"
-      elif "laser" in element.name: 
+      elif "pockels" in str.lower(element.name) or "Pockels_Cell" == element.class_name: element_name = "pockelscell"
+      elif "laser" in str.lower(element.name): 
           element_name = "laser"
           angle += 180
-      elif "camera" in element.name or "Camera" == element.class_name:  element_name = "camera"
-      elif "diode" in element.name or "Diode" == element.class_name:  element_name = "diode"
+      elif "camera" in str.lower(element.name) or "Camera" == element.class_name:  element_name = "camera"
+      elif "diode" in str.lower(element.name) or "Diode" == element.class_name:  element_name = "diode"
       else: continue
 
       coordinates_string += f"\\coordinate ({name}) at ({element.pos[0]/100:.1f}, {element.pos[1]/100:.1f});\n"
@@ -742,7 +757,10 @@ def export_to_TikZ(Setup, draw_rays = False, draw_beams = False, beam_color="bla
   endpoint = Setup.compute_beams()[-1].inner_ray().endpoint()
   ray_string += f"({endpoint[0]/100:.1f}, {endpoint[1]/100:.1f});"
   try:
-      beam_string += f"\\drawbeam[0.5][0.5][{beam_color}]{{{names[-1]}}}{{{endpoint[0]/100:.1f}, {endpoint[1]/100:.1f}}}{{{angle_prev}}}{{{angles[-1]}}};\n"
+      beam_vector = endpoint - Setup._elements[-1].pos
+      beam_vector /= np.linalg.norm(beam_vector)
+      final_angle = np.arccos(beam_vector[0]) * 180 / np.pi
+      beam_string += f"\\drawbeam[{beam_radius[-1]}][{beam_radius[-1]}][{beam_color}]{{{names[-1]}}}{{{endpoint[0]/100:.1f}, {endpoint[1]/100:.1f}}}{{{angles[-1]}}}{{{final_angle:.2f}}};\n"
   except:
       pass
 
@@ -759,4 +777,3 @@ def export_to_TikZ(Setup, draw_rays = False, draw_beams = False, beam_color="bla
         if draw_rays: f.write(ray_string)
         if draw_beams: f.write(beam_string)
         f.write(mirror_string)
-

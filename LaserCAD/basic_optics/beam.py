@@ -162,7 +162,7 @@ class Beam(Geom_Object):
   def __repr__(self):
     radius, angle = self.radius_angle()
     txt = 'Beam(radius=' + repr(radius)
-    txt += ', anlge=' + repr(angle)
+    txt += ', angle=' + repr(angle)
     txt += ', distribution=' + repr(self._distribution)
     txt += ', ' + super().__repr__()[6::]
     return txt
