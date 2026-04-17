@@ -15,11 +15,13 @@ from scipy.optimize import brentq
 
 
 class Lens(Opt_Element):
-  def __init__(self, f=100, name="NewLens", **kwargs):
+  def __init__(self, f=100, name="NewLens", aperture=1*inch, **kwargs):
     super().__init__(name=name, **kwargs)
     self.focal_length = f
     self.thickness = 4
+    self.aperture = aperture
     self.freecad_model = model_lens
+    self.set_mount_to_default()
 
   @property
   def focal_length(self):
