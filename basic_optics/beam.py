@@ -252,7 +252,7 @@ class CircularRayBeam(Beam):
     The radius of circle equals the radius of ray group
     Parameters
     ----------
-    ring_number : int(>0).
+    ring_number : int(>0).​ [Click and drag to move] 
       The number of the rings around the center. That is going to
      determine the density of ray.
 
