@@ -6,11 +6,12 @@ Created on Sun Aug 21 20:28:02 2022
 @author: mens
 """
 
-from ..freecad_models import model_lens, lens_mount
+from ..freecad_models import model_lens, model_stripe_mirror
 from .optical_element import Opt_Element
-from .mount import Unit_Mount
+from .mount import Unit_Mount, KM100C
 from copy import deepcopy
 import numpy as np
+from .geom_object import TOLERANCE
 
 class Lens(Opt_Element):
   def __init__(self, f=100, name="NewLens", **kwargs):
@@ -55,117 +56,78 @@ class Cylindrical_Lens(Opt_Element):
   The default mirror is placed horizontally, which means the cylinder_center
   points tp the z-axis. Use rotate function if you want to rotate the mirror.
   """
-  def __init__(self, f=200,height=10, thickness=25, **kwargs):
+  def __init__(self, f=100, height=30, thickness=10, **kwargs):
     super().__init__(**kwargs)
     self.focal_length = f
     # self.draw_dict["Radius"] = radius
     self.height=height
     self.thickness=thickness
     # self.draw_dict["model_type"]="Stripe"
-    # self.freecad_model = model_mirror
-    self.Mount = Unit_Mount()
+    self.freecad_model = model_stripe_mirror
+    # self.set_mount(KM100C(height=self.height, width=self.aperture, post="0.5inch_post"))
 
-  # @property
-  # def radius(self):
-  #   return self.__radius
-  # @radius.setter
-  # def radius(self, x):
-  #   """
-  #   This part is incorrect. Since I don't know the matrix of Cylindrical_Mirror
-  #   Parameters
-  #   ----------
-  #   x : TYPE
-  #     DESCRIPTION.
-  #   """
-  #   self.__radius = x
-  #   if x == 0:
-  #     self._matrix[1,0] = 0
-  #   else:
-  #     self._matrix[1,0] = -2/x
+  @property
+  def focal_length(self):
+    return self.__f
+  @focal_length.setter
+  def focal_length(self, x):
+    self.__f = x
+    if x == 0:
+      self._matrix[1,0] = 0
+    else:
+      self._matrix[1,0] = -1/x
 
-
-  # def update_draw_dict(self):
-  #   super().update_draw_dict()
-  #   self.draw_dict["dia"]=self.aperture
-  #   self.draw_dict["Radius"] = self.radius
-  #   self.draw_dict["height"]=self.height
-  #   self.draw_dict["thickness"]=self.thickness
+  def update_draw_dict(self):
+    super().update_draw_dict()
+    self.draw_dict["dia"]=self.aperture
+    self.draw_dict["Radius"] = - 300
+    self.draw_dict["height"]=self.height
+    self.draw_dict["thickness"]=self.thickness
+    DEFAULT_COLOR_LENS = (0/255,170/255,124/255)
+    self.draw_dict["color"] = DEFAULT_COLOR_LENS
 
   def next_ray(self, ray):
     """
-    erzeugt den nächsten Ray auf Basis der analytischen Berechung von Schnitt-
-    punkt von Sphere mit ray und dem vektoriellen Reflexionsgesetz
-    siehe S Hb o LaO S 66 f
-
-    Parameters
-    ----------
-    ray : TYPE Ray
-      input ray
-
-    Returns
-    -------
-    ray2 : TYPE Ray
-      output ray
+    lskdfölkadfmaöof
 
     """
     ray2 = deepcopy(ray)
-    ray2.name = "next_" + ray.name
-    center = self.pos - self.radius * self.normal
-    xx,yy,zz = self.get_coordinate_system()
-    ray_origin = ray2.pos
-    ray_direction = ray2.normal
-    cylinder_center = center
-    cylinder_axis = zz
+    ray2.pos = self.intersection(ray)
 
-    middle_vec = cylinder_center + cylinder_axis * (np.dot(ray_origin,cylinder_axis) - np.dot(cylinder_center,cylinder_axis))-ray_origin
-    middle_vec2 = cylinder_axis*(np.dot(ray_direction,cylinder_axis))-ray_direction
-    a = np.dot(middle_vec2 , middle_vec2)
-    b = 2 * np.dot(middle_vec2 , middle_vec)
-    c = np.dot(middle_vec , middle_vec) - self.radius **2
+    ex, ey, ez = self.get_coordinate_system()
+    radius = np.dot(ray2.pos - self.pos, ey) # abstand zu achse in y richtung
+    cn = np.dot(ex, ray2.normal) # normal compopent
 
+    if np.sum(cn) < 0:
+      ex *= -1#gibt sonst hässliche Ergebnisse, wenn die Linse falsch rum steht
+    if np.abs(radius) > TOLERANCE:
+      cm = np.dot(ey, ray2.normal) # meridonial
+      cs = np.dot(ez, ray2.normal) # sagital
 
-    # Compute discriminant
-    discriminant = b**2 - 4 * a * c
-
-    # If discriminant is negative, no intersection
-    if discriminant < 0:
-        print("Warning: no interaction of ray with cylindirc lens")
-        print(ray2)
-        ray2.draw()
-        print("ray_origin=",ray_origin)
-        print("ray_direction=",ray_direction)
-        print("cylinder_center=",cylinder_center)
-        print("cylinder_axis=",cylinder_axis)
-        return None
-
-    # Compute t parameter (parameter along the ray direction)
-    t1 = (-b + np.sqrt(discriminant)) / (2 * a)
-    t2 = (-b - np.sqrt(discriminant)) / (2 * a)
-
-    # Check if intersection is within ray segment
-    # if t1 < 0 and t2 < 0:
-    #     return None
-
-    # Select smallest positive t
-    # t = min(t1, t2) if t1 >= 0 and t2 >= 0 else max(t1, t2)
-    if self.radius>0:
-      t = max(t1, t2)
+      alpha = np.arctan(cm/cn)
+      vm = np.sqrt(cm**2 + cn**2) #length of the raz.normal projected in the meridional plane
+      parax1 = np.array((radius, alpha)) #classic matrix optics
+      rad2, alpha2 = np.matmul(self._matrix, parax1) #classic matrix optics
+      norm2 = vm*np.cos(alpha2)*ex + vm*np.sin(alpha2)*ey + cs*ez # neue normale
+      ray2.normal = norm2
+      return ray2
     else:
-      t = min(t1, t2)
-    # Compute intersection point
+      # mittelpunktstrahl
+      return ray2
 
-    intersection_point = ray_origin + ray_direction * t
-    p0 = intersection_point
-    ray.length = np.linalg.norm(p0-ray.pos)
-    
-    new_center = cylinder_center + cylinder_axis * (np.dot(p0,cylinder_axis)-np.dot(cylinder_center,cylinder_axis))
-    surface_norm = p0 - new_center #Normale auf Spiegeloberfläche in p0
-    surface_norm *= 1/np.linalg.norm(surface_norm) #normieren
-    #Reflektionsgesetz
-    # print(cylinder_center,new_center)
-    ray2.normal = ray.normal - 2*np.sum(ray.normal*surface_norm)*surface_norm
-    ray2.pos = p0
-    return ray2
+  # def set_mount_to_default(self):
+  #   x,y,z = self.get_coordinate_system()
+  #   if np.abs(np.dot(y, (0,1,0))) > 0.9:
+  #     self.set_mount(KM100C(height=self.height, width=self.aperture, post="0.5inch_post"))
+  #   else:
+  #     self.set_mount(KM100C(height=self.aperture, width=self.height, post="0.5inch_post"))
+  #   self.Mount.pos = self.pos
+
+
+
+
+
+
 
 
 def tests():

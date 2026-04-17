@@ -18,50 +18,73 @@ if freecad_da:
   clear_doc()
 
 
-B = SquareBeam(radius=3, ray_in_line=10)
 
-B=SquareBeam(radius =5,ray_in_line = 10)
-C = Composition()
-C.set_light_source(B)
-C.propagate(100)
-# a= Cylindrical_Mirror(radius=100)
-a= Cylindrical_Lens(f=100)
-a.height =25
-print(a.get_coordinate_system())
-a.rotate(a.normal, np.pi/2)
-print(a.get_coordinate_system())
-a.Mount = Stripe_Mirror_Mount(mirror_thickness=a.thickness)
-a.aperture = 75
-a.pos += (100,0,0)
-a.phi = -90
-C.add_on_axis(a)
-C.recompute_optical_axis()
-C.propagate(70.6)
+ls = SquareBeam(radius =5,ray_in_line = 10)
+comp = Composition()
+comp.set_light_source(ls)
+
+comp.propagate(100)
+cyl = Cylindrical_Lens(f=100)
+cyl.height = 25
+
+print(cyl.get_coordinate_system())
+
+# cyl.Mount = Stripe_Mirror_Mount(mirror_thickness=cyl.thickness)
+# cyl.aperture = 75
+
+cyl.pos += (100,0,0)
+
+comp.add_on_axis(cyl)
+cyl.rotate(cyl.normal, np.pi/2)
+print(cyl.get_coordinate_system())
+
+# comp.recompute_optical_axis()
+comp.propagate(105)
+
 IP = Intersection_plane()
-C.add_on_axis(IP)
-C.draw()
+comp.add_on_axis(IP)
+comp.draw()
+
 IP.draw()
-IP.spot_diagram(C._beams[2])
+IP.spot_diagram(comp._beams[2])
 
-B=SquareBeam(radius =5,ray_in_line = 10)
-B._radius = 5
-C = Composition()
-C.set_light_source(B)
-C.propagate(100)
-a= Curved_Mirror()
-a.height =25
-a.rotate(a.normal, np.pi/2)
-# a.Mount = Stripe_Mirror_Mount(mirror_thickness=a.thickness)
-# a.aperture = 75
-a.pos += (100,0,0)
-a.phi = -90
-C.add_on_axis(a)
-# C.recompute_optical_axis()
-C.propagate(100)
-IP = Intersection_plane()
-# C.add_on_axis(IP)
-C.pos += (300,0,0)
-C.draw()
+
+
+ls2 = SquareBeam(radius =5,ray_in_line = 10)
+comp2 = Composition()
+comp2.set_light_source(ls)
+
+comp2.propagate(100)
+cyl2 = Cylindrical_Lens(f=180)
+cyl2.height = 40
+cyl2.aperture = 50
+
+comp2.add_on_axis(cyl2)
+comp2.propagate(200)
+
+comp2.pos += (0,80,0)
+comp2.draw()
+
+
+# B=SquareBeam(radius =5,ray_in_line = 10)
+# B._radius = 5
+# C = Composition()
+# comp.set_light_source(B)
+# comp.propagate(100)
+# a= Curved_Mirror()
+# cyl.height =25
+# cyl.rotate(cyl.normal, np.pi/2)
+# # cyl.Mount = Stripe_Mirror_Mount(mirror_thickness=cyl.thickness)
+# # cyl.aperture = 75
+# cyl.pos += (100,0,0)
+# cyl.phi = -90
+# comp.add_on_axis(a)
+# # comp.recompute_optical_axis()
+# comp.propagate(100)
+# IP = Intersection_plane()
+# # comp.add_on_axis(IP)
+# comp.pos += (300,0,0)
+# comp.draw()
 
 if freecad_da:
   setview()
