@@ -56,15 +56,17 @@ class Cylindrical_Lens(Opt_Element):
   The default mirror is placed horizontally, which means the cylinder_center
   points tp the z-axis. Use rotate function if you want to rotate the mirror.
   """
-  def __init__(self, f=100, height=30, thickness=10, **kwargs):
+  def __init__(self, f=100, height=30, thickness=6, aperture=40, vertical=True,
+               **kwargs):
     super().__init__(**kwargs)
     self.focal_length = f
-    # self.draw_dict["Radius"] = radius
+    self.vertical = vertical
     self.height=height
     self.thickness=thickness
-    # self.draw_dict["model_type"]="Stripe"
+    self.aperture = aperture
     self.freecad_model = model_stripe_mirror
-    # self.set_mount(KM100C(height=self.height, width=self.aperture, post="0.5inch_post"))
+    self.set_mount(KM100C(height=self.height, width=self.aperture,
+                          post="0.5inch_post"))
 
   @property
   def focal_length(self):
@@ -88,13 +90,17 @@ class Cylindrical_Lens(Opt_Element):
 
   def next_ray(self, ray):
     """
-    lskdfölkadfmaöof
-
+    computes the next ray after the cylindircal lens with the help of the
+    optical matrix
     """
     ray2 = deepcopy(ray)
     ray2.pos = self.intersection(ray)
 
     ex, ey, ez = self.get_coordinate_system()
+    if not self.vertical:
+      h = np.array(ey)
+      ey = np.array(ez)
+      ez = np.array(h)
     radius = np.dot(ray2.pos - self.pos, ey) # abstand zu achse in y richtung
     cn = np.dot(ex, ray2.normal) # normal compopent
 

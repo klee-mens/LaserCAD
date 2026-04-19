@@ -133,6 +133,10 @@ class Beam(Geom_Object):
   def wavelength(self):
     return self._rays[0].wavelength
 
+  def set_ray_color(self, color):
+    for ray in self._rays:
+      ray.draw_dict["color"] = color
+
   def _pos_changed(self, old_pos, new_pos):
     """
     wird aufgerufen, wen die Position von <self> verändert wird
@@ -252,7 +256,7 @@ class CircularRayBeam(Beam):
     The radius of circle equals the radius of ray group
     Parameters
     ----------
-    ring_number : int(>0).​ [Click and drag to move] 
+    ring_number : int(>0).​ [Click and drag to move]
       The number of the rings around the center. That is going to
      determine the density of ray.
 
