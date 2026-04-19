@@ -6,13 +6,11 @@ Created on Thu Apr 16 16:41:34 2026
 @author: clemens
 """
 
-from LaserCAD.basic_optics import Cylindrical_Mirror, SquareBeam
+from LaserCAD.basic_optics import SquareBeam
 from LaserCAD.basic_optics.lens import Cylindrical_Lens
-from LaserCAD.basic_optics import Curved_Mirror
-from LaserCAD.basic_optics import Intersection_plane,Composition
+from LaserCAD.basic_optics import Intersection_plane, Composition
 from LaserCAD.freecad_models import clear_doc, setview, freecad_da
-from LaserCAD.basic_optics.mount import Stripe_Mirror_Mount
-import numpy as np
+# import numpy as np
 
 if freecad_da:
   clear_doc()
@@ -24,16 +22,17 @@ comp = Composition()
 comp.set_light_source(ls)
 
 comp.propagate(100)
-cyl = Cylindrical_Lens(f=100, height=50, thickness=5, aperture=40, vertical=False)
 
+cyl = Cylindrical_Lens(f=100, height=50, thickness=5, aperture=40, horizontal=True)
 comp.add_on_axis(cyl)
+
 comp.propagate(105)
 
 IP = Intersection_plane()
 comp.add_on_axis(IP)
+
 comp.draw()
 
-IP.draw()
 IP.spot_diagram(comp._beams[2])
 
 

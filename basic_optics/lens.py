@@ -11,7 +11,7 @@ from .optical_element import Opt_Element
 from .mount import Unit_Mount, KM100C
 from copy import deepcopy
 import numpy as np
-from .geom_object import TOLERANCE
+from .geom_object import TOLERANCE, Geom_Object
 
 class Lens(Opt_Element):
   def __init__(self, f=100, name="NewLens", **kwargs):
@@ -56,16 +56,20 @@ class Cylindrical_Lens(Opt_Element):
   The default mirror is placed horizontally, which means the cylinder_center
   points tp the z-axis. Use rotate function if you want to rotate the mirror.
   """
-  def __init__(self, f=100, height=30, thickness=6, aperture=40, vertical=True,
+  def __init__(self, f=100, height=30, thickness=6, aperture=40, horizontal=False,
                **kwargs):
     super().__init__(**kwargs)
     self.focal_length = f
-    self.vertical = vertical
-    self.height=height
+    self.horizontal = horizontal
     self.thickness=thickness
-    self.aperture = aperture
+    if self.horizontal:
+      self.aperture = height
+      self.height = aperture
+    else:
+      self.height=height
+      self.aperture = aperture
     self.freecad_model = model_stripe_mirror
-    self.set_mount(KM100C(height=self.height, width=self.aperture,
+    self.set_mount(KM100C(height=height, width=aperture,
                           post="0.5inch_post"))
 
   @property
@@ -87,6 +91,11 @@ class Cylindrical_Lens(Opt_Element):
     self.draw_dict["thickness"]=self.thickness
     DEFAULT_COLOR_LENS = (0/255,170/255,124/255)
     self.draw_dict["color"] = DEFAULT_COLOR_LENS
+    if self.horizontal:
+      go = Geom_Object()
+      go.set_geom(self.get_geom())
+      go.rotate(vec=go.normal, phi=np.pi/2)
+      self.draw_dict["geom"] = go.get_geom()
 
   def next_ray(self, ray):
     """
@@ -97,7 +106,7 @@ class Cylindrical_Lens(Opt_Element):
     ray2.pos = self.intersection(ray)
 
     ex, ey, ez = self.get_coordinate_system()
-    if not self.vertical:
+    if self.horizontal:
       h = np.array(ey)
       ey = np.array(ez)
       ez = np.array(h)
