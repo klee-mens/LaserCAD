@@ -6,13 +6,15 @@ Created on Sun Aug 21 20:28:02 2022
 @author: mens
 """
 
-from ..freecad_models import model_lens, lens_mount
+from ..freecad_models import model_lens, model_stripe_mirror
 from .optical_element import Opt_Element
 from .constants import inch
-import numpy as np
-from copy import deepcopy
 from scipy.optimize import brentq
 
+from .mount import Unit_Mount, KM100C
+from copy import deepcopy
+import numpy as np
+from .geom_object import TOLERANCE, Geom_Object
 
 class Lens(Opt_Element):
   def __init__(self, f=100, name="NewLens", aperture=1*inch, **kwargs):
@@ -49,6 +51,98 @@ class Lens(Opt_Element):
     return txt
 
 
+class Cylindrical_Lens(Opt_Element):
+  """
+  The class of Cylindrical mirror.
+  Cylindrical mirror have those parameters:
+    radius: The curvature of the mirror
+    height: The vertical thickness of the mirror
+    thickness: The horizontal thickness of the mirror
+  The default mirror is placed horizontally, which means the cylinder_center
+  points tp the z-axis. Use rotate function if you want to rotate the mirror.
+  """
+  def __init__(self, f=100, height=30, thickness=6, aperture=40, horizontal=False,
+               **kwargs):
+    super().__init__(**kwargs)
+    self.focal_length = f
+    self.horizontal = horizontal
+    self.thickness=thickness
+    if self.horizontal:
+      self.aperture = height
+      self.height = aperture
+    else:
+      self.height=height
+      self.aperture = aperture
+    self.freecad_model = model_stripe_mirror
+    self.set_mount(KM100C(height=height, width=aperture,
+                          post="0.5inch_post"))
+
+  @property
+  def focal_length(self):
+    return self.__f
+  @focal_length.setter
+  def focal_length(self, x):
+    self.__f = x
+    if x == 0:
+      self._matrix[1,0] = 0
+    else:
+      self._matrix[1,0] = -1/x
+  
+  def update_draw_dict(self):
+    super().update_draw_dict()
+    self.draw_dict["dia"]=self.aperture
+    self.draw_dict["Radius"] = - 300
+    self.draw_dict["height"]=self.height
+    self.draw_dict["thickness"]=self.thickness
+    DEFAULT_COLOR_LENS = (0/255,170/255,124/255)
+    self.draw_dict["color"] = DEFAULT_COLOR_LENS
+    if self.horizontal:
+      go = Geom_Object()
+      go.set_geom(self.get_geom())
+      go.rotate(vec=go.normal, phi=np.pi/2)
+      self.draw_dict["geom"] = go.get_geom()
+
+  def next_ray(self, ray):
+    """
+    computes the next ray after the cylindircal lens with the help of the
+    optical matrix
+    """
+    ray2 = deepcopy(ray)
+    ray2.pos = self.intersection(ray)
+
+    ex, ey, ez = self.get_coordinate_system()
+    if self.horizontal:
+      h = np.array(ey)
+      ey = np.array(ez)
+      ez = np.array(h)
+    radius = np.dot(ray2.pos - self.pos, ey) # abstand zu achse in y richtung
+    cn = np.dot(ex, ray2.normal) # normal compopent
+
+    if np.sum(cn) < 0:
+      ex *= -1#gibt sonst hässliche Ergebnisse, wenn die Linse falsch rum steht
+    if np.abs(radius) > TOLERANCE:
+      cm = np.dot(ey, ray2.normal) # meridonial
+      cs = np.dot(ez, ray2.normal) # sagital
+
+      alpha = np.arctan(cm/cn)
+      vm = np.sqrt(cm**2 + cn**2) #length of the raz.normal projected in the meridional plane
+      parax1 = np.array((radius, alpha)) #classic matrix optics
+      rad2, alpha2 = np.matmul(self._matrix, parax1) #classic matrix optics
+      norm2 = vm*np.cos(alpha2)*ex + vm*np.sin(alpha2)*ey + cs*ez # neue normale
+      ray2.normal = norm2
+      return ray2
+    else:
+      # mittelpunktstrahl
+      return ray2
+
+  # def set_mount_to_default(self):
+  #   x,y,z = self.get_coordinate_system()
+  #   if np.abs(np.dot(y, (0,1,0))) > 0.9:
+  #     self.set_mount(KM100C(height=self.height, width=self.aperture, post="0.5inch_post"))
+  #   else:
+  #     self.set_mount(KM100C(height=self.aperture, width=self.height, post="0.5inch_post"))
+  #   self.Mount.pos = self.pos
+      
 class Thicklens(Opt_Element):
   """
   Build a thick lens with given focal length, refractive index, aperture and edge thickness.
@@ -100,19 +194,7 @@ class Thicklens(Opt_Element):
       self.Mount.pos += self.normal * (self.thickness/2 - 4.5)
     else:
       self.Mount.pos += self.normal * (self.thickness-9)
-
-
-  @property
-  def focal_length(self):
-    return self.__f
-  @focal_length.setter
-  def focal_length(self, x):
-    self.__f = x
-    if x == 0:
-      self._matrix[1,0] = 0
-    else:
-      self._matrix[1,0] = -1/x
-
+  
   def calc_thickness(self):
     if self.focal_length < 0:
       return self.edge_thickness

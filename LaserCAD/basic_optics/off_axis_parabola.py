@@ -22,12 +22,12 @@ class Off_Axis_Parabola(Opt_Element):
     self.reflected_focal_length = reflected_focal_length
     self.angle = angle #in degrees
     self.aperture = 1*inch # Aperture in mm for drawing, Mount and clipping (not yet implemented)
-    self.thickness = 1.25*inch # Thickness in mm, importent for mount placing and drawing
+    # self.thickness = 1.25*inch # Thickness in mm, importent for mount placing and drawing
     self.colim = colim # Focussing or collimating
     self._theta = theta
     self.freecad_model = model_off_axis_parabola
     # example referes to https://www.thorlabs.com/thorproduct.cfm?partnumber=MPD129-M01
-    self.Mount.pos += (+self._mount_shift() - 5.5, 0, 0) #hacky but works, 5.5 comes from Polaris inset
+    self._shift_mount()      
 
   def set_geom(self, geom):
     super().set_geom(geom)
@@ -104,9 +104,28 @@ class Off_Axis_Parabola(Opt_Element):
     # model_off_axis_parabola(name="off_axis_parab", parent_pos=(25, 50),
                                 # parent_focal=25, dia=25, thickness=30,
                                 # geom=None, **kwargs):
-  def set_mount_to_default(self):
-    self.Mount = Composed_Mount(unit_model_list=["POLARIS-K1", "0.5inch_post"])
-    self.Mount.set_geom(self.get_geom())
+  # def set_mount_to_default(self):
+  #   self.Mount = Composed_Mount(unit_model_list=["POLARIS-K1", "0.5inch_post"])
+  #   self.Mount.set_geom(self.get_geom())
+
+  @property
+  def aperture(self):
+    return self._aperture
+  
+  @aperture.setter
+  def aperture(self, x):
+    self._aperture = x
+    self.set_mount_to_default()
+    #adapt thickness according to https://www.thorlabs.com/newgrouppage9.cfm?objectgroup_id=5447
+    if x <= 0.5 * inch:
+      self.thickness = 20
+    elif x <= 1*inch:
+      self.thickness = 1.25 * inch
+    elif x <= 2*inch:
+      self.thickness = 2.47*inch
+    else:
+      self.thickness = 3.47*inch
+    self._shift_mount()
 
   def _mount_shift(self):
     th = self.thickness
@@ -116,6 +135,9 @@ class Off_Axis_Parabola(Opt_Element):
     ppy = parentpos[1]
     return th - c*(dia*abs(ppy) + dia**2/4)
 
+  def _shift_mount(self):
+    self.Mount.set_geom(self.get_geom())
+    self.Mount.pos += (+self._mount_shift() - 5.5, 0, 0) #hacky but works, 5.5 comes from Polaris mount inset
 
 # class Off_Axis_Parabola_Colim(Off_Axis_Parabola):
 #   def set_geom(self, geom):

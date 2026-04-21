@@ -26,7 +26,6 @@ from .intersection_plane import Intersection_plane
 from .resonator import LinearResonator
 from .component import Component
 from .mount import Unit_Mount, Grating_Mount, Composed_Mount, Stripe_Mirror_Mount, Rooftop_Mirror_Mount, Post, KM100C
-from .post import Post_and_holder
 from .refractive_plane import Refractive_plane
 from .off_axis_parabola import Off_Axis_Parabola
 from .composition import export_to_TikZ, print_post_positions
