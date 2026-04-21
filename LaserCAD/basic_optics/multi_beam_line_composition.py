@@ -44,12 +44,12 @@ class Multi_Beamline_Composition(Geom_Object):
     self._active_index = index
 
   def add_new_line(self, beam):
-    newcomp = Composition(name="asdf")
+    newcomp = Composition(name=self.name+ f"Line{self._max_index+2}")
     newcomp.set_geom(beam.get_geom())
     newcomp.set_light_source(beam)
     self._subcomps.append(newcomp)
     self._active_index += 1
-
+    self._max_index += 1
 
   def draw(self):
     for comp in self._subcomps:

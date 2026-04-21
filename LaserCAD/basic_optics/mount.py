@@ -53,7 +53,7 @@ del a,b,c,i,SPECIAL_LIST1,LENS_LIST1,MIRROR_LIST1
 
 
 def get_mount_by_aperture_and_element(aperture, elm_type, elm_thickness):
-  if elm_type == "Lens":
+  if elm_type in ["Lens", "Thicklens"]:
     if aperture<= 25.4/2:
       model = "MLH05_M"
     elif aperture <= 25.4:

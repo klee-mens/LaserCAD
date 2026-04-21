@@ -8,6 +8,7 @@ Created on Thu Aug  8 12:47:12 2024
 
 from LaserCAD.basic_optics import SquareBeam, Lens, Composition, Intersection_plane
 from LaserCAD.freecad_models import clear_doc, setview, freecad_da
+from LaserCAD.basic_optics.constants import inch
 
 
 if freecad_da:
@@ -19,7 +20,7 @@ B = SquareBeam(radius=3, ray_in_line=10)
 
 C.set_light_source(B)
 C.propagate(100)
-a= Lens(f=150)
+a= Lens(f=150 , aperture=1*inch)
 C.add_on_axis(a)
 C.propagate(150)
 IP = Intersection_plane()
