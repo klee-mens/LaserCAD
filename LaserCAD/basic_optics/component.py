@@ -41,6 +41,13 @@ class Component(Geom_Object):
     mount.set_geom(self.get_geom())
     self.Mount = mount
   
+  def set_mount_face_mounted(self):
+    self.Mount.set_geom(self.get_geom())
+
+  def set_mount_back_mounted(self):
+    self.Mount.set_geom(self.get_geom())
+    self.Mount.pos += self.normal * (self.thickness - self.Mount.get_depth())
+  
   def update_draw_dict(self):
     super().update_draw_dict()
     self.draw_dict["dia"]=self.aperture

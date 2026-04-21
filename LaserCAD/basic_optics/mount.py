@@ -116,6 +116,7 @@ class Unit_Mount(Geom_Object):
     self.docking_obj = Geom_Object()
     self.element_thickness = element_thickness #standard thickness of for example a mirror
     self.aperture = 25.4
+    self.depth = 6.5 # depth of the mounts fringe in mm, needed for back mounting
     self.is_horizontal = True
     self.flip_angle = 0
     self.freecad_model = load_STL
@@ -190,6 +191,9 @@ class Unit_Mount(Geom_Object):
     self.docking_obj.normal = docking_normal
     self.path = folder
     return True
+  
+  def get_depth(self):
+    return self.depth
 
   def reverse(self):
     x,y,z = self.get_coordinate_system()
@@ -418,6 +422,9 @@ class Composed_Mount(Geom_Object):
    modellist = str([um.model for um in self.mount_list])
    txt2 = txt[0:ind] + ', unit_model_list=' + modellist + txt[ind::]
    return txt2
+ 
+  def get_depth(self):
+    return self.mount_list[0].get_depth()
 
   def _pos_changed(self, old_pos, new_pos):
     self._rearange_subobjects_pos(old_pos, new_pos,[self.mount_list[0]])
