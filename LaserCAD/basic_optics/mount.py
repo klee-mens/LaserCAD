@@ -10,7 +10,6 @@ from ..freecad_models.freecad_model_composition import initialize_composition_ol
 from ..freecad_models.freecad_model_mounts import mirror_mount,DEFAULT_MOUNT_COLOR,DEFAULT_MAX_ANGULAR_OFFSET,model_Post_Marker,rotate_vector
 from ..freecad_models.freecad_model_grating import grating_mount
 from .geom_object import Geom_Object, rotation_matrix
-from .post import Post_and_holder
 from ..freecad_models.freecad_model_mounts import draw_post,draw_post_holder,draw_post_base,draw_1inch_post,draw_large_post,model_mirror_holder
 # from .mirror import Mirror
 
@@ -68,7 +67,7 @@ def get_mount_by_aperture_and_element(aperture, elm_type, elm_thickness):
     elif aperture <=25.4*4:
       model = "LMR4_M"
     post = "0.5inch_post"
-  elif elm_type in ["Mirror", "Curved_Mirror", "Beamsplitter"]:
+  elif elm_type in ["Mirror", "Curved_Mirror", "Beamsplitter", "Off_Axis_Parabola"]:
     post = "1inch_post"
     if aperture<= 25.4/2:
       model = "POLARIS-K05"
@@ -452,7 +451,9 @@ class Stages_Mount(Composed_Mount):
     basic_mount.mount_list[-1].set_lower_limit(stages_height)
     for mou in basic_mount.mount_list:
       self.add(mou)
-    self.add(Unit_Mount("XR25C"))
+    XR25C = Unit_Mount("XR25C")
+    XR25C.draw_dict["color"] = (0.2, 0.2, 0.2)
+    self.add(XR25C)
     self.x_aligned = x_aligned
     if not self.x_aligned:
       self.mount_list[-1].normal = self.mount_list[0].normal
