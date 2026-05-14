@@ -19,6 +19,7 @@ if freecad_da:
   import Sketcher
   import Part
   from math import pi
+  from BOPTools import BOPFeatures
 
 DEFAULT_MAX_ANGULAR_OFFSET = 10
 price = 0
@@ -1245,6 +1246,8 @@ def model_Post_Marker(name="marker", h1 = (0,0), h2 = (75,0), h3 = (75,75),
   obj_new1.ViewObject.ShapeColor = color
   return obj_new1
 
+
+
 def model_mirror_holder(name="mirror_holder",dia = 25.4,angle = 30,
                         color=DEFAULT_MOUNT_COLOR, geom = None,**kwargs):
   DOC = get_DOC()
@@ -1261,28 +1264,39 @@ def model_mirror_holder(name="mirror_holder",dia = 25.4,angle = 30,
   obj1.Height = dia_l/np.tan(angle/180*np.pi)
   obj1.Placement = Placement(Vector(-dia_l/(2*np.tan(angle/180*np.pi)),0,0), Rotation(0,90,0), Vector(0,0,0))
   obj2 = DOC.addObject("Part::Box","Box")
-  obj2.Length = dia_l/np.sin(angle/180*np.pi)
-  obj2.Width = dia_l/np.sin(angle/180*np.pi)
-  obj2.Height = dia_l/np.sin(angle/180*np.pi)
-  obj2.Placement = Placement(Vector(-dia_l/(2*np.tan(angle/180*np.pi)),-dia_l/np.sin(angle/180*np.pi)/2,-dia_l/2), Rotation(0,-angle,0), Vector(0,0,0))
+  obj2.Length = dia_l/np.sin(angle/180*np.pi)*1.2
+  obj2.Width = dia_l/np.sin(angle/180*np.pi)*1.2
+  obj2.Height = dia_l/np.sin(angle/180*np.pi)*1.2
+  obj2.Placement = Placement(Vector(-dia_l/(2*np.tan(angle/180*np.pi)) -3 ,-dia_l/np.sin(angle/180*np.pi)/2 *1.1, -dia_l/2 -1), Rotation(0,-angle,0), Vector(0,0,0))
   obj3 = DOC.addObject("Part::Cut","Cut")
   obj3.Base = obj1
   obj3.Tool = obj2
   obj1.Visibility = False
   obj2.Visibility = False
+  DOC.recompute()
   obj4 = DOC.addObject("Part::Cylinder", "Cylinder")
   obj4.Label = "Cylinder"
   obj4.Radius = dia/2
   obj4.Placement = Placement(Vector(5*np.sin(angle/180*np.pi),0,-5*np.cos(angle/180*np.pi)), Rotation(0,-angle,0), Vector(0,0,0))
+  DOC.recompute()
   obj5 = DOC.addObject("Part::Cylinder", "Cylinder")
   obj5.Label = "Cylinder"
   obj5.Radius = dia/2
   obj5.Height = 6
   obj5.Placement = Placement(Vector(dia_l/(2*np.tan(angle/180*np.pi))-1,0,0), Rotation(0,90,0), Vector(0,0,0))
-  obj_new1 = DOC.addObject("Part::MultiFuse","Fusion")
-  obj_new1.Shapes = [obj3,obj5,]
-  obj3.Visibility = False
-  obj5.Visibility = False
+  DOC.recompute()
+
+
+  bp = BOPFeatures.BOPFeatures(DOC)
+  # obj_new1 = bp.make_fuse([obj3.Name, obj5.Name])
+  obj_new1 = bp.make_multi_fuse([obj3.Name, obj5.Name, ])
+  DOC.recompute()
+
+  # obj_new1 = DOC.addObject("Part::MultiFuse","Fusion")
+  # obj_new1.Shapes = [obj3,obj5,]
+  # obj3.Visibility = False
+  # obj5.Visibility = False
+
   obj_new2 = DOC.addObject("Part::Cut","Cut")
   obj_new2.Base = obj_new1
   obj_new2.Tool = obj4
