@@ -5,23 +5,25 @@ Created on Sat Aug 19 14:40:56 2023
 @author: mens
 """
 
-from ..freecad_models.utils import thisfolder,load_STL,rotate,translate
-from ..freecad_models.freecad_model_composition import initialize_composition_old,add_to_composition
-from ..freecad_models.freecad_model_mounts import mirror_mount,DEFAULT_MOUNT_COLOR,DEFAULT_MAX_ANGULAR_OFFSET,model_Post_Marker,rotate_vector
-from ..freecad_models.freecad_model_grating import grating_mount
-from .geom_object import Geom_Object, rotation_matrix
-from ..freecad_models.freecad_model_mounts import draw_post,draw_post_holder,draw_post_base,draw_1inch_post,draw_large_post,model_mirror_holder
-# from .mirror import Mirror
-
-DEFALUT_POST_COLOR = (0.8,0.8,0.8)
-DEFALUT_HOLDER_COLOR = (0.2,0.2,0.2)
-POST_LIST = ["1inch_post","0.5inch_post","big_post"]
-
-# from copy import deepcopy
 import csv
 import os
 import numpy as np
 import math
+
+from .geom_object import Geom_Object, rotation_matrix
+from ..freecad_models.utils import thisfolder,load_STL
+from ..freecad_models.freecad_model_composition import initialize_composition_old
+from ..freecad_models.freecad_model_composition import add_to_composition
+from ..freecad_models.freecad_model_grating import grating_mount
+from ..freecad_models.freecad_model_mounts import model_Post_Marker
+from ..freecad_models.freecad_model_mounts import draw_post, draw_post_holder
+from ..freecad_models.freecad_model_mounts import draw_post_base, draw_1inch_post
+from ..freecad_models.freecad_model_mounts import draw_large_post, model_mirror_holder
+
+
+DEFALUT_POST_COLOR = (0.8,0.8,0.8)
+DEFALUT_HOLDER_COLOR = (0.2,0.2,0.2)
+POST_LIST = ["1inch_post","0.5inch_post","big_post"]
 
 
 DEFALUT_CAV_PATH = thisfolder
