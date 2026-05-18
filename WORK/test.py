@@ -7,16 +7,23 @@ Created on Mon Mar 18 14:01:12 2024
 from LaserCAD.freecad_models import freecad_da, clear_doc, setview
 from LaserCAD import Composition, Beam, ThinBeamsplitter, Mirror, Composed_Mount, ThickBeamsplitter, Crystal
 
-from LaserCAD.freecad_models.freecad_model_crystal import model_crystal_mount, model_crystal
+from LaserCAD.freecad_models.freecad_model_crystal import model_crystal_mount, model_crystal, model_cylinder, model_box
+
+m = Mirror()
+m.pos = (30, 0, 0)
 
 if freecad_da:
   clear_doc()
   # obj = model_crystal()
   # obj2 = model_crystal_mount()
 
-crys = Crystal()
-crys.pos= (0,0,0)
-crys.draw()
+  cyl = model_cylinder(name="lajskdf")
+
+  box = model_box(name="booox", geom=m.get_geom())
+
+# crys = Crystal()
+# crys.pos= (0,0,0)
+# crys.draw()
 
 # from LaserCAD.WORK.tutorialJ import comp
 

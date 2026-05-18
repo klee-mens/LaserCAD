@@ -6,7 +6,7 @@ Created on Thu Aug 18 19:55:00 2022
 @author: mens
 """
 
-from .utils import freecad_da, update_geom_info, get_DOC
+from .utils import freecad_da, update_geom_info, get_DOC, GEOM0
 from .freecad_model_composition import initialize_composition_old, add_to_composition
 from .freecad_model_lens import model_lens
 from .freecad_model_mounts import draw_post_part
@@ -102,38 +102,80 @@ def model_crystal(name="crystal",model="cube", width=50, height=10, thickness=25
   return obj
 
 
+DEFAULT_COLOR = (200/255, 50/255, 30/255)
+DEFAULT_TRANSPARENCY = 50
+
+def model_cylinder(name="cylinder", diameter=25, thickness=6, geom=GEOM0,
+                   color=DEFAULT_COLOR, transparency=DEFAULT_TRANSPARENCY, **kwargs):
+
+  DOC = get_DOC()
+  obj = DOC.addObject("Part::Cylinder","Cylinder")
+  obj.Label = name
+  # DOC.recompute()
+  # Gui.SendMsgToActiveView("ViewFit")
+  ### End command Part_Cylinder
+  # Gui.Selection.addSelection('Unnamed','Cylinder')
+  obj.Radius = diameter/2
+  obj.Height =  thickness
+  
+  obj.ViewObject.ShapeColor = color
+  obj.ViewObject.Transparency = transparency
+  obj.Placement=Placement(Vector(0,0,0), Rotation(90,0,90), Vector(0,0,0))
+  update_geom_info(obj, geom)
+  DOC.recompute()
+  
+  return obj
+
+def model_box(name="cylinder", length=5, width=10, height=10, geom=GEOM0,
+                   color=DEFAULT_COLOR, transparency=DEFAULT_TRANSPARENCY, **kwargs):
+
+  DOC = get_DOC()
+  obj = DOC.addObject("Part::Box","Box")
+  obj.Label = name
+  
+  obj.Length = length
+  obj.Width = width
+  obj.Height =  height
+  
+  obj.ViewObject.ShapeColor = color
+  obj.ViewObject.Transparency = transparency
+  update_geom_info(obj, geom)
+  DOC.recompute()
+  
+  return obj
+
 
 # =============================================================================
 # round crystal mount
 # =============================================================================
 
-#  App.activeDocument().addObject('PartDesign::Body','Body')
-# >>> App.ActiveDocument.getObject('Body').Label = 'Body'
-# >>> App.ActiveDocument.getObject('Body').AllowCompound = False
+#  activeDocument().addObject('PartDesign::Body','Body')
+# >>> ActiveDocument.getObject('Body').Label = 'Body'
+# >>> ActiveDocument.getObject('Body').AllowCompound = False
 # >>> # import PartDesignGui
 # >>> # Gui.activateView('Gui::View3DInventor', True)
-# >>> # Gui.activeView().setActiveObject('pdbody', App.activeDocument().Body)
+# >>> # Gui.activeView().setActiveObject('pdbody', activeDocument().Body)
 # >>> # Gui.Selection.clearSelection()
-# >>> # Gui.Selection.addSelection(App.ActiveDocument.Body)
-# >>> App.ActiveDocument.recompute()
+# >>> # Gui.Selection.addSelection(ActiveDocument.Body)
+# >>> ActiveDocument.recompute()
 # >>> ### End command PartDesign_Body
 # >>> # Gui.Selection.addSelection('labor_116','Body')
 # >>> # Gui.runCommand('PartDesign_CompSketches',0)
 # >>> # Gui.Selection.clearSelection()
 # >>> # Gui.Selection.addSelection('labor_116','Body','Origin002.YZ_Plane001.')
-# >>> App.getDocument('labor_116').getObject('Body').newObject('Sketcher::SketchObject','Sketch')
-# >>> App.getDocument('labor_116').getObject('Sketch').AttachmentSupport = (App.getDocument('labor_116').getObject('Origin002'),['YZ_Plane001'])
-# >>> App.getDocument('labor_116').getObject('Sketch').MapMode = 'FlatFace'
-# >>> App.ActiveDocument.recompute()
-# >>> # Gui.getDocument('labor_116').setEdit(App.getDocument('labor_116').getObject('Body'), 0, 'Sketch.')
+# >>> getDocument('labor_116').getObject('Body').newObject('Sketcher::SketchObject','Sketch')
+# >>> getDocument('labor_116').getObject('Sketch').AttachmentSupport = (getDocument('labor_116').getObject('Origin002'),['YZ_Plane001'])
+# >>> getDocument('labor_116').getObject('Sketch').MapMode = 'FlatFace'
+# >>> ActiveDocument.recompute()
+# >>> # Gui.getDocument('labor_116').setEdit(getDocument('labor_116').getObject('Body'), 0, 'Sketch.')
 # >>> # import Show
-# >>> # ActiveSketch = App.getDocument('labor_116').getObject('Sketch')
-# >>> # tv = Show.TempoVis(App.ActiveDocument, tag= ActiveSketch.ViewObject.TypeId)
+# >>> # ActiveSketch = getDocument('labor_116').getObject('Sketch')
+# >>> # tv = Show.TempoVis(ActiveDocument, tag= ActiveSketch.ViewObject.TypeId)
 # >>> # ActiveSketch.ViewObject.TempoVis = tv
 # >>> # if ActiveSketch.ViewObject.EditingWorkbench:
 # >>> #   tv.activateWorkbench(ActiveSketch.ViewObject.EditingWorkbench)
 # >>> # if ActiveSketch.ViewObject.HideDependent:
-# >>> #   tv.hide(tv.get_all_dependent(App.getDocument('labor_116').getObject('Body'), 'Sketch.'))
+# >>> #   tv.hide(tv.get_all_dependent(getDocument('labor_116').getObject('Body'), 'Sketch.'))
 # >>> # if ActiveSketch.ViewObject.ShowSupport:
 # >>> #   tv.show([ref[0] for ref in ActiveSketch.AttachmentSupport if not (ref[0].isDerivedFrom("App::Plane") or ref[0].isDerivedFrom("App::LocalCoordinateSystem"))])
 # >>> # if ActiveSketch.ViewObject.ShowLinks:
@@ -144,7 +186,7 @@ def model_crystal(name="crystal",model="cube", width=50, height=10, thickness=25
 # >>> # del(ActiveSketch)
 # >>> # 
 # >>> import PartDesignGui
-# >>> # ActiveSketch = App.getDocument('labor_116').getObject('Sketch')
+# >>> # ActiveSketch = getDocument('labor_116').getObject('Sketch')
 # >>> # if ActiveSketch.ViewObject.RestoreCamera:
 # >>> #   ActiveSketch.ViewObject.TempoVis.saveCamera()
 # >>> #   if ActiveSketch.ViewObject.ForceOrtho:
@@ -158,44 +200,44 @@ def model_crystal(name="crystal",model="cube", width=50, height=10, thickness=25
 # >>> # Gui.runCommand('Std_ToggleVisibility',0)
 # >>> # Gui.runCommand('Sketcher_CompCreateConic',0)
 # >>> # Gui.Selection.clearSelection()
-# >>> ActiveSketch = App.getDocument('labor_116').getObject('Sketch')
+# >>> ActiveSketch = getDocument('labor_116').getObject('Sketch')
 # >>> 
 # >>> lastGeoId = len(ActiveSketch.Geometry)
 # >>> 
 # >>> geoList = []
-# >>> geoList.append(Part.Circle(App.Vector(0.000000, 0.000000, 0.000000), App.Vector(0.000000, 0.000000, 1.000000), 10.921819))
-# >>> App.getDocument('labor_116').getObject('Sketch').addGeometry(geoList,False)
+# >>> geoList.append(Part.Circle(Vector(0.000000, 0.000000, 0.000000), Vector(0.000000, 0.000000, 1.000000), 10.921819))
+# >>> getDocument('labor_116').getObject('Sketch').addGeometry(geoList,False)
 # >>> del geoList
 # >>> 
 # >>> constraintList = []
-# >>> App.getDocument('labor_116').getObject('Sketch').addConstraint(Sketcher.Constraint('Coincident', 0, 3, -1, 1))
+# >>> getDocument('labor_116').getObject('Sketch').addConstraint(Sketcher.Constraint('Coincident', 0, 3, -1, 1))
 # >>> 
 # >>> 
 # >>> # Gui.runCommand('Sketcher_CompDimensionTools',0)
-# >>> App.getDocument('labor_116').getObject('Sketch').addConstraint(Sketcher.Constraint('Diameter',0,21.843638)) 
+# >>> getDocument('labor_116').getObject('Sketch').addConstraint(Sketcher.Constraint('Diameter',0,21.843638)) 
 # >>> # Gui.Selection.addSelection('labor_116','Body','Sketch.Edge1',-8.78457,6.48979,0,False)
-# >>> App.getDocument('labor_116').getObject('Sketch').deleteAllGeometry(True)
-# >>> ActiveSketch = App.getDocument('labor_116').getObject('Sketch')
+# >>> getDocument('labor_116').getObject('Sketch').deleteAllGeometry(True)
+# >>> ActiveSketch = getDocument('labor_116').getObject('Sketch')
 # >>> 
 # >>> lastGeoId = len(ActiveSketch.Geometry)
 # >>> 
 # >>> geoList = []
-# >>> geoList.append(Part.Circle(App.Vector(0.000000, 0.000000, 0.000000), App.Vector(0.000000, 0.000000, 1.000000), 25.000000))
-# >>> App.getDocument('labor_116').getObject('Sketch').addGeometry(geoList,False)
+# >>> geoList.append(Part.Circle(Vector(0.000000, 0.000000, 0.000000), Vector(0.000000, 0.000000, 1.000000), 25.000000))
+# >>> getDocument('labor_116').getObject('Sketch').addGeometry(geoList,False)
 # >>> del geoList
 # >>> 
 # >>> constraintList = []
 # >>> constraintList.append(Sketcher.Constraint('Coincident', 0, 3, -1, 1))
 # >>> constraintList.append(Sketcher.Constraint('Diameter', 0, 50.000000))
-# >>> App.getDocument('labor_116').getObject('Sketch').addConstraint(constraintList)
+# >>> getDocument('labor_116').getObject('Sketch').addConstraint(constraintList)
 # >>> del constraintList
 # >>> 
-# >>> App.getDocument('labor_116').getObject('Sketch').setGeometryIds([(0,1)])
-# >>> App.getDocument('labor_116').getObject('Sketch').setDatum(1,App.Units.Quantity('50.000000 mm'))
+# >>> getDocument('labor_116').getObject('Sketch').setGeometryIds([(0,1)])
+# >>> getDocument('labor_116').getObject('Sketch').setDatum(1,Units.Quantity('50.000000 mm'))
 # >>> # Gui.Selection.clearSelection()
 # >>> # Gui.getDocument('labor_116').resetEdit()
-# >>> App.ActiveDocument.recompute()
-# >>> # ActiveSketch = App.getDocument('labor_116').getObject('Sketch')
+# >>> ActiveDocument.recompute()
+# >>> # ActiveSketch = getDocument('labor_116').getObject('Sketch')
 # >>> # tv = ActiveSketch.ViewObject.TempoVis
 # >>> # if tv:
 # >>> #   tv.restore()
@@ -204,56 +246,56 @@ def model_crystal(name="crystal",model="cube", width=50, height=10, thickness=25
 # >>> # del(ActiveSketch)
 # >>> # 
 # >>> # Gui.Selection.addSelection('labor_116','Body','Sketch.')
-# >>> App.getDocument('labor_116').recompute()
+# >>> getDocument('labor_116').recompute()
 # >>> ### Begin command PartDesign_Pad
-# >>> App.getDocument('labor_116').getObject('Body').newObject('PartDesign::Pad','Pad001')
-# >>> App.getDocument('labor_116').getObject('Pad001').Profile = (App.getDocument('labor_116').getObject('Sketch'), ['',])
-# >>> App.getDocument('labor_116').getObject('Pad001').Length = 10
-# >>> App.ActiveDocument.recompute()
-# >>> App.getDocument('labor_116').getObject('Pad001').ReferenceAxis = (App.getDocument('labor_116').getObject('Sketch'),['N_Axis'])
-# >>> App.getDocument('labor_116').getObject('Sketch').Visibility = False
-# >>> App.ActiveDocument.recompute()
-# >>> # App.getDocument('labor_116').getObject('Pad001').ViewObject.ShapeAppearance=getattr(App.getDocument('labor_116').getObject('Body').getLinkedObject(True).ViewObject,'ShapeAppearance',App.getDocument('labor_116').getObject('Pad001').ViewObject.ShapeAppearance)
-# >>> # App.getDocument('labor_116').getObject('Pad001').ViewObject.LineColor=getattr(App.getDocument('labor_116').getObject('Body').getLinkedObject(True).ViewObject,'LineColor',App.getDocument('labor_116').getObject('Pad001').ViewObject.LineColor)
-# >>> # App.getDocument('labor_116').getObject('Pad001').ViewObject.PointColor=getattr(App.getDocument('labor_116').getObject('Body').getLinkedObject(True).ViewObject,'PointColor',App.getDocument('labor_116').getObject('Pad001').ViewObject.PointColor)
-# >>> # App.getDocument('labor_116').getObject('Pad001').ViewObject.Transparency=getattr(App.getDocument('labor_116').getObject('Body').getLinkedObject(True).ViewObject,'Transparency',App.getDocument('labor_116').getObject('Pad001').ViewObject.Transparency)
-# >>> # App.getDocument('labor_116').getObject('Pad001').ViewObject.DisplayMode=getattr(App.getDocument('labor_116').getObject('Body').getLinkedObject(True).ViewObject,'DisplayMode',App.getDocument('labor_116').getObject('Pad001').ViewObject.DisplayMode)
-# >>> # Gui.getDocument('labor_116').setEdit(App.getDocument('labor_116').getObject('Body'), 0, 'Pad001.')
+# >>> getDocument('labor_116').getObject('Body').newObject('PartDesign::Pad','Pad001')
+# >>> getDocument('labor_116').getObject('Pad001').Profile = (getDocument('labor_116').getObject('Sketch'), ['',])
+# >>> getDocument('labor_116').getObject('Pad001').Length = 10
+# >>> ActiveDocument.recompute()
+# >>> getDocument('labor_116').getObject('Pad001').ReferenceAxis = (getDocument('labor_116').getObject('Sketch'),['N_Axis'])
+# >>> getDocument('labor_116').getObject('Sketch').Visibility = False
+# >>> ActiveDocument.recompute()
+# >>> # getDocument('labor_116').getObject('Pad001').ViewObject.ShapeAppearance=getattr(getDocument('labor_116').getObject('Body').getLinkedObject(True).ViewObject,'ShapeAppearance',getDocument('labor_116').getObject('Pad001').ViewObject.ShapeAppearance)
+# >>> # getDocument('labor_116').getObject('Pad001').ViewObject.LineColor=getattr(getDocument('labor_116').getObject('Body').getLinkedObject(True).ViewObject,'LineColor',getDocument('labor_116').getObject('Pad001').ViewObject.LineColor)
+# >>> # getDocument('labor_116').getObject('Pad001').ViewObject.PointColor=getattr(getDocument('labor_116').getObject('Body').getLinkedObject(True).ViewObject,'PointColor',getDocument('labor_116').getObject('Pad001').ViewObject.PointColor)
+# >>> # getDocument('labor_116').getObject('Pad001').ViewObject.Transparency=getattr(getDocument('labor_116').getObject('Body').getLinkedObject(True).ViewObject,'Transparency',getDocument('labor_116').getObject('Pad001').ViewObject.Transparency)
+# >>> # getDocument('labor_116').getObject('Pad001').ViewObject.DisplayMode=getattr(getDocument('labor_116').getObject('Body').getLinkedObject(True).ViewObject,'DisplayMode',getDocument('labor_116').getObject('Pad001').ViewObject.DisplayMode)
+# >>> # Gui.getDocument('labor_116').setEdit(getDocument('labor_116').getObject('Body'), 0, 'Pad001.')
 # >>> # Gui.Selection.clearSelection()
 # >>> ### End command PartDesign_Pad
 # >>> # Gui.Selection.clearSelection()
-# >>> App.getDocument('labor_116').getObject('Pad001').Length = 10.000000
-# >>> App.getDocument('labor_116').getObject('Pad001').TaperAngle = 0.000000
-# >>> App.getDocument('labor_116').getObject('Pad001').UseCustomVector = 0
-# >>> App.getDocument('labor_116').getObject('Pad001').Direction = (1, 0, 0)
-# >>> App.getDocument('labor_116').getObject('Pad001').ReferenceAxis = (App.getDocument('labor_116').getObject('Sketch'), ['N_Axis'])
-# >>> App.getDocument('labor_116').getObject('Pad001').AlongSketchNormal = 1
-# >>> App.getDocument('labor_116').getObject('Pad001').SideType = 0
-# >>> App.getDocument('labor_116').getObject('Pad001').Type = 0
-# >>> App.getDocument('labor_116').getObject('Pad001').Type2 = 0
-# >>> App.getDocument('labor_116').getObject('Pad001').UpToFace = None
-# >>> App.getDocument('labor_116').getObject('Pad001').UpToFace2 = None
-# >>> App.getDocument('labor_116').getObject('Pad001').Reversed = 0
-# >>> App.getDocument('labor_116').getObject('Pad001').Offset = 0
-# >>> App.getDocument('labor_116').getObject('Pad001').Offset2 = 0
-# >>> App.getDocument('labor_116').purgeTouched()
-# >>> App.getDocument('labor_116').recompute()
+# >>> getDocument('labor_116').getObject('Pad001').Length = 10.000000
+# >>> getDocument('labor_116').getObject('Pad001').TaperAngle = 0.000000
+# >>> getDocument('labor_116').getObject('Pad001').UseCustomVector = 0
+# >>> getDocument('labor_116').getObject('Pad001').Direction = (1, 0, 0)
+# >>> getDocument('labor_116').getObject('Pad001').ReferenceAxis = (getDocument('labor_116').getObject('Sketch'), ['N_Axis'])
+# >>> getDocument('labor_116').getObject('Pad001').AlongSketchNormal = 1
+# >>> getDocument('labor_116').getObject('Pad001').SideType = 0
+# >>> getDocument('labor_116').getObject('Pad001').Type = 0
+# >>> getDocument('labor_116').getObject('Pad001').Type2 = 0
+# >>> getDocument('labor_116').getObject('Pad001').UpToFace = None
+# >>> getDocument('labor_116').getObject('Pad001').UpToFace2 = None
+# >>> getDocument('labor_116').getObject('Pad001').Reversed = 0
+# >>> getDocument('labor_116').getObject('Pad001').Offset = 0
+# >>> getDocument('labor_116').getObject('Pad001').Offset2 = 0
+# >>> getDocument('labor_116').purgeTouched()
+# >>> getDocument('labor_116').recompute()
 # >>> # Gui.getDocument('labor_116').resetEdit()
-# >>> App.getDocument('labor_116').getObject('Sketch').Visibility = False
+# >>> getDocument('labor_116').getObject('Sketch').Visibility = False
 # >>> # Gui.Selection.addSelection('labor_116','Body','Pad001.Face2',1.77636e-15,-9.39204,6.14509)
 # >>> ### Begin command PartDesign_CompSketches
-# >>> App.getDocument('labor_116').getObject('Body').newObject('Sketcher::SketchObject','Sketch001')
-# >>> App.getDocument('labor_116').getObject('Sketch001').AttachmentSupport = (App.getDocument('labor_116').getObject('Pad001'),['Face2',])
-# >>> App.getDocument('labor_116').getObject('Sketch001').MapMode = 'FlatFace'
-# >>> App.ActiveDocument.recompute()
-# >>> # Gui.getDocument('labor_116').setEdit(App.getDocument('labor_116').getObject('Body'), 0, 'Sketch001.')
-# >>> # ActiveSketch = App.getDocument('labor_116').getObject('Sketch001')
-# >>> # tv = Show.TempoVis(App.ActiveDocument, tag= ActiveSketch.ViewObject.TypeId)
+# >>> getDocument('labor_116').getObject('Body').newObject('Sketcher::SketchObject','Sketch001')
+# >>> getDocument('labor_116').getObject('Sketch001').AttachmentSupport = (getDocument('labor_116').getObject('Pad001'),['Face2',])
+# >>> getDocument('labor_116').getObject('Sketch001').MapMode = 'FlatFace'
+# >>> ActiveDocument.recompute()
+# >>> # Gui.getDocument('labor_116').setEdit(getDocument('labor_116').getObject('Body'), 0, 'Sketch001.')
+# >>> # ActiveSketch = getDocument('labor_116').getObject('Sketch001')
+# >>> # tv = Show.TempoVis(ActiveDocument, tag= ActiveSketch.ViewObject.TypeId)
 # >>> # ActiveSketch.ViewObject.TempoVis = tv
 # >>> # if ActiveSketch.ViewObject.EditingWorkbench:
 # >>> #   tv.activateWorkbench(ActiveSketch.ViewObject.EditingWorkbench)
 # >>> # if ActiveSketch.ViewObject.HideDependent:
-# >>> #   tv.hide(tv.get_all_dependent(App.getDocument('labor_116').getObject('Body'), 'Sketch001.'))
+# >>> #   tv.hide(tv.get_all_dependent(getDocument('labor_116').getObject('Body'), 'Sketch001.'))
 # >>> # if ActiveSketch.ViewObject.ShowSupport:
 # >>> #   tv.show([ref[0] for ref in ActiveSketch.AttachmentSupport if not (ref[0].isDerivedFrom("App::Plane") or ref[0].isDerivedFrom("App::LocalCoordinateSystem"))])
 # >>> # if ActiveSketch.ViewObject.ShowLinks:
@@ -264,7 +306,7 @@ def model_crystal(name="crystal",model="cube", width=50, height=10, thickness=25
 # >>> # del(ActiveSketch)
 # >>> # 
 # >>> import PartDesignGui
-# >>> # ActiveSketch = App.getDocument('labor_116').getObject('Sketch001')
+# >>> # ActiveSketch = getDocument('labor_116').getObject('Sketch001')
 # >>> # if ActiveSketch.ViewObject.RestoreCamera:
 # >>> #   ActiveSketch.ViewObject.TempoVis.saveCamera()
 # >>> #   if ActiveSketch.ViewObject.ForceOrtho:
@@ -273,44 +315,44 @@ def model_crystal(name="crystal",model="cube", width=50, height=10, thickness=25
 # >>> ### End command PartDesign_CompSketches
 # >>> # Gui.Selection.clearSelection()
 # >>> # Gui.runCommand('Sketcher_CompCreateConic',0)
-# >>> ActiveSketch = App.getDocument('labor_116').getObject('Sketch001')
+# >>> ActiveSketch = getDocument('labor_116').getObject('Sketch001')
 # >>> 
 # >>> lastGeoId = len(ActiveSketch.Geometry)
 # >>> 
 # >>> geoList = []
-# >>> geoList.append(Part.Circle(App.Vector(0.000000, 0.000000, 0.000000), App.Vector(0.000000, 0.000000, 1.000000), 9.791914))
-# >>> App.getDocument('labor_116').getObject('Sketch001').addGeometry(geoList,False)
+# >>> geoList.append(Part.Circle(Vector(0.000000, 0.000000, 0.000000), Vector(0.000000, 0.000000, 1.000000), 9.791914))
+# >>> getDocument('labor_116').getObject('Sketch001').addGeometry(geoList,False)
 # >>> del geoList
 # >>> 
 # >>> constraintList = []
-# >>> App.getDocument('labor_116').getObject('Sketch001').addConstraint(Sketcher.Constraint('Coincident', 0, 3, -1, 1))
+# >>> getDocument('labor_116').getObject('Sketch001').addConstraint(Sketcher.Constraint('Coincident', 0, 3, -1, 1))
 # >>> 
 # >>> 
 # >>> # Gui.runCommand('Sketcher_CompDimensionTools',0)
-# >>> App.getDocument('labor_116').getObject('Sketch001').addConstraint(Sketcher.Constraint('Diameter',0,19.583828)) 
+# >>> getDocument('labor_116').getObject('Sketch001').addConstraint(Sketcher.Constraint('Diameter',0,19.583828)) 
 # >>> # Gui.Selection.addSelection('labor_116','Body','Sketch001.Edge1',5.10428,8.35631,0,False)
-# >>> App.getDocument('labor_116').getObject('Sketch001').deleteAllGeometry(True)
-# >>> ActiveSketch = App.getDocument('labor_116').getObject('Sketch001')
+# >>> getDocument('labor_116').getObject('Sketch001').deleteAllGeometry(True)
+# >>> ActiveSketch = getDocument('labor_116').getObject('Sketch001')
 # >>> 
 # >>> lastGeoId = len(ActiveSketch.Geometry)
 # >>> 
 # >>> geoList = []
-# >>> geoList.append(Part.Circle(App.Vector(0.000000, 0.000000, 0.000000), App.Vector(0.000000, 0.000000, 1.000000), 7.500000))
-# >>> App.getDocument('labor_116').getObject('Sketch001').addGeometry(geoList,False)
+# >>> geoList.append(Part.Circle(Vector(0.000000, 0.000000, 0.000000), Vector(0.000000, 0.000000, 1.000000), 7.500000))
+# >>> getDocument('labor_116').getObject('Sketch001').addGeometry(geoList,False)
 # >>> del geoList
 # >>> 
 # >>> constraintList = []
 # >>> constraintList.append(Sketcher.Constraint('Coincident', 0, 3, -1, 1))
 # >>> constraintList.append(Sketcher.Constraint('Diameter', 0, 15.000000))
-# >>> App.getDocument('labor_116').getObject('Sketch001').addConstraint(constraintList)
+# >>> getDocument('labor_116').getObject('Sketch001').addConstraint(constraintList)
 # >>> del constraintList
 # >>> 
-# >>> App.getDocument('labor_116').getObject('Sketch001').setGeometryIds([(0,1)])
-# >>> App.getDocument('labor_116').getObject('Sketch001').setDatum(1,App.Units.Quantity('15.000000 mm'))
+# >>> getDocument('labor_116').getObject('Sketch001').setGeometryIds([(0,1)])
+# >>> getDocument('labor_116').getObject('Sketch001').setDatum(1,Units.Quantity('15.000000 mm'))
 # >>> # Gui.Selection.clearSelection()
 # >>> # Gui.getDocument('labor_116').resetEdit()
-# >>> App.ActiveDocument.recompute()
-# >>> # ActiveSketch = App.getDocument('labor_116').getObject('Sketch001')
+# >>> ActiveDocument.recompute()
+# >>> # ActiveSketch = getDocument('labor_116').getObject('Sketch001')
 # >>> # tv = ActiveSketch.ViewObject.TempoVis
 # >>> # if tv:
 # >>> #   tv.restore()
@@ -319,42 +361,42 @@ def model_crystal(name="crystal",model="cube", width=50, height=10, thickness=25
 # >>> # del(ActiveSketch)
 # >>> # 
 # >>> # Gui.Selection.addSelection('labor_116','Body','Sketch001.')
-# >>> App.getDocument('labor_116').recompute()
+# >>> getDocument('labor_116').recompute()
 # >>> ### Begin command PartDesign_Pocket
-# >>> App.getDocument('labor_116').getObject('Body').newObject('PartDesign::Pocket','Pocket')
-# >>> App.getDocument('labor_116').getObject('Pocket').Profile = (App.getDocument('labor_116').getObject('Sketch001'), ['',])
-# >>> App.getDocument('labor_116').getObject('Pocket').Length = 5
-# >>> App.ActiveDocument.recompute()
-# >>> App.getDocument('labor_116').getObject('Pocket').ReferenceAxis = (App.getDocument('labor_116').getObject('Sketch001'),['N_Axis'])
-# >>> App.getDocument('labor_116').getObject('Sketch001').Visibility = False
-# >>> App.ActiveDocument.recompute()
-# >>> # App.getDocument('labor_116').getObject('Pocket').ViewObject.ShapeAppearance=getattr(App.getDocument('labor_116').getObject('Pad001').getLinkedObject(True).ViewObject,'ShapeAppearance',App.getDocument('labor_116').getObject('Pocket').ViewObject.ShapeAppearance)
-# >>> # App.getDocument('labor_116').getObject('Pocket').ViewObject.LineColor=getattr(App.getDocument('labor_116').getObject('Pad001').getLinkedObject(True).ViewObject,'LineColor',App.getDocument('labor_116').getObject('Pocket').ViewObject.LineColor)
-# >>> # App.getDocument('labor_116').getObject('Pocket').ViewObject.PointColor=getattr(App.getDocument('labor_116').getObject('Pad001').getLinkedObject(True).ViewObject,'PointColor',App.getDocument('labor_116').getObject('Pocket').ViewObject.PointColor)
-# >>> # App.getDocument('labor_116').getObject('Pocket').ViewObject.Transparency=getattr(App.getDocument('labor_116').getObject('Pad001').getLinkedObject(True).ViewObject,'Transparency',App.getDocument('labor_116').getObject('Pocket').ViewObject.Transparency)
-# >>> # App.getDocument('labor_116').getObject('Pocket').ViewObject.DisplayMode=getattr(App.getDocument('labor_116').getObject('Pad001').getLinkedObject(True).ViewObject,'DisplayMode',App.getDocument('labor_116').getObject('Pocket').ViewObject.DisplayMode)
-# >>> # Gui.getDocument('labor_116').setEdit(App.getDocument('labor_116').getObject('Body'), 0, 'Pocket.')
+# >>> getDocument('labor_116').getObject('Body').newObject('PartDesign::Pocket','Pocket')
+# >>> getDocument('labor_116').getObject('Pocket').Profile = (getDocument('labor_116').getObject('Sketch001'), ['',])
+# >>> getDocument('labor_116').getObject('Pocket').Length = 5
+# >>> ActiveDocument.recompute()
+# >>> getDocument('labor_116').getObject('Pocket').ReferenceAxis = (getDocument('labor_116').getObject('Sketch001'),['N_Axis'])
+# >>> getDocument('labor_116').getObject('Sketch001').Visibility = False
+# >>> ActiveDocument.recompute()
+# >>> # getDocument('labor_116').getObject('Pocket').ViewObject.ShapeAppearance=getattr(getDocument('labor_116').getObject('Pad001').getLinkedObject(True).ViewObject,'ShapeAppearance',getDocument('labor_116').getObject('Pocket').ViewObject.ShapeAppearance)
+# >>> # getDocument('labor_116').getObject('Pocket').ViewObject.LineColor=getattr(getDocument('labor_116').getObject('Pad001').getLinkedObject(True).ViewObject,'LineColor',getDocument('labor_116').getObject('Pocket').ViewObject.LineColor)
+# >>> # getDocument('labor_116').getObject('Pocket').ViewObject.PointColor=getattr(getDocument('labor_116').getObject('Pad001').getLinkedObject(True).ViewObject,'PointColor',getDocument('labor_116').getObject('Pocket').ViewObject.PointColor)
+# >>> # getDocument('labor_116').getObject('Pocket').ViewObject.Transparency=getattr(getDocument('labor_116').getObject('Pad001').getLinkedObject(True).ViewObject,'Transparency',getDocument('labor_116').getObject('Pocket').ViewObject.Transparency)
+# >>> # getDocument('labor_116').getObject('Pocket').ViewObject.DisplayMode=getattr(getDocument('labor_116').getObject('Pad001').getLinkedObject(True).ViewObject,'DisplayMode',getDocument('labor_116').getObject('Pocket').ViewObject.DisplayMode)
+# >>> # Gui.getDocument('labor_116').setEdit(getDocument('labor_116').getObject('Body'), 0, 'Pocket.')
 # >>> # Gui.Selection.clearSelection()
 # >>> ### End command PartDesign_Pocket
 # >>> # Gui.Selection.clearSelection()
-# >>> App.getDocument('labor_116').getObject('Pocket').TaperAngle = 0.000000
-# >>> App.getDocument('labor_116').getObject('Pocket').UseCustomVector = 0
-# >>> App.getDocument('labor_116').getObject('Pocket').Direction = (1, 0, 0)
-# >>> App.getDocument('labor_116').getObject('Pocket').ReferenceAxis = (App.getDocument('labor_116').getObject('Sketch001'), ['N_Axis'])
-# >>> App.getDocument('labor_116').getObject('Pocket').AlongSketchNormal = 1
-# >>> App.getDocument('labor_116').getObject('Pocket').SideType = 0
-# >>> App.getDocument('labor_116').getObject('Pocket').Type = 1
-# >>> App.getDocument('labor_116').getObject('Pocket').Type2 = 0
-# >>> App.getDocument('labor_116').getObject('Pocket').UpToFace = None
-# >>> App.getDocument('labor_116').getObject('Pocket').UpToFace2 = None
-# >>> App.getDocument('labor_116').getObject('Pocket').Reversed = 0
-# >>> App.getDocument('labor_116').getObject('Pocket').Offset = 0
-# >>> App.getDocument('labor_116').getObject('Pocket').Offset2 = 0
-# >>> App.getDocument('labor_116').purgeTouched()
-# >>> App.getDocument('labor_116').recompute()
-# >>> App.getDocument('labor_116').getObject('Pad001').Visibility = False
+# >>> getDocument('labor_116').getObject('Pocket').TaperAngle = 0.000000
+# >>> getDocument('labor_116').getObject('Pocket').UseCustomVector = 0
+# >>> getDocument('labor_116').getObject('Pocket').Direction = (1, 0, 0)
+# >>> getDocument('labor_116').getObject('Pocket').ReferenceAxis = (getDocument('labor_116').getObject('Sketch001'), ['N_Axis'])
+# >>> getDocument('labor_116').getObject('Pocket').AlongSketchNormal = 1
+# >>> getDocument('labor_116').getObject('Pocket').SideType = 0
+# >>> getDocument('labor_116').getObject('Pocket').Type = 1
+# >>> getDocument('labor_116').getObject('Pocket').Type2 = 0
+# >>> getDocument('labor_116').getObject('Pocket').UpToFace = None
+# >>> getDocument('labor_116').getObject('Pocket').UpToFace2 = None
+# >>> getDocument('labor_116').getObject('Pocket').Reversed = 0
+# >>> getDocument('labor_116').getObject('Pocket').Offset = 0
+# >>> getDocument('labor_116').getObject('Pocket').Offset2 = 0
+# >>> getDocument('labor_116').purgeTouched()
+# >>> getDocument('labor_116').recompute()
+# >>> getDocument('labor_116').getObject('Pad001').Visibility = False
 # >>> # Gui.getDocument('labor_116').resetEdit()
-# >>> App.getDocument('labor_116').getObject('Sketch001').Visibility = False
+# >>> getDocument('labor_116').getObject('Sketch001').Visibility = False
 # >>> 
 
 
