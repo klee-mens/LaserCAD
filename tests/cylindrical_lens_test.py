@@ -51,5 +51,27 @@ comp2.propagate(200)
 comp2.pos += (0,80,0)
 comp2.draw()
 
+
+from LaserCAD import KM100C_flipped
+
+
+ls3 = SquareBeam(radius =5,ray_in_line = 10)
+ls3.set_ray_color((0.5, 0.0, 0.8))
+comp3 = Composition()
+comp3.set_light_source(ls3)
+
+comp3.propagate(100)
+cyl3 = Cylindrical_Lens(f=180, height=40, aperture=70)
+cyl3.set_mount(KM100C_flipped(height=cyl3.height, width=cyl3.aperture))
+
+comp3.add_on_axis(cyl3)
+comp3.propagate(200)
+
+comp3.pos += (0,160,0)
+comp3.draw()
+
+
+
+
 if freecad_da:
   setview()

@@ -11,7 +11,7 @@ import numpy as np
 import math
 
 from .geom_object import Geom_Object, rotation_matrix
-from ..freecad_models.utils import thisfolder,load_STL
+from ..freecad_models.utils import thisfolder,load_STL, inch
 from ..freecad_models.freecad_model_composition import initialize_composition_old
 from ..freecad_models.freecad_model_composition import add_to_composition
 from ..freecad_models.freecad_model_grating import grating_mount
