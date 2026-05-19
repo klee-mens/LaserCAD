@@ -8,6 +8,7 @@ Created on Sat Aug 19 13:59:08 2023
 from .geom_object import Geom_Object
 from .constants import inch
 from .mount import get_mount_by_aperture_and_element
+from ..freecad_models.utils import thisfolder, load_STL
 
 # from .. freecad_models import freecad_da
 
@@ -16,11 +17,17 @@ class Component(Geom_Object):
   class for shaped components with mounts, posts and bases
   developes into Optical_Element and many non interactings
   """
-  def __init__(self, name="Component", **kwargs):
+  def __init__(self, name="Component", aperture=1*inch, thickness=5, stl_file=None, **kwargs):
     super().__init__(name, **kwargs)
-    self._aperture = 1*inch # Aperture in mm for drawing, Mount and clipping (not yet implemented)
-    self.thickness = 5 # Thickness in mm, importent for mount placing and drawing
+    if type(aperture) == int:
+      aperture = inch*float(aperture) # convert integer values to inch, for easier use
+    self._aperture = aperture # Aperture in mm for drawing, Mount and clipping (not yet implemented)
+    self.thickness = thickness # Thickness in mm, importent for mount placing and drawing
     self.set_mount_to_default()
+
+    if stl_file is not None:
+      self.draw_dict["stl_file"] = rf"{thisfolder}\{stl_file}"
+      self.freecad_model = load_STL
    
   @property
   def aperture(self):

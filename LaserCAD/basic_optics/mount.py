@@ -181,6 +181,8 @@ class Unit_Mount(Geom_Object):
         DockNormalY = float(mount_loop["DockNormalY"])
         DockNormalZ = float(mount_loop["DockNormalZ"])
         self.draw_dict["color"] = eval(mount_loop["color"])
+        if "depth" in mount_loop:
+          self.depth = float(mount_loop["depth"])
         # eval
     if not mount_in_database:
       print("The mount '", self.model, "' is not in the database.")

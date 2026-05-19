@@ -7,6 +7,8 @@ Created on Wed Apr 22 03:47:53 2026
 
 from LaserCAD import Mirror, Composition
 from LaserCAD import freecad_da, clear_doc, setview
+from LaserCAD.basic_optics.mount import Composed_Mount
+from LaserCAD.basic_optics import Component
 
 if freecad_da:
   clear_doc()
@@ -15,8 +17,7 @@ if freecad_da:
 setup = Composition(name="Thickmirrortest")
 setup.propagate(100)
 
-mir1 = Mirror(phi=90)
-mir1.thickness = 15
+mir1 = Mirror(phi=90, thickness=15, aperture=1)
 
 setup.add_on_axis(mir1)
 setup.propagate(70)
@@ -30,8 +31,7 @@ setup2.pos += (150, 0, 0)
 
 setup2.propagate(100)
 
-mir2 = Mirror(phi=90)
-mir2.thickness = 15
+mir2 = Mirror(phi=90, thickness=15, aperture=1)
 mir2.set_mount_back_mounted()
 
 setup2.add_on_axis(mir2)

@@ -10,6 +10,7 @@ from .ray import Ray
 from .optical_element import Opt_Element
 from .mount import Stripe_Mirror_Mount, Unit_Mount
 from ..freecad_models import model_mirror, model_stripe_mirror, model_crystal
+from ..freecad_models.utils import inch
 import numpy as np
 from copy import deepcopy
 
