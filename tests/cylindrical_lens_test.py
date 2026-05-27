@@ -18,7 +18,7 @@ if freecad_da:
 
 
 ls = SquareBeam(radius =5,ray_in_line = 10)
-comp = Composition()
+comp = Composition(name="horizontal")
 comp.set_light_source(ls)
 
 comp.propagate(100)
@@ -39,7 +39,7 @@ IP.spot_diagram(comp._beams[2])
 
 ls2 = SquareBeam(radius =5,ray_in_line = 10)
 ls2.set_ray_color((0.5, 0.0, 0.8))
-comp2 = Composition()
+comp2 = Composition(name="vertical")
 comp2.set_light_source(ls2)
 
 comp2.propagate(100)
@@ -52,12 +52,29 @@ comp2.pos += (0,80,0)
 comp2.draw()
 
 
+
+ls_rev = SquareBeam(radius =5,ray_in_line = 10)
+ls_rev.set_ray_color((0.5, 0.0, 0.8))
+comp_rev = Composition(name="vertical_reversed")
+comp_rev.set_light_source(ls_rev)
+
+comp_rev.propagate(100)
+cyl_rev = Cylindrical_Lens(f=180)
+
+comp_rev.add_on_axis(cyl_rev)
+cyl_rev.Mount.reverse(thickness=7)
+comp_rev.propagate(200)
+
+comp_rev.pos += (0,-110,0)
+comp_rev.draw()
+
+
 from LaserCAD import KM100C_flipped
 
 
 ls3 = SquareBeam(radius =5,ray_in_line = 10)
 ls3.set_ray_color((0.5, 0.0, 0.8))
-comp3 = Composition()
+comp3 = Composition(name="flipped")
 comp3.set_light_source(ls3)
 
 comp3.propagate(100)
@@ -69,6 +86,22 @@ comp3.propagate(200)
 
 comp3.pos += (0,160,0)
 comp3.draw()
+
+ls3_rev = SquareBeam(radius =5,ray_in_line = 10)
+ls3_rev.set_ray_color((0.5, 0.0, 0.8))
+comp3_rev = Composition(name="flipped_reversed")
+comp3_rev.set_light_source(ls3_rev)
+
+comp3_rev.propagate(100)
+cyl3_rev = Cylindrical_Lens(f=180, height=40, aperture=70)
+cyl3_rev.set_mount(KM100C_flipped(height=cyl3_rev.height, width=cyl3_rev.aperture))
+
+comp3_rev.add_on_axis(cyl3_rev)
+cyl3_rev.Mount.reverse(thickness=7)
+comp3_rev.propagate(200)
+
+comp3_rev.pos += (0,160+110,0)
+comp3_rev.draw()
 
 
 

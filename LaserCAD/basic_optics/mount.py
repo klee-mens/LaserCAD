@@ -653,6 +653,11 @@ class KM100C(Composed_Mount):
 
     self.add(Post(model=post))
 
+  def reverse(self, thickness=7):
+    self.rotate(vec=(0,0,1), phi=np.pi)
+    self.pos += -self.normal*thickness
+
+
 
 class KM100C_flipped(Composed_Mount):
   def __init__(self, name="KM100C", height=15, width=0, post="1inch_post", **kwargs):
@@ -699,3 +704,7 @@ class KM100C_flipped(Composed_Mount):
     # print("lower pos", lower.pos)
 
     self.add(Post(model=post))
+
+  def reverse(self, thickness=7):
+    self.rotate(vec=(0,0,1), phi=np.pi)
+    self.pos += -self.normal*thickness
