@@ -708,3 +708,50 @@ class KM100C_flipped(Composed_Mount):
   def reverse(self, thickness=7):
     self.rotate(vec=(0,0,1), phi=np.pi)
     self.pos += -self.normal*thickness
+
+
+class KM100CL(Composed_Mount):
+  def __init__(self, name="KM100CL", height=15, width=0, post="1inch_post", **kwargs):
+    super().__init__(name=name, **kwargs)
+    self.height = height
+    self.width = width
+    self.side_shift = 0 if self.width < 25 else (self.width-25)/2
+    self.post_model = post
+    self.docking_obj.rotate(vec=(0,0,1), phi=np.pi)
+    self.docking_obj.pos += (4, self.side_shift, height/2)
+
+    upper = Unit_Mount()
+    upper.model = "KM100CL_upper"
+    upper.path = thisfolder + "misc_meshes/"
+    upper.draw_dict["color"] = (0.18,0.18,0.18)
+    # upper.docking_obj.pos += (0, 0, -height-0.7)
+    upper.docking_obj.pos += (-1, -45.4, -height-0.7)
+    self.add(upper)
+
+    self.number_of_extensions = int((self.height+5) // (1.5*25.4)) + 1
+    for n in range(self.number_of_extensions):
+      extension = Unit_Mount()
+      extension.model = "KM100C_extension"
+      extension.path = thisfolder + "misc_meshes/"
+      extension.docking_obj.pos += (0, 0, +1.5*25.4)
+      self.add(extension)
+
+    invis = Unit_Mount()
+    invis.invisible = True
+    invis.docking_obj.pos += (1, 45.4, -1.5*25.4*self.number_of_extensions)
+    self.add(invis)
+
+    lower = Unit_Mount()
+    # print("lower pos", lower.pos)
+    lower.model = "KM100CL_lower"
+    lower.path = thisfolder + "misc_meshes/"
+    lower.draw_dict["color"] = (0.18,0.18,0.18)
+    lower.docking_obj.pos += (-9-1, 13.55-29, -17.65)
+    self.add(lower)
+    # print("lower pos", lower.pos)
+
+    self.add(Post(model=post))
+
+  def reverse(self, thickness=7):
+    self.rotate(vec=(0,0,1), phi=np.pi)
+    self.pos += -self.normal*thickness
