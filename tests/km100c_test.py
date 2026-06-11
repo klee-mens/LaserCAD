@@ -106,7 +106,8 @@ comp3_rev.draw()
 # =============================================================================
 # left handed
 # =============================================================================
-from LaserCAD.basic_optics.mount import KM100CL
+
+from LaserCAD.basic_optics.mount import KM100CL, KM100CL_flipped
 
 
 
@@ -142,3 +143,37 @@ comp6.propagate(200)
 
 comp6.pos += (0,-400,0)
 comp6.draw()
+
+
+cyl7 = Cylindrical_Lens(aperture=80)
+cyl7.set_mount(KM100CL_flipped(height=cyl7.height, width=cyl7.aperture))
+# cyl7.Mount.reverse()
+
+ls7 = SquareBeam(radius =5,ray_in_line = 10)
+# ls7.set_ray_color((0.5, 0.0, 0.8))
+comp7 = Composition("left")
+comp7.set_light_source(ls7)
+
+comp7.propagate(100)
+comp7.add_on_axis(cyl7)
+comp7.propagate(200)
+
+comp7.pos += (100,-400,0)
+comp7.draw()
+
+
+cyl8 = Cylindrical_Lens(aperture=80)
+cyl8.set_mount(KM100CL_flipped(height=cyl8.height, width=cyl8.aperture))
+cyl8.Mount.reverse()
+
+ls8 = SquareBeam(radius =5,ray_in_line = 10)
+# ls8.set_ray_color((0.5, 0.0, 0.8))
+comp8 = Composition("left")
+comp8.set_light_source(ls8)
+
+comp8.propagate(100)
+comp8.add_on_axis(cyl8)
+comp8.propagate(200)
+
+comp8.pos += (200,-400,0)
+comp8.draw()
