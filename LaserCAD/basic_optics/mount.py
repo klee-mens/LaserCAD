@@ -805,3 +805,118 @@ class KM100CL_flipped(Composed_Mount):
   def reverse(self, thickness=7):
     self.rotate(vec=(0,0,1), phi=np.pi)
     self.pos += -self.normal*thickness
+    
+    
+class KM100CALL(Composed_Mount): # bullshit, funktioniert nicht
+    def __init__(self, name="KM100C", height=15, width=0, thickness=7, post="1inch_post", 
+                 left_hand=False, flipp=False, reverse=False, **kwargs):
+        
+        # Falls der Name nicht angepasst wurde, fügen wir ein "L" für Left-Handed hinzu
+        if left_hand and name == "KM100C":
+            name = "KM100CL"
+        if flipp:
+            name += "_flipp"
+            
+        super().__init__(name=name, **kwargs)
+        
+        self.height = height
+        self.width = width
+        self.thickness = thickness
+        self.post_model = post
+        
+        # --- 1. Richtungsabhängige Variablen (Links- vs. Rechtshänder) ---
+        model_suffix = "L" if left_hand else ""
+        
+        if reverse:
+          self.docking_obj.rotate(vec=(0, 0, 1), phi=np.pi)
+          self.docking_obj.pos += -self.normal * thickness
+
+        # Berechnung des Side-Shifts und Vorzeichen
+        if not left_hand:
+            # Rechtshänder (KM100C)
+            limit_val = self.height if flipp else self.width
+            self.side_shift = 0 if limit_val < 25 else (25 - limit_val) / 2
+            sign_x = 0
+            sign_y = 0
+        else:
+            # Linkshänder (KM100CL)
+            limit_val = self.height if flipp else self.width
+            self.side_shift = 0 if limit_val < 25 else (limit_val - 25) / 2
+            sign_x = -1
+            sign_y = -29
+
+        # --- 2. Docking Object Transformationen (flipp vs. Normal) ---
+        self.docking_obj.rotate(vec=(0, 0, 1), phi=np.pi)
+        
+        if not flipp:
+            # Normales Mount
+            self.docking_obj.pos += (4, self.side_shift, height / 2)
+            z_offset = -height - 0.7
+            invis_pos_shift = (0, 0) if not left_hand else (1, 45.4)
+            lower_pos_delta = (0, 0, 0)
+        else:
+            # Geflipptes Mount
+            phi_x = -np.pi / 2 if not left_hand else np.pi / 2
+            self.docking_obj.rotate(vec=(1, 0, 0), phi=phi_x)
+            
+            y_pos = -width / 2 if not left_hand else +width / 2
+            z_pos = self.side_shift if not left_hand else -self.side_shift
+            self.docking_obj.pos += (4, y_pos, z_pos)
+            
+            z_offset = -width - 0.7
+            invis_pos_shift = (0, 0) if not left_hand else (1, 45.4)
+            lower_pos_delta = (0, inch, inch) if not left_hand else (0, -inch, inch)
+
+        # Base-Koordinaten für Upper/Invis/Lower Anpassungen (aus CL extrahiert)
+        base_x = 0 if not left_hand else -1
+        base_y = 0 if not left_hand else -45.4
+
+        # --- 3. Komponenten hinzufügen ---
+        
+        # UPPER
+        upper = Unit_Mount()
+        upper.is_horizontal = not flipp
+        upper.model = f"KM100C{model_suffix}_upper"
+        upper.path = thisfolder + "misc_meshes/"
+        upper.draw_dict["color"] = (0.18, 0.18, 0.18)
+        upper.docking_obj.pos += (base_x, base_y, z_offset)
+        self.add(upper)
+
+        # EXTENSIONS (Höhe bei normal, Breite bei flipp)
+        dimension_for_extensions = self.width if flipp else self.height
+        self.number_of_extensions = int((dimension_for_extensions + 5) // (1.5 * 25.4)) + 1
+        
+        for n in range(self.number_of_extensions):
+            extension = Unit_Mount()
+            extension.is_horizontal = not flipp
+            extension.model = "KM100C_extension"
+            extension.path = thisfolder + "misc_meshes/"
+            extension.docking_obj.pos += (0, 0, +1.5 * 25.4)
+            self.add(extension)
+
+        # INVISIBLE
+        invis = Unit_Mount()
+        invis.is_horizontal = not flipp
+        invis.invisible = True
+        invis.docking_obj.pos += (invis_pos_shift[0], invis_pos_shift[1], -1.5 * 25.4 * self.number_of_extensions)
+        self.add(invis)
+
+        # LOWER
+        lower = Unit_Mount()
+        lower.is_horizontal = not flipp
+        lower.model = f"KM100C{model_suffix}_lower"
+        lower.path = thisfolder + "misc_meshes/"
+        lower.draw_dict["color"] = (0.18, 0.18, 0.18)
+        
+        # Berechne exakte Position basierend auf allen Faktoren
+        lower_x = -9 + sign_x + lower_pos_delta[0]
+        lower_y = 13.55 + sign_y + lower_pos_delta[1]
+        lower_z = -17.65 + lower_pos_delta[2]
+        lower.docking_obj.pos += (lower_x, lower_y, lower_z)
+        self.add(lower)
+
+        # POST
+        self.add(Post(model=post))
+
+        # --- 4. Reversed Flag abfangen ---
+        
