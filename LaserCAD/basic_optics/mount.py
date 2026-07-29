@@ -649,3 +649,35 @@ class KM100C(Composed_Mount):
     # print("lower pos", lower.pos)
 
     self.add(Post(model=post))
+
+class Adapter_1inch(Composed_Mount):
+  def __init__(self, angle=0, post="1inch_post", model="U100-A2K"):
+    super().__init__()
+    um = Unit_Mount()
+    um.model = "1inch_adapter"
+    um.path = thisfolder + "misc_meshes/"
+    um.docking_obj.pos += (6.5,38,0) # from manual adjustments in FreeCAD
+    um.is_horizontal = False
+    um.draw_dict["color"] = (0.3,0.3,0.3)
+    self.add(um)
+    self.post_model = post
+    self.model = model
+    um.rotate(vec=um.normal, phi=angle*np.pi/180)
+    self.add(Unit_Mount(model=model))
+    self.add(Post(model=post))
+
+class Adapter_2inch(Composed_Mount):
+  def __init__(self, angle=0, post="1inch_post", model="U200-A2K"):
+    super().__init__()
+    um = Unit_Mount()
+    um.model = "2inch_adapter"
+    um.path = thisfolder + "misc_meshes/"
+    um.docking_obj.pos += (14.3,64,0) # from manual adjustments in FreeCAD
+    um.is_horizontal = False
+    um.draw_dict["color"] = (0.3,0.3,0.3)
+    self.add(um)
+    self.post_model = post
+    self.model = model
+    um.rotate(vec=um.normal, phi=angle*np.pi/180)
+    self.add(Unit_Mount(model=model))
+    self.add(Post(model=post))
