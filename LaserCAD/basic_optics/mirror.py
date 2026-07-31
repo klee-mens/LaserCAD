@@ -8,7 +8,7 @@ Created on Wed Aug 24 16:28:07 2022
 from .geom_object import TOLERANCE, NORM0
 from .ray import Ray
 from .optical_element import Opt_Element
-from .mount import Stripe_Mirror_Mount, Unit_Mount
+from .mount import Stripe_Mirror_Mount, Unit_Mount, Composed_Mount
 from ..freecad_models import model_mirror, model_stripe_mirror, model_crystal
 from ..freecad_models.utils import inch
 import numpy as np
@@ -518,6 +518,70 @@ class Rectangular_Mirror(Mirror):
     self.draw_dict["width"] = self.width
     self.draw_dict["thickness"] = self.thickness
 
+
+class Newport_Mirror(Mirror):
+  """Creates a mirror with a Newport mount. The size of the mount is determined by the aperture of the mirror. The default mount is back-mounted.
+  
+  parameters
+  ----------
+  phi : float, optional
+      The angle of the mirror in degrees. The default is 180.
+  name : str, optional
+      The name of the mirror. The default is "Newport Mirror".
+  aperture : float, optional
+      The aperture of the mirror. The default is inch.
+  thickness : float, optional
+      The thickness of the mirror. The default is 6.
+  mirror : bool, optional
+      If True, the mirror is left-handed. The default is False.
+  """
+  def __init__(self, name="Newport Mirror", aperture=inch, thickness=6, mirror=False, **kwargs):
+    super().__init__(name=name, aperture=aperture, thickness=thickness, **kwargs)
+    self.aperture = aperture
+    add_name = "_LH" if mirror else ""
+    if aperture == inch:
+        model = "U100-A2K"
+    elif aperture == 2*inch:
+        model = "U200-A2K"
+    elif aperture == 3*inch:
+        model = "U300-A2K"
+    elif aperture == 4*inch:
+        model = "U400-AC2K"
+
+    self.set_mount(Composed_Mount(unit_model_list=[model+add_name, "1inch_post"]))
+    self.set_mount_back_mounted()
+            
+
+class Newport_Curved_Mirror(Curved_Mirror):
+  """Creates a curved mirror with a Newport mount. The size of the mount is determined by the aperture of the mirror. The default mount is back-mounted.
+    
+    parameters
+    ----------
+    phi : float, optional
+        The angle of the mirror in degrees. The default is 180.
+    radius : float, optional
+        The radius of the mirror. The default is 200.
+    name : str, optional
+        The name of the mirror. The default is "Newport Mirror".
+    aperture : float, optional
+        The aperture of the mirror. The default is inch.
+    thickness : float, optional
+        The thickness of the mirror. The default is 6.
+    mirror : bool, optional
+        If True, the mirror is left-handed. The default is False.
+    """
+  def __init__(self, name="Newport Mirror", aperture=inch, thickness=6, mirror=False, **kwargs):
+    super().__init__(name=name, aperture=aperture, thickness=thickness, **kwargs)
+    self.aperture = aperture
+    add_name = "_LH" if mirror else ""
+    if aperture == inch:
+        model = "U100-A2K"
+    elif aperture == 2*inch:
+        model = "U200-A2K"
+    elif aperture == 3*inch:
+        model = "U300-A2K"
+    self.set_mount(Composed_Mount(unit_model_list=[model+add_name, "1inch_post"]))
+    self.set_mount_back_mounted()
 
 # class Cylindrical_Mirror1(Cylindrical_Mirror):
 #   @property
