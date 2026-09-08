@@ -11,7 +11,7 @@ from .optical_element import Opt_Element
 from .constants import inch
 from scipy.optimize import brentq
 
-from .mount import Unit_Mount, KM100C
+from .mount import KM100C
 from copy import deepcopy
 import numpy as np
 from .geom_object import TOLERANCE, Geom_Object
@@ -87,7 +87,7 @@ class Cylindrical_Lens(Opt_Element):
       self._matrix[1,0] = 0
     else:
       self._matrix[1,0] = -1/x
-  
+
   def update_draw_dict(self):
     super().update_draw_dict()
     self.draw_dict["dia"]=self.aperture
@@ -142,7 +142,7 @@ class Cylindrical_Lens(Opt_Element):
   #   else:
   #     self.set_mount(KM100C(height=self.aperture, width=self.height, post="0.5inch_post"))
   #   self.Mount.pos = self.pos
-      
+
 class Thicklens(Opt_Element):
   """
   Build a thick lens with given focal length, refractive index, aperture and edge thickness.
@@ -161,7 +161,7 @@ class Thicklens(Opt_Element):
       Thickness of the lens in mm. If None, it is calculated from the edge thickness. The default is None.
     edge_thickness : float, optional
       Edge thickness of the lens in mm. The default is 3 mm. for a lens with f < 0 this is equal to the thickness, since an edge thickness parameter is non-practical here.
-  
+
   Functions
   ---------
     radius1()
@@ -190,26 +190,26 @@ class Thicklens(Opt_Element):
 
   def set_Mount(self):
     self.set_mount_to_default()
-    if self.biconvex: 
+    if self.biconvex:
       self.Mount.pos += self.normal * (self.thickness/2 - 4.5)
     else:
       self.Mount.pos += self.normal * (self.thickness-9)
-  
+
   def calc_thickness(self):
     if self.focal_length < 0:
       return self.edge_thickness
     # Calculate R1 from the edge thickness, focal length, refractive index and aperture
-    if self.biconvex: 
+    if self.biconvex:
       R_low = self.aperture/2 * 1.01
       R_high = self.aperture*20
       R1 = brentq(self.radius_function, R_low, R_high)
       thickness = self.edge_thickness + 2*R1 - 2*np.sqrt(R1**2 - (self.aperture/2)**2)
-    else: 
+    else:
       R1 = (self.refractive_index-1)*self.focal_length
       thickness = self.edge_thickness + R1 - np.sqrt(R1**2 - (self.aperture/2)**2)
     return thickness
 
-  
+
   def radius_function(self, R):
     f = self.focal_length
     delta = self.edge_thickness
@@ -222,7 +222,7 @@ class Thicklens(Opt_Element):
       lhs = 1/f
       rhs = (n-1)*(2/R - (n-1)*d/(n*R**2))
       return lhs - rhs
-  
+
   def radius1(self):
     f = self.focal_length
     d = self.thickness
@@ -231,19 +231,19 @@ class Thicklens(Opt_Element):
       return (n-1)*f
     else:
       return (n-1)*(f+np.sign(f)*np.sqrt(f**2-f*d/n))
-    
+
   def radius2(self):
     if not self.biconvex:
       return 0
     else:
       return -self.radius1()
-  
+
   def calc_principal_planes(self):
     """
     Calculates the positions of the principal planes h1 and h2 relative to the lens center.
-    Positive signs indicate the principle plane is located outside the lens, negative signs inside. 
+    Positive signs indicate the principle plane is located outside the lens, negative signs inside.
 
-    For an imaging with an object and image distance g and b, the distances to propagate are g+h1 and b+h2. 
+    For an imaging with an object and image distance g and b, the distances to propagate are g+h1 and b+h2.
     """
     R1 = self.radius1()
     R2 = self.radius2()
@@ -254,7 +254,7 @@ class Thicklens(Opt_Element):
     self.h1 =  f*(n-1)*d/(R2*n) if R2 != 0 else 0
     self.h2 = -f*(n-1)*d/(R1*n) if R1 != 0 else 0
 
-  
+
   def intersection(self, ray, radius):
     """
     ermittelt den Schnittpunkt vom Strahl mit einer Spähre, die durch
@@ -278,7 +278,7 @@ class Thicklens(Opt_Element):
     """
     if radius == 0:
       return self.intersection_plane(ray)
-    
+
     radius = -radius
     diffvec = self.pos - radius*self.normal - ray.pos
     k = np.sum( diffvec * ray.normal )
@@ -292,10 +292,10 @@ class Thicklens(Opt_Element):
       dist = s1
     ray.length = dist
     return ray.endpoint()
-  
+
   def intersection_plane(self, ray):
     """
-    Calculates the intersection point of the ray with a plane given by a 
+    Calculates the intersection point of the ray with a plane given by a
     Geom_Object (e.g a thin lens).
 
     Parameters
@@ -303,7 +303,7 @@ class Thicklens(Opt_Element):
     element : Geom_Object
       Element in the intersection plane.
     set_length : optional
-      Sets the length of the ray so that it end on the object plane if true. 
+      Sets the length of the ray so that it end on the object plane if true.
       The default is True.
 
     Returns
@@ -311,16 +311,16 @@ class Thicklens(Opt_Element):
     endpoint
     """
     C = self.pos
-    n_z = self.normal 
+    n_z = self.normal
     a = ray.normal
     p = ray.pos
 
     s0 = np.sum((C-p)*n_z) / np.sum(a*n_z)
     ray.length = s0
-    
+
     return ray.endpoint()
-  
-  
+
+
   def next_ray(self, ray):
     mid_ray = self.refraction(ray, R=self.radius1(), from_material=False)
     self.pos += self.normal * self.thickness
@@ -329,7 +329,7 @@ class Thicklens(Opt_Element):
     # mid_ray.draw()
 
     return out_ray
-  
+
   def refraction(self, ray, R, from_material = False):
     # See Springer Handbook of Lasers and Optics page 68
     ray2 = deepcopy(ray)

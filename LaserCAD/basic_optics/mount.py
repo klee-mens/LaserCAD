@@ -5,23 +5,25 @@ Created on Sat Aug 19 14:40:56 2023
 @author: mens
 """
 
-from ..freecad_models.utils import thisfolder,load_STL,rotate,translate
-from ..freecad_models.freecad_model_composition import initialize_composition_old,add_to_composition
-from ..freecad_models.freecad_model_mounts import mirror_mount,DEFAULT_MOUNT_COLOR,DEFAULT_MAX_ANGULAR_OFFSET,model_Post_Marker,rotate_vector
-from ..freecad_models.freecad_model_grating import grating_mount
-from .geom_object import Geom_Object, rotation_matrix
-from ..freecad_models.freecad_model_mounts import draw_post,draw_post_holder,draw_post_base,draw_1inch_post,draw_large_post,model_mirror_holder
-# from .mirror import Mirror
-
-DEFALUT_POST_COLOR = (0.8,0.8,0.8)
-DEFALUT_HOLDER_COLOR = (0.2,0.2,0.2)
-POST_LIST = ["1inch_post","0.5inch_post","big_post"]
-
-# from copy import deepcopy
 import csv
 import os
 import numpy as np
 import math
+
+from .geom_object import Geom_Object, rotation_matrix
+from ..freecad_models.utils import thisfolder,load_STL, inch
+from ..freecad_models.freecad_model_composition import initialize_composition_old
+from ..freecad_models.freecad_model_composition import add_to_composition
+from ..freecad_models.freecad_model_grating import grating_mount
+from ..freecad_models.freecad_model_mounts import model_Post_Marker
+from ..freecad_models.freecad_model_mounts import draw_post, draw_post_holder
+from ..freecad_models.freecad_model_mounts import draw_post_base, draw_1inch_post
+from ..freecad_models.freecad_model_mounts import draw_large_post, model_mirror_holder
+
+
+DEFALUT_POST_COLOR = (0.8,0.8,0.8)
+DEFALUT_HOLDER_COLOR = (0.2,0.2,0.2)
+POST_LIST = ["1inch_post","0.5inch_post","big_post"]
 
 
 DEFALUT_CAV_PATH = thisfolder
@@ -193,7 +195,7 @@ class Unit_Mount(Geom_Object):
     self.docking_obj.normal = docking_normal
     self.path = folder
     return True
-  
+
   def get_depth(self):
     return self.depth
 
@@ -424,7 +426,7 @@ class Composed_Mount(Geom_Object):
    modellist = str([um.model for um in self.mount_list])
    txt2 = txt[0:ind] + ', unit_model_list=' + modellist + txt[ind::]
    return txt2
- 
+
   def get_depth(self):
     return self.mount_list[0].get_depth()
 
@@ -609,12 +611,48 @@ class Adaptive_Angular_Mount(Unit_Mount):
       self.docking_obj.normal = self.normal
     super().set_axes(new_axes)
 
+class Adapter_1inch(Composed_Mount):
+  def __init__(self, angle=0, post="1inch_post", model="U100-A2K"):
+    super().__init__()
+    um = Unit_Mount()
+    um.model = "1inch_adapter"
+    um.path = thisfolder + "misc_meshes/"
+    um.docking_obj.pos += (6.5,38,0) # from manual adjustments in FreeCAD
+    um.is_horizontal = False
+    um.draw_dict["color"] = (0.3,0.3,0.3)
+    self.add(um)
+    self.post_model = post
+    self.model = model
+    um.rotate(vec=um.normal, phi=angle*np.pi/180)
+    self.add(Unit_Mount(model=model))
+    self.add(Post(model=post))
+
+class Adapter_2inch(Composed_Mount):
+  def __init__(self, angle=0, post="1inch_post", model="U200-A2K"):
+    super().__init__()
+    um = Unit_Mount()
+    um.model = "2inch_adapter"
+    um.path = thisfolder + "misc_meshes/"
+    um.docking_obj.pos += (14.3,64,0) # from manual adjustments in FreeCAD
+    um.is_horizontal = False
+    um.draw_dict["color"] = (0.3,0.3,0.3)
+    self.add(um)
+    self.post_model = post
+    self.model = model
+    um.rotate(vec=um.normal, phi=angle*np.pi/180)
+    self.add(Unit_Mount(model=model))
+    self.add(Post(model=post))
+  def reverse(self, thickness=7):
+    self.rotate(vec=(0,0,1), phi=np.pi)
+    self.pos += -self.normal*thickness
+   
 
 class KM100C(Composed_Mount):
   def __init__(self, name="KM100C", height=15, width=0, post="1inch_post", **kwargs):
     super().__init__(name=name, **kwargs)
     self.height = height
-    self.side_shift = 0 if width < 25 else (25-width)/2
+    self.width = width
+    self.side_shift = 0 if self.width < 25 else (25-self.width)/2
     self.post_model = post
     self.docking_obj.rotate(vec=(0,0,1), phi=np.pi)
     self.docking_obj.pos += (4, self.side_shift, height/2)
@@ -650,34 +688,99 @@ class KM100C(Composed_Mount):
 
     self.add(Post(model=post))
 
-class Adapter_1inch(Composed_Mount):
-  def __init__(self, angle=0, post="1inch_post", model="U100-A2K"):
-    super().__init__()
-    um = Unit_Mount()
-    um.model = "1inch_adapter"
-    um.path = thisfolder + "misc_meshes/"
-    um.docking_obj.pos += (6.5,38,0) # from manual adjustments in FreeCAD
-    um.is_horizontal = False
-    um.draw_dict["color"] = (0.3,0.3,0.3)
-    self.add(um)
+class KM100C_flipped(Composed_Mount):
+  def __init__(self, name="KM100C", height=15, width=0, post="1inch_post", **kwargs):
+    super().__init__(name=name, **kwargs)
+    self.height = height
+    self.width = width
+    self.side_shift = 0 if self.height < 25 else (25-self.height)/2
     self.post_model = post
-    self.model = model
-    um.rotate(vec=um.normal, phi=angle*np.pi/180)
-    self.add(Unit_Mount(model=model))
+    self.docking_obj.rotate(vec=(1,0,0), phi=-np.pi/2)
+    self.docking_obj.rotate(vec=(0,0,1), phi=np.pi)
+    self.docking_obj.pos += (4, -width/2, self.side_shift)
+
+    upper = Unit_Mount()
+    upper.is_horizontal = False
+    upper.model = "KM100C_upper"
+    upper.path = thisfolder + "misc_meshes/"
+    upper.draw_dict["color"] = (0.18,0.18,0.18)
+    upper.docking_obj.pos += (0, 0, -self.width-0.7)
+    self.add(upper)
+
+    self.number_of_extensions = int((self.width+5) // (1.5*25.4)) + 1
+    for n in range(self.number_of_extensions):
+      extension = Unit_Mount()
+      extension.is_horizontal = False
+      extension.model = "KM100C_extension"
+      extension.path = thisfolder + "misc_meshes/"
+      extension.docking_obj.pos += (0, 0, +1.5*25.4)
+      self.add(extension)
+
+    invis = Unit_Mount()
+    invis.is_horizontal = False
+    invis.invisible = True
+    invis.docking_obj.pos += (0, 0, -1.5*25.4*self.number_of_extensions)
+    self.add(invis)
+
+    lower = Unit_Mount()
+    lower.is_horizontal = False
+    # print("lower pos", lower.pos)
+    lower.model = "KM100C_lower"
+    lower.path = thisfolder + "misc_meshes/"
+    lower.draw_dict["color"] = (0.18,0.18,0.18)
+    lower.docking_obj.pos += (-9, 13.55+inch, -17.65+inch)
+    self.add(lower)
+    # print("lower pos", lower.pos)
+
     self.add(Post(model=post))
 
-class Adapter_2inch(Composed_Mount):
-  def __init__(self, angle=0, post="1inch_post", model="U200-A2K"):
-    super().__init__()
-    um = Unit_Mount()
-    um.model = "2inch_adapter"
-    um.path = thisfolder + "misc_meshes/"
-    um.docking_obj.pos += (14.3,64,0) # from manual adjustments in FreeCAD
-    um.is_horizontal = False
-    um.draw_dict["color"] = (0.3,0.3,0.3)
-    self.add(um)
+  def reverse(self, thickness=7):
+    self.rotate(vec=(0,0,1), phi=np.pi)
+    self.pos += -self.normal*thickness
+
+
+class KM100CL(Composed_Mount):
+  def __init__(self, name="KM100CL", height=15, width=0, post="1inch_post", **kwargs):
+    super().__init__(name=name, **kwargs)
+    self.height = height
+    self.width = width
+    self.side_shift = 0 if self.width < 25 else (self.width-25)/2
     self.post_model = post
-    self.model = model
-    um.rotate(vec=um.normal, phi=angle*np.pi/180)
-    self.add(Unit_Mount(model=model))
+    self.docking_obj.rotate(vec=(0,0,1), phi=np.pi)
+    self.docking_obj.pos += (4, self.side_shift, height/2)
+
+    upper = Unit_Mount()
+    upper.model = "KM100CL_upper"
+    upper.path = thisfolder + "misc_meshes/"
+    upper.draw_dict["color"] = (0.18,0.18,0.18)
+    # upper.docking_obj.pos += (0, 0, -height-0.7)
+    upper.docking_obj.pos += (-1, -45.4, -height-0.7)
+    self.add(upper)
+
+    self.number_of_extensions = int((self.height+5) // (1.5*25.4)) + 1
+    for n in range(self.number_of_extensions):
+      extension = Unit_Mount()
+      extension.model = "KM100C_extension"
+      extension.path = thisfolder + "misc_meshes/"
+      extension.docking_obj.pos += (0, 0, +1.5*25.4)
+      self.add(extension)
+
+    invis = Unit_Mount()
+    invis.invisible = True
+    invis.docking_obj.pos += (1, 45.4, -1.5*25.4*self.number_of_extensions)
+    self.add(invis)
+
+    lower = Unit_Mount()
+    # print("lower pos", lower.pos)
+    lower.model = "KM100CL_lower"
+    lower.path = thisfolder + "misc_meshes/"
+    lower.draw_dict["color"] = (0.18,0.18,0.18)
+    lower.docking_obj.pos += (-9-1, 13.55-29, -17.65)
+    self.add(lower)
+    # print("lower pos", lower.pos)
+
     self.add(Post(model=post))
+
+  def reverse(self, thickness=7):
+    self.rotate(vec=(0,0,1), phi=np.pi)
+    self.pos += -self.normal*thickness

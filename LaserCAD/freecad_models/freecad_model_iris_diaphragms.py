@@ -5,27 +5,27 @@ Created on Mon Mar 27 11:33:37 2023
 @author: He
 """
 
-import sys
+# import sys
 # sys.path.append(u'/home/mens/Nextcloud/FreeCAD/opticslib2/basic_objects/freecad_models')
 # sys.path.append(u"C:/Users/mens/Nextcloud/FreeCAD/opticslib2/basic_objects/freecad_models")
 
 # from .utils import freecad_da, update_geom_info
-from .utils import freecad_da, update_geom_info, get_DOC, thisfolder#, inch
-from .freecad_model_composition import initialize_composition_old, add_to_composition
-from .freecad_model_mounts import draw_post_part
-import numpy as np
+from .utils import freecad_da, update_geom_info, get_DOC
+# from .freecad_model_composition import initialize_composition_old, add_to_composition
+# from .freecad_model_mounts import draw_post_part
+# import numpy as np
 #import math
 
 DEFALUT_MAX_ANGULAR_OFFSET = 10
 
-import csv
+# import csv
 if freecad_da:
   from FreeCAD import Vector, Placement, Rotation
-  import Mesh
-  import ImportGui
+  # import Mesh
+  # import ImportGui
   import Part
   import Sketcher
-  from math import pi
+  # from math import pi
   
 
 def model_intersection_plane(name="intersection_plane", Radius=25, geom=None, **kwargs):

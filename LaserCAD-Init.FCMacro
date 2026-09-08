@@ -2,7 +2,7 @@
 
 # Macro Begin: /home/mens/projects/LaserCAD/LC-imp1.FCMacro +++++++++++++++++++++++++++++++++++++++++++++++++
 import sys
-sys.path.append('/home/mens/projects')
+sys.path.append('/home/mens/projects/LaserCAD')
 
 # Gui.runCommand('Std_DlgMacroRecord',0)
 # Macro End: /home/mens/projects/LaserCAD/LC-imp1.FCMacro +++++++++++++++++++++++++++++++++++++++++++++++++
