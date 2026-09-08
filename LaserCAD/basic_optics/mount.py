@@ -611,6 +611,41 @@ class Adaptive_Angular_Mount(Unit_Mount):
       self.docking_obj.normal = self.normal
     super().set_axes(new_axes)
 
+class Adapter_1inch(Composed_Mount):
+  def __init__(self, angle=0, post="1inch_post", model="U100-A2K"):
+    super().__init__()
+    um = Unit_Mount()
+    um.model = "1inch_adapter"
+    um.path = thisfolder + "misc_meshes/"
+    um.docking_obj.pos += (6.5,38,0) # from manual adjustments in FreeCAD
+    um.is_horizontal = False
+    um.draw_dict["color"] = (0.3,0.3,0.3)
+    self.add(um)
+    self.post_model = post
+    self.model = model
+    um.rotate(vec=um.normal, phi=angle*np.pi/180)
+    self.add(Unit_Mount(model=model))
+    self.add(Post(model=post))
+
+class Adapter_2inch(Composed_Mount):
+  def __init__(self, angle=0, post="1inch_post", model="U200-A2K"):
+    super().__init__()
+    um = Unit_Mount()
+    um.model = "2inch_adapter"
+    um.path = thisfolder + "misc_meshes/"
+    um.docking_obj.pos += (14.3,64,0) # from manual adjustments in FreeCAD
+    um.is_horizontal = False
+    um.draw_dict["color"] = (0.3,0.3,0.3)
+    self.add(um)
+    self.post_model = post
+    self.model = model
+    um.rotate(vec=um.normal, phi=angle*np.pi/180)
+    self.add(Unit_Mount(model=model))
+    self.add(Post(model=post))
+  def reverse(self, thickness=7):
+    self.rotate(vec=(0,0,1), phi=np.pi)
+    self.pos += -self.normal*thickness
+   
 
 class KM100C(Composed_Mount):
   def __init__(self, name="KM100C", height=15, width=0, post="1inch_post", **kwargs):
@@ -652,12 +687,6 @@ class KM100C(Composed_Mount):
     # print("lower pos", lower.pos)
 
     self.add(Post(model=post))
-
-  def reverse(self, thickness=7):
-    self.rotate(vec=(0,0,1), phi=np.pi)
-    self.pos += -self.normal*thickness
-
-
 
 class KM100C_flipped(Composed_Mount):
   def __init__(self, name="KM100C", height=15, width=0, post="1inch_post", **kwargs):
