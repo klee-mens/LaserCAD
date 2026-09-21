@@ -9,6 +9,7 @@ from .. basic_optics import Mirror, Beam, Composition, inch, Curved_Mirror, Rain
 from .. basic_optics import Grating, Unit_Mount, Composed_Mount
 from ..basic_optics.mirror import Stripe_mirror
 from .periscope import Make_RoofTop_Mirror
+from .. freecad_models import freecad_da, clear_doc
 import numpy as np
 
 
@@ -149,53 +150,72 @@ def Make_Stretcher_chromeo():
 
 
 
-def Make_Stretcher(radius_concave = 1000, #radius of the big concave sphere
-    aperture_concave = 6 * inch,
-    height_stripe_mirror = 10, #height of the stripe mirror in mm
-    seperation_angle = 10 /180 *np.pi, # sep between in and outgoing middle ray
-    grating_const = 1/1000, # in 1/mm
-    seperation = 50, # difference grating position und radius_concave
-    lambda_mid = 800e-9 * 1e3, # central wave length in mm
-    band_width = 100e-9*1e3, # full bandwith in mm
-    number_of_rays = 20,
-    safety_to_stripe_mirror = 5, #distance first incomming ray to stripe_mirror in mm
-    periscope_height = 10,
-    first_propagation = 120, # legnth of the first ray_bundle to flip mirror1 mm
-    distance_roof_top_grating = 600):
+def Make_Stretcher(
+  radius_concave = 1000, #radius of the big concave sphere
+  aperture_concave = 6 * inch,
+  height_stripe_mirror = 10, #height of the stripe mirror in mm
+  width_stripe_mirror = 75, # in mm
+  separation_angle = 10 /180 *np.pi, # sep between in and outgoing middle ray
+  grating_const = 1/1000, # in mm (1000 lines per mm)
+  separation = 50, # difference grating position and radius_concave
+  lambda_mid = 800e-9 * 1e3, # central wave length in mm
+  bandwidth = 100e-9*1e3, # full bandwidth in mm
+  number_of_rays = 20,
+  safety_to_stripe_mirror = 5, #distance first incomming ray to stripe_mirror in mm
+  periscope_height = 10,
+  first_propagation = 120, # legnth of the first ray_bundle to flip mirror1 mm
+  distance_flip_mirror1_grating = 300-85,
+  ray_thickness = 2,
+  distance_roof_top_grating = 600):
+  """
+  constructs an Offner Stretcher with an on axis helper composition
+  Note: When drawing a rooftop mirror, we will draw apure_cosmetic mirror to
+  confirm the position of the mount. The mirror's geom is the average of two
+  flip mirror. And its aperture is the periscope_height.
+  Returns
+  -------
+  TYPE Composition
+  """
 
   # calculated parameters according to the grating equation and set the grating
   v = lambda_mid/grating_const
-  s = np.sin(seperation_angle)
-  c = np.cos(seperation_angle)
+  s = np.sin(separation_angle)
+  c = np.cos(separation_angle)
   a = v/2
   b = np.sqrt(a**2 - (v**2 - s**2)/(2*(1+c)))
   sinB = a - b
   grating_normal = (np.sqrt(1-sinB**2), sinB, 0)
-  Grat = Grating(grat_const=grating_const, name="Gitter", order=-1)
-  Grat.normal = grating_normal
 
   #set the big sphere
-  Concav = Curved_Mirror(radius=radius_concave,name="Concav_Mirror")
+  Concav = Curved_Mirror(radius=radius_concave, name="Concav_Mirror")
   Concav.aperture = aperture_concave
   Concav.set_mount_to_default()
 
-  # set the convex stripe mirror and its cosmetics
-  StripeM = Stripe_mirror(radius= -radius_concave/2)
+  StripeM = Stripe_mirror(radius= -radius_concave/2, thickness=25,  name="Stripe_Mirror")
+  #Cosmetics
+  StripeM.aperture = width_stripe_mirror
+  StripeM.draw_dict["height"] = height_stripe_mirror
+  StripeM.draw_dict["thickness"] = 25 # arbitrary
+  StripeM.draw_dict["model_type"] = "Stripe"
 
-  # prepare the helper Composition
+  Grat = Grating(grat_const=grating_const, name="Gitter", order=-1)
+
+  Grat.normal = grating_normal
+
   helper = Composition()
   helper_light_source = Beam(angle=0, wavelength=lambda_mid)
   helper.set_light_source(helper_light_source)
-  #to adjust the wavelength of the oA and set everything on axis
+  #to adjust the wavelength of the oA
   helper.redefine_optical_axis(helper_light_source.inner_ray())
   helper.add_fixed_elm(Grat)
   helper.recompute_optical_axis()
-  helper.propagate(radius_concave - seperation)
+  helper.propagate(radius_concave - separation)
   helper.add_on_axis(Concav)
   helper.propagate(radius_concave/2)
   helper.add_on_axis(StripeM)
 
-  lightsource = RainbowBeam(wavelength=lambda_mid, bandwith=band_width, ray_count=number_of_rays)
+  # setting the lightsource as an bundle of different coulered rays
+  lightsource = RainbowBeam(wavelength=lambda_mid, bandwidth=bandwidth, ray_count=number_of_rays, thickness=ray_thickness)
 
   # starting the real stretcher
   Stretcher = Composition(name="DerStrecker")
@@ -203,23 +223,30 @@ def Make_Stretcher(radius_concave = 1000, #radius of the big concave sphere
   Stretcher.redefine_optical_axis(helper_light_source.inner_ray())
 
   Stretcher.propagate(first_propagation)
+  FlipMirror_In_Out = Mirror(phi=100, name="FlipMirrorInOut")
+  FlipMirror_In_Out.set_mount(Composed_Mount(unit_model_list = ["MH25_KMSS","1inch_post"]))
+
+  Stretcher.add_on_axis(FlipMirror_In_Out)
+  FlipMirror_In_Out.pos += (0,0,-periscope_height/2)
+  Stretcher.propagate(distance_flip_mirror1_grating)
+
   #adding the helper
   helper.set_geom(Stretcher.last_geom())
   helper.pos += (0,0, height_stripe_mirror/2 + safety_to_stripe_mirror)
   Stretcher.add_supcomposition_fixed(helper)
 
-  Stretcher.set_sequence([0,1,2,1,0])
+  Stretcher.set_sequence([0,1,2,3,2,1])
   Stretcher.recompute_optical_axis()
-  # Stretcher.draw()
 
   # adding the rooftop mirror and it's cosmetics
   Stretcher.propagate(distance_roof_top_grating)
-  RoofTopMirror = Make_RoofTop_Mirror(height=periscope_height, up=False)
+  Stretcher.add_supcomposition_on_axis(Make_RoofTop_Mirror(height=periscope_height, up=False))
 
-  Stretcher.add_supcomposition_on_axis(RoofTopMirror)
-  Stretcher.set_sequence([0,1,2,1,0, 3,4, 0,1,2,1,0]) # believe me :)
+  # setting the final sequence and the last propagation for visualization
+  # note that pure cosmetic (pos6) is not in the sequence
+  Stretcher.set_sequence([0, 1,2,3,2,1, 4,5, 1,2,3,2,1, 0])
   Stretcher.recompute_optical_axis()
-  Stretcher.propagate(100)
+  Stretcher.propagate(120)
 
   # =============================================================================
   # GDD, TOD computation
@@ -227,8 +254,8 @@ def Make_Stretcher(radius_concave = 1000, #radius of the big concave sphere
   lam0 = lambda_mid * 1e-3 # m
   d0 = grating_const * 1e-3 # m
   c0 = 299792458 # m/s
-  sep = seperation * 1e-3
-  diffray = Stretcher._optical_axis[1]
+  sep = separation * 1e-3
+  diffray = Stretcher._optical_axis[2]
   theta = diffray.angle_to(Grat)
 
   GDD = -lam0**3 / np.pi / (c0 * d0 * np.cos(theta))**2 * (-2 * sep) # s^2
