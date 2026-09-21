@@ -156,7 +156,7 @@ grat.draw()
 
 from LaserCAD.basic_optics.beam import RainbowBeam
 
-rb= RainbowBeam(bandwith=50E-6)
+rb= RainbowBeam(bandwidth=50E-6)
 nr = grat.next_beam(rb)
 rb.draw()
 nr.draw()

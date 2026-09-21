@@ -29,12 +29,12 @@ def Make_Stretcher_chromeo():
   aperture_concave = 6 * inch
   height_stripe_mirror = 10 #height of the stripe mirror in mm
   width_stripe_mirror = 75 # in mm
-  seperation_angle = 10 /180 *np.pi # sep between in and outgoing middle ray
-  # incident_angle = seperation_angle + reflection_angle
+  separation_angle = 10 /180 *np.pi # sep between in and outgoing middle ray
+  # incident_angle = separation_angle + reflection_angle
   grating_const = 1/450 # in mm (450 lines per mm)
-  seperation = 135 # difference grating position und radius_concave
+  separation = 135 # difference grating position und radius_concave
   lambda_mid = 2400e-9 * 1e3 # central wave length in mm
-  delta_lamda = 200e-9*1e3 # full bandwith in mm
+  delta_lamda = 200e-9*1e3 # full bandwidth in mm
   number_of_rays = 20
   safety_to_stripe_mirror = 5 #distance first incomming ray to stripe_mirror in mm
   periscope_height = 15
@@ -44,8 +44,8 @@ def Make_Stretcher_chromeo():
 
   # calculated parameters according to the grating equation
   v = lambda_mid/grating_const
-  s = np.sin(seperation_angle)
-  c = np.cos(seperation_angle)
+  s = np.sin(separation_angle)
+  c = np.cos(separation_angle)
   a = v/2
   b = np.sqrt(a**2 - (v**2 - s**2)/(2*(1+c)))
   sinB = a - b
@@ -74,13 +74,13 @@ def Make_Stretcher_chromeo():
   helper.redefine_optical_axis(helper_light_source.inner_ray())
   helper.add_fixed_elm(Grat)
   helper.recompute_optical_axis()
-  helper.propagate(radius_concave - seperation)
+  helper.propagate(radius_concave - separation)
   helper.add_on_axis(Concav)
   helper.propagate(radius_concave/2)
   helper.add_on_axis(StripeM)
 
   # setting the lightsource as an bundle of different coulered rays
-  lightsource = RainbowBeam(wavelength=lambda_mid, bandwith=delta_lamda, ray_count=number_of_rays)
+  lightsource = RainbowBeam(wavelength=lambda_mid, bandwidth=delta_lamda, ray_count=number_of_rays)
 
   # starting the real stretcher
   Stretcher = Composition(name="DerStrecker")
@@ -137,7 +137,7 @@ def Make_Stretcher_chromeo():
   lam0 = lambda_mid * 1e-3 # m
   d0 = grating_const * 1e-3 # m
   c0 = 299792458 # m/s
-  sep = seperation * 1e-3
+  sep = separation * 1e-3
   diffray = Stretcher._optical_axis[2]
   theta = diffray.angle_to(Grat)
 

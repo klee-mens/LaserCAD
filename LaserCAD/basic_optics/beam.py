@@ -297,10 +297,10 @@ class CircularRayBeam(Beam):
 # import matplotlib.pyplot as plt
 
 class RainbowBeam(Beam):
-  def __init__(self,  name="NewRainbow", wavelength=1030E-6, bandwith=10E-6, ray_count=11, thickness=2,**kwargs):
+  def __init__(self,  name="NewRainbow", wavelength=1030E-6, bandwidth=10E-6, ray_count=11, thickness=2,**kwargs):
     super().__init__(name=name, wavelength=wavelength, **kwargs)
     self._ray_count = ray_count
-    self._bandwith = bandwith
+    self._bandwidth = bandwidth
     self._ray_thickness = thickness
     self.make_rainbow_distribution(ray_count)
     self._distribution = "rainbow"
@@ -308,11 +308,11 @@ class RainbowBeam(Beam):
 
   def make_rainbow_distribution(self, ray_count=11):
     self._ray_count = ray_count
-    # wavels = np.linspace(self._Bwavelength - self.bandwith/2, self._Bwavelength + self.bandwith/2, ray_count)
+    # wavels = np.linspace(self._Bwavelength - self.bandwidth/2, self._Bwavelength + self.bandwidth/2, ray_count)
     rc_blue = ray_count//2 +1
     rc_red = ray_count + 1 - rc_blue
-    blue = np.linspace(self._Bwavelength - self._bandwith/2, self._Bwavelength, rc_blue)
-    reds = np.linspace(self._Bwavelength, self._Bwavelength + self._bandwith/2, rc_red)
+    blue = np.linspace(self._Bwavelength - self._bandwidth/2, self._Bwavelength, rc_blue)
+    reds = np.linspace(self._Bwavelength, self._Bwavelength + self._bandwidth/2, rc_red)
 
     wavels = [self._Bwavelength] # middle ray hat wavelength
     wavels += list(blue[0:-1]) # then all blue wavelength except middle
@@ -323,7 +323,7 @@ class RainbowBeam(Beam):
       rn = Ray()
       rn.set_geom(self.get_geom())
       rn.wavelength = wavel
-      x = 1-(wavel - self._Bwavelength + self._bandwith/2) / self._bandwith
+      x = 1-(wavel - self._Bwavelength + self._bandwidth/2) / self._bandwidth
       rn.draw_dict["color"] = cmap( x )
       rn.draw_dict["thickness"] = self._ray_thickness
       rays.append(rn)
