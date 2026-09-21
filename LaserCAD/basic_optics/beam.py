@@ -297,10 +297,11 @@ class CircularRayBeam(Beam):
 # import matplotlib.pyplot as plt
 
 class RainbowBeam(Beam):
-  def __init__(self,  name="NewRainbow", wavelength=1030E-6, bandwith=10E-6, ray_count=11, **kwargs):
+  def __init__(self,  name="NewRainbow", wavelength=1030E-6, bandwith=10E-6, ray_count=11, thickness=2,**kwargs):
     super().__init__(name=name, wavelength=wavelength, **kwargs)
     self._ray_count = ray_count
     self._bandwith = bandwith
+    self._ray_thickness = thickness
     self.make_rainbow_distribution(ray_count)
     self._distribution = "rainbow"
     self.draw_dict["model"] = "ray_group"
@@ -324,6 +325,7 @@ class RainbowBeam(Beam):
       rn.wavelength = wavel
       x = 1-(wavel - self._Bwavelength + self._bandwith/2) / self._bandwith
       rn.draw_dict["color"] = cmap( x )
+      rn.draw_dict["thickness"] = self._ray_thickness
       rays.append(rn)
     self._rays = rays
     for n in range(1, len(self._rays)):
