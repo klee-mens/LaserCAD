@@ -50,9 +50,9 @@ class Polarization_Rotator(Composition):
 
     def add_housing(self):
         Housing = Unit_Mount("Polarization_rotator-Fusion")
-        Housing.draw_dict["color"]=(239/255, 239/255, 239/255)
-        Housing.docking_obj.pos += (28.65,38.89, -41.89)
-        Housing.docking_obj.normal = (0,0,1)
+        # Housing.draw_dict["color"]=(239/255, 239/255, 239/255)
+        # Housing.docking_obj.pos += (28.65,38.89, -41.89)
+        # Housing.docking_obj.normal = (0,0,1)
 
         Rotator_box = Composed_Mount()
         Rotator_box.add(Housing)
