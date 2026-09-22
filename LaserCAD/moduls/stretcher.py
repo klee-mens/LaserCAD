@@ -262,4 +262,7 @@ def Make_Stretcher(
   TOD = GDD * 3*lam0/(2*np.pi*c0) * (1 + lam0/d0 * np.tan(theta)/np.cos(theta))
   Stretcher.GDD = GDD
   Stretcher.TOD = TOD
+  Stretcher.theta = theta 
+  Stretcher.gamma = theta - separation_angle
+
   return Stretcher
