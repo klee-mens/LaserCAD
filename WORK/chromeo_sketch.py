@@ -734,6 +734,28 @@ notused = Amp2._elements[0].next_beam(Out_Beam1)
 
 
 
+
+# =============================================================================
+# diagnosys regen amp1
+# =============================================================================
+
+Amp2.compute_beams()
+h1 = Amp2._beams[0] 
+r1,a1 = h1.radius_angle()
+diag_light_source = Beam(radius=r1, angle=a1)
+diag_light_source.set_geom(h1.get_geom())
+
+Diagnosys = Composition(name="Diagnosys")
+Diagnosys.set_geom(diag_light_source.get_geom())
+Diagnosys.set_light_source(diag_light_source)
+Diagnosys.propagate(185)
+Diagnosys.add_on_axis(Mirror(phi=90))
+Diagnosys.propagate(350)
+Diagnosys.add_on_axis(Mirror(phi=90))
+Diagnosys.propagate(500)
+Diagnosys.add_on_axis(Mirror(phi=-90))
+Diagnosys.propagate(300)
+
 # =============================================================================
 # Pump Amp1
 # =============================================================================
@@ -951,13 +973,15 @@ klt_pump.draw()
 Out_Beam0.draw()
 Out_Beam1.draw()
 
+Diagnosys.draw()
+
 Amp2.draw()
 
-Pump.draw()
+# Pump.draw()
 BigPump.draw()
 Table().draw()
 Compressor.draw()
-
+# 
 
 
 
