@@ -14,7 +14,7 @@ X_STAGE_HEIGHT = 23.1
 
 class Delay_Stage(Composition):
   def __init__(self, name="NewDelayStage", path_length=250, left_turn=True,
-                   xstage_distance = 38, **kwargs):
+                   xstage_distance = 38, xstage_shift=0, **kwargs):
     super().__init__(name=name, **kwargs)
 
     FIRST_PROP = (path_length - xstage_distance) / 2
@@ -38,8 +38,7 @@ class Delay_Stage(Composition):
     xstage.draw_dict["stl_file"]=stl_file
     xstage.draw_dict["color"]=(0.1, 0.1, 0.1)
 
-    xstage.pos = (FIRST_PROP, xstage_distance/2*sign, 0)
-
+    xstage.pos = (FIRST_PROP+xstage_shift, xstage_distance/2*sign, 0)
     self.add_fixed_elm(xstage)
 
     self.propagate(xstage_distance)
