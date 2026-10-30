@@ -4,7 +4,7 @@ from .. freecad_models.utils import load_STL
 import numpy as np
 
 class Polarization_Rotator(Composition):
-    def __init__(self, name="Polarisationsdreher", **kwargs):
+    def __init__(self, name="Polarisationsdreher", flip=False, **kwargs):
         """Creates a polarization rotator with three mirrors and a housing.
         The mirrors are arranged in a way that the beam polarization is rotated by 90 degrees.
         
@@ -13,10 +13,13 @@ class Polarization_Rotator(Composition):
             path_length (float): Total beam path length of the polarization rotator. 
             geometric_length (float): Geometric distance between input and output of the polarization rotator.
             length_diff (float): Difference between path length and geometric length.
+            flip (bool): If True, the polarization rotator is flipped along the y-axis.
             PDM1 (Mirror): First mirror in the polarization rotator.
             PDM2 (Mirror): Second mirror in the polarization rotator.
             PDM3 (Mirror): Third mirror in the polarization rotator.
         """
+        self.flip = flip
+        flip_factor = -1 if flip else 1
         super().__init__(name=name,**kwargs)
         self.name = name 
         sep = 28.3
@@ -31,7 +34,7 @@ class Polarization_Rotator(Composition):
         PDM1 = Mirror(name="Polarisationsdreher M1")
         PDM2 = Mirror(name="Polarisationsdreher M2")
         PDM3 = Mirror(name="Polarisationsdreher M3")
-        PDM2.pos += (start_length + sep/2, L*np.cos(PD_theta), L*np.sin(PD_theta))
+        PDM2.pos += (start_length + sep/2, flip_factor*L*np.cos(PD_theta), L*np.sin(PD_theta))
         PDM3.pos += (start_length + sep,0,0)
 
         self.add_on_axis(self.add_housing())
@@ -50,9 +53,6 @@ class Polarization_Rotator(Composition):
 
     def add_housing(self):
         Housing = Unit_Mount("Polarization_rotator-Fusion")
-        # Housing.draw_dict["color"]=(239/255, 239/255, 239/255)
-        # Housing.docking_obj.pos += (28.65,38.89, -41.89)
-        # Housing.docking_obj.normal = (0,0,1)
 
         Rotator_box = Composed_Mount()
         Rotator_box.add(Housing)
@@ -61,5 +61,8 @@ class Polarization_Rotator(Composition):
         Rotator_housing.draw_dict["stl_file"]="dont_draw"
         Rotator_housing.freecad_model = load_STL
         Rotator_housing.Mount = Rotator_box
+        if self.flip: 
+            Rotator_housing.Mount.reverse()
+            Rotator_housing.Mount.pos += (self.geometric_length-5, 0, 0)
 
         return Rotator_housing
