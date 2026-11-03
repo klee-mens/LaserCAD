@@ -264,3 +264,26 @@ def load_STEP(step_file, name="new_step", geom=None, off0=0, **kwargs):
   update_geom_info(obj, geom, off0)
   ##DOC.recompute()
   return obj
+
+
+def load_FCStd(fcstd_file, name="new_link", obj_name=None, **kwargs):
+  if "dont_draw" in fcstd_file:
+    return None
+  DOC = get_DOC()
+  # Dokument nur einmal öffnen
+  src = None
+  for d in FreeCAD.listDocuments().values():
+    if d.FileName == fcstd_file:
+      src = d
+      break
+  if src is None:
+    src = FreeCAD.openDocument(fcstd_file)
+  # Zielobjekt: per Name oder erstes Top-Level-Objekt
+  if obj_name:
+    target = src.getObject(obj_name)
+  else:
+    target = [o for o in src.RootObjects][0]
+  link = DOC.addObject("App::Link", name)
+  link.LinkedObject = target
+  link.Label = name
+  return link
