@@ -102,6 +102,52 @@ def model_crystal(name="crystal",model="cube", width=50, height=10, thickness=25
   return obj
 
 
+def model_crystal_mounts(name="crystal_mount", shape="rectangular",
+                          width=30, height=30, thickness=10,
+                          inner_aperture=10, inner_width=10, inner_height=10,
+                          color=DEFALUT_MOUNT_COLOR, geom=None, **kwargs):
+  """Create a crystal mount with a centered opening for the crystal."""
+  DOC = get_DOC()
+  if width <= 0 or height <= 0 or thickness <= 0:
+    raise ValueError("Mount dimensions must be positive.")
+  if inner_aperture <= 0 or inner_width <= 0 or inner_height <= 0:
+    raise ValueError("Crystal dimensions must be positive.")
+  if shape == "cylindrical":
+    opening_width = inner_aperture
+    opening_height = inner_aperture
+  elif shape == "rectangular":
+    opening_width = inner_width
+    opening_height = inner_height
+  else:
+    raise ValueError(
+      f"Invalid shape {shape!r}. Choose 'cylindrical' or 'rectangular'."
+    )
+  if opening_width > width or opening_height > height:
+    raise ValueError("The crystal opening must fit inside the mount.")
+
+  outer = Part.makeBox(
+    thickness, width, height,
+    Vector(0, -width / 2, -height / 2),
+  )
+  if shape == "cylindrical":
+    opening = Part.makeCylinder(
+      inner_aperture / 2, thickness,
+      Vector(0, 0, 0), Vector(1, 0, 0),
+    )
+  else:
+    opening = Part.makeBox(
+      thickness, inner_width, inner_height,
+      Vector(0, -inner_width / 2, -inner_height / 2),
+    )
+
+  obj = DOC.addObject("Part::Feature", name)
+  obj.Shape = outer.cut(opening)
+  obj.ViewObject.ShapeColor = color
+  update_geom_info(obj, geom)
+  DOC.recompute()
+  return obj
+
+
 DEFAULT_COLOR = (200/255, 50/255, 30/255)
 DEFAULT_TRANSPARENCY = 50
 
