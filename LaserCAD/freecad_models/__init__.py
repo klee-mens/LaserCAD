@@ -26,7 +26,7 @@ from .freecad_model_iris_diaphragms import model_intersection_plane
 from .freecad_model_mounts import model_table
 # from .freecad_inputoutput_test import input_output_test
 # from .freecad_model_crystal import model_crystal,model_crystal_mount
-from .freecad_model_crystal import model_crystal
+from .freecad_model_crystal import model_crystal, model_crystal_mounts
 from .freecad_model_geom_object import model_geom_object
 from .freecad_model_off_axis_parabola import model_off_axis_parabola
 pfad = __file__[0:-11]

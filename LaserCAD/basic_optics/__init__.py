@@ -17,7 +17,7 @@ from .geom_object import Geom_Object, TOLERANCE
 from .ray import Ray
 from .beam import Beam, CircularRayBeam, Gaussian_Beam, RainbowBeam, SquareBeam, Ray_Distribution
 from .optical_element import Opt_Element
-from .lens import Lens
+from .lens import Lens, Thicklens, Cylindrical_Lens
 from .mirror import Mirror, Curved_Mirror, Cylindrical_Mirror, Stripe_mirror, Rectangular_Mirror
 from .composition import Composition
 from .constants import inch

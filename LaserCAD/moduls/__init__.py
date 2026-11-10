@@ -14,4 +14,5 @@ from .type_II_Amplifier import Make_Amplifier_Typ_II_UpDown
 from .white_cell import Make_White_Cell
 from .compressor import Make_Compressor
 from .polarization_rotator import Polarization_Rotator
+from .motorized_TSF import Motorized_TSF
 from .transmission_disk import Transmission_Disk
