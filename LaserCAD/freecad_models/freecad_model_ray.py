@@ -52,7 +52,7 @@ def model_ray_cylinder(name="ray", length=200, geom=GEOM0):
   return obj
 
 
-def model_ray_1D(name="ray1D", length=200, geom=GEOM0, color=RAY_COLOR):
+def model_ray_1D(name="ray1D", length=200, geom=GEOM0, color=RAY_COLOR, thickness=2):
   """
   kreiert aus geom und length einen 1D-Edge Strahl
 
@@ -82,7 +82,8 @@ def model_ray_1D(name="ray1D", length=200, geom=GEOM0, color=RAY_COLOR):
   obj = DOC.addObject("Part::Feature", name)
   obj.Shape = s1
   obj.ViewObject.LineColor = color
-  
+  obj.ViewObject.LineWidth = thickness
+
   ##DOC.recompute()
   return obj
   

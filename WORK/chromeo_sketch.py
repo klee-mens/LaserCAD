@@ -113,7 +113,7 @@ seperation_angle = 10 /180 *np.pi # sep between in and outgoing middle ray
 grating_const = 1/450 # in mm (450 lines per mm)
 seperation = 135 # difference grating position und radius_concave
 lambda_mid = 2400e-9 * 1e3 # central wave length in mm
-delta_lamda = 200e-9*1e3 # full bandwith in mm
+delta_lamda = 200e-9*1e3 # full bandwidth in mm
 number_of_rays = 20
 safety_to_stripe_mirror = 5 #distance first incomming ray to stripe_mirror in mm
 periscope_height = 15
@@ -159,7 +159,7 @@ helper.propagate(radius_concave/2)
 helper.add_on_axis(StripeM)
 
 # setting the lightsource as an bundle of different coulered rays
-lightsource = RainbowBeam(wavelength=lambda_mid, bandwith=delta_lamda, ray_count=number_of_rays)
+lightsource = RainbowBeam(wavelength=lambda_mid, bandwidth=delta_lamda, ray_count=number_of_rays)
 
 # starting the real stretcher
 Stretcher = Composition(name="DerStrecker")

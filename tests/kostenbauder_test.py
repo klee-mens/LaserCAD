@@ -209,7 +209,7 @@ plane_stretch = Make_Stretcher(radius_concave = 1000, #radius of the big concave
     grating_const = 1/1000, # in 1/mm
     seperation = 100, # difference grating position und radius_concave
     lambda_mid = 800e-9 * 1e3, # central wave length in mm
-    band_width = 20e-9*1e3, # full bandwith in mm
+    band_width = 20e-9*1e3, # full bandwidth in mm
     number_of_rays = 20,
     safety_to_stripe_mirror = 5, #distance first incomming ray to stripe_mirror in mm
     periscope_height = 10,
@@ -235,7 +235,7 @@ comp = Make_Compressor(seperation_angle = 20 /180 *np.pi, # sep between in and o
     grating_const = 1/1000, # in 1/mm
     seperation = 200, # difference grating position und radius_concave
     lambda_mid = 800e-9 * 1e3, # central wave length in mm
-    band_width = 20e-9*1e3, # full bandwith in mm
+    band_width = 20e-9*1e3, # full bandwidth in mm
     number_of_rays = 20,
     height_seperation = 16, # seperation between incomming and outgoing beam,
     first_propagation = 120, # legnth of the first ray_bundle to grating 1 mm
@@ -319,7 +319,7 @@ for delta in delta_z:
   grating_const = 1/1000 # in 1/mm
   seperation = 50 # difference grating position und radius_concave
   lambda_mid = 800e-9 * 1e3 # central wave length in mm
-  band_width = 100e-9*1e3 # full bandwith in mm
+  band_width = 100e-9*1e3 # full bandwidth in mm
   number_of_rays = 20
   safety_to_stripe_mirror = 5 #distance first incomming ray to stripe_mirror in mm
   periscope_height = 10
@@ -358,7 +358,7 @@ for delta in delta_z:
   helper.propagate(radius_concave/2 + delta)
   helper.add_on_axis(StripeM)
 
-  lightsource = RainbowBeam(wavelength=lambda_mid, bandwith=band_width, ray_count=number_of_rays)
+  lightsource = RainbowBeam(wavelength=lambda_mid, bandwidth=band_width, ray_count=number_of_rays)
 
   # starting the real stretcher
   Stretcher_missal = Composition(name="DerStrecker_withSpatChirp")
