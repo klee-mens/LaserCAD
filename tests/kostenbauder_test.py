@@ -204,12 +204,12 @@ from LaserCAD.moduls import Make_Stretcher
 plane_stretch = Make_Stretcher(radius_concave = 1000, #radius of the big concave sphere
     aperture_concave = 6 * inch,
     height_stripe_mirror = 10, #height of the stripe mirror in mm
-    seperation_angle = 20 /180 *np.pi, # sep between in and outgoing middle ray
-    # incident_angle = seperation_angle + reflection_angle
+    separation_angle = 20 /180 *np.pi, # sep between in and outgoing middle ray
+    # incident_angle = separation_angle + reflection_angle
     grating_const = 1/1000, # in 1/mm
-    seperation = 100, # difference grating position und radius_concave
+    separation = 100, # difference grating position und radius_concave
     lambda_mid = 800e-9 * 1e3, # central wave length in mm
-    band_width = 20e-9*1e3, # full bandwidth in mm
+    bandwidth = 20e-9*1e3, # full bandwidth in mm
     number_of_rays = 20,
     safety_to_stripe_mirror = 5, #distance first incomming ray to stripe_mirror in mm
     periscope_height = 10,

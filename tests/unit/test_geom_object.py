@@ -4,12 +4,6 @@ Tests für LaserCAD.basic_optics.geom_object
 
 Geom_Object ist die Basisklasse für alles mit Position (pos) und Ausrichtung
 (normal / _axes). Fehler hier wirken sich auf jedes andere Objekt aus.
-
-Tests, die mit @unittest.expectedFailure markiert sind, beschreiben ein
-Verhalten, das nach Ansicht der Doku bzw. der Physik gelten sollte, vom Code
-aber aktuell nicht erfüllt wird. Sie halten die Auffälligkeit fest, ohne die
-Test-Suite rot zu färben. Sobald der Code korrigiert ist, schlägt der Test
-mit "unexpected success" an, und man entfernt einfach den Dekorator.
 """
 import io
 import unittest
@@ -80,15 +74,29 @@ class TestRotationMatrixFromVectors(unittest.TestCase):
     assert_allclose(rotation_matrix_from_vectors((1, 0, 0), (5, 0, 0)),
                     np.eye(3), atol=1e-12)
 
-  @unittest.expectedFailure
   def test_antiparallel_vectors_are_mapped_correctly(self):
-    # BEKANNTE LÜCKE: Für antiparallele Vektoren ist das Kreuzprodukt Null,
-    # die Funktion nimmt aber an, das passiere nur bei identischen
-    # Richtungen, und gibt die Einheitsmatrix zurück. Dann wird v1 nicht auf
-    # v2 = -v1 abgebildet. (Geom_Object.normal behandelt den Fall separat,
-    # daher fällt es dort nicht auf.)
-    R = rotation_matrix_from_vectors((1, 0, 0), (-1, 0, 0))
-    assert_allclose(R @ (1, 0, 0), (-1, 0, 0), atol=1e-12)
+    # Regression: Für antiparallele Vektoren ist das Kreuzprodukt Null. Die
+    # Funktion hat das früher als "identische Richtung" gedeutet und die
+    # Einheitsmatrix zurückgegeben, sodass v1 nicht auf -v1 abgebildet wurde.
+    for v in [(1, 0, 0), (-1, 0, 0), (0, 1, 0), (0, 0, 1), (0, 0, -5),
+              (1, 1, 1), (1, -2, 3)]:
+      with self.subTest(v=v):
+        v = np.array(v, dtype=float)
+        v_unit = v / np.linalg.norm(v)
+        R = rotation_matrix_from_vectors(v, -v)
+        assert_allclose(R @ v_unit, -v_unit, atol=1e-12)
+        self.assertTrue(is_orthonormal_right_handed(R))
+
+  def test_nearly_parallel_and_antiparallel_vectors_stay_accurate(self):
+    v1 = np.array((1.0, 0.0, 0.0))
+    for eps in (1e-3, 1e-6, 1e-9, 1e-12, 1e-14, 1e-16):
+      for sign in (1, -1):
+        with self.subTest(eps=eps, sign=sign):
+          v2 = np.array((sign, eps, 0.0))
+          v2 /= np.linalg.norm(v2)
+          R = rotation_matrix_from_vectors(v1, v2)
+          assert_allclose(R @ v1, v2, atol=1e-10)
+          self.assertTrue(is_orthonormal_right_handed(R, atol=1e-9))
 
 
 class TestGeomObjectDefaults(unittest.TestCase):
@@ -289,11 +297,12 @@ class TestGeomObjectGeom(unittest.TestCase):
 
 class TestAngleTo(unittest.TestCase):
 
-  def _angle_after_rotation(self, axis, phi):
+  def _angle_after_rotation(self, rot_axis, phi, **kwargs):
+    """Dreht ein Objekt um <rot_axis> um <phi> und liefert angle_to(...)."""
     a = Geom_Object()
     b = Geom_Object()
-    b.rotate(axis, phi)
-    return a.angle_to(b)
+    b.rotate(rot_axis, phi)
+    return a.angle_to(b, **kwargs)
 
   def test_zero_for_identical_orientation(self):
     self.assertAlmostEqual(self._angle_after_rotation((0, 1, 0), 0.0), 0.0)
@@ -309,20 +318,60 @@ class TestAngleTo(unittest.TestCase):
         self.assertAlmostEqual(abs(self._angle_after_rotation((0, 0, 1), phi)),
                                abs(phi))
 
-  @unittest.expectedFailure
-  def test_sign_for_rotation_about_z(self):
-    # ZU KLÄREN: Das Vorzeichen wird gegen die y-Achse des Objekts bestimmt.
-    # Bei Drehungen um z (also in der Tischebene xy) steht das Kreuzprodukt
-    # aber senkrecht auf y, daher kommt immer "+" heraus. Die Docstring sagt
-    # "with correct sign". Ist das so gewollt (Konvention nur für Drehungen
-    # um y) oder ein Fehler? Aufrufer: moduls/compressor.py, moduls/stretcher.py
-    self.assertAlmostEqual(self._angle_after_rotation((0, 0, 1), -0.3), -0.3)
+  # --- Standardverhalten (ohne axis) -------------------------------------
+  # Diese beiden Tests halten das bisherige Verhalten ausdrücklich fest, weil
+  # moduls/compressor.py und moduls/stretcher.py es für GDD und TOD benutzen
+  # (siehe test_moduls_gdd.py). Ändert sich es, ändern sich dort die Ergebnisse.
 
-  @unittest.expectedFailure
-  def test_angles_larger_than_90_degrees(self):
-    # angle_to benutzt arcsin(|a x b|); damit ist der Wertebereich auf
-    # [-90°, 90°] beschränkt, ein Winkel von 2 rad wird als pi-2 geliefert.
-    self.assertAlmostEqual(self._angle_after_rotation((0, 1, 0), 2.0), 2.0)
+  def test_default_gives_the_angle_to_the_line_of_the_normal(self):
+    # Bereich [-90°, 90°]: ein Winkel von 2 rad wird als pi-2 geliefert
+    self.assertAlmostEqual(self._angle_after_rotation((0, 1, 0), 2.0),
+                           np.pi - 2.0)
+
+  def test_default_sign_is_only_meaningful_for_rotations_about_y(self):
+    # Bei Drehungen um z kommt immer ein positiver Winkel heraus
+    for phi in (0.3, -0.3):
+      with self.subTest(phi=phi):
+        self.assertAlmostEqual(self._angle_after_rotation((0, 0, 1), phi), 0.3)
+
+  # --- mit axis: vorzeichenrichtiger Winkel im vollen Bereich ------------
+
+  def test_with_axis_the_sign_is_correct_for_rotation_about_z(self):
+    for phi in (0.3, -0.3, 1.0, -1.0):
+      with self.subTest(phi=phi):
+        self.assertAlmostEqual(
+          self._angle_after_rotation((0, 0, 1), phi, axis=(0, 0, 1)), phi)
+
+  def test_with_axis_angles_larger_than_90_degrees_are_supported(self):
+    for phi in (2.0, -2.0, 3.0, -3.0, 0.1):
+      with self.subTest(phi=phi):
+        self.assertAlmostEqual(
+          self._angle_after_rotation((0, 1, 0), phi, axis=(0, 1, 0)), phi)
+
+  def test_with_axis_the_axis_need_not_be_normalized(self):
+    self.assertAlmostEqual(
+      self._angle_after_rotation((0, 0, 1), 0.7, axis=(0, 0, 7)), 0.7)
+
+  def test_with_axis_works_for_any_axis_perpendicular_to_the_normal(self):
+    for axis in ((0, 1, 0), (0, 0, 1), (0, 1, 1), (0, 1, -2)):
+      for phi in (0.4, -0.4, 2.5):
+        with self.subTest(axis=axis, phi=phi):
+          self.assertAlmostEqual(
+            self._angle_after_rotation(axis, phi, axis=axis), phi)
+
+  def test_with_axis_the_angle_is_antisymmetric(self):
+    a = Geom_Object()
+    b = Geom_Object()
+    b.rotate((0, 0, 1), 1.1)
+    self.assertAlmostEqual(a.angle_to(b, axis=(0, 0, 1)),
+                           -b.angle_to(a, axis=(0, 0, 1)))
+
+  def test_with_axis_agrees_with_the_default_for_small_rotations_about_y(self):
+    for phi in (0.3, -0.3):
+      with self.subTest(phi=phi):
+        self.assertAlmostEqual(
+          self._angle_after_rotation((0, 1, 0), phi, axis=(0, 1, 0)),
+          self._angle_after_rotation((0, 1, 0), phi))
 
 
 class TestDraw(unittest.TestCase):

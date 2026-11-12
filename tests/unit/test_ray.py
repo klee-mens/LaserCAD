@@ -133,26 +133,95 @@ class TestRayHAlphaTheta(unittest.TestCase):
     assert_allclose(r.pos, (0, 100, 85), atol=1e-12)
     assert_allclose(r.normal, (0, 1, 0), atol=1e-12)
 
-  @unittest.expectedFailure
-  def test_h_alpha_to_returns_height_and_angle(self):
-    # BUG: Ray.h_alpha_to ruft self.angle_to(element.normal) auf, angle_to
-    # erwartet aber ein Objekt mit .normal und bricht mit
-    # "AttributeError: 'numpy.ndarray' object has no attribute 'normal'" ab.
-    # Vermutlich soll es self.angle_to(element) heißen. Die Funktion wird im
-    # Projekt bisher nirgends aufgerufen.
+  # --- h_alpha_to / h_alpha_theta_to --------------------------------------
+  # Regression: beide Funktionen stürzten früher immer mit einem AttributeError
+  # ab (angle_to wurde mit element.normal statt mit element aufgerufen).
+  # h_alpha_theta_to entpackte außerdem die ZEILEN statt der Spalten der
+  # Achsenmatrix, was bei gedrehten Elementen falsche Achsen lieferte.
+
+  def test_h_alpha_to_for_a_parallel_ray(self):
     r = Ray()
     r.pos = (0, 0, 85)
     h, alpha = r.h_alpha_to(plane_at((100, 0, 80)))
     self.assertAlmostEqual(h, 5)
     self.assertAlmostEqual(alpha, 0)
 
-  @unittest.expectedFailure
-  def test_h_alpha_theta_to_returns_height_and_angles(self):
-    # gleiche Ursache wie oben (h_alpha_theta_to ruft h_alpha_to auf)
+  def test_h_alpha_to_returns_a_two_element_array(self):
+    r = Ray()
+    r.pos = (0, 0, 85)
+    res = r.h_alpha_to(plane_at((100, 0, 80)))
+    self.assertEqual(np.shape(res), (2,))
+
+  def test_h_alpha_to_uses_the_height_at_the_element_not_at_the_start(self):
+    # Strahl startet bei z=85 und steigt mit Steigung 0.1 -> bei x=100 ist er
+    # bei z=95, also 15 mm über der Achse, und läuft von ihr weg (alpha > 0)
+    r = Ray()
+    r.pos = (0, 0, 85)
+    r.normal = (1, 0, 0.1)
+    h, alpha = r.h_alpha_to(plane_at((100, 0, 80)))
+    self.assertAlmostEqual(h, 15)
+    self.assertAlmostEqual(alpha, np.arctan(0.1))
+
+  def test_alpha_sign_ray_towards_the_axis_is_negative(self):
+    r = Ray()
+    r.pos = (0, 0, 90)
+    r.normal = (1, 0, -0.1)    # fällt auf die Achse zu
+    h, alpha = r.h_alpha_to(plane_at((100, 0, 80)))
+    self.assertAlmostEqual(h, 0, places=9)   # trifft die Achse genau
+    r.pos = (0, 0, 95)
+    h, alpha = r.h_alpha_to(plane_at((100, 0, 80)))
+    self.assertAlmostEqual(h, 5)
+    self.assertAlmostEqual(alpha, -np.arctan(0.1))
+
+  def test_alpha_is_the_same_for_an_element_facing_the_other_way(self):
+    r = Ray()
+    r.pos = (0, 0, 85)
+    r.normal = (1, 0, 0.1)
+    _, alpha_front = r.h_alpha_to(plane_at((100, 0, 80), normal=(1, 0, 0)))
+    _, alpha_back = r.h_alpha_to(plane_at((100, 0, 80), normal=(-1, 0, 0)))
+    self.assertAlmostEqual(alpha_front, alpha_back)
+
+  def test_h_alpha_theta_to_for_a_ray_above_and_below_the_axis(self):
     r = Ray()
     r.pos = (0, 0, 85)
     h, alpha, theta = r.h_alpha_theta_to(plane_at((100, 0, 80)))
+    self.assertAlmostEqual(theta, 0)           # +z des Elements
+    r.pos = (0, 0, 75)
+    h, alpha, theta = r.h_alpha_theta_to(plane_at((100, 0, 80)))
     self.assertAlmostEqual(h, 5)
+    self.assertAlmostEqual(abs(theta), np.pi)  # -z des Elements
+
+  def test_on_axis_ray_has_zero_height_and_default_theta(self):
+    r = Ray()
+    r.normal = (1, 0, 0.05)    # Steigung 0.05: 5 mm Anstieg auf 100 mm
+    r.pos = (0, 0, 75)         # trifft die Achse bei x=100 genau
+    h, alpha, theta = r.h_alpha_theta_to(plane_at((100, 0, 80)))
+    self.assertAlmostEqual(h, 0, places=9)
+    self.assertEqual(theta, 0)
+    self.assertAlmostEqual(alpha, np.arctan(0.05), places=9)
+
+  def test_h_alpha_theta_roundtrip_with_from_h_alpha_theta(self):
+    # from_h_alpha_theta und h_alpha_theta_to müssen Umkehrungen sein, auch
+    # für beliebig ausgerichtete Elemente (deckt Zeilen/Spalten-Verwechslung ab)
+    rng = np.random.default_rng(5)
+    elements = [plane_at((100, 0, 80))]
+    for normal in ((0, 1, 0), (1, 2, 3), (-1, 0.5, -0.3), (0, 0, 1)):
+      elements.append(plane_at(rng.uniform(-100, 100, size=3), normal=normal))
+    el_rot = plane_at((10, 20, 30))
+    el_rot.rotate((1, 2, 3), 0.9)
+    elements.append(el_rot)
+    for el in elements:
+      for _ in range(20):
+        h = rng.uniform(0.5, 10)
+        alpha = rng.uniform(-0.4, 0.4)
+        theta = rng.uniform(-np.pi + 0.01, np.pi)
+        with self.subTest(normal=el.normal, h=h, alpha=alpha, theta=theta):
+          r = Ray()
+          r.from_h_alpha_theta(h, alpha, theta, el)
+          h2, alpha2, theta2 = r.h_alpha_theta_to(el)
+          self.assertAlmostEqual(h2, h, places=9)
+          self.assertAlmostEqual(alpha2, alpha, places=9)
+          self.assertAlmostEqual(theta2, theta, places=9)
 
 
 if __name__ == "__main__":
