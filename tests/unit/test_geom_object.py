@@ -7,6 +7,7 @@ Geom_Object ist die Basisklasse für alles mit Position (pos) und Ausrichtung
 """
 import io
 import unittest
+import warnings
 from contextlib import redirect_stdout
 
 import numpy as np
@@ -393,6 +394,63 @@ class TestDraw(unittest.TestCase):
       result = g.draw()
     self.assertIsNone(result)
     self.assertEqual(buf.getvalue(), "")
+
+
+class TestUnknownKeywords(unittest.TestCase):
+  """
+  Geom_Object und alle Unterklassen nehmen beliebige Keyword-Argumente an.
+  Unbekannte werden nicht benutzt, aber gemeldet (UserWarning), damit
+  Tippfehler wie "bandwith" statt "bandwidth" nicht unbemerkt bleiben.
+  """
+
+  @staticmethod
+  def _keyword_warnings(func, *args, **kwargs):
+    with warnings.catch_warnings(record=True) as caught:
+      warnings.simplefilter("always")
+      with redirect_stdout(io.StringIO()):
+        func(*args, **kwargs)
+    return [str(w.message) for w in caught
+            if "unknown keyword" in str(w.message)]
+
+  def test_unknown_keyword_gives_a_warning_with_class_and_keyword(self):
+    msgs = self._keyword_warnings(Geom_Object, foo=1, bar=2)
+    self.assertEqual(len(msgs), 1)
+    self.assertIn("Geom_Object", msgs[0])
+    self.assertIn("foo", msgs[0])
+    self.assertIn("bar", msgs[0])
+
+  def test_object_is_still_created_with_unknown_keywords(self):
+    with warnings.catch_warnings():
+      warnings.simplefilter("ignore")
+      g = Geom_Object(name="x", foo=1)
+    self.assertEqual(g.name, "x")
+
+  def test_subclasses_warn_with_their_own_name(self):
+    from LaserCAD import RainbowBeam, Beam
+    msgs = self._keyword_warnings(RainbowBeam, bandwith=1e-4)
+    self.assertEqual(len(msgs), 1)
+    self.assertIn("RainbowBeam", msgs[0])
+    self.assertIn("bandwith", msgs[0])
+    msgs = self._keyword_warnings(Beam, distribution="square")
+    self.assertEqual(len(msgs), 1)
+    self.assertIn("distribution", msgs[0])
+
+  def test_correct_keywords_give_no_warning(self):
+    from LaserCAD import (Ray, Beam, RainbowBeam, Lens, Mirror, Curved_Mirror,
+                          Composition)
+    cases = [
+      (Geom_Object, dict(name="a")),
+      (Ray, dict()),
+      (Beam, dict(radius=2, angle=0.1, name="b", wavelength=1e-3)),
+      (RainbowBeam, dict(bandwidth=1e-4, ray_count=5)),
+      (Lens, dict(f=100, name="l")),
+      (Mirror, dict(phi=90, theta=10, name="m")),
+      (Curved_Mirror, dict(radius=200, phi=180)),
+      (Composition, dict(name="c")),
+    ]
+    for cls, kw in cases:
+      with self.subTest(cls=cls.__name__):
+        self.assertEqual(self._keyword_warnings(cls, **kw), [])
 
 
 if __name__ == "__main__":

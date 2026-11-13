@@ -127,8 +127,9 @@ class Beam(Geom_Object):
       ray.length = x
 
   def set_wavelength(self, wl):
+    self._Bwavelength = wl
     for ray in self._rays:
-      ray.length = wl
+      ray.wavelength = wl
 
   def wavelength(self):
     return self._rays[0].wavelength
@@ -199,7 +200,7 @@ class Beam(Geom_Object):
 
 class SquareBeam(Beam):
   def __init__(self, radius=1, name="NewBeam", wavelength=1030E-6, ray_in_line = 3, **kwargs):
-    super().__init__(name=name, radius=radius, **kwargs)
+    super().__init__(name=name, radius=radius, wavelength=wavelength, **kwargs)
     self._ray_in_line = ray_in_line
     self.make_square_distribution(ray_in_line)
     self._distribution = "square"

@@ -18,10 +18,12 @@ Regressionstests für die Module Compressor und Stretcher.
 import contextlib
 import io
 import unittest
+import warnings
 
 from LaserCAD import RainbowBeam
 from LaserCAD.moduls.compressor import Make_Compressor
 from LaserCAD.moduls.stretcher import Make_Stretcher
+from LaserCAD.moduls.white_cell import Make_White_Cell
 
 # gemessen mit den Default-Parametern der Make_*-Funktionen
 COMPRESSOR_GDD = -5.272268994413651e-25   # s^2
@@ -69,7 +71,7 @@ class TestBandwidthOfModules(unittest.TestCase):
   def test_compressor_passes_its_bandwidth_to_the_lightsource(self):
     for band_width in (100e-9 * 1e3, 40e-9 * 1e3):   # in mm
       with self.subTest(band_width=band_width):
-        c = quiet(Make_Compressor, band_width=band_width)
+        c = quiet(Make_Compressor, bandwidth=band_width)
         self.assertAlmostEqual(wavelength_span(c._lightsource) / band_width,
                                1, places=9)
 
@@ -96,6 +98,41 @@ class TestBandwidthOfModules(unittest.TestCase):
     s = quiet(Make_Stretcher, separation=60, separation_angle=0.2,
               bandwidth=5e-5)
     self.assertIsInstance(s._lightsource, RainbowBeam)
+
+
+class TestRenamedKeywords(unittest.TestCase):
+  """
+  Compressor, Stretcher und White-Cell verwenden dieselben, korrekt
+  geschriebenen Namen (separation, bandwidth). Die alten Schreibweisen
+  (seperation, band_width) müssen laut mit einem TypeError scheitern.
+  """
+
+  def test_compressor_accepts_the_corrected_keywords(self):
+    c = quiet(Make_Compressor, separation=150, separation_angle=0.3,
+              height_separation=10, bandwidth=5e-5)
+    self.assertIsInstance(c._lightsource, RainbowBeam)
+
+  def test_compressor_rejects_the_old_keywords(self):
+    for old in ({"seperation": 150}, {"seperation_angle": 0.3},
+                {"height_seperation": 10}, {"band_width": 5e-5}):
+      with self.subTest(keyword=list(old)[0]):
+        with self.assertRaises(TypeError):
+          quiet(Make_Compressor, **old)
+
+  def test_white_cell_accepts_separation_and_rejects_the_old_name(self):
+    quiet(Make_White_Cell, roundtrips4=2, separation=8)
+    with self.assertRaises(TypeError):
+      quiet(Make_White_Cell, roundtrips4=2, seperation=8)
+
+  def test_modules_give_no_unknown_keyword_warning(self):
+    for func in (Make_Compressor, Make_Stretcher, Make_White_Cell):
+      with self.subTest(module=func.__name__):
+        with warnings.catch_warnings(record=True) as caught:
+          warnings.simplefilter("always")
+          quiet(func)
+        bad = [str(w.message) for w in caught
+               if "unknown keyword" in str(w.message)]
+        self.assertEqual(bad, [])
 
 
 if __name__ == "__main__":

@@ -8,8 +8,10 @@ Fehlermeldungen in der Konsole zu suchen, gibt es pro Skript ein klares
 OK / FAIL. Jedes Skript läuft in einem eigenen Prozess, damit sich Skripte
 nicht gegenseitig beeinflussen (globale Zustände, geänderte Pfade, ...).
 
-Geprüft wird nur, dass nichts abstürzt, nicht, ob das Ergebnis physikalisch
-stimmt. Das übernehmen die Tests in tests/unit.
+Geprüft wird, dass nichts abstürzt und dass keine Keyword-Argumente still
+ignoriert werden (Geom_Object meldet unbekannte Keywords per UserWarning, etwa
+Tippfehler oder veraltete Parameternamen). Ob das Ergebnis physikalisch stimmt,
+prüfen die Tests in tests/unit.
 
 Matplotlib läuft ohne Fenster (Backend "Agg"), damit plt.show() nicht blockiert.
 
@@ -45,6 +47,21 @@ KNOWN_BROKEN_TUTORIALS = {
 }
 
 
+# Text der Warnung aus Geom_Object.__init__
+UNKNOWN_KEYWORD_MARKER = "unknown keyword argument"
+
+# Tutorial-Skripte, die (noch) unbekannte Keywords übergeben und dadurch nicht
+# das zeigen, was sie ankündigen. Gehören in die Überarbeitung der Doku.
+KNOWN_IGNORED_KEYWORDS_TUTORIALS = {
+  "3_RaysAndBeams.py":
+    "RainbowBeam(spatial_chirp=...): diesen Parameter gibt es nicht",
+  "4_LensesAndMirrors.py":
+    "Beam(distribution=...): Beam hat keinen solchen Parameter (zeigt die "
+    "Standardverteilung statt square/circular, siehe SquareBeam, "
+    "CircularRayBeam)",
+}
+
+
 def run_script(path):
   """Führt <path> in einem eigenen Prozess aus, gibt CompletedProcess zurück."""
   env = dict(os.environ)
@@ -59,6 +76,12 @@ def run_script(path):
 
 def last_lines(text, n=12):
   return "\n".join(text.strip().splitlines()[-n:])
+
+
+def keyword_warnings(result):
+  """Zeilen der Ausgabe, die auf still ignorierte Keywords hinweisen."""
+  return [line.strip() for line in result.stderr.splitlines()
+          if UNKNOWN_KEYWORD_MARKER in line]
 
 
 def demo_scripts():
@@ -84,6 +107,9 @@ class TestDemoScripts(unittest.TestCase):
           result.returncode, 0,
           f"{script.name} endete mit Exit-Code {result.returncode}:\n"
           + last_lines(result.stderr))
+        self.assertEqual(
+          keyword_warnings(result), [],
+          f"{script.name} übergibt unbekannte Keyword-Argumente")
 
 
 class TestTutorialScripts(unittest.TestCase):
@@ -102,6 +128,17 @@ class TestTutorialScripts(unittest.TestCase):
             result.returncode, 0,
             f"{script.name} endete mit Exit-Code {result.returncode}:\n"
             + last_lines(result.stderr))
+          ignored = KNOWN_IGNORED_KEYWORDS_TUTORIALS.get(script.name)
+          if ignored is None:
+            self.assertEqual(
+              keyword_warnings(result), [],
+              f"{script.name} übergibt unbekannte Keyword-Argumente")
+          elif not keyword_warnings(result):
+            self.fail(f"{script.name} übergibt jetzt keine unbekannten "
+                      "Keywords mehr! Bitte aus "
+                      "KNOWN_IGNORED_KEYWORDS_TUTORIALS entfernen.")
+          else:
+            self.skipTest(f"bekannt: {ignored}")
         elif result.returncode == 0:
           self.fail(f"{script.name} läuft jetzt durch! Bitte aus "
                     "KNOWN_BROKEN_TUTORIALS entfernen.")

@@ -26,7 +26,7 @@ from .basic_optics.beam_splitter import ThinBeamsplitter, ThickBeamsplitter, TFP
 from .basic_optics.non_linear_crystal import NLO_Crystal
 from .basic_optics.multi_beam_line_composition import Multi_Beamline_Composition
 
-from .non_interactings import Breadboard, Crystal, Crystal_Mount, Crystal_Unit_Mount, Cylindric_Crystal, crystal, Detector, Faraday_Isolator, Iris, Lambda_Plate, LaserPointer, Pockels_Cell, Table
+from .non_interactings import Breadboard, Crystal, Crystal_Mount, Crystal_Unit_Mount, Cylindric_Crystal, Detector, Faraday_Isolator, Iris, Lambda_Plate, LaserPointer, Pockels_Cell, Table
 
 # from . import basic_optics
 # from . import moduls

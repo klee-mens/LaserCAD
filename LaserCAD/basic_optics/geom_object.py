@@ -5,6 +5,7 @@ Created on Thu Aug 18 10:46:05 2022
 @author: mens
 """
 
+import warnings
 import numpy as np
 from .constants import TOLERANCE, NAME0, NORM0, POS0
 from .. freecad_models import freecad_da, model_geom_object
@@ -51,13 +52,19 @@ def rotation_matrix_from_vectors(vec1, vec2):
   a = (vec1 / np.linalg.norm(vec1)).reshape(3)
   b =  (vec2 / np.linalg.norm(vec2)).reshape(3)
   v = np.cross(a, b)
-  if any(v): #if not all zeros then
-    c = np.dot(a, b)
-    s = np.linalg.norm(v)
+  c = np.dot(a, b)
+  s = np.linalg.norm(v)
+  if s > 1e-14: #regular case: the cross product defines the rotation axis
     kmat = np.array([[0, -v[2], v[1]], [v[2], 0, -v[0]], [-v[1], v[0], 0]])
     return np.eye(3) + kmat + kmat.dot(kmat) * ((1 - c) / (s ** 2))
-  else:
-      return np.eye(3) #cross of all zeros only occurs on identical directions
+  if c > 0:
+    return np.eye(3) #identical directions
+  # antiparallel directions: the cross product vanishes as well, but a rotation
+  # by 180 degrees is needed. Every axis perpendicular to <a> works, we take the
+  # one built with the coordinate axis that is the most perpendicular to <a>
+  e = np.zeros(3)
+  e[np.argmin(np.abs(a))] = 1.0
+  return rotation_matrix(np.cross(a, e), np.pi)
 
 
 def vec2str(vec):
@@ -90,6 +97,12 @@ class Geom_Object(object):
   siehe tests()
   """
   def __init__(self, name=NAME0, **kwargs):
+    if kwargs:
+      # Unbekannte Keywords (meist Tippfehler oder veraltete Namen) werden
+      # nicht benutzt. Wir melden das, statt sie still zu verwerfen.
+      warnings.warn(f"{type(self).__name__}: unknown keyword argument(s) "
+                    f"ignored: {', '.join(sorted(kwargs))}",
+                    UserWarning, stacklevel=2)
     self.name = name
     self._pos = POS0
     self._axes = np.eye(3)
@@ -294,14 +307,29 @@ class Geom_Object(object):
     self.set_axes(geom[1])
 
 
-  def angle_to(self, obj):
+  def angle_to(self, obj, axis=None):
     """
-    computes the angle to the normal of an other GeomObj <obj> with
-    correct sign
+    computes the angle to the normal of an other GeomObj <obj>
+
+    Without <axis> (default) the result is the angle between the normal of
+    self and the LINE of the normal of <obj>, i.e. it lies in [-pi/2, pi/2]
+    (arcsin). The sign is determined with respect to the y-axis of self and is
+    therefore only meaningful for rotations about the y-axis; for rotations
+    about other axes (e.g. in the xy-plane) the result is always positive.
+    The modules compressor and stretcher rely on exactly this behavior.
+
+    With <axis> (a 3D vector, need not be normalized) the signed angle of the
+    rotation about <axis> that turns the normal of self into the normal of
+    <obj> is returned, in the full range (-pi, pi].
+    Example: g1.angle_to(g2, axis=(0,0,1)) for angles in the xy-plane
 
     """
     vec = obj.normal
     c = np.cross(self.normal, vec)
+    if axis is not None:
+      axis = np.array(axis) * 1.0
+      axis = axis / np.linalg.norm(axis)
+      return np.arctan2(np.dot(c, axis), np.dot(self.normal, vec))
     abs_c = np.linalg.norm(c)
     if abs_c > 1: #because you know rounding errors and stuff
       abs_c = 1

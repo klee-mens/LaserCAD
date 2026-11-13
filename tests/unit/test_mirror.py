@@ -8,6 +8,7 @@ Spiegel einen Strahl in der xy-Ebene (mathematisch positiv) weiterdreht,
 Die Normale des Spiegels wird aus Einfallsrichtung, phi und theta berechnet.
 """
 import unittest
+import warnings
 
 import numpy as np
 from numpy.testing import assert_allclose
@@ -214,6 +215,77 @@ class TestCurvedMirror(unittest.TestCase):
     out = reflect(cm)
     assert_allclose(out.normal, (0, 1, 0), atol=1e-9)
     assert_allclose(out.pos, MIRROR_POS, atol=1e-9)
+
+
+class TestSetNormalWith2Points(unittest.TestCase):
+  """
+  set_normal_with_2_points(p0, p1): der Spiegel an self.pos reflektiert einen
+  Strahl, der von p0 kommt, nach p1. <phi> und <theta> beschreiben dabei die
+  Ablenkung relativ zur tatsächlichen Einfallsrichtung (pos - p0).
+  """
+  # (p0, pos, p1)
+  GEOMETRIES = [
+    ((0, 0, 80), (100, 0, 80), (100, 100, 80)),          # 90 Grad in der Ebene
+    ((0, 0, 80), (100, 0, 80), (200, 0, 100)),           # leichte Ablenkung
+    ((0, 0, 80), (100, 0, 80), (150, -60, 140)),         # Ablenkung mit theta
+    ((10, 20, 30), (110, 50, 70), (60, -40, -20)),       # beliebig im Raum
+    # Spiegel M2 des Polarisationsdrehers: Einfall senkrecht zur Standard-
+    # richtung (1,0,0), früher Division durch 0 und phi = theta = 0
+    ((14.496, 0, 80), (28.646, 56.784, 136.784), (42.796, 0, 80)),
+  ]
+
+  def _mirror(self, p0, pos, p1):
+    m = Mirror()
+    m.pos = pos
+    m.set_normal_with_2_points(np.array(p0, float), np.array(p1, float))
+    return m
+
+  def test_reflects_a_ray_from_p0_towards_p1(self):
+    for p0, pos, p1 in self.GEOMETRIES:
+      with self.subTest(p0=p0, pos=pos, p1=p1):
+        m = self._mirror(p0, pos, p1)
+        r = Ray()
+        r.pos = p0
+        r.normal = np.array(pos, float) - p0
+        out = m.next_ray(r)
+        expected = np.array(p1, float) - pos
+        assert_allclose(out.pos, pos, atol=1e-9)
+        assert_allclose(out.normal, expected / np.linalg.norm(expected),
+                        atol=1e-9)
+
+  def test_no_runtime_warning(self):
+    for p0, pos, p1 in self.GEOMETRIES:
+      with self.subTest(pos=pos):
+        with warnings.catch_warnings():
+          warnings.simplefilter("error")
+          self._mirror(p0, pos, p1)
+
+  def test_angles_are_finite(self):
+    for p0, pos, p1 in self.GEOMETRIES:
+      with self.subTest(pos=pos):
+        m = self._mirror(p0, pos, p1)
+        self.assertTrue(np.isfinite(m.phi) and np.isfinite(m.theta))
+
+  def test_angles_reproduce_the_normal_for_the_actual_incident_direction(self):
+    for p0, pos, p1 in self.GEOMETRIES:
+      with self.subTest(pos=pos):
+        m = self._mirror(p0, pos, p1)
+        r = Ray()
+        r.normal = np.array(pos, float) - p0
+        m2 = Mirror(phi=m.phi, theta=m.theta)
+        m2.set_geom(r.get_geom())
+        assert_allclose(m2.normal, m.normal, atol=1e-9)
+
+  def test_setting_an_angle_again_does_not_change_the_normal(self):
+    # phi.setter und theta.setter berechnen die Normale aus den Winkeln neu
+    for p0, pos, p1 in self.GEOMETRIES:
+      with self.subTest(pos=pos):
+        m = self._mirror(p0, pos, p1)
+        n = m.normal
+        m.phi = m.phi
+        assert_allclose(m.normal, n, atol=1e-9)
+        m.theta = m.theta
+        assert_allclose(m.normal, n, atol=1e-9)
 
 
 if __name__ == "__main__":

@@ -9,7 +9,7 @@ from .. basic_optics import Composition, inch, Curved_Mirror, Unit_Mount
 import numpy as np
 
 
-def Make_White_Cell(name="WhiteCell", Radius=300, roundtrips4=2, seperation=15):
+def Make_White_Cell(name="WhiteCell", Radius=300, roundtrips4=2, separation=15):
   """
   Generates a White Cell Mirror Triplett for a compact multipass system with
   optical unity matrix (or something similar)
@@ -24,8 +24,8 @@ def Make_White_Cell(name="WhiteCell", Radius=300, roundtrips4=2, seperation=15):
     gives the number of roundtrips the beam apsses the cell.
     For each the beam will propagate 4x the Radius.
     The default is 2.
-  seperation : TYPE, optional
-    The seperation of the beam hits on the big sphere. Might be smaller.
+  separation : TYPE, optional
+    The separation of the beam hits on the big sphere. Might be smaller.
     The default is 15.
 
   Returns
@@ -35,7 +35,7 @@ def Make_White_Cell(name="WhiteCell", Radius=300, roundtrips4=2, seperation=15):
 
   """
   mirror_sep_angle = 12 #degree, could be smaller
-  deflection = 2 * np.arcsin(seperation/2 / Radius) * 180/np.pi
+  deflection = 2 * np.arcsin(separation/2 / Radius) * 180/np.pi
 
   helper = Composition(name=name)
   helper.propagate(Radius)
@@ -44,7 +44,7 @@ def Make_White_Cell(name="WhiteCell", Radius=300, roundtrips4=2, seperation=15):
   helper.propagate(Radius)
 
   bigcm = Curved_Mirror(radius=Radius, phi=180+mirror_sep_angle)
-  bigcm.aperture = 12 + (roundtrips4-1)*2*seperation
+  bigcm.aperture = 12 + (roundtrips4-1)*2*separation
   bigcm.Mount = Unit_Mount()
   helper.add_on_axis(bigcm)
   helper.propagate(Radius)
@@ -54,7 +54,7 @@ def Make_White_Cell(name="WhiteCell", Radius=300, roundtrips4=2, seperation=15):
   helper.propagate(Radius)
 
   white_cell = Composition()
-  white_cell.pos = helper.pos - (0, seperation*(roundtrips4-1), 0)
+  white_cell.pos = helper.pos - (0, separation*(roundtrips4-1), 0)
   white_cell.normal = scm1.pos - white_cell.pos
   white_cell.add_supcomposition_fixed(helper)
 

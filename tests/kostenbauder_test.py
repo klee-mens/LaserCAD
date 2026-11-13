@@ -197,10 +197,10 @@ print()
 from LaserCAD.moduls import Make_Stretcher
 
 
-# plane_stretch = Make_Stretcher(seperation_angle=0,
+# plane_stretch = Make_Stretcher(separation_angle=0,
 #                                height_stripe_mirror=0,
 #                                safety_to_stripe_mirror=0,
-#                                seperation=50)
+#                                separation=50)
 plane_stretch = Make_Stretcher(radius_concave = 1000, #radius of the big concave sphere
     aperture_concave = 6 * inch,
     height_stripe_mirror = 10, #height of the stripe mirror in mm
@@ -230,14 +230,14 @@ print(txtps)
 
 from LaserCAD.moduls import Make_Compressor
 
-# comp = Make_Compressor(seperation=100, seperation_angle=0, height_seperation=0)
-comp = Make_Compressor(seperation_angle = 20 /180 *np.pi, # sep between in and outgoing middle ray
+# comp = Make_Compressor(separation=100, separation_angle=0, height_separation=0)
+comp = Make_Compressor(separation_angle = 20 /180 *np.pi, # sep between in and outgoing middle ray
     grating_const = 1/1000, # in 1/mm
-    seperation = 200, # difference grating position und radius_concave
+    separation = 200, # difference grating position und radius_concave
     lambda_mid = 800e-9 * 1e3, # central wave length in mm
-    band_width = 20e-9*1e3, # full bandwidth in mm
+    bandwidth = 20e-9*1e3, # full bandwidth in mm
     number_of_rays = 20,
-    height_seperation = 16, # seperation between incomming and outgoing beam,
+    height_separation = 16, # separation between incomming and outgoing beam,
     first_propagation = 120, # legnth of the first ray_bundle to grating 1 mm
     distance_roof_top_grating = 600,
     grating1_dimensions = (25, 25, 5),

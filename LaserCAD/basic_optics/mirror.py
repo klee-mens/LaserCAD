@@ -205,6 +205,11 @@ class Mirror(Opt_Element):
     refl *= 1/np.linalg.norm(refl)
     # print("nextnormal", (inc - refl)/np.linalg.norm(inc - refl))
     self.normal = inc - refl
+    # <phi> und <theta> sind relativ zur Einfallsrichtung definiert. Die ist
+    # hier bekannt und muss gesetzt werden, sonst werden die Winkel relativ zu
+    # einer veralteten Einfallsrichtung berechnet (im Extremfall liegt der
+    # Hilfsstrahl in recompute_angles parallel zum Spiegel -> Division durch 0)
+    self.__incident_normal = np.array(inc)
     self.__phi, self.__theta =  self.recompute_angles()
 
   def set_normal_with_output_direction(self, output_vec=(0,1,0)):

@@ -145,35 +145,49 @@ class Ray(Geom_Object):
   #   endpoint = self.pos + dist * self.normal
   #   return endpoint
   
+  def _h_alpha_theta(self, element):
+    """
+    gemeinsame Berechnung für h_alpha_to und h_alpha_theta_to, ist die Umkehrung
+    von from_h_alpha_theta (verwendet intersection, setzt also self.length)
+
+    h: Abstand des Auftreffpunkts von der Achse des Elements
+    theta: Winkel des Auftreffpunkts um die Achse, 0 bedeutet +z des Elements,
+      positiv in Richtung -y (siehe from_h_alpha_theta), Bereich (-pi, pi]
+    alpha: Winkel des Strahls zur Achse in der meridionalen Ebene, positiv
+      wenn sich der Strahl von der Achse entfernt (Konvention der ABCD-Matrix,
+      wie in Opt_Element.ABCD_refraction)
+    """
+    p = self.intersection(element)
+    radial = p - element.pos
+    h = np.linalg.norm(radial)
+    xa, ya, za = element.get_coordinate_system()
+    k = self.normal
+    if np.dot(k, xa) < 0:
+      xa = -xa # Element steht "falsch herum" zum Strahl
+    if h < TOLERANCE:
+      er = za # Mittelpunktsstrahl, kein Winkel bestimmbar, default theta=0
+      theta = 0.0
+    else:
+      er = radial / h
+      theta = np.arctan2(-np.dot(er, ya), np.dot(er, za))
+    alpha = np.arctan2(np.dot(k, er), np.dot(k, xa))
+    return h, alpha, theta
+
   def h_alpha_to(self, element):
     """
     ermittelt die Parameter (h, alpha) der geometrischen Optik, wenn Ray()
     auf ein Element trifft (verwendet intersection)
     """
-    p = self.intersection(element)
-    h = np.linalg.norm(p - element.pos)
-    v = element.normal
-    return np.array((h, self.angle_to(v)))
+    h, alpha, theta = self._h_alpha_theta(element)
+    return np.array((h, alpha))
 
   def h_alpha_theta_to(self, element):
     """
     ermittelt die Parameter (h, alpha) der geometrischen Optik, wenn Ray()
-    auf ein Element trifft, sowie den Winkel <theta> unter dem die ray.normal zur
-    z-Achse des elements steht (verwendet intersection)
+    auf ein Element trifft, sowie den Winkel <theta> des Auftreffpunkts um die
+    Achse des Elements, gemessen von dessen z-Achse (verwendet intersection)
     """
-    h, alpha = self.h_alpha_to(element)
-    ep = self.endpoint()
-    v = ep - element.pos
-    vabs = np.linalg.norm(v)
-    if vabs < TOLERANCE:
-       theta = 0 # kein Winkel bestimmbar, default=0
-    else:
-       v = v / vabs
-       xa, ya, za = element.get_axes()
-       c = np.cross(za, v) #Winkel mit z-Achse
-       sign = 1 if np.sum(c * xa) >= 0 else -1
-       theta = np.arcsin(np.linalg.norm(c))*sign
-    return (h, alpha, theta)
+    return self._h_alpha_theta(element)
 
   def from_h_alpha_theta(self, h, alpha, theta, element):
     """
