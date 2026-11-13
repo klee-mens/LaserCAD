@@ -32,9 +32,15 @@ class Refractive_plane(Opt_Element):
     N = self.normal
     a1 = ray.normal
     n1n2 = 1/self.relative_refractive_index
-    a2 = n1n2* a1 - n1n2*np.sum(a1*N)* N + np.sqrt(1 - n1n2**2*(1 - np.sum(a1*N)**2))* N
-    if np.sign(np.sum(a1*N)) != np.sign(np.sum(a2*N)):
-      a2 = n1n2* a1 - n1n2*np.sum(a1*N)* N - np.sqrt(1 - n1n2**2*(1 - np.sum(a1*N)**2))* N
+    cos1 = np.sum(a1*N)
+    radicand = 1 - n1n2**2*(1 - cos1**2)
+    if radicand < 0:
+      # Totalreflexion: der Strahl wird an der Ebene reflektiert
+      a2 = a1 - 2*cos1*N
+    else:
+      a2 = n1n2* a1 - n1n2*cos1* N + np.sqrt(radicand)* N
+      if np.sign(cos1) != np.sign(np.sum(a2*N)):
+        a2 = n1n2* a1 - n1n2*cos1* N - np.sqrt(radicand)* N
     ray2.normal = a2
     return ray2
 

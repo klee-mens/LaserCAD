@@ -93,6 +93,10 @@ class ThickBeamsplitter(ThinBeamsplitter):
         first_ray = surface.next_ray(ray)
         second_ray = backside.next_ray(first_ray)
       else:
+        # Strahl kommt von der Rückseite: dort geht es ins Glas hinein (n),
+        # an der Vorderseite wieder hinaus (1/n)
+        backside.relative_refractive_index = self.refractive_index
+        surface.relative_refractive_index = 1/self.refractive_index
         first_ray = backside.next_ray(ray)
         second_ray = surface.next_ray(first_ray)
       return second_ray

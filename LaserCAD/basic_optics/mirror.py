@@ -12,6 +12,7 @@ from .mount import Stripe_Mirror_Mount, Unit_Mount, Composed_Mount
 from ..freecad_models import model_mirror, model_stripe_mirror, model_crystal
 from ..freecad_models.utils import inch
 import numpy as np
+import warnings
 from copy import deepcopy
 
 
@@ -274,6 +275,69 @@ class Curved_Mirror(Mirror):
   def focal_length(self):
     return self.radius/2
 
+  # False (Standard): Matrix wie bisher, C = -2/R unabhängig vom Einfallswinkel.
+  # True: C = -P mit der Brechkraft P in der horizontalen Ebene beim
+  # tatsächlichen Einfallswinkel (siehe _horizontal_power).
+  angle_dependent_matrix = False
+
+  def matrix(self, inray=Ray()):
+    M = np.array(self._matrix)
+    if self.angle_dependent_matrix and self.radius != 0:
+      M[1,0] = -self._horizontal_power(inray)
+    return M
+
+  def _curvature_direction(self):
+    """
+    Richtung der Krümmung in der Spiegeltangentialebene (Einheitsvektor) oder
+    None, wenn der Spiegel in alle Richtungen gleich gekrümmt ist (Kugel).
+    """
+    return None
+
+  def _horizontal_power(self, inray):
+    """
+    Brechkraft P (1/mm) des Spiegels für die horizontale Strahlkoordinate
+    (senkrecht zum Strahl und zur z-Achse) beim Einfall von <inray>.
+
+    Für einen Spiegel mit Krümmungstensor K (Kugel: K = 1/R) gilt in der
+    Einfallsebene (t) und senkrecht dazu (s), Einfallswinkel theta:
+      P_tt = 2 K_tt / cos(theta),  P_ss = 2 K_ss * cos(theta),  P_ts = 2 K_ts
+    Beispiele: Kugel, Einfallsebene horizontal: 2/(R cos theta); Einfallsebene
+    vertikal: 2 cos(theta)/R; Zylinder mit z-Achse im horizontalen Strahlengang:
+    2/(R cos theta).
+    Exakt ist das für eine horizontale oder vertikale Einfallsebene. Bei
+    schräger Einfallsebene vermischen sich horizontale und vertikale Ebene
+    (astigmatische Kopplung), eine 2x2-Matrix ist dann nur eine Näherung.
+    """
+    R = self.radius
+    n = self.normal
+    k = np.array(inray.normal, dtype=float)
+    k = k / np.linalg.norm(k)
+    cos_t = max(abs(np.dot(k, n)), 1e-6)
+    e_h = np.cross((0, 0, 1), k)
+    if np.linalg.norm(e_h) < 1e-9:      # Strahl senkrecht: keine horizontale Richtung
+      return 2/R
+    e_h = e_h / np.linalg.norm(e_h)
+    k_tang = k - np.dot(k, n)*n
+    if np.linalg.norm(k_tang) < 1e-9:   # senkrechter Einfall: t beliebig
+      t = np.cross(n, (0, 0, 1))
+      if np.linalg.norm(t) < 1e-9:
+        t = np.array((0.0, 1.0, 0.0))
+    else:
+      t = k_tang
+    t = t / np.linalg.norm(t)
+    s = np.cross(n, t)
+    c = self._curvature_direction()
+    if c is None:
+      K = np.eye(2) / R
+    else:
+      ct, cs = np.dot(c, t), np.dot(c, s)
+      K = np.array(((ct*ct, ct*cs), (ct*cs, cs*cs))) / R
+    P = 2*np.array(((K[0,0]/cos_t, K[0,1]), (K[0,1], K[1,1]*cos_t)))
+    t_beam = np.cross(s, k)
+    t_beam = t_beam / np.linalg.norm(t_beam)
+    e = np.array((np.dot(e_h, t_beam), np.dot(e_h, s)))
+    return float(e @ P @ e)
+
   def __repr__(self):
     n = len(self.class_name())
     txt = self.class_name() + '(radius=' + repr(self.radius)
@@ -307,7 +371,15 @@ class Curved_Mirror(Mirror):
     """
     diffvec = self.pos - self.radius*self.normal - ray.pos
     k = np.sum( diffvec * ray.normal )
-    w = np.sqrt(k**2 - np.sum(diffvec**2) + self.radius**2)
+    radicand = k**2 - np.sum(diffvec**2) + self.radius**2
+    if radicand < 0:
+      # Strahl verfehlt die Kugel: sichtbar machen, Ergebnis ist NaN
+      warnings.warn(f"{type(self).__name__}: ray misses the mirror surface "
+                    f"(no intersection with the sphere)", UserWarning,
+                    stacklevel=2)
+      ray.length = np.nan
+      return ray.endpoint()
+    w = np.sqrt(radicand)
     s1 = k + w
     s2 = k - w
     #Fallunterscheidung
@@ -420,6 +492,11 @@ class Cylindrical_Mirror(Stripe_mirror):
       self._matrix[1,0] = -2/x
 
 
+  def _curvature_direction(self):
+    # gekrümmt ist die Richtung senkrecht zur Zylinderachse (z-Achse des
+    # Spiegelkoordinatensystems) in der Spiegelebene, also dessen y-Achse
+    return self.get_coordinate_system()[1]
+
   def update_draw_dict(self):
     super().update_draw_dict()
     self.draw_dict["dia"]=self.aperture
@@ -470,13 +547,13 @@ class Cylindrical_Mirror(Stripe_mirror):
 
     # If discriminant is negative, no intersection
     if discriminant < 0:
-        print(ray2)
-        ray2.draw()
-        print("ray_origin=",ray_origin)
-        print("ray_direction=",ray_direction)
-        print("cylinder_center=",cylinder_center)
-        print("cylinder_axis=",cylinder_axis)
-        return None
+        # Strahl verfehlt den Zylinder: sichtbar machen, Ergebnis ist ein
+        # Strahl mit NaN-Position und -Richtung (wie bei Curved_Mirror)
+        warnings.warn(f"{type(self).__name__}: ray misses the cylinder surface "
+                      f"(no intersection)", UserWarning, stacklevel=2)
+        ray2._pos = np.full(3, np.nan)
+        ray2._axes = np.full((3, 3), np.nan)
+        return ray2
 
     # Compute t parameter (parameter along the ray direction)
     t1 = (-b + np.sqrt(discriminant)) / (2 * a)
@@ -510,7 +587,7 @@ class Cylindrical_Mirror(Stripe_mirror):
 
 class Rectangular_Mirror(Mirror):
   def __init__(self, name="NewRectMirror", height=25, width=25, phi=180, theta=0, **kwargs):
-    super().__init__(phi=phi, theta=theta, name=name)
+    super().__init__(phi=phi, theta=theta, name=name, **kwargs)
     self.height = height
     self.width = width
     # self.thickness = thickness
