@@ -8,6 +8,10 @@ die Ebene. spot_diagram liefert die Auftreffpunkte in Ebenenkoordinaten
 """
 import unittest
 
+import matplotlib
+matplotlib.use("Agg")          # keine Fenster beim Testlauf
+import matplotlib.pyplot as plt
+
 import numpy as np
 from numpy.testing import assert_allclose
 
@@ -86,6 +90,9 @@ class TestSpotDiagram(unittest.TestCase):
 
   def test_repr_contains_class_name_and_dia(self):
     self.assertTrue(repr(make_plane(dia=50)).startswith("Intersection_plane(dia=50"))
+    
+  def tearDown(self):
+    plt.close("all")
 
 
 if __name__ == "__main__":
