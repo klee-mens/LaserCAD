@@ -683,6 +683,29 @@ def replace_string(string):
     """Replace spaces and commas in a string with underscores, and remove parentheses."""
     return string.replace(" ", "_").replace(",", "_").replace("(", "").replace(")", "").replace("__", "_")
 
+def make_unique_names(names, reserved=()):
+    """
+    Makes TikZ node names unique: names that occur more than once get the
+    suffix _1, _2, ... in order of appearance. Names in <reserved> (for example
+    the start node) are treated as already taken.
+    """
+    taken = set(reserved) | set(names)
+    totals = {name: names.count(name) for name in names}
+    counters = {}
+    unique = []
+    for name in names:
+        if totals[name] == 1 and name not in reserved:
+            unique.append(name)
+            continue
+        counters[name] = counters.get(name, 0) + 1
+        candidate = f"{name}_{counters[name]}"
+        while candidate in taken:
+            counters[name] += 1
+            candidate = f"{name}_{counters[name]}"
+        taken.add(candidate)
+        unique.append(candidate)
+    return unique
+
 def strip_zeros(value, precision=2):
     """Strip trailing zeros from a float value and return as a string."""
     return f"{value:.{precision}f}".rstrip('0').rstrip('.')
@@ -702,7 +725,8 @@ def export_to_TikZ(Setup, draw_rays = False, draw_beams = False, beam_color="bla
 
   beam_radius, _ = zip(*[beam.radius_angle() for beam in Setup.compute_beams()])
   beam_radius = [strip_zeros(radius) for radius in np.array(beam_radius) / 25.4]
-  names = [replace_string(mirror.name) for mirror in Setup._elements]
+  names = make_unique_names([replace_string(mirror.name) for mirror in Setup._elements],
+                            reserved=[start_name])
   angles = [strip_zeros(calc_tikz_angle(mirror)) for mirror in Setup._elements]
   positions = [f"{mirror.pos[0]/scale:.2f}, {mirror.pos[1]/scale:.2f}" for mirror in Setup._elements]
   mirror_name_prev = "mirror"

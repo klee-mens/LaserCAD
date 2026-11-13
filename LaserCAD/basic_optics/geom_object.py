@@ -97,6 +97,16 @@ class Geom_Object(object):
   siehe tests()
   """
   def __init__(self, name=NAME0, **kwargs):
+    # pos und normal werden im Konstruktor bewusst NICHT akzeptiert: Objekte
+    # werden zuerst an der Standardposition erzeugt und erst danach (wenn alle
+    # Unterobjekte existieren) verschoben/gedreht.
+    ignored = [k for k in ("pos", "normal") if k in kwargs]
+    if ignored:
+      warnings.warn(f"{type(self).__name__}: {', '.join(ignored)} is not accepted "
+                    f"in the constructor and is ignored. Create the object "
+                    f"first and set .pos / .normal afterwards.",
+                    UserWarning, stacklevel=2)
+      kwargs = {k: v for k, v in kwargs.items() if k not in ignored}
     if kwargs:
       # Unbekannte Keywords (meist Tippfehler oder veraltete Namen) werden
       # nicht benutzt. Wir melden das, statt sie still zu verwerfen.

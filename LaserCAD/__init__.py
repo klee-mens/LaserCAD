@@ -11,13 +11,13 @@ from .basic_optics.geom_object import Geom_Object, TOLERANCE
 from .basic_optics.ray import Ray
 from .basic_optics.beam import Beam, CircularRayBeam, Gaussian_Beam, RainbowBeam, SquareBeam, Ray_Distribution
 from .basic_optics.optical_element import Opt_Element
-from .basic_optics.lens import Lens
+from .basic_optics.lens import Lens, Thicklens
 from .basic_optics.mirror import Mirror, Curved_Mirror, Cylindrical_Mirror, Stripe_mirror, Rectangular_Mirror
 from .basic_optics.composition import Composition
 from .basic_optics.constants import inch
 from .basic_optics.grating import Grating
 from .basic_optics.intersection_plane import Intersection_plane
-from .basic_optics.resonator import LinearResonator
+from .basic_optics.resonator import LinearResonator, CircularResonator
 from .basic_optics.component import Component
 from .basic_optics.mount import Unit_Mount, Grating_Mount, Composed_Mount, Stripe_Mirror_Mount, Rooftop_Mirror_Mount, Post, KM100C, KM100C_flipped
 from .basic_optics.refractive_plane import Refractive_plane

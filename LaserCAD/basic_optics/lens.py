@@ -358,7 +358,11 @@ class Thicklens(Opt_Element):
 
   def __repr__(self):
     n = len(self.class_name())
-    txt = 'Lens(f=' + repr(self.focal_length)
+    txt = 'Thicklens(f=' + repr(self.focal_length)
+    txt += ', n=' + repr(self.refractive_index)
+    txt += ', aperture=' + repr(self.aperture)
+    txt += ', biconvex=' + repr(self.biconvex)
+    txt += ', thickness=' + repr(self.thickness)
     txt += ', ' + super().__repr__()[n+1::]
     return txt
 

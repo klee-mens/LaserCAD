@@ -136,3 +136,6 @@ dmypy.json
 # FreeCAD stuff
 .FCStd
 .FCStd1
+
+# LaTeX/TikZ-Dateien, die von export_to_TikZ erzeugt werden
+*.tex

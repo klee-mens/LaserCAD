@@ -396,6 +396,57 @@ class TestDraw(unittest.TestCase):
     self.assertEqual(buf.getvalue(), "")
 
 
+class TestPosNormalKeywords(unittest.TestCase):
+  """
+  pos und normal werden im Konstruktor bewusst nicht akzeptiert (Objekte
+  entstehen an der Standardposition und werden erst danach positioniert).
+  Es gibt eine eigene Warnung, der Wert wird ignoriert.
+  """
+
+  @staticmethod
+  def _messages(cls, **kwargs):
+    with warnings.catch_warnings(record=True) as caught:
+      warnings.simplefilter("always")
+      obj = cls(**kwargs)
+    return obj, [str(w.message) for w in caught if "constructor" in str(w.message)]
+
+  def test_pos_gives_warning_and_is_ignored(self):
+    g, msgs = self._messages(Geom_Object, pos=(1, 2, 3))
+    self.assertEqual(len(msgs), 1)
+    self.assertIn("pos", msgs[0])
+    np.testing.assert_allclose(g.pos, Geom_Object().pos)
+
+  def test_normal_gives_warning_and_is_ignored(self):
+    g, msgs = self._messages(Geom_Object, normal=(0, 1, 0))
+    self.assertEqual(len(msgs), 1)
+    self.assertIn("normal", msgs[0])
+    np.testing.assert_allclose(g.normal, (1, 0, 0))
+
+  def test_both_in_one_warning_and_no_second_unknown_keyword_warning(self):
+    with warnings.catch_warnings(record=True) as caught:
+      warnings.simplefilter("always")
+      Geom_Object(pos=(1, 2, 3), normal=(0, 1, 0))
+    texts = [str(w.message) for w in caught]
+    self.assertEqual(len(texts), 1)
+    self.assertIn("pos", texts[0])
+    self.assertIn("normal", texts[0])
+
+  def test_subclasses_warn_with_their_own_name(self):
+    from LaserCAD import Ray, Lens, Mirror, Composition, Beam
+    for cls in (Ray, Lens, Mirror, Composition, Beam):
+      _, msgs = self._messages(cls, pos=(5, 6, 7))
+      self.assertEqual(len(msgs), 1, cls.__name__)
+      self.assertIn(cls.__name__, msgs[0])
+
+  def test_position_can_be_set_afterwards(self):
+    from LaserCAD import Lens
+    lens = Lens(f=75)
+    lens.pos = (5, 6, 7)
+    lens.normal = (0, 1, 0)
+    np.testing.assert_allclose(lens.pos, (5, 6, 7))
+    np.testing.assert_allclose(lens.normal, (0, 1, 0))
+
+
 class TestUnknownKeywords(unittest.TestCase):
   """
   Geom_Object und alle Unterklassen nehmen beliebige Keyword-Argumente an.

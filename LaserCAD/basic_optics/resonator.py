@@ -29,7 +29,7 @@ class LinearResonator(Composition):
   def add_output_coupler(self, item):
     if type(item) == type(Mirror()):
       self.add_on_axis(item)
-      self._out_putcoupler_index = len(self._elements)-1
+      self._output_coupler_index = len(self._elements)-1
     else:
       print("Outputcoupler must be a mirror")
       return -1
@@ -174,7 +174,6 @@ class CircularResonator(LinearResonator):
   def compute_eigenmode(self, start_index=0):
     noe = len(self._elements)
     seq = [x for x in range(noe)]
-    seq.extend([0])
     prop = np.linalg.norm(self._elements[-1].pos-self._elements[0].pos)
     self._last_prop = prop
     self.set_sequence(seq)

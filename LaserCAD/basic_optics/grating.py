@@ -22,7 +22,7 @@ class Grating(Opt_Element):
     self.height = 60
     self.thickness = 8
     super().__init__(**kwargs)
-    self.grating_constant = grat_const # lines per millimeter
+    self.grating_constant = grat_const # Gitterperiode d in mm (Abstand zweier Linien, nicht Linien/mm)
     self.width = 50
     self.diffraction_order = order
     self.G = 2*np.pi / self.grating_constant * self.get_coordinate_system()[1] 
@@ -85,7 +85,7 @@ class Grating(Opt_Element):
     intersec = ray.intersection(self)
     ray2.pos = intersec
     
-    if alternative_order:
+    if alternative_order is not None:
       m = alternative_order
     else:
       m = self.diffraction_order
