@@ -57,7 +57,8 @@ def Make_Periscope(name="Periskop", height=150, up=True, backwards=False):
     m2.normal = (n1[0], n1[1], -n1[2])
   else:
     m2.normal = -n1
-  
+  # m2.normal wurde erst nach add_on_axis gesetzt -> Achse neu berechnen
+  peris.recompute_optical_axis()
   return peris
 
 

@@ -79,4 +79,4 @@ class Multi_Beamline_Composition(Geom_Object):
     dreht außerdem das eigene Koordiantensystem
     """
     super()._axes_changed(old_axes, new_axes)
-    self._rearange_subobjects_axes(old_axes, new_axes, [self._subcomps]) #sonst wird ls doppelt geshifted
+    self._rearange_subobjects_axes(old_axes, new_axes, self._subcomps)
