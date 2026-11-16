@@ -11,6 +11,15 @@ from ..basic_optics import Component, Composed_Mount
 
 class Camera(Component):
 
+  """Camera (default model: Allied Vision Manta).
+
+  Non-interacting component: it is drawn (with its mount) but does not change the rays.
+
+  Parameters
+  ----------
+  mesh_name : str
+    Name of the STL model.
+  """
   def __init__(self, name = "New_Camera", mesh_name="Manta_allied_vision_camera", **kwargs):
     super().__init__(name, **kwargs)
     stl_file=thisfolder+f"misc_meshes/{mesh_name}.stl"

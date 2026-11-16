@@ -10,6 +10,10 @@ from ..basic_optics.component import Component
 from ..freecad_models.utils import thisfolder, load_STL
 
 class Pockels_Cell(Component):
+  """Pockels cell. Polarization is not simulated.
+
+  Non-interacting component: it is drawn (with its mount) but does not change the rays.
+  """
   def __init__(self, name="Pockels_Cell", mount_name = "pockels_cell_easy_steal-Body", **kwargs):
     super().__init__(name, **kwargs)
     stl_file=thisfolder+"misc_meshes/"+mount_name+".stl"
@@ -19,6 +23,10 @@ class Pockels_Cell(Component):
     self.freecad_model = load_STL
 
 class Pockels_Cell_Thick(Component):
+  """Thick Pockels cell model. Polarization is not simulated.
+
+  Non-interacting component: it is drawn (with its mount) but does not change the rays.
+  """
   def __init__(self, name="Pockels_Cell", mount_name = "Pockels_cell_thick", **kwargs):
     super().__init__(name, **kwargs)
     stl_file=thisfolder+"misc_meshes/"+mount_name+".stl"

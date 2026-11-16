@@ -13,6 +13,10 @@ DEFAULT_LAMBDA_PLATE_COLOR = (255/255,255/255,0/255)
 
 class Lambda_Plate(Component):
 
+  """Wave plate. Polarization is not simulated.
+
+  Non-interacting component: it is drawn (with its mount) but does not change the rays.
+  """
   def __init__(self, name="LambdaPlate", **kwargs):
     super().__init__(name=name, **kwargs)
     self.aperture = 25.4/2

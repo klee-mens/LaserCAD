@@ -2,6 +2,10 @@ from ..basic_optics import Component, Unit_Mount, Composed_Mount, Post
 from ..freecad_models.utils import thisfolder, load_STL
 
 class Spectrometer(Component):
+  """Spectrometer (default: Ocean Optics, model SR).
+
+  Non-interacting component: it is drawn (with its mount) but does not change the rays.
+  """
   def __init__(self, name="Ocean Optics spectrometer", model="SR", **kwargs):
     self.model = model
     super().__init__(name, **kwargs)

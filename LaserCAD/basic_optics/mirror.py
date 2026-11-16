@@ -17,19 +17,24 @@ from copy import deepcopy
 
 
 class Mirror(Opt_Element):
-  """
-  Spiegelklasse, erbit von <Opt_Element>, nimmt einen ray und transformiert
-  ihn entsprechend des Reflexionsgesetzes
-  Anwendung wie folgt:
+  """Mirror class, inherits from <Opt_Element>. Reflects a ray according to the law of reflection.
 
-  m = Mirror(phi=90)
-  r = Ray()
-  m.set_geom(r.get_geom())
-  nr = m.next_ray(r)
+  Parameters
+  ----------
+  phi : float
+    Angle in degrees in [-180, 180] by which the mirror rotates the incident ray
+    in the xy-plane (mathematically positive direction). The default 180
+    sends the ray back.
+  theta : float
+    Angle in degrees in [-90, 90] by which the mirror rotates the ray out of
+    the xy-plane.
 
-  dreht <r> in der xy-Ebene um den Winkel <phi> €[-180,180] und dreht um
-  <theta> € [-90,90] aus der xy-Ebene heraus, wenn man die normale voher mit
-  set_geom() einstellt
+  Examples
+  --------
+  >>> m = Mirror(phi=90)
+  >>> r = Ray()
+  >>> m.set_geom(r.get_geom())   # the mirror is placed at the ray
+  >>> nr = m.next_ray(r)         # the ray is deflected by 90 degrees
   """
   def __init__(self, phi=180, theta=0, name="NewMirror", **kwargs):
     super().__init__(name=name, **kwargs)
@@ -40,10 +45,7 @@ class Mirror(Opt_Element):
     self.freecad_model = model_mirror
 
   def update_normal(self):
-    """
-    aktualisiert die Normale des Mirrors entsprechend der __incident_normal,
-    phi und theta
-    """
+    """Update the normal of the mirror from the incident direction, phi and theta."""
     phi = self.__phi/180*np.pi
     theta = self.__theta/180*np.pi
     if phi == 0 and theta == 0:
@@ -67,14 +69,12 @@ class Mirror(Opt_Element):
     self.normal = self.__incident_normal - (x2, y2, z2)
 
   def set_geom(self, geom):
-    """
-    setzt <pos> und __incident_normal auf <geom> und akturalisiert dann die
-    eigene <normal> entsprechend <phi> und <theta>
+    """Set <pos> and the incident direction from <geom>, then update the normal from <phi> and <theta>.
 
     Parameters
     ----------
-    geom : 2-dim Tupel aus 3-D float arrays
-      (pos, normal)
+    geom : tuple of (3-D array, 3x3 array)
+      (pos, axes)
     """
     # print("GEOM-MIRROR:", geom)
     self.pos = geom[0]
@@ -94,6 +94,10 @@ class Mirror(Opt_Element):
   @phi.setter
   def phi(self, x):
 
+    """Angle <phi> in degrees by which the mirror deflects a ray coming from the incident
+    direction in the xy-plane (mathematically positive direction).
+    The setter updates the normal accordingly.
+    """
     self.__phi = x
     self.update_normal()
 
@@ -108,18 +112,22 @@ class Mirror(Opt_Element):
     return self.__theta
   @theta.setter
   def theta(self, x):
+    """Angle <theta> in degrees by which the mirror deflects a ray coming from the incident
+    direction out of the xy-plane (mathematically positive direction).
+    The setter updates the normal accordingly.
+    """
     self.__theta = x
     self.update_normal()
 
   def reflection(self, ray):
-    """
-    erzeugt den nächsten Strahl aus <Ray> mit Hilfe des Reflexionsgesetzes
-    (man beachte die umgedrehte <normal> im Gegensatz zur Konvention in z.B.
-    Springer Handbook of Optics and Lasers S. 68)
+    """Return the next ray from <ray> using the law of reflection.
+
+    Note that the <normal> of the mirror points the other way than in the
+    convention of e.g. the Springer Handbook of Optics and Lasers, p. 68.
 
     Parameters
     ----------
-    ray : Ray()
+    ray : Ray
       incident ray
 
     Returns
@@ -137,9 +145,11 @@ class Mirror(Opt_Element):
     return ray2
 
   def next_ray(self, ray):
+    """Return the ray after the reflection at the mirror (vectorial law of reflection)."""
     return self.reflection(ray)
 
   def through_out_beam(self, beam):
+    """Return a copy of <beam> that propagates through the mirror without reflection."""
     newb = deepcopy(beam)
     newb.name = "next_" + beam.name
     rays = beam.get_all_rays(by_reference=True)
@@ -153,18 +163,13 @@ class Mirror(Opt_Element):
     return newb
 
   def set_incident_normal(self, vec):
-    """
-    setzt neue <__incident_normal> und berechnet daraus mit <phi> und <theta>
-    die neue <normal>
-    """
+    """Set a new incident direction and compute the new <normal> from <phi> and <theta>."""
     vec = vec / np.linalg.norm(vec)
     self.__incident_normal = np.array((1.0,1.0,1.0)) * vec
     self.update_normal()
 
   def recompute_angles(self):
-    """
-    berechnet die Winkel neu aus <__incident_normal> und <normal>
-    """
+    """Recompute <phi> and <theta> from the incident direction and the <normal>."""
     vec1 = self.__incident_normal
     dummy = Ray()
     dummy.normal=vec1
@@ -195,10 +200,9 @@ class Mirror(Opt_Element):
     return phi, theta
 
   def set_normal_with_2_points(self, p0, p1):
-    """
-    setzt die Normale neu, sodass der mirror einen Strahl reflektiert, der von
-    p0 kommt, den Spiegel in self.pos trifft und dann zu p1 reflektiert wird
-    berechnet anschließend die Winkel neu
+    """Set the normal so that a ray coming from <p0> that hits the mirror at self.pos is reflected towards <p1>.
+
+    The angles <phi> and <theta> are recomputed afterwards.
     """
     inc = self.pos - p0
     refl = p1 - self.pos
@@ -244,11 +248,13 @@ class Mirror(Opt_Element):
     return txt
 
   def update_draw_dict(self):
+    """Update the drawing parameters (draw_dict) from the current attributes."""
     super().update_draw_dict()
     self.draw_dict["dia"]=self.aperture
     self.draw_dict["Radius"] = 0
 
   def kostenbauder(self, inray=Ray()):
+    """Return the 4x4 Kostenbauder matrix of the mirror for the ray <inray>."""
     kmatrix = np.eye(4)
     # kmatrix[0:2, 0:2] = self.matrix(inray=inray)
     kmatrix[0:2, 0:2] = -self.matrix(inray=inray)
@@ -257,6 +263,22 @@ class Mirror(Opt_Element):
 
 
 class Curved_Mirror(Mirror):
+  """Spherical mirror.
+
+  Parameters
+  ----------
+  radius : float
+    Radius of curvature in mm. Positive values focus (concave), the focal
+    length is radius/2. Inherits phi, theta and name from Mirror.
+
+  Notes
+  -----
+  For a tilted mirror the ray tracing (next_ray) is exact. The ABCD matrix
+  is the paraxial one at normal incidence unless the class attribute
+  `angle_dependent_matrix` is set to True; then the tangential and sagittal
+  powers are 2/(R*cos(theta)) and 2*cos(theta)/R (exact for horizontal or
+  vertical incidence planes).
+  """
   def __init__(self, radius=200, **kwargs):
     super().__init__(**kwargs)
     self.radius = radius
@@ -273,6 +295,7 @@ class Curved_Mirror(Mirror):
       self._matrix[1,0] = -2/x
 
   def focal_length(self):
+    """Focal length in mm (radius/2)."""
     return self.radius/2
 
   # False (Standard): Matrix wie bisher, C = -2/R unabhängig vom Einfallswinkel.
@@ -281,32 +304,31 @@ class Curved_Mirror(Mirror):
   angle_dependent_matrix = False
 
   def matrix(self, inray=Ray()):
+    """Return the 2x2 ABCD matrix of the mirror, see the class docstring for the angle dependence."""
     M = np.array(self._matrix)
     if self.angle_dependent_matrix and self.radius != 0:
       M[1,0] = -self._horizontal_power(inray)
     return M
 
   def _curvature_direction(self):
-    """
-    Richtung der Krümmung in der Spiegeltangentialebene (Einheitsvektor) oder
-    None, wenn der Spiegel in alle Richtungen gleich gekrümmt ist (Kugel).
+    """Direction of the curvature in the tangential plane of the mirror (unit vector).
+
+    None if the mirror is curved equally in all directions (sphere).
     """
     return None
 
   def _horizontal_power(self, inray):
-    """
-    Brechkraft P (1/mm) des Spiegels für die horizontale Strahlkoordinate
-    (senkrecht zum Strahl und zur z-Achse) beim Einfall von <inray>.
+    """Optical power P (1/mm) of the mirror for the horizontal beam coordinate (perpendicular to the beam and to the z-axis) for the incident ray <inray>.
 
-    Für einen Spiegel mit Krümmungstensor K (Kugel: K = 1/R) gilt in der
-    Einfallsebene (t) und senkrecht dazu (s), Einfallswinkel theta:
+    For a mirror with curvature tensor K (sphere: K = 1/R) the following holds in the
+    plane of incidence (t) and perpendicular to it (s) for the angle of incidence theta:
       P_tt = 2 K_tt / cos(theta),  P_ss = 2 K_ss * cos(theta),  P_ts = 2 K_ts
-    Beispiele: Kugel, Einfallsebene horizontal: 2/(R cos theta); Einfallsebene
-    vertikal: 2 cos(theta)/R; Zylinder mit z-Achse im horizontalen Strahlengang:
-    2/(R cos theta).
-    Exakt ist das für eine horizontale oder vertikale Einfallsebene. Bei
-    schräger Einfallsebene vermischen sich horizontale und vertikale Ebene
-    (astigmatische Kopplung), eine 2x2-Matrix ist dann nur eine Näherung.
+    Examples: sphere, horizontal plane of incidence: 2/(R cos theta); vertical
+    plane of incidence: 2 cos(theta)/R; cylinder with the z-axis in a
+    horizontal beam path: 2/(R cos theta).
+    This is exact for a horizontal or vertical plane of incidence. For an
+    oblique plane of incidence the horizontal and vertical planes mix
+    (astigmatic coupling), and a 2x2 matrix is only an approximation.
     """
     R = self.radius
     n = self.normal
@@ -345,29 +367,23 @@ class Curved_Mirror(Mirror):
     return txt
 
   def update_draw_dict(self):
+    """Update the drawing parameters (draw_dict), including the radius of curvature."""
     super().update_draw_dict()
     self.draw_dict["Radius"] = self.radius
     self.draw_dict["dia"]=self.aperture
     # self.draw_dict["Radius1"] = self.radius
 
   def intersection(self, ray):
-    """
-    ermittelt den Schnittpunkt vom Strahl mit einer Spähre, die durch
-    <center> € R^3 und <radius> € R definiert ist
-    und setzt seine Länge auf den Abstand self.pos--element.pos (bedenken!)
-    siehe Springer Handbook of Lasers and Optics Seite 66 f
+    """Return the intersection point of <ray> with the spherical surface of the mirror.
 
-    Parameters
-    ----------
-    center : TYPE 3D-array
-      Mittelpunkt der Sphäre
-
-    radius : TYPE float
-      Radius der Sphäre; >0 für konkave Spiegel (Fokus), <0 für konvexe
+    The sphere has its center at pos - radius*normal. The length of <ray> is set
+    to the distance to the intersection point (see Springer Handbook of Lasers and
+    Optics, p. 66 ff). If the ray misses the sphere, a warning is issued and a NaN
+    point is returned.
 
     Returns
     -------
-    endpoint : TYPE 3D-array
+    endpoint : 3D-array
     """
     diffvec = self.pos - self.radius*self.normal - ray.pos
     k = np.sum( diffvec * ray.normal )
@@ -392,21 +408,18 @@ class Curved_Mirror(Mirror):
     return endpoint
 
   def next_ray(self, ray):
-    """
-    erzeugt den nächsten Ray auf Basis der analytischen Berechung von Schnitt-
-    punkt von Sphere mit ray und dem vektoriellen Reflexionsgesetz
-    siehe S Hb o LaO S 66 f
+    """Return the next ray: analytic intersection of the ray with the sphere and
+    the vectorial law of reflection (Springer Handbook of Lasers and Optics, p. 66 ff).
 
     Parameters
     ----------
-    ray : TYPE Ray
+    ray : Ray
       input ray
 
     Returns
     -------
-    ray2 : TYPE Ray
+    ray2 : Ray
       output ray
-
     """
     ray2 = deepcopy(ray)
     ray2.name = "next_" + ray.name
@@ -423,6 +436,11 @@ class Curved_Mirror(Mirror):
 
 
 class Stripe_mirror(Curved_Mirror):
+  """Curved mirror with a wide, flat stripe shape (default aperture 3 inch).
+
+  Used e.g. as the large folding mirror in stretchers and compressors. All
+  parameters are those of Curved_Mirror; the mount is a Stripe_Mirror_Mount.
+  """
   def __init__(self, **kwargs):
     super().__init__(**kwargs)
     self.aperture *= 3 #default 3inch
@@ -505,21 +523,21 @@ class Cylindrical_Mirror(Stripe_mirror):
     self.draw_dict["thickness"]=self.thickness
 
   def next_ray(self, ray):
-    """
-    erzeugt den nächsten Ray auf Basis der analytischen Berechung von Schnitt-
-    punkt von Sphere mit ray und dem vektoriellen Reflexionsgesetz
-    siehe S Hb o LaO S 66 f
+    """Return the next ray: analytic intersection of the ray with the cylinder and
+    the vectorial law of reflection.
+
+    If the ray misses the cylinder, a warning is issued and a ray with NaN
+    position and axes is returned.
 
     Parameters
     ----------
-    ray : TYPE Ray
+    ray : Ray
       input ray
 
     Returns
     -------
-    ray2 : TYPE Ray
+    ray2 : Ray
       output ray
-
     """
     ray2 = deepcopy(ray)
     ray2.name = "next_" + ray.name
@@ -586,6 +604,15 @@ class Cylindrical_Mirror(Stripe_mirror):
 
 
 class Rectangular_Mirror(Mirror):
+  """Flat mirror with a rectangular shape.
+
+  Parameters
+  ----------
+  height, width : float
+    Size of the mirror in mm.
+  phi, theta : float
+    Deflection angle and tilt in degrees, see Mirror.
+  """
   def __init__(self, name="NewRectMirror", height=25, width=25, phi=180, theta=0, **kwargs):
     super().__init__(phi=phi, theta=theta, name=name, **kwargs)
     self.height = height

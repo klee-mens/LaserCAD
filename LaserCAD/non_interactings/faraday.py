@@ -25,6 +25,10 @@ import csv
 DEFALUT_HOLDER_COLOR = (0.2,0.2,0.2)
 
 class Faraday_Isolator(Component):
+  """Faraday isolator. Polarization is not simulated.
+
+  Non-interacting component: it is drawn (with its mount) but does not change the rays.
+  """
   def __init__(self, name="Faraday_Isolator", **kwargs):
     super().__init__(name, **kwargs)
     stl_file=thisfolder+"/misc_meshes/Faraday-Isolatoren-Body.stl"

@@ -13,21 +13,14 @@ import numpy as np
 def Make_Amplifier_Typ_II_simple(name="AmpTyp2s", focal_length=600, magnification=1,
                               roundtrips2=2,
                               aperture_small=1*inch, aperture_big=2*inch, beam_sep=15):
-    """
-    generiert die Strahlführung eines einfachen Typ II Verstärkers mit einer Linse
-    und einem gekrümmten Spiegel
+    """Create the beam path of a simple type II amplifier with a lens and a curved mirror.
 
-    V = magnification
-    f = focal_length
-    a = (V+1)/V * f
-    b = a*V
-    f2 = V/2 * f
+    With V = magnification and f = focal_length the distances are
+    a = (V+1)/V * f, b = a*V and the second focal length f2 = V/2 * f.
 
     Returns
     -------
-    composition: Amplifier_TypII_simple
-
-
+    composition : Composition
     """
     Radius2 = magnification*focal_length
     dist1 = (magnification+1) / magnification * focal_length
@@ -85,6 +78,27 @@ def Make_Amplifier_Typ_II_Mirror(name="AmpTyp2sr", focal_length=600, magnificati
                               roundtrips2=2,
                               aperture_small=0.5*inch, aperture_big=2*inch, beam_sep=15):
 
+  """Create a type II multipass amplifier from curved mirrors and a plane mirror.
+
+  Parameters
+  ----------
+  name : str
+  focal_length : float
+    Focal length in mm that sets the scale of the setup.
+  roundtrips2 : int
+    Number of round trips of the beam (the sequence of elements grows
+    accordingly).
+  magnification : float
+    Magnification V; the second radius of curvature is V*focal_length.
+  aperture_small, aperture_big : float
+    Apertures in mm of the small (end/plane) mirrors and the big optics.
+  beam_sep : float
+    Distance in mm between neighbouring spots on the big optics.
+
+  Returns
+  -------
+  composition : Composition
+  """
   Radius2 = magnification*focal_length
   dist1 = (magnification+1) / magnification * focal_length
   dist2 = magnification * dist1
@@ -144,6 +158,27 @@ def Make_Amplifier_Typ_II_UpDown(name="AmpTyp2sr", focal_length=600, magnificati
                               roundtrips2=2,
                               aperture_small=0.5*inch, aperture_big=2*inch, beam_sep=15):
 
+  """Create a type II multipass amplifier like Make_Amplifier_Typ_II_Mirror, where the spots are arranged above and below the optical axis.
+
+  Parameters
+  ----------
+  name : str
+  focal_length : float
+    Focal length in mm that sets the scale of the setup.
+  roundtrips2 : int
+    Number of round trips of the beam (the sequence of elements grows
+    accordingly).
+  magnification : float
+    Magnification V; the second radius of curvature is V*focal_length.
+  aperture_small, aperture_big : float
+    Apertures in mm of the small (end/plane) mirrors and the big optics.
+  beam_sep : float
+    Distance in mm between neighbouring spots on the big optics.
+
+  Returns
+  -------
+  composition : Composition
+  """
   Radius2 = magnification*focal_length
   dist1 = (magnification+1) / magnification * focal_length
   dist2 = magnification * dist1

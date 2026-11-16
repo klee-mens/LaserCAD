@@ -17,6 +17,17 @@ import numpy as np
 from .geom_object import TOLERANCE, Geom_Object
 
 class Lens(Opt_Element):
+  """Thin lens, described by its focal length.
+
+  Parameters
+  ----------
+  f : float
+    Focal length in mm (negative for a diverging lens). The ABCD matrix is
+    [[1, 0], [-1/f, 1]]; f=0 gives the identity.
+  aperture : float
+    Free diameter in mm (default 1 inch), used for drawing and the mount.
+  name : str
+  """
   def __init__(self, f=100, name="NewLens", aperture=1*inch, **kwargs):
     super().__init__(name=name, **kwargs)
     self.focal_length = f
@@ -37,9 +48,11 @@ class Lens(Opt_Element):
       self._matrix[1,0] = -1/x
 
   def next_ray(self, ray):
+    """Return the ray after the lens (thin lens refraction at the ray's intersection)."""
     return self.ABCD_refraction(ray)
 
   def update_draw_dict(self):
+    """Update the drawing parameters (draw_dict) from the current attributes."""
     super().update_draw_dict()
     self.draw_dict["Radius1"] = 400
     self.draw_dict["Radius2"] = 0
@@ -256,25 +269,20 @@ class Thicklens(Opt_Element):
 
 
   def intersection(self, ray, radius):
-    """
-    ermittelt den Schnittpunkt vom Strahl mit einer Spähre, die durch
-    <center> € R^3 und <radius> € R definiert ist
-    und setzt seine Länge auf den Abstand self.pos--element.pos (bedenken!)
-    siehe Springer Handbook of Lasers and Optics Seite 66 f
+    """Return the intersection point of <ray> with a sphere of radius <radius> at the lens.
 
-    if radius = 0: plane intersection is calculated
+    The length of the ray is set to the distance to the intersection point.
+    If radius = 0 the intersection with the plane is calculated.
 
     Parameters
     ----------
-    center : TYPE 3D-array
-      Mittelpunkt der Sphäre
-
-    radius : TYPE float
-      Radius der Sphäre; >0 für konkave Spiegel (Fokus), <0 für konvexe
+    ray : Ray
+    radius : float
+      Signed radius of the sphere (see radius1 and radius2 of the lens).
 
     Returns
     -------
-    endpoint : TYPE 3D-array
+    endpoint : 3D-array
     """
     if radius == 0:
       return self.intersection_plane(ray)

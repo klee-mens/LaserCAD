@@ -11,33 +11,30 @@ from .. basic_optics import Mirror, Lens, Beam, Composition, inch
 
 def Make_Telescope(name="Teleskop", f1=100.0, f2=100.0, d0=100.0, lens1_aperture=25,
              lens2_aperture=inch):
-  """
-  erstellt ein Teleskop mit dem Kram da oben
-
-  Bsp:
-  teles = Teleskop()
-  teles.draw_elements()
-  teles.draw_beams()
-  teles.draw_mounts()
-  teles.draw_rays()
+  """Create a telescope of two thin lenses with distance f1+f2.
 
   Parameters
   ----------
-  name : TYPE, optional
-    DESCRIPTION. The default is "Teleskop".
-  f1 : TYPE, optional
-    Brennweite der ersten Linse. The default is 100.
-  f2 : TYPE, optional
-    Brennweite der zweiten Linse, Das Verhältnis f2/f1 gitb die Vergrößerung
-    <amplification> des Teleskops an. The default is 100. -> amp=1.0
-  d0 : TYPE, optional
-    gibt den Abstand pos0 von Teleskop und erster Linse an. The default is 100.
+  name : str, optional
+    The default is "Teleskop".
+  f1 : float, optional
+    Focal length of the first lens in mm. The default is 100.
+  f2 : float, optional
+    Focal length of the second lens in mm. The ratio f2/f1 is the
+    amplification <amplification> of the telescope. The default is 100
+    (amplification 1.0).
+  d0 : float, optional
+    Distance in mm between the start position of the telescope and the first
+    lens. The default is 100.
 
   Returns
-  -------focal_length = 200
+  -------
   teles : Composition
 
-
+  Examples
+  --------
+  >>> teles = Make_Telescope()
+  >>> teles.draw()
   """
   ls = Beam(radius=1.5, angle=0)
   l1 = Lens(f=f1)

@@ -13,16 +13,15 @@ from .. freecad_models import freecad_da, model_ray_1D
 DEFAULT_LENGTH = 200
 
 class Ray(Geom_Object):
-  """
-  Klasse für Strahlen
-  erbt von Geom_Object
-  besitzt neben pos und normal auch length zum zeichnen
-  neue Methoden:
-    endpoint()
-    intersection_with(element)
-    h_alpha_to(element)
-    h_alpha_theta_to(element)
-    from_h_alpha_theta
+  """A single ray: position <pos>, direction <normal> and a <length> for drawing.
+
+  Inherits from Geom_Object. Default: position (0, 0, 80), direction (1, 0, 0),
+  wavelength 660 nm (0.00066 mm).
+
+  Methods
+  -------
+  endpoint(), intersection_with(element), h_alpha_to(element),
+  h_alpha_theta_to(element), from_h_alpha_theta(h, alpha, theta, element)
   """
   def __init__(self, **kwargs):
     super().__init__(**kwargs)
@@ -146,16 +145,14 @@ class Ray(Geom_Object):
   #   return endpoint
   
   def _h_alpha_theta(self, element):
-    """
-    gemeinsame Berechnung für h_alpha_to und h_alpha_theta_to, ist die Umkehrung
-    von from_h_alpha_theta (verwendet intersection, setzt also self.length)
+    """Common calculation for h_alpha_to and h_alpha_theta_to; the inverse of from_h_alpha_theta (uses the intersection, i.e. sets self.length).
 
-    h: Abstand des Auftreffpunkts von der Achse des Elements
-    theta: Winkel des Auftreffpunkts um die Achse, 0 bedeutet +z des Elements,
-      positiv in Richtung -y (siehe from_h_alpha_theta), Bereich (-pi, pi]
-    alpha: Winkel des Strahls zur Achse in der meridionalen Ebene, positiv
-      wenn sich der Strahl von der Achse entfernt (Konvention der ABCD-Matrix,
-      wie in Opt_Element.ABCD_refraction)
+    h: distance of the point of incidence from the axis of the element
+    theta: angle of the point of incidence around the axis, 0 means +z of the
+      element, positive towards -y (see from_h_alpha_theta), range (-pi, pi]
+    alpha: angle of the ray to the axis in the meridional plane, positive if
+      the ray moves away from the axis (convention of the ABCD matrix, as in
+      Opt_Element.ABCD_refraction)
     """
     p = self.intersection(element)
     radial = p - element.pos
@@ -174,32 +171,28 @@ class Ray(Geom_Object):
     return h, alpha, theta
 
   def h_alpha_to(self, element):
-    """
-    ermittelt die Parameter (h, alpha) der geometrischen Optik, wenn Ray()
-    auf ein Element trifft (verwendet intersection)
-    """
+    """Return the parameters (h, alpha) of geometrical optics when the ray hits <element> (uses the intersection)."""
     h, alpha, theta = self._h_alpha_theta(element)
     return np.array((h, alpha))
 
   def h_alpha_theta_to(self, element):
-    """
-    ermittelt die Parameter (h, alpha) der geometrischen Optik, wenn Ray()
-    auf ein Element trifft, sowie den Winkel <theta> des Auftreffpunkts um die
-    Achse des Elements, gemessen von dessen z-Achse (verwendet intersection)
+    """Return (h, alpha) of geometrical optics when the ray hits <element>, and the
+    angle <theta> of the point of incidence around the axis of the element,
+    measured from its z-axis (uses the intersection).
     """
     return self._h_alpha_theta(element)
 
   def from_h_alpha_theta(self, h, alpha, theta, element):
-    """
-    setzt das ray geom so, dass er in Bezug auf <element> die geometrischen
-    Parameter <h, alpha, theta> hat
+    """Set the geometry of the ray so that it has the geometrical parameters <h, alpha, theta> with respect to <element>.
 
     Parameters
     ----------
     h : float
-    alpha : float - Winkel im Bogenmaß
-    theta : float - Winkel im Bogenmaß
-    element : geom_object
+    alpha : float
+      angle in rad
+    theta : float
+      angle in rad
+    element : Geom_Object
     """
     self.set_geom(element.get_geom())
     xa, ya, za = element.get_coordinate_system()

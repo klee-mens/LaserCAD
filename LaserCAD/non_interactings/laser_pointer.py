@@ -11,6 +11,10 @@ from ..basic_optics import Component, Composed_Mount
 
 class LaserPointer(Component):
 
+  """Laser pointer, e.g. as a marker for a light source.
+
+  Non-interacting component: it is drawn (with its mount) but does not change the rays.
+  """
   def __init__(self, name = "New_LaserPointer", **kwargs):
     super().__init__(name, **kwargs)
     stl_file=thisfolder+"misc_meshes/LaserPointer.stl"

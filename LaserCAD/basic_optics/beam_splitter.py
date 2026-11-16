@@ -16,6 +16,16 @@ from copy import deepcopy
 
 
 class ThinBeamsplitter(Mirror):
+  """Beam splitter without thickness (a mirror whose output can be transmitted or reflected).
+
+  Parameters
+  ----------
+  angle_of_incidence : float
+    Angle between the incoming ray and the surface normal in degrees.
+  transmission : bool
+    If True, `next_ray` and `next_beam` follow the transmitted beam, otherwise
+    the reflected one. The other beam is available as `get_alternative_beam()`.
+  """
   def __init__(self, angle_of_incidence=45, transmission=True,
                name="BeamSplitter", **kwargs):
     super().__init__(phi=180-2*angle_of_incidence, name=name, **kwargs)
@@ -28,11 +38,13 @@ class ThinBeamsplitter(Mirror):
     self._alternative_beam = Beam()
 
   def next_ray(self, ray):
+    """Return the transmitted ray if `transmission` is True, else the reflected one."""
     if self.transmission:
       return self.just_pass_through(ray)
     return self.reflection(ray)
 
   def next_beam(self, beam):
+    """Return the output beam and store input, output and alternative beam."""
     self._input_beam = deepcopy(beam)
     output_beam = super().next_beam(beam)
     self._output_beam = output_beam
@@ -42,12 +54,15 @@ class ThinBeamsplitter(Mirror):
     return output_beam
 
   def get_input_beam(self):
+    """Return a copy of the last beam that hit the splitter."""
     return deepcopy(self._input_beam)
 
   def get_output_beam(self):
+    """Return a copy of the last output beam (transmitted if `transmission` is True)."""
     return deepcopy(self._output_beam)
 
   def get_alternative_beam(self):
+    """Return a copy of the beam in the other output arm."""
     return deepcopy(self._alternative_beam)
 
   # def _pos_changed(self, old_pos, new_pos):
@@ -74,6 +89,20 @@ class ThinBeamsplitter(Mirror):
 
 
 class ThickBeamsplitter(ThinBeamsplitter):
+  """Beam splitter with a plate of finite thickness and a refractive index.
+
+  Parameters
+  ----------
+  angle_of_incidence : float
+    Angle of incidence in degrees.
+  thickness : float
+    Plate thickness in mm.
+  transmission : bool
+    Follow the transmitted (True) or the reflected beam, see ThinBeamsplitter.
+  refractive_index : float
+    Refractive index of the plate; the transmitted beam is shifted
+    accordingly.
+  """
   def __init__(self, angle_of_incidence=45, thickness=5, transmission=True,
                refractive_index=1.45, name="ThickSplitter", **kwargs):
     super().__init__(angle_of_incidence=angle_of_incidence,
@@ -105,6 +134,11 @@ class ThickBeamsplitter(ThinBeamsplitter):
 
 
 class TFP56(ThickBeamsplitter):
+  """Thin film polarizer for 56 degrees angle of incidence (refractive index 1.45, thickness 4 mm).
+
+  The mount orientation can be changed with the attributes `flip_mount`,
+  `revers_mount` and `angle_positiv`.
+  """
   def __init__(self, name="NewTFP56", **kwargs):
     super().__init__(name=name, angle_of_incidence=56, **kwargs)
     self.angle_of_incidence = 56
@@ -151,6 +185,7 @@ class TFP56_Mount(Unit_Mount):
 
 
 class Rectangular_Beamsplitter(ThickBeamsplitter):
+  """ThickBeamsplitter with a rectangular shape (height, width in mm)."""
   def __init__(self, name="NewRectBS", height=25, width=25, angle_of_incidence=45,
                thickness=5, refractive_index=1.45, **kwargs):
     self.height = height
@@ -172,6 +207,7 @@ class Rectangular_Beamsplitter(ThickBeamsplitter):
 
 
 class Rectangular_Thin_Beamsplitter(ThinBeamsplitter):
+  """ThinBeamsplitter with a rectangular shape (height, width in mm)."""
   def __init__(self, name="NewRectThinBS", height=25, width=25, angle_of_incidence=45, **kwargs):
     self.height = height
     self.width = width

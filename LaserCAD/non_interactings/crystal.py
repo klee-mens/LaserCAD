@@ -14,6 +14,17 @@ from ..freecad_models.utils import load_STL, thisfolder
 import numpy as np
 
 class Cylindric_Crystal(Component):
+  """Cylindrical laser crystal.
+
+  Non-interacting component: it is drawn (with its mount) but does not change the rays.
+
+  Parameters
+  ----------
+  aperture : float
+    Diameter in mm.
+  thickness : float
+    Length in mm.
+  """
   def __init__(self, name="LaserCrystal", aperture=6, thickness=3, **kwargs):
     super().__init__(name=name, **kwargs)
     self.aperture = aperture
@@ -23,6 +34,21 @@ class Cylindric_Crystal(Component):
 
 
 class Crystal(Component):
+  """Crystal with a rectangular or cylindrical shape.
+
+  Non-interacting component: it is drawn (with its mount) but does not change the rays.
+
+  Parameters
+  ----------
+  width, height, thickness : float
+    Size in mm (rectangular shape).
+  aperture : float
+    Diameter in mm (cylindrical shape).
+  n : float
+    Refractive index.
+  shape : str
+    "rectangular" (default) or "cylindrical".
+  """
   shapes = ["cylindrical", "rectangular"]
 
   def __init__(self, width=10, height=10, thickness=10, aperture=6,
@@ -60,6 +86,17 @@ class Crystal(Component):
 
 
 class Crystal_Unit_Mount(Unit_Mount):
+  """Single mount plate for a crystal.
+
+  Parameters
+  ----------
+  shape : str
+    "rectangular" (default) or "cylindrical".
+  width, height, thickness : float
+    Outer size of the mount in mm.
+  inner_aperture, inner_width, inner_height : float
+    Size of the opening for the crystal in mm.
+  """
   shapes = ["cylindrical", "rectangular"]
 
   def __init__(self, shape="rectangular", width=30, height=30, thickness=10,
@@ -110,6 +147,7 @@ class Crystal_Unit_Mount(Unit_Mount):
 
 
 class Crystal_Mount(Composed_Mount):
+  """Composed mount for a crystal (mount plate on a post). Parameters as Crystal_Unit_Mount."""
   def __init__(self, shape="rectangular", width=30, height=30, thickness=10,
                inner_aperture=10.0, inner_width=10., inner_height=10.0,
                name="Crystal Mount", **kwargs):

@@ -10,6 +10,13 @@ from .composition import Composition
 
 
 class Multi_Beamline_Composition(Geom_Object):
+  """Group of Compositions (beam lines) that move and rotate together.
+
+  Used for setups with several arms, e.g. interferometers. Create the
+  lines with `add_new_line(beam)`, select the active one with
+  `change_acitve_index` and add elements with `add_on_axis` or `propagate` as
+  for a Composition.
+  """
   def __init__(self, name="New_Multi_Line", **kwargs):
     super().__init__(name=name, **kwargs)
     self._max_index = 0
@@ -64,19 +71,11 @@ class Multi_Beamline_Composition(Geom_Object):
       comp.recompute_optical_axis()
 
   def _pos_changed(self, old_pos, new_pos):
-    """
-    wird aufgerufen, wen die Position von <self> verändert wird
-    ändert die Position aller __rays mit
-    """
+    """Called when the position of <self> is changed; moves all beam lines along."""
     super()._pos_changed(old_pos, new_pos)
     self._rearange_subobjects_pos(old_pos, new_pos, self._subcomps)
 
   def _axes_changed(self, old_axes, new_axes):
-    """
-    wird aufgerufen, wen die axese von <self> verändert wird
-    dreht die axese aller __rays mit
-
-    dreht außerdem das eigene Koordiantensystem
-    """
+    """Called when the axes of <self> are changed; rotates all beam lines and the own coordinate system."""
     super()._axes_changed(old_axes, new_axes)
     self._rearange_subobjects_axes(old_axes, new_axes, self._subcomps)

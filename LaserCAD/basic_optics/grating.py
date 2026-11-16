@@ -15,8 +15,17 @@ from .mount import Grating_Mount
 
 
 class Grating(Opt_Element):
-  """
-  Klasse für Gitter
+  """Diffraction grating.
+
+  Parameters
+  ----------
+  grat_const : float
+    Grating period d in mm (distance between two lines, not lines/mm).
+  order : int
+    Diffraction order m (default -1). The direction follows the grating
+    equation d (sin(alpha) + sin(beta)) = m * lambda.
+
+  The grating lines are parallel to the z-axis of the grating frame.
   """
   def __init__(self, grat_const=0.005, order=-1, **kwargs):
     self.height = 60

@@ -13,6 +13,28 @@ def Make_Amplifier_Typ_I_simple(name = "AmpTyp1s", focal_length=600,
                                 dist3=600,roundtrips2=2,
                                 aperture_small=1*inch, aperture_big=2*inch, beam_sep=15):
   # Radius2 = magnification*focal_length
+  """Create a type I multipass amplifier from two lenses and two plane mirrors.
+
+  Parameters
+  ----------
+  name : str
+  focal_length : float
+    Focal length in mm that sets the scale of the setup.
+  roundtrips2 : int
+    Number of round trips of the beam (the sequence of elements grows
+    accordingly).
+  dist3 : float
+    Distance in mm; the distance between the plane mirror and the nearest lens
+    is dist1 = 2*focal_length - dist3.
+  aperture_small, aperture_big : float
+    Apertures in mm of the small (end/plane) mirrors and the big optics.
+  beam_sep : float
+    Distance in mm between neighbouring spots on the big optics.
+
+  Returns
+  -------
+  composition : Composition
+  """
   dist1 =2*focal_length-dist3
   dist2 = focal_length*2
   theta = np.arctan(beam_sep/dist1) # Seperationswinkel auf Planspiegel
@@ -73,6 +95,27 @@ def Make_Amplifier_Typ_I_Mirror(name = "AmpTyp1sr", focal_length=600,
                                 magnification=1,roundtrips2=2,
                                 aperture_small=0.5*inch, aperture_big=2*inch, beam_sep=15):
   # Radius2 = magnification*focal_length
+  """Create a type I multipass amplifier from curved mirrors and a plane mirror.
+
+  Parameters
+  ----------
+  name : str
+  focal_length : float
+    Focal length in mm that sets the scale of the setup.
+  roundtrips2 : int
+    Number of round trips of the beam (the sequence of elements grows
+    accordingly).
+  magnification : float
+    Magnification V; the second radius of curvature is V*focal_length.
+  aperture_small, aperture_big : float
+    Apertures in mm of the small (end/plane) mirrors and the big optics.
+  beam_sep : float
+    Distance in mm between neighbouring spots on the big optics.
+
+  Returns
+  -------
+  composition : Composition
+  """
   dist1 = (magnification+1) / (magnification**2+1) * focal_length
   dist2 = magnification * dist1 * 2
   Radius1=focal_length*2

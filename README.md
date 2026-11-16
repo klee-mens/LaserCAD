@@ -118,7 +118,8 @@ see `manual/README.md`:
 
 - Tutorials (`manual/TutorialLaserCAD.md`, scripts in `manual/tutorial`)
 - How-to guides (`manual/how_to_*.md`), e.g. a stretcher and a white cell
-- Discussion and reference (`manual/docs`)
+- Reference of all classes, generated from the code (`manual/reference`)
+- Discussion (`manual/docs`)
 
 ## Tests
 

@@ -155,6 +155,10 @@ class LinearResonator(Composition):
     
 class CircularResonator(LinearResonator):
   
+  """Ring resonator: the last element is a mirror that closes the circle.
+
+  The last mirror is oriented so that the beam returns to the first element.
+  """
   def __init__(self, **kwargs):
     super().__init__(**kwargs)
     

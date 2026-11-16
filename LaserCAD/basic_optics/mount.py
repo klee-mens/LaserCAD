@@ -234,6 +234,15 @@ class Unit_Mount(Geom_Object):
 
 
 class Post(Geom_Object):
+  """Optical post with a base, standing under the element.
+
+  Parameters
+  ----------
+  model : str
+    Name of the post model (default "1inch_post").
+  lower_limit : float
+    Lower end of the post in mm.
+  """
   def __init__(self, name="post",model="1inch_post",lower_limit=0, **kwargs):
     super().__init__(name, **kwargs)
     self.axis_fixed = True
@@ -487,6 +496,7 @@ class Stages_Mount(Composed_Mount):
 
 
 class Stripe_Mirror_Mount(Composed_Mount):
+  """Composed mount for a Stripe_mirror (mirror_thickness in mm)."""
   def __init__(self, mirror_thickness=10,**kwargs):
     super().__init__(**kwargs)
     self.docking_obj.pos += self.normal * mirror_thickness
@@ -498,6 +508,7 @@ class Stripe_Mirror_Mount(Composed_Mount):
 
 
 class Rooftop_Mirror_Mount(Composed_Mount):
+  """Composed mount for a rooftop (retro-reflecting) mirror."""
   def __init__(self, **kwargs):
     super().__init__(**kwargs)
     roof = Unit_Mount("Rooftop_mirror_mount")
@@ -508,6 +519,7 @@ class Rooftop_Mirror_Mount(Composed_Mount):
 
 
 class Grating_Mount(Composed_Mount):
+  """Composed mount for a grating with the given height and thickness in mm."""
   def __init__(self,height=50,thickness=8, **kwargs):
     super().__init__(**kwargs)
     self.height = height
@@ -648,6 +660,7 @@ class Adapter_2inch(Composed_Mount):
    
 
 class KM100C(Composed_Mount):
+  """Composed mount of a Thorlabs KM100C kinematic mirror mount on a post."""
   def __init__(self, name="KM100C", height=15, width=0, post="1inch_post", **kwargs):
     super().__init__(name=name, **kwargs)
     self.height = height
@@ -693,6 +706,7 @@ class KM100C(Composed_Mount):
     self.pos += -self.normal*thickness
 
 class KM100C_flipped(Composed_Mount):
+  """KM100C in flipped orientation."""
   def __init__(self, name="KM100C", height=15, width=0, post="1inch_post", **kwargs):
     super().__init__(name=name, **kwargs)
     self.height = height

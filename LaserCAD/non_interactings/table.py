@@ -9,6 +9,13 @@ from ..basic_optics import Geom_Object
 from ..freecad_models.freecad_model_mounts import model_table
 
 class Table(Geom_Object):
+  """Optical table, drawn as a plate below the setup.
+
+  Parameters
+  ----------
+  length, width, height : float
+    Size in mm (default 4000 x 1500 x 10).
+  """
   def __init__(self, name="BreadBoard",length=4000,width=1500,height=10, **kwargs):
     super().__init__(name, **kwargs)
     # stl_file=thisfolder+"\post\optical_breadboard.stl"

@@ -10,6 +10,10 @@ from ..basic_optics import Component, Unit_Mount, Composed_Mount, Post
 from ..freecad_models.utils import thisfolder, load_STL
 
 class Detector(Component):
+  """Photodetector (default model: PDA10A2).
+
+  Non-interacting component: it is drawn (with its mount) but does not change the rays.
+  """
   def __init__(self, name="Det_PDA10A2", **kwargs):
     super().__init__(name, **kwargs)
     stl_file = thisfolder+"misc_meshes/Diode.stl"

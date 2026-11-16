@@ -14,10 +14,7 @@ ARROW_LENGTH = 12
 
 
 def model_geom_object(name="GeomObj", geom=GEOM0, **kwargs):
-  """
-  zeichnet ein Koordinatensystem bestehend aus drei Rays1D in den Farben RGB
-  und richtet es entprechend des GEOM0 aus
-  """
+  """Draw a coordinate system of three 1D rays in the colors RGB, aligned with GEOM0."""
   DOC = get_DOC()
   mainpart = DOC.addObject('App::Part', name)
   mainpart.Label = name

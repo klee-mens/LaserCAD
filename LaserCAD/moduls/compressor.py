@@ -12,7 +12,7 @@ import numpy as np
 
 
 def Make_Compressor(separation_angle = 20 /180 *np.pi, # sep between in and outgoing middle ray
-    grating_const = 1/1000, # in 1/mm
+    grating_const = 1/1000, # grating period in mm
     separation = 200, # difference grating position und radius_concave
     lambda_mid = 800e-9 * 1e3, # central wave length in mm
     bandwidth = 100e-9*1e3, # full bandwidth in mm
@@ -24,6 +24,35 @@ def Make_Compressor(separation_angle = 20 /180 *np.pi, # sep between in and outg
     grating2_dimensions = (50, 50, 5)):
 
   # calculated parameters according to the grating equation and set the grating
+  """Create a grating compressor with a rooftop mirror for a spectrally broad beam.
+
+  Parameters
+  ----------
+  separation_angle : float
+    Angle in rad between the incoming and the outgoing middle ray.
+  grating_const : float
+    Grating period in mm (distance of two lines).
+  separation : float
+    Distance in mm between the two gratings.
+  lambda_mid : float
+    Central wavelength in mm (800e-6 = 800 nm).
+  bandwidth : float
+    Full bandwidth in mm.
+  number_of_rays : int
+    Number of wavelengths (rays) of the RainbowBeam light source.
+  height_separation : float
+    Height separation in mm between the incoming and the outgoing beam.
+  first_propagation : float
+    Length in mm of the first propagation to the first grating.
+  distance_roof_top_grating : float
+    Distance in mm between the second grating and the rooftop mirror.
+  grating1_dimensions, grating2_dimensions : tuple
+    (width, height, thickness) of the gratings in mm.
+
+  Returns
+  -------
+  composition : Composition
+  """
   v = lambda_mid/grating_const
   s = np.sin(separation_angle)
   c = np.cos(separation_angle)

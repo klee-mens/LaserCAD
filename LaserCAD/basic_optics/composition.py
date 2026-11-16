@@ -21,10 +21,14 @@ from scipy.constants import speed_of_light
 
 
 class Composition(Geom_Object):
-  """
-  Komposition von Elementen, besitzt optical Axis die mit jedem Element und
-  jedem .propagate erweitert wird und sequence, die die Reihenfolge der
-  Elemente angibt (meist trivial außer bei multipass)
+  """A sequence of optical elements placed along an optical axis.
+
+  The optical axis grows with each added element and each `propagate`. The
+  `sequence` gives the order of the elements (usually trivial, except in
+  multipass setups where elements are hit several times).
+
+  Typical use: set_light_source(beam), then alternating propagate(x) and
+  add_on_axis(element); finally draw().
   """
   def __init__(self, name="NewComposition", **kwargs):
     super().__init__(name=name,**kwargs)
@@ -47,14 +51,12 @@ class Composition(Geom_Object):
 
 
   def propagate(self, x):
-    """
-    propagiert das System um x mm vorwärts, updated damit opt_axis,
-    self._matrix, ersetzt früheres add(Propagation)
+    """Propagate the system by <x> mm, updating the optical axis and the matrix (replaces the former add(Propagation)).
 
     Parameters
     ----------
     x : float
-      Länge um die propagiert wird
+      length in mm
     """
     end_of_axis = self._optical_axis[-1]
     end_of_axis.length += x
@@ -75,11 +77,10 @@ class Composition(Geom_Object):
     self._last_prop = 0 #endet mit Element
 
   def add_on_axis(self, item):
-    """
-    fügt <item> an der Stelle _last_geom (und damit) auf der optAx ein,
-    checkt ob nicht ausversehen doppelt eingefügt, ändert namen, geom
+    """Add <item> at the end of the optical axis (the last geom).
 
-    updatet _matrix, opt_axis
+    Checks that the item is not added twice by accident, changes its name and
+    geom, and updates the matrix and the optical axis.
     """
     item.set_geom(self.last_geom())
     if hasattr(item, "next_ray"):
@@ -92,11 +93,7 @@ class Composition(Geom_Object):
       self.non_opticals.append(item)
 
   def add_fixed_elm(self, item):
-    """
-    fügt <item> genau an der Stelle <item.get_geom()> ein
-
-    updated entsprechend add_on_axis
-    """
+    """Add <item> exactly at <item.get_geom()>. Updates like add_on_axis."""
     if hasattr(item, "next_ray"):
       self.__add_raw(item)
     else:
@@ -344,10 +341,9 @@ class Composition(Geom_Object):
                               self._beams_part, self._alignment_post_part]
 
   def set_light_source(self, ls):
-    """
-    setzt neue Lightsource (meistens ein Beam) für die Composition und passt
-    deren Geom und Namen an
-    danach werden _beams[] und raygroups[] neu initialisiert
+    """Set a new light source (usually a Beam) for the Composition and adapt its geometry and name.
+
+    Afterwards the lists of beams and ray groups are re-initialized.
     """
     self._lightsource = ls
     ls.set_geom(self.get_geom())
@@ -382,10 +378,7 @@ class Composition(Geom_Object):
 
 
   def _pos_changed(self, old_pos, new_pos):
-    """
-    wird aufgerufen, wen die Position von <self> verändert wird
-    ändert die Position aller __rays mit
-    """
+    """Called when the position of <self> is changed; moves all sub-objects along."""
     super()._pos_changed(old_pos, new_pos)
     self._rearange_subobjects_pos(old_pos, new_pos, self._elements)
     self._rearange_subobjects_pos(old_pos, new_pos, [self._lightsource]) #sonst wird ls doppelt geshifted
@@ -394,12 +387,7 @@ class Composition(Geom_Object):
     self._rearange_subobjects_pos(old_pos, new_pos, self.non_opticals)
 
   def _axes_changed(self, old_axes, new_axes):
-    """
-    wird aufgerufen, wen die axese von <self> verändert wird
-    dreht die axese aller __rays mit
-
-    dreht außerdem das eigene Koordiantensystem
-    """
+    """Called when the axes of <self> are changed; rotates all sub-objects and the own coordinate system."""
     super()._axes_changed(old_axes, new_axes)
     self._rearange_subobjects_axes(old_axes, new_axes, [self._lightsource]) #sonst wird ls doppelt geshifted
     self._rearange_subobjects_axes(old_axes, new_axes, self._elements)

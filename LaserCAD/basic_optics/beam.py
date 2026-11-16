@@ -77,11 +77,7 @@ class Beam(Geom_Object):
     rays[0].name = self.name + "_middle_ray"
 
   def radius_angle(self):
-    """
-    berechnet aus 2 Strahlen inn und outer den zugehörigen beam Kegel mit
-    radius r und öffnungswinkel alpha und zwar von hinten durch die Brust
-    ins Auge
-    """
+    """Compute the beam cone (radius r and opening angle alpha) from the inner and outer ray of the beam."""
     inner = self._rays[0]
     outer = self._rays[1]
     v0 = inner.normal
@@ -139,24 +135,14 @@ class Beam(Geom_Object):
       ray.draw_dict["color"] = color
 
   def _pos_changed(self, old_pos, new_pos):
-    """
-    wird aufgerufen, wen die Position von <self> verändert wird
-    ändert die Position aller __rays mit
-
-    is called when the position of <self> is changed
+    """is called when the position of <self> is changed
     changes the position of all __rays with
     """
     super()._pos_changed(old_pos, new_pos)
     self._rearange_subobjects_pos(old_pos, new_pos, self._rays)
 
   def _axes_changed(self, old_axes, new_axes):
-    """
-    wird aufgerufen, wen das KooSys <_axes> von <self> verändert wird
-    dreht die KooSys aller __rays mit
-
-    dreht außerdem das eigene Koordiantensystem
-
-    is called when the KooSys <_axes> is changed from <self>.
+    """is called when the KooSys <_axes> is changed from <self>.
     rotates the KooSys of all __rays as well
 
     also rotates the own coordiante system
@@ -199,6 +185,15 @@ class Beam(Geom_Object):
 
 
 class SquareBeam(Beam):
+  """Beam whose rays form a square grid (for spot diagrams and aberrations).
+
+  Parameters
+  ----------
+  radius : float
+    Half the width of the square in mm.
+  ray_in_line : int
+    Number of rays per line of the grid.
+  """
   def __init__(self, radius=1, name="NewBeam", wavelength=1030E-6, ray_in_line = 3, **kwargs):
     super().__init__(name=name, radius=radius, wavelength=wavelength, **kwargs)
     self._ray_in_line = ray_in_line
@@ -241,6 +236,15 @@ class SquareBeam(Beam):
 
 
 class CircularRayBeam(Beam):
+  """Beam whose rays are arranged on concentric rings (for spot diagrams).
+
+  Parameters
+  ----------
+  radius : float
+    Radius of the outermost ring in mm.
+  ring_number : int
+    Number of rings around the central ray.
+  """
   def __init__(self, radius=1, name="NewBeam", wavelength=1030E-6, ring_number = 2, **kwargs):
     super().__init__(name=name, **kwargs)
     self._radius = radius
@@ -298,6 +302,19 @@ class CircularRayBeam(Beam):
 # import matplotlib.pyplot as plt
 
 class RainbowBeam(Beam):
+  """Group of rays with different wavelengths, used for dispersive setups.
+
+  Parameters
+  ----------
+  wavelength : float
+    Central wavelength in mm (default 1030e-6, i.e. 1030 nm).
+  bandwidth : float
+    Full spectral width in mm (default 10e-6, i.e. 10 nm).
+  ray_count : int
+    Number of rays, the middle ray has the central wavelength.
+  thickness : float
+    Line thickness used when drawing the rays.
+  """
   def __init__(self,  name="NewRainbow", wavelength=1030E-6, bandwidth=10E-6, ray_count=11, thickness=2,**kwargs):
     super().__init__(name=name, wavelength=wavelength, **kwargs)
     self._ray_count = ray_count
@@ -356,6 +373,17 @@ class Ray_Distribution(SquareBeam):
 
 class Gaussian_Beam(Ray):
 # class Gaussian_beam(Geom_Object):
+  """Beam described by its complex Gaussian beam parameter q.
+
+  Parameters
+  ----------
+  radius : float
+    Beam radius in mm at the position of the beam.
+  angle : float
+    Half divergence angle in rad (negative: converging).
+  wavelength : float
+    Wavelength in mm.
+  """
   def __init__(self, radius=10, angle=0.02, wavelength=1030E-6, name="NewGassian",  **kwargs):
     super().__init__(name=name, **kwargs)
     z0 = wavelength/(np.pi*np.tan(abs(angle))*np.tan(abs(angle)))

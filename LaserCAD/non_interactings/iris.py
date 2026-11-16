@@ -11,6 +11,10 @@ from ..basic_optics import Component, Composed_Mount
 
 class Iris(Component):
 
+  """Iris diaphragm. The aperture is only drawn, rays are not clipped.
+
+  Non-interacting component: it is drawn (with its mount) but does not change the rays.
+  """
   def __init__(self, name = "New_iris", **kwargs):
     super().__init__(name, **kwargs)
     stl_file=thisfolder+"misc_meshes/Iris_ID12M.stl"

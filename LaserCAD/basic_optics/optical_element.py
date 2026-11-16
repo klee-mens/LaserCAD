@@ -18,19 +18,16 @@ from .. freecad_models import freecad_da
 
 
 class Opt_Element(Component):
-  """
-  Basisklasse aller "dünnen" optischen Elemente wie z.B. Linse
-  "dünn" heißt, nur der Winkel (normal) vom Strahl wird geändert, nicht seine
-  Höhe (pos)
-  die Oberfläche wird als ebene im R3 angenommen
-  erbt von Geom_Obj
-  führt neben pos, normal auch Matrix für geometrische Optik ein
-  neue Methoden:
-    next_ray(ray)
-    reflection(ray)
-    refraction(ray)
-    diffraction(ray) ?
+  """Base class of all "thin" optical elements, e.g. a lens.
 
+  "Thin" means that only the direction (normal) of a ray is changed, not its
+  height (pos). The surface is assumed to be a plane in R^3. Inherits from
+  Component (and thus Geom_Object) and adds the matrix <_matrix> for
+  geometrical optics (ABCD).
+
+  Important methods
+  -----------------
+  next_ray(ray), next_beam(beam), reflection(ray), refraction(ray)
   """
   def __init__(self, **kwargs):
     super().__init__(**kwargs)
@@ -46,18 +43,16 @@ class Opt_Element(Component):
     return np.array(kmatrix)
 
   def intersection(self, ray):
-    """
-    ermittelt den Schnittpunkt vom Strahl mit der ebene eines opt Elements
+    """Return the intersection point of <ray> with the plane of the element.
 
     Parameters
     ----------
-    element : Geom_Object
-      Element mit dessen Ebene der Schnittpunkt berechnet wird
+    ray : Ray
+      ray that hits the element
 
     Returns
     -------
-    endpoint
-
+    endpoint : 3D-array
     """
     # delta_p = self.pos - ray.pos 
     # s = np.sum(delta_p*ray.normal) / np.sum(self.normal * ray.normal)
@@ -66,16 +61,17 @@ class Opt_Element(Component):
     return ray.intersection(self)
 
   def next_ray(self, ray):
-    """
-    erzeugt den durch das opt Elem veränderten Strahl und gibt ihn zurück
+    """Return the ray after the element.
+
     Parameters
     ----------
     ray : Ray
-      Eingangsstrahl
+      input ray
+
     Returns
     -------
     ray2 : Ray
-      Ausgangsstrahl
+      output ray
     """
     return self.just_pass_through(ray)
 
@@ -156,16 +152,15 @@ class Opt_Element(Component):
   
 
   def next_beam(self, beam):
-    """
-    erzeugt den durch das opt Elem veränderten Beam und gibt ihn zurück
-    und zwar ultra lazy
+    """Return the beam after the element, computed ray by ray with next_ray.
+
     Parameters
     ----------
-    beam : Beam()
+    beam : Beam
 
     Returns
     -------
-    next Beam()
+    next Beam
     """
     if type(beam) == type(Gaussian_Beam()):
       return self.next_gauss(beam)

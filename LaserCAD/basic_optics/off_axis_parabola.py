@@ -16,6 +16,20 @@ from copy import deepcopy
 
 
 class Off_Axis_Parabola(Opt_Element):
+  """Off-axis parabolic mirror.
+
+  Parameters
+  ----------
+  reflected_focal_length : float
+    Distance in mm from the mirror surface to the focus (default 2 inch).
+  angle : float
+    Deflection angle of the beam in degrees (default 90).
+  theta : float
+    Rotation of the mirror around the beam axis in degrees.
+  colim : bool
+    False: the mirror focuses an incoming collimated beam, True: the mirror
+    collimates a beam that comes from its focus.
+  """
   def __init__(self, name="NewFocusOAP", reflected_focal_length=2*inch, 
                angle=90, theta=0, colim=False, **kwargs):
     super().__init__(name=name, **kwargs)
