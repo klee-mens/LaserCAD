@@ -1,21 +1,20 @@
 # Documentation and Examples
 
-The documentation tries to follow the approach of the [Divio Documentation System](https://documentation.divio.com) .
-That means it should consist of 4 parts:
-1. Tutorials are in the tutorial folder, and the markdown sheet is here. They 
-are little scripts for the introduction and aim to be Learning oriented and 
-help to get something started in LaserCAD.
-2. How-To-Guides lying around here. They are problem-oriented and show the
-construction of some more advanced assemblies, with more explanation in between.
-3. Reference: information oriented and shows the code and its interface.
-Honestly, there are some generic tools for this, but I don't want to do this.
-You can look in the code, it is modularized, mostly verbose and commented.
-You can also find a lot of it in the:
-4. Discussion and Explanation, which is understanding-oriented and shows the
-object structure of LAserCAD, together with some thoughts about the why and how.
+The documentation follows the approach of the
+[Divio Documentation System](https://docs.divio.com/documentation-system/) and
+consists of four parts:
 
-In short: Just try some tutorial code snippets and one of the how-to-guides
-and horse around.
+1. **Tutorials** (learning oriented): little scripts in `tutorial/` and the
+   accompanying text in `TutorialLaserCAD.md`. Start here.
+2. **How-to guides** (problem oriented): `how_to_build_a_new_element.md`,
+   `how_to_build_a_stretcher.md` and `how_to_build_a_white_cell.md` show the
+   construction of more advanced setups step by step.
+3. **Reference** (information oriented): the interface of the classes. The code
+   itself is modularized and commented; a separate reference is part of
+   `docs/`.
+4. **Discussion and explanation** (understanding oriented): `docs/` describes
+   the object structure of LaserCAD together with some thoughts about the why
+   and how.
 
-In very short for members of my RLP group: Just call me. Seriously, it is that
-simple. 47825. I'm there :)
+In short: try some tutorial snippets and one of the how-to guides and play
+around.

@@ -42,8 +42,6 @@ KNOWN_BROKEN_TUTORIALS = {
   "8_HeTutorial.py":
     "ruft Beam.make_circular_distribution auf, die Methode existiert nicht "
     "mehr (make_cone_distribution?)",
-  "9_GUI.py":
-    "importiert LaserCAD.GUI, dieses Paket gibt es im Repository nicht",
 }
 
 
