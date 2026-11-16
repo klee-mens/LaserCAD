@@ -35,14 +35,7 @@ NOT_A_DEMO = {"run_all_tests.py"}
 # Tutorial-Skripte, die aktuell nachweislich fehlschlagen (Stand der Analyse).
 # Sobald eines repariert ist, schlägt der Test mit einer entsprechenden Meldung
 # an, und der Eintrag kann hier gelöscht werden.
-KNOWN_BROKEN_TUTORIALS = {
-  "6_LinearResonator.py":
-    "importiert Crystal aus LaserCAD.basic_optics, die Klasse liegt aber in "
-    "LaserCAD.non_interactings",
-  "8_HeTutorial.py":
-    "ruft Beam.make_circular_distribution auf, die Methode existiert nicht "
-    "mehr (make_cone_distribution?)",
-}
+KNOWN_BROKEN_TUTORIALS = {}
 
 
 # Text der Warnung aus Geom_Object.__init__
@@ -50,14 +43,8 @@ UNKNOWN_KEYWORD_MARKER = "unknown keyword argument"
 
 # Tutorial-Skripte, die (noch) unbekannte Keywords übergeben und dadurch nicht
 # das zeigen, was sie ankündigen. Gehören in die Überarbeitung der Doku.
-KNOWN_IGNORED_KEYWORDS_TUTORIALS = {
-  "3_RaysAndBeams.py":
-    "RainbowBeam(spatial_chirp=...): diesen Parameter gibt es nicht",
-  "4_LensesAndMirrors.py":
-    "Beam(distribution=...): Beam hat keinen solchen Parameter (zeigt die "
-    "Standardverteilung statt square/circular, siehe SquareBeam, "
-    "CircularRayBeam)",
-}
+KNOWN_IGNORED_KEYWORDS_TUTORIALS = {}
+
 
 
 def run_script(path):

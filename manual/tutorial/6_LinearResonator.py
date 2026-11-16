@@ -21,7 +21,6 @@ from LaserCAD.freecad_models import clear_doc, setview, freecad_da
 from LaserCAD.basic_optics import Mirror, Beam, Composition, inch
 from LaserCAD.basic_optics import Curved_Mirror, Ray, Component
 from LaserCAD.basic_optics import LinearResonator, Lens
-from LaserCAD.basic_optics import Crystal
 from LaserCAD.non_interactings import Faraday_Isolator, Pockels_Cell, Lambda_Plate
 
 

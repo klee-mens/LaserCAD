@@ -19,6 +19,7 @@ if not pfad in sys.path:
 
 from LaserCAD.basic_optics import Mirror, Curved_Mirror, Lens, Beam, Ray
 from LaserCAD.basic_optics import Intersection_plane,Cylindrical_Mirror
+from LaserCAD.basic_optics import SquareBeam, CircularRayBeam
 from LaserCAD.freecad_models import freecad_da, clear_doc, setview
 
 
@@ -112,7 +113,7 @@ print()
 The 'Intersection_plane' can set up a plane and is primarily used to show a spot 
 diagram of the beam on that plane. 
 """
-b13 = Beam(radius=3,angle=0,distribution="square")
+b13 = SquareBeam(radius=3)
 b13.pos += (0,300,0)
 
 mir3 = Curved_Mirror(radius=400,phi=90)
@@ -141,7 +142,7 @@ Besides, an anisotropic mirror named as
 'Cylindrical_Mirror' is a special mirror with some certain radius in one 
 direction and flat in the other.
 """
-b14 = Beam(radius=5,distribution="circular")
+b14 = CircularRayBeam(radius=5)
 b14.pos += (0,500,0)
 
 mir4 = Cylindrical_Mirror(radius=200,phi=90)

@@ -47,10 +47,11 @@ print()
 
 """
 The class 'Beam' is the most common light source and describes 3D light bundles.
-Beam has three distributions: Cone, square, and circular. As for the
-cone distribution (default setting of a beam) shows some cylinders and cones
-to represent light beams. The square and circular distributions are some ray
-groups that have different shapes.
+There are several beam classes with different ray distributions: the plain
+'Beam' (default) uses the cone distribution and shows some cylinders and cones
+to represent light beams. 'SquareBeam' and 'CircularRayBeam' are ray groups on
+a square or circular grid, 'RainbowBeam' consists of rays with different
+wavelengths and 'Gaussian_Beam' is a ray distribution for a Gaussian beam.
 """
 b1 = Beam()
 b1.pos += (0,100,0)
@@ -62,7 +63,7 @@ print()
 
 b2 = SquareBeam()
 b2.pos += (0,-100,0)
-b2.make_square_distribution(10)
+b2.make_square_distribution(10)   # 10 rays per line
 b2.draw()
 
 b3 = CircularRayBeam()
@@ -74,8 +75,7 @@ b4 = Gaussian_Beam()
 b4.pos += (0,-300,0)
 b4.draw()
 
-b6= RainbowBeam(spatial_chirp=1E-15)
-# b6.make_rainbow_distribution(spatial_chirp=0.1)
+b6 = RainbowBeam()
 b6.pos += (0,-400,0)
 b6.draw()
 

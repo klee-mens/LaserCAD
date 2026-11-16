@@ -266,10 +266,11 @@ Here, you can see a demonstration of the Ray and Beam class.
 The class 'Ray' describes the one dimensional ray and only considers the
 position and direction.
 The class 'Beam' is the most common light source and describes 3D light bundles.
-Beam has three distributions: Cone, square, and circular. As for the
-cone distribution (default setting of a beam) shows some cylinders and cones
-to represent light beams. The square and circular distributions are some ray
-groups that have different shapes.
+There are several beam classes with different ray distributions: the plain
+'Beam' (default) uses the cone distribution and shows some cylinders and cones
+to represent light beams. 'SquareBeam' and 'CircularRayBeam' are ray groups on
+a square or circular grid, 'RainbowBeam' consists of rays with different
+wavelengths and 'Gaussian_Beam' is a ray distribution for a Gaussian beam.
 ```python
 
 from LaserCAD.basic_optics import Mirror, Curved_Mirror, Lens, Beam, Ray, Gaussian_Beam
@@ -297,7 +298,7 @@ print()
 
 b2 = Beam()
 b2.pos += (0,-100,0)
-b2.make_square_distribution(10)
+b2.make_square_distribution(10)   # 10 rays per line
 b2.draw()
 
 b3 = Beam()
@@ -353,7 +354,7 @@ print(b5.get_all_rays())
 ```
 Output:
 ```
-Beam(radius=1.0, anlge=0.0, distribution='cone', ame="NewBeam", pos=[  7.,  -4., 100.], normal=[0.70711, 0.70711, 0.     ])
+Beam(radius=1.0, angle=0.0, distribution='cone', name="NewBeam", pos=[  7.,  -4., 100.], normal=[0.70711, 0.70711, 0.     ])
 [Ray(name="NewBeam_inner_Ray", pos=[  7.,  -4., 100.], normal=[0.70711, 0.70711, 0.     ]), Ray(name="NewBeam_outer_Ray0", pos=[  7.,  -4., 101.], normal=[0.70711, 0.70711, 0.     ])]
 ```
 As you see, any change in position and axes of the beam will transform its
@@ -408,6 +409,7 @@ if not pfad in sys.path:
 
 from LaserCAD.basic_optics import Mirror, Curved_Mirror, Lens, Beam, Ray
 from LaserCAD.basic_optics import Intersection_plane,Cylindrical_Mirror
+from LaserCAD.basic_optics import SquareBeam, CircularRayBeam
 from LaserCAD.freecad_models import freecad_da, clear_doc, setview
 
 # =============================================================================
@@ -467,7 +469,7 @@ b22.draw()
 print()
 print()
 
-b13 = Beam(radius=3,angle=0,distribution="square")
+b13 = SquareBeam(radius=3)
 b13.pos += (0,300,0)
 
 mir3 = Curved_Mirror(radius=400,phi=90)
@@ -489,7 +491,7 @@ ip.spot_diagram(b33)
 print()
 print()
 
-b14 = Beam(radius=5,distribution="circular")
+b14 = CircularRayBeam(radius=5)
 b14.pos += (0,500,0)
 
 mir4 = Cylindrical_Mirror(radius=200,phi=90)
@@ -615,7 +617,6 @@ from LaserCAD.freecad_models import clear_doc, setview, freecad_da
 from LaserCAD.basic_optics import Mirror, Beam, Composition, inch
 from LaserCAD.basic_optics import Curved_Mirror, Ray, Component
 from LaserCAD.basic_optics import LinearResonator, Lens
-from LaserCAD.basic_optics import Crystal
 from LaserCAD.non_interactings import Faraday_Isolator, Pockels_Cell, Lambda_Plate
 
 
