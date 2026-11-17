@@ -16,6 +16,8 @@ import unittest
 from LaserCAD.basic_optics import export_to_TikZ
 from LaserCAD.basic_optics.composition import make_unique_names
 from LaserCAD.moduls import Make_Telescope
+from LaserCAD.basic_optics import Composition, Lens, Mirror
+from LaserCAD.non_interactings import Camera
 
 
 def export(setup, **kwargs):
@@ -90,6 +92,49 @@ class TestExportTelescope(unittest.TestCase):
     self.assertIn("\\coordinate (Teleskop_NewLens_2) at (3.00, 0.00);", tex)
     self.assertRegex(tex, r"\\convexlens\[angle=0, width=0.66\] at \(Teleskop_NewLens_1\)")
     self.assertRegex(tex, r"\\convexlens\[angle=0, width=0.67\] at \(Teleskop_NewLens_2\)")
+
+
+def small_setup():
+  """Composition along x: lens "Focus" at 100 mm, camera "Cam" at 200 mm, end at 300 mm."""
+  setup = Composition(name="Small")
+  setup.propagate(100)
+  setup.add_on_axis(Lens(name="Focus", f=100))
+  setup.propagate(100)
+  setup.add_on_axis(Camera(name="Cam"))
+  setup.propagate(100)
+  return setup
+
+
+class TestExportClassDetectionAndScale(unittest.TestCase):
+
+  def test_lens_is_detected_by_class_not_only_by_name(self):
+    tex, _ = export(small_setup())
+    self.assertRegex(tex, r"\\convexlens\[angle=0, width=[0-9.]+\] at \(Small_Focus\)")
+
+  def test_camera_is_detected_by_class_not_only_by_name(self):
+    tex, _ = export(small_setup())
+    self.assertRegex(tex, r"\\camera\[angle=[-0-9.]+\] at \(Cam\)")
+
+  def test_default_scale_for_all_coordinates(self):
+    tex, _ = export(small_setup(), draw_rays=True)
+    self.assertIn("\\coordinate (Small_Focus) at (1.00, 0.00);", tex)
+    self.assertIn("\\coordinate (Cam) at (2.00, 0.00);", tex)
+    self.assertIn("(3.00, 0.00);", tex)
+
+  def test_scale_is_used_for_non_opticals_and_end_point(self):
+    tex, _ = export(small_setup(), draw_rays=True, draw_beams=True, scale=5)
+    self.assertIn("\\coordinate (Small_Focus) at (2.00, 0.00);", tex)
+    self.assertIn("\\coordinate (Cam) at (4.00, 0.00);", tex)
+    self.assertIn("--(6.00, 0.00);", tex)
+    self.assertIn("{6.00, 0.00}", tex)
+
+  def test_mirror_is_still_drawn_as_mirror(self):
+    setup = Composition(name="M")
+    setup.propagate(100)
+    setup.add_on_axis(Mirror(phi=90))
+    setup.propagate(50)
+    tex, _ = export(setup)
+    self.assertRegex(tex, r"\\mirror\[")
 
 
 class TestMakeUniqueNames(unittest.TestCase):

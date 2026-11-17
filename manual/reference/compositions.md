@@ -25,29 +25,29 @@ add_on_axis(element); finally draw().
 
 | Member | Description |
 |---|---|
-| `Kostenbauder_matrix(reference_ray=None, dimension=4, reference_axis='z', text_explanation=False)` |  |
+| `Kostenbauder_matrix(reference_ray=None, dimension=4, reference_axis='z', text_explanation=False)` | Compute the Kostenbauder matrix of the composition numerically. |
 | `add_fixed_elm(item)` | Add <item> exactly at <item.get_geom()>. Updates like add_on_axis. |
 | `add_on_axis(item)` | Add <item> at the end of the optical axis (the last geom). |
-| `add_supcomposition_fixed(subcomp)` |  |
-| `add_supcomposition_on_axis(subcomp)` |  |
-| `compute_beams(external_source=None)` |  |
-| `draw()` | function to display the object checks whether freecad is available as backend and then calls the corresponding draw function |
-| `draw_alignment_posts()` |  |
-| `draw_beams()` |  |
-| `draw_elements()` |  |
-| `draw_mounts()` |  |
-| `get_sequence()` |  |
-| `last_geom()` |  |
+| `add_supcomposition_fixed(subcomp)` | Add all optical and non-optical elements of <subcomp> as fixed elements. |
+| `add_supcomposition_on_axis(subcomp)` | Place <subcomp> at the end of the optical axis and add all its elements as fixed elements. |
+| `compute_beams(external_source=None)` | Propagate the light source through the elements in the sequence. |
+| `draw()` | Draw elements, beams and mounts of the composition. |
+| `draw_alignment_posts()` | Draw an alignment holder at the position of every optical element (FreeCAD only). |
+| `draw_beams()` | Compute the beams, draw them and group them in one part. |
+| `draw_elements()` | Draw all optical and non-optical elements and group them in one part. |
+| `draw_mounts()` | Draw the mounts of all elements and group them in one part. |
+| `get_sequence()` | Return a copy of the sequence (indices of the elements in the order the light passes them). |
+| `last_geom()` | Return the geom (end point, axes) at the end of the current optical axis. |
 | `matrix()` | computes the optical matrix of the system each iteration consists of a propagation given by the length of the nth ray of the optical_axis followed by the matrix multiplication with the seq[n] element |
-| `new_catalogue_entry(item)` |  |
-| `optical_path_length()` |  |
-| `post_positions(verbose=False, print_errors=True)` |  |
-| `posts_pq_on_table(verbose=True)` |  |
+| `new_catalogue_entry(item)` | Return a new unique name for <item> and register it in the catalogue. |
+| `optical_path_length()` | Return the summed length of all segments of the optical axis in mm. |
+| `post_positions(verbose=False, print_errors=True)` | Return the xy positions of the posts of all elements. |
+| `posts_pq_on_table(verbose=True)` | Return the post positions as hole coordinates (p, q) plus offset on the optical table. |
 | `propagate(x)` | Propagate the system by <x> mm, updating the optical axis and the matrix (replaces the former add(Propagation)). |
-| `recompute_optical_axis()` |  |
-| `redefine_optical_axis(ray)` |  |
+| `recompute_optical_axis()` | Trace the first ray of the optical axis again through all elements in the sequence. |
+| `redefine_optical_axis(ray)` | Start the optical axis anew with a copy of <ray> and recompute it. |
 | `set_light_source(ls)` | Set a new light source (usually a Beam) for the Composition and adapt its geometry and name. |
-| `set_sequence(seq)` |  |
+| `set_sequence(seq)` | Set the order in which the light passes the elements. |
 
 ### CircularResonator
 
@@ -63,8 +63,8 @@ The last mirror is oriented so that the beam returns to the first element.
 
 | Member | Description |
 |---|---|
-| `Setting_last_element()` |  |
-| `compute_eigenmode(start_index=0)` | computes the gaussian TEM00 eigenmode from the matrix law |
+| `Setting_last_element()` | Turn the last element so that it reflects from the second last to the first element. Returns -1 if it is not a Mirror. |
+| `compute_eigenmode(start_index=0)` | Compute the eigenmode of the ring resonator and use it as light source. |
 
 ### LinearResonator
 
@@ -82,14 +82,14 @@ add_outputcoupler / set_outputcoupler: sets  the OC (type=Mirror)
 
 | Member | Description |
 |---|---|
-| `add_output_coupler(item)` |  |
-| `compute_beams(external_source=None)` |  |
+| `add_output_coupler(item)` | Add the mirror <item> on the axis and mark it as output coupler. Returns -1 if <item> is not a Mirror. |
+| `compute_beams(external_source=None)` | Compute the eigenmode and the Gaussian beams between the end mirrors (drawn with the Gaussian model). |
 | `compute_eigenmode(start_index=0)` | computes the gaussian TEM00 eigenmode from the matrix law |
-| `output_beam()` |  |
+| `output_beam()` | Compute the beams and return the beam that hits the output coupler. |
 | `set_input_coupler_index(index, forward=True)` | sets the index for the input coupler if the resonator is used as an regen- erative amplifier. (Should best be used after all elements have been inserted) The optical Element[index] becomes the input coupler meaning that the next beams geom will be GEOM0 if forward is true. If not, than the beam before will be the input beam with inverted geom. All other elements will be turned accordingly and afterwards the geom of the whole resonator is reseted to GEOM0 |
-| `set_output_coupler_index(index)` |  |
+| `set_output_coupler_index(index)` | Mark the element with <index> as output coupler. Returns -1 if it is not a Mirror. |
 | `set_wavelength(wavelength)` | sets the own wavelength and thus the one of the lightsource and eigenmode PARAMETER: wavelength in mm |
-| `transform_gauss_to_cone_beams()` |  |
+| `transform_gauss_to_cone_beams()` | Compute the beams and return them as cone beams (see Gaussian_Beam.transform_to_cone_beam). |
 
 ### Multi_Beamline_Composition
 
@@ -108,15 +108,15 @@ for a Composition.
 
 | Member | Description |
 |---|---|
-| `add_fixed_elm(item)` |  |
-| `add_new_line(beam)` |  |
-| `add_on_axis(item)` |  |
-| `add_supcomposition_fixed(scomb)` |  |
-| `add_supcomposition_on_axis(scomp)` |  |
-| `change_acitve_index(index)` |  |
-| `compute_beams()` |  |
-| `draw()` | function to display the object checks whether freecad is available as backend and then calls the corresponding draw function |
-| `get_acitve_index()` |  |
-| `propagate(x)` |  |
-| `recompute_optical_axis()` |  |
+| `add_fixed_elm(item)` | Add <item> as fixed element to the active beam line. |
+| `add_new_line(beam)` | Start a new beam line with <beam> as light source and make it the active one. |
+| `add_on_axis(item)` | Add <item> on the axis of the active beam line. |
+| `add_supcomposition_fixed(scomb)` | Add the elements of <scomb> as fixed elements to the active beam line. |
+| `add_supcomposition_on_axis(scomp)` | Add the elements of <scomp> on the axis of the active beam line. |
+| `change_acitve_index(index)` | Make the beam line with <index> the active one. |
+| `compute_beams()` | Compute the beams of all beam lines. |
+| `draw()` | Draw all beam lines. |
+| `get_acitve_index()` | Return the index of the active beam line. |
+| `propagate(x)` | Propagate the active beam line by <x> mm. |
+| `recompute_optical_axis()` | Recompute the optical axis of all beam lines. |
 | `set_light_source(beam)` | only works correctly if set directly after initialization |

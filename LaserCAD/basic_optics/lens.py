@@ -38,6 +38,7 @@ class Lens(Opt_Element):
 
   @property
   def focal_length(self):
+    """Focal length in mm; 0 means no refraction. Setting it updates the ABCD matrix."""
     return self.__f
   @focal_length.setter
   def focal_length(self, x):
@@ -92,6 +93,7 @@ class Cylindrical_Lens(Opt_Element):
 
   @property
   def focal_length(self):
+    """Focal length in mm in the focusing plane; 0 means no refraction. Setting it updates the ABCD matrix."""
     return self.__f
   @focal_length.setter
   def focal_length(self, x):
@@ -102,6 +104,7 @@ class Cylindrical_Lens(Opt_Element):
       self._matrix[1,0] = -1/x
 
   def update_draw_dict(self):
+    """Add size, color and orientation (horizontal or vertical focusing plane) to <draw_dict>."""
     super().update_draw_dict()
     self.draw_dict["dia"]=self.aperture
     self.draw_dict["Radius"] = - 300
@@ -202,6 +205,7 @@ class Thicklens(Opt_Element):
     self.set_Mount()
 
   def set_Mount(self):
+    """Set the default mount and shift it along the normal to the center (biconvex) or the back (plano-convex) of the lens."""
     self.set_mount_to_default()
     if self.biconvex:
       self.Mount.pos += self.normal * (self.thickness/2 - 4.5)
@@ -209,6 +213,10 @@ class Thicklens(Opt_Element):
       self.Mount.pos += self.normal * (self.thickness-9)
 
   def calc_thickness(self):
+    """Return the center thickness from edge thickness, focal length, refractive index and aperture.
+
+    For negative focal lengths the edge thickness is returned.
+    """
     if self.focal_length < 0:
       return self.edge_thickness
     # Calculate R1 from the edge thickness, focal length, refractive index and aperture
@@ -224,6 +232,7 @@ class Thicklens(Opt_Element):
 
 
   def radius_function(self, R):
+    """Thick lens equation 1/f - (n-1)(2/R - (n-1)d/(nR^2)) of a symmetric biconvex lens; its root is the radius R."""
     f = self.focal_length
     delta = self.edge_thickness
     n = self.refractive_index
@@ -237,6 +246,7 @@ class Thicklens(Opt_Element):
       return lhs - rhs
 
   def radius1(self):
+    """Return the radius of curvature of the first surface in mm."""
     f = self.focal_length
     d = self.thickness
     n = self.refractive_index
@@ -246,6 +256,7 @@ class Thicklens(Opt_Element):
       return (n-1)*(f+np.sign(f)*np.sqrt(f**2-f*d/n))
 
   def radius2(self):
+    """Return the radius of curvature of the second surface in mm (0 = plane for plano-convex lenses)."""
     if not self.biconvex:
       return 0
     else:
@@ -330,6 +341,7 @@ class Thicklens(Opt_Element):
 
 
   def next_ray(self, ray):
+    """Return the ray behind the lens, refracted at both surfaces."""
     mid_ray = self.refraction(ray, R=self.radius1(), from_material=False)
     self.pos += self.normal * self.thickness
     out_ray = self.refraction(mid_ray, R=self.radius2(), from_material=True)
@@ -340,6 +352,16 @@ class Thicklens(Opt_Element):
 
   def refraction(self, ray, R, from_material = False):
     # See Springer Handbook of Lasers and Optics page 68
+    """Return <ray> refracted at one spherical surface of the lens.
+
+    Parameters
+    ----------
+    ray : Ray
+    R : float
+      Radius of curvature of the surface, 0 for a plane surface.
+    from_material : bool
+      True if the ray leaves the glass, False if it enters it.
+    """
     ray2 = deepcopy(ray)
     ray2.pos = self.intersection(ray, R)
     center = self.pos + self.normal * R
@@ -359,6 +381,7 @@ class Thicklens(Opt_Element):
     return ray2
 
   def update_draw_dict(self):
+    """Add the radii of both surfaces to <draw_dict>."""
     super().update_draw_dict()
     radius = self.radius1()
     self.draw_dict["Radius1"] = radius

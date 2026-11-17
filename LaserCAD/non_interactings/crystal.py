@@ -78,6 +78,7 @@ class Crystal(Component):
     ))
 
   def update_draw_dict(self):
+    """Add thickness and, for rectangular crystals, height and width to <draw_dict>."""
     super().update_draw_dict()
     if self.shape == "rectangular":
       self.draw_dict["height"] = self.height
@@ -133,6 +134,7 @@ class Crystal_Unit_Mount(Unit_Mount):
     self._update_docking_obj()
 
   def draw_freecad(self, **kwargs):
+    """Draw the crystal holder with the outer and inner dimensions."""
     self.update_draw_dict()
     self.draw_dict.update({
       "shape": self.shape,

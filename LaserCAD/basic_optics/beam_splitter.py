@@ -112,6 +112,10 @@ class ThickBeamsplitter(ThinBeamsplitter):
     self.draw_dict["color"] = (0.2, 0.8, 0.5) #cosmetic
 
   def next_ray(self, ray):
+    """Return the reflected ray or, if transmission is True, the ray after refraction at both surfaces.
+
+    The side from which the ray comes is taken into account.
+    """
     if self.transmission:
       surface = Refractive_plane(relative_refractive_index=self.refractive_index)
       surface.set_geom(self.get_geom())
@@ -153,12 +157,14 @@ class TFP56(ThickBeamsplitter):
     self.update_mount()
 
   def update_phi(self):
+    """Set the deflection angle phi from the angle of incidence and the direction (angle_positiv)."""
     if self.angle_positiv:
       self.phi = 180 - 2*self.angle_of_incidence
     else:
       self.phi = 2*self.angle_of_incidence - 180
 
   def update_mount(self):
+    """Build the mount (56 degree holder, POLARIS-K1, post) and apply flip and reverse options."""
     m56 = TFP56_Mount()
     cm = Composed_Mount()
     cm.add(m56)
@@ -172,6 +178,7 @@ class TFP56(ThickBeamsplitter):
 
 
 class TFP56_Mount(Unit_Mount):
+  """Holder for thin film polarizers at 56 degree angle of incidence (special_mount mesh)."""
   def __init__(self, name="TFP56_Mount_Head", **kwargs):
     super().__init__(name=name)
     self.angle_of_incidence = 56
@@ -197,9 +204,11 @@ class Rectangular_Beamsplitter(ThickBeamsplitter):
     # self.draw_dict["color"] = (131/255,27/255,44/255)
 
   def set_mount_to_default(self):
+    """Use a KM100C mount that fits height and width."""
     self.set_mount(KM100C(height=self.height, width=self.width))
 
   def update_draw_dict(self):
+    """Add height, width and thickness to <draw_dict>."""
     super().update_draw_dict()
     self.draw_dict["height"] = self.height
     self.draw_dict["width"] = self.width
@@ -217,9 +226,11 @@ class Rectangular_Thin_Beamsplitter(ThinBeamsplitter):
     # self.draw_dict["color"] = (131/255,27/255,44/255)
 
   def set_mount_to_default(self):
+    """Use a KM100C mount that fits height and width."""
     self.set_mount(KM100C(height=self.height, width=self.width))
 
   def update_draw_dict(self):
+    """Add height, width and thickness to <draw_dict>."""
     super().update_draw_dict()
     self.draw_dict["height"] = self.height
     self.draw_dict["width"] = self.width

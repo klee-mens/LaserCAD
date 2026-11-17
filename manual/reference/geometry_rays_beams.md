@@ -27,7 +27,7 @@ the constructor, set them afterwards.
 | Member | Description |
 |---|---|
 | `angle_to(obj, axis=None)` | computes the angle to the normal of an other GeomObj <obj> |
-| `class_name(cls)` |  |
+| `class_name(cls)` | Return the name of the class of the object, e.g. "Mirror". |
 | `draw()` | function to display the object checks whether freecad is available as backend and then calls the corresponding draw function |
 | `draw_freecad()` | if FreeCAD is present, calls the corresponding drawing function from freecad_models, normally returns a reference to the corresponding FreeCAD object |
 | `draw_text()` | if FreeCAD is not available, the object will be "drawn" into the console. "drawn", i.e. all relevant parameters from the <draw_dict> will be by text, returns the text as str |
@@ -62,12 +62,12 @@ wavelength 660 nm (0.00066 mm).
 
 | Member | Description |
 |---|---|
-| `endpoint()` |  |
+| `endpoint()` | Return the end point pos + length * normal of the ray. |
 | `from_h_alpha_theta(h, alpha, theta, element)` | Set the geometry of the ray so that it has the geometrical parameters <h, alpha, theta> with respect to <element>. |
 | `h_alpha_theta_to(element)` | Return (h, alpha) of geometrical optics when the ray hits <element>, and the angle <theta> of the point of incidence around the axis of the element, measured from its z-axis (uses the intersection). |
 | `h_alpha_to(element)` | Return the parameters (h, alpha) of geometrical optics when the ray hits <element> (uses the intersection). |
 | `intersection(element, set_length=True)` | Calculates the intersection point of the ray with a plane given by a Geom_Object (e.g a thin lens). |
-| `update_draw_dict()` | is usually called for the draw_routines and can update the most important key word arguments of <draw_dict> if they have been changed (e.g. self.radius of have been changed (e.g. self.radius of Curved_Mirror). |
+| `update_draw_dict()` | Add the length of the ray to <draw_dict>. |
 
 ### Beam
 
@@ -84,20 +84,20 @@ average_divegence = ?
 
 | Member | Description |
 |---|---|
-| `draw_freecad()` | if FreeCAD is present, calls the corresponding drawing function from freecad_models, normally returns a reference to the corresponding FreeCAD object |
-| `focal_length()` |  |
-| `get_all_rays(by_reference=False)` |  |
-| `inner_ray()` |  |
-| `length()` |  |
-| `make_cone_distribution(ray_count=2)` |  |
-| `outer_rays()` |  |
+| `draw_freecad()` | Draw the beam in FreeCAD. |
+| `focal_length()` | Return the distance to the apex of the beam cone. |
+| `get_all_rays(by_reference=False)` | Return all rays of the beam, the inner ray first. |
+| `inner_ray()` | Return a copy of the inner (central) ray of the beam. |
+| `length()` | Return the propagation length of the beam (length of the inner ray). |
+| `make_cone_distribution(ray_count=2)` | Distribute the rays on a cone: one inner ray on the axis and <ray_count>-1 outer rays on a circle with the beam radius and the divergence angle of the beam. |
+| `outer_rays()` | Return copies of all rays except the inner ray. |
 | `override_rays(rays)` | setzt die rays neu, muss man eventuell aufpassen, mal sehen |
 | `radius_angle()` | Compute the beam cone (radius r and opening angle alpha) from the inner and outer ray of the beam. |
-| `set_length(x)` |  |
-| `set_ray_color(color)` |  |
-| `set_wavelength(wl)` |  |
-| `update_draw_dict()` | is usually called for the draw_routines and can update the most important key word arguments of <draw_dict> if they have been changed (e.g. self.radius of have been changed (e.g. self.radius of Curved_Mirror). |
-| `wavelength()` |  |
+| `set_length(x)` | Set the length of all rays of the beam to <x>. |
+| `set_ray_color(color)` | Set the drawing color of all rays, e.g. (1.0, 0.0, 0.0). |
+| `set_wavelength(wl)` | Set the wavelength <wl> (in mm) of the beam and of all its rays. |
+| `update_draw_dict()` | Add length, radius and angle of the beam cone to <draw_dict>. |
+| `wavelength()` | Return the wavelength of the beam (wavelength of the inner ray) in mm. |
 
 ### CircularRayBeam
 
@@ -143,16 +143,16 @@ Beam described by its complex Gaussian beam parameter q.
 
 | Member | Description |
 |---|---|
-| `divergence()` |  |
-| `draw_freecad()` | if FreeCAD is present, calls the corresponding drawing function from freecad_models, normally returns a reference to the corresponding FreeCAD object |
-| `draw_gaussian_profile(center_intensity=2, norm=True)` |  |
-| `get_all_rays()` |  |
-| `inner_ray()` |  |
-| `radius()` |  |
-| `set_length(length)` |  |
-| `transform_to_cone_beam()` |  |
-| `update_draw_dict()` | is usually called for the draw_routines and can update the most important key word arguments of <draw_dict> if they have been changed (e.g. self.radius of have been changed (e.g. self.radius of Curved_Mirror). |
-| `waist()` |  |
+| `divergence()` | Return the angle of the 1/e^2 envelope at the start of the beam. |
+| `draw_freecad()` | Draw the Gaussian beam in FreeCAD. |
+| `draw_gaussian_profile(center_intensity=2, norm=True)` | Plot the transverse intensity profile at the start of the beam with matplotlib. |
+| `get_all_rays()` | Return a list with one ray on the beam axis (same geom, wavelength and length). |
+| `inner_ray()` | Return the ray on the beam axis. |
+| `radius()` | Return the beam radius w(z) at the start of the beam in mm. |
+| `set_length(length)` | Set the propagation length of the Gaussian beam (used by next_beam). |
+| `transform_to_cone_beam()` | Return a cone Beam with the same radius, divergence, geom and length. |
+| `update_draw_dict()` | Add name, wavelength, propagation length and geom to <draw_dict>. |
+| `waist()` | Return the waist radius w0 = sqrt(wavelength/pi * Im(q)) in mm. |
 
 ### RainbowBeam
 
@@ -178,7 +178,7 @@ Group of rays with different wavelengths, used for dispersive setups.
 
 | Member | Description |
 |---|---|
-| `make_rainbow_distribution(ray_count=11)` |  |
+| `make_rainbow_distribution(ray_count=11)` | Create <ray_count> rays on the beam axis with wavelengths spread over the bandwidth. |
 
 ### Ray_Distribution
 

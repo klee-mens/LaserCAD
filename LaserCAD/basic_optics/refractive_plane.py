@@ -27,6 +27,11 @@ class Refractive_plane(Opt_Element):
     
   def next_ray(self, ray):
     # See Springer Handbook of Lasers and Optics page 68
+    """Return the ray refracted at the plane (vector form of Snell's law).
+
+    If the ray can not leave the plane (total internal reflection) it is
+    reflected instead.
+    """
     ray2 = deepcopy(ray)
     ray2.pos = self.intersection(ray)
     N = self.normal

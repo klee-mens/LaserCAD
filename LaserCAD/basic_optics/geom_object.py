@@ -58,6 +58,7 @@ def rotation_matrix_from_vectors(vec1, vec2):
 
 
 def vec2str(vec):
+	"""Return the vector rounded to 5 decimals as a short string, used in repr."""
 	return repr(np.round(vec, decimals=5))[6:-1]
 
 
@@ -315,6 +316,7 @@ class Geom_Object(object):
     return ">>> " + repr(self)
 
   def class_name(cls):
+    """Return the name of the class of the object, e.g. "Mirror"."""
     return str(type(cls)).split(".")[-1].split("'")[0]
 
 

@@ -50,7 +50,7 @@ Non-interacting component: it is drawn (with its mount) but does not change the 
 
 | Member | Description |
 |---|---|
-| `update_draw_dict()` | is usually called for the draw_routines and can update the most important key word arguments of <draw_dict> if they have been changed (e.g. self.radius of have been changed (e.g. self.radius of Curved_Mirror). |
+| `update_draw_dict()` | Add thickness and, for rectangular crystals, height and width to <draw_dict>. |
 
 ### Crystal_Mount
 
@@ -84,7 +84,7 @@ Single mount plate for a crystal.
 
 | Member | Description |
 |---|---|
-| `draw_freecad(**kwargs)` | if FreeCAD is present, calls the corresponding drawing function from freecad_models, normally returns a reference to the corresponding FreeCAD object |
+| `draw_freecad(**kwargs)` | Draw the crystal holder with the outer and inner dimensions. |
 
 ### Cylindric_Crystal
 
@@ -120,7 +120,7 @@ Non-interacting component: it is drawn (with its mount) but does not change the 
 
 | Member | Description |
 |---|---|
-| `set_mount_to_default()` |  |
+| `set_mount_to_default()` | Use an invisible adapter on a 0.5 inch post. |
 
 ### Faraday_Isolator
 
@@ -160,7 +160,7 @@ Non-interacting component: it is drawn (with its mount) but does not change the 
 
 | Member | Description |
 |---|---|
-| `set_mount_to_default()` |  |
+| `set_mount_to_default()` | Use a lambda_mirror_mount on a 0.5 inch post. |
 
 ### LaserPointer
 
@@ -204,5 +204,5 @@ Optical table, drawn as a plate below the setup.
 
 | Member | Description |
 |---|---|
-| `draw_fc()` |  |
-| `update_draw_dict()` | is usually called for the draw_routines and can update the most important key word arguments of <draw_dict> if they have been changed (e.g. self.radius of have been changed (e.g. self.radius of Curved_Mirror). |
+| `draw_fc()` | Draw the table in FreeCAD and return the object. |
+| `update_draw_dict()` | Add length, width and height to <draw_dict>. |

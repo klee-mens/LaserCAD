@@ -21,6 +21,7 @@ class Spectrometer(Component):
     self.set_mount_to_default()
 
   def set_mount_to_default(self):
+    """Use an invisible adapter (offset depends on the model SR or HR) on a 0.5 inch post."""
     invis_adapter = Unit_Mount()
 
     if self.model == "SR":

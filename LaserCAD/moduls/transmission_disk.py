@@ -10,6 +10,21 @@ from ..freecad_models import model_mirror
 import numpy as np
 
 class Transmission_Disk(Composition):
+  """Plane parallel plate (e.g. extended TFP) that the beam passes under the angle AOI.
+
+  Built from two refractive planes, so the lateral beam offset is
+  included.
+
+  Parameters
+  ----------
+  refractive_index : float
+    Default 1.5.
+  AOI : float
+    Angle of incidence in degree. Default 56.
+  thickness, aperture : float
+    In mm.
+  mount_reversed, mount_flipped : bool
+  """
   def __init__(self, name="NewExtended_TFP", refractive_index=1.5, AOI=56,
                thickness=5, aperture = 2*inch, mount_reversed=False,
                mount_flipped=False, **kwargs):
@@ -48,6 +63,7 @@ class Transmission_Disk(Composition):
       cosmetic.Mount.flip()
 
   def reflected_beam(self, beam):
+    """Return <beam> reflected at the front surface of the disk."""
     mir = Mirror()
     mir.set_geom(self._elements[0].get_geom())
     return mir.next_beam(beam)

@@ -32,6 +32,7 @@ class Ray(Geom_Object):
     # self.draw_dict.update({"length":self.length})
 
   def endpoint(self):
+    """Return the end point pos + length * normal of the ray."""
     return self.pos + self.length * self.normal
 
   def intersection(self, element, set_length=True):
@@ -202,6 +203,7 @@ class Ray(Geom_Object):
     self.rotate(rotation_vec, -alpha)
 
   def update_draw_dict(self):
+    """Add the length of the ray to <draw_dict>."""
     super().update_draw_dict()
     self.draw_dict["length"] = self.length
 

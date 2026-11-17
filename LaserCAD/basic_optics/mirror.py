@@ -285,6 +285,7 @@ class Curved_Mirror(Mirror):
 
   @property
   def radius(self):
+    """Radius of curvature in mm; 0 means a plane mirror. Setting it updates the ABCD matrix (C = -2/R)."""
     return self.__radius
   @radius.setter
   def radius(self, x):
@@ -450,12 +451,14 @@ class Stripe_mirror(Curved_Mirror):
     self.set_mount_to_default()
 
   def set_mount_to_default(self):
+    """Use a Stripe_Mirror_Mount at the position of the mirror."""
     smm = Stripe_Mirror_Mount(mirror_thickness=self.thickness)
     smm.set_geom(self.get_geom())
     # smm.pos += self.normal * self.thickness
     self.Mount = smm
 
   def update_draw_dict(self):
+    """Add the height and the stripe model type to <draw_dict>."""
     super().update_draw_dict()
     self.draw_dict["height"] = self.height
     self.draw_dict["model_type"] = "Stripe"
@@ -493,6 +496,7 @@ class Cylindrical_Mirror(Stripe_mirror):
 
   @property
   def radius(self):
+    """Radius of curvature in mm of the curved direction."""
     return self.__radius
   @radius.setter
   def radius(self, x):
@@ -516,6 +520,7 @@ class Cylindrical_Mirror(Stripe_mirror):
     return self.get_coordinate_system()[1]
 
   def update_draw_dict(self):
+    """Add aperture, radius, height and thickness to <draw_dict>."""
     super().update_draw_dict()
     self.draw_dict["dia"]=self.aperture
     self.draw_dict["Radius"] = self.radius
@@ -622,6 +627,7 @@ class Rectangular_Mirror(Mirror):
     # self.draw_dict["color"] = (131/255,27/255,44/255)
 
   def update_draw_dict(self):
+    """Add height, width and thickness to <draw_dict>."""
     super().update_draw_dict()
     self.draw_dict["height"] = self.height
     self.draw_dict["width"] = self.width

@@ -63,6 +63,7 @@ class Composition(Geom_Object):
     self._last_prop = end_of_axis.length #endet mit Propagation
 
   def last_geom(self):
+    """Return the geom (end point, axes) at the end of the current optical axis."""
     end_of_axis = self._optical_axis[-1]
     return (end_of_axis.endpoint(), end_of_axis.get_axes())
 
@@ -100,10 +101,15 @@ class Composition(Geom_Object):
       self.non_opticals.append(item)
 
   def add_supcomposition_on_axis(self, subcomp):
+    """Place <subcomp> at the end of the optical axis and add all its elements as fixed elements."""
     subcomp.set_geom(self.last_geom())
     self.add_supcomposition_fixed(subcomp)
 
   def add_supcomposition_fixed(self, subcomp):
+    """Add all optical and non-optical elements of <subcomp> as fixed elements.
+
+    The sub-composition itself is not kept, only its elements.
+    """
     for element in subcomp._elements:
       self.add_fixed_elm(element)
     for nonopt in subcomp.non_opticals:
@@ -121,6 +127,11 @@ class Composition(Geom_Object):
     # zB wenn die wavelength angepasst werden muss
     # print("sollte nur gemacht werden, wenn absolut noch kein Element eingefügt wurde")
     # print("should only be done if absolutely no element has been inserted yet")
+    """Start the optical axis anew with a copy of <ray> and recompute it.
+
+    Use it for example to change the wavelength of the optical axis. Should be
+    done before elements are added.
+    """
     self.set_geom(ray.get_geom())
     oA = deepcopy(ray)
     oA.name = self.name +"__oA_0"
@@ -128,6 +139,7 @@ class Composition(Geom_Object):
     self.recompute_optical_axis()
 
   def recompute_optical_axis(self):
+    """Trace the first ray of the optical axis again through all elements in the sequence."""
     self._optical_axis = [self._optical_axis[0]]
     counter = 0
 
@@ -197,13 +209,35 @@ class Composition(Geom_Object):
   #   return np.array(self._kostenbauder)
 
   def get_sequence(self):
+    """Return a copy of the sequence (indices of the elements in the order the light passes them)."""
     return list(self._sequence)
 
   def set_sequence(self, seq):
+    """Set the order in which the light passes the elements.
+
+    Parameters
+    ----------
+    seq : list of int
+      Indices into the element list; indices may repeat (multipass setups).
+    """
     self._sequence = list(seq)
     # self.recompute_optical_axis()
 
   def compute_beams(self, external_source=None):
+    """Propagate the light source through the elements in the sequence.
+
+    Parameters
+    ----------
+    external_source : Beam, optional
+      Beam to use instead of the light source of the composition. In this
+      case the stored beams of the composition are not changed.
+
+    Returns
+    -------
+    beams : list of Beam
+      The light source followed by the beam behind every element; the last
+      beam has the length of the last propagation.
+    """
     beamcount = 0
     if external_source:
       beamlist = [external_source]
@@ -227,9 +261,11 @@ class Composition(Geom_Object):
     return beamlist
 
   def optical_path_length(self):
+    """Return the summed length of all segments of the optical axis in mm."""
     return sum([ray.length for ray in self._optical_axis])
 
   def draw_elements(self):
+    """Draw all optical and non-optical elements and group them in one part."""
     self.__init_parts()
     container = []
     for elm in self._elements:
@@ -241,6 +277,7 @@ class Composition(Geom_Object):
     return self.__container_to_part(self._elements_part, container)
 
   def draw_beams(self):
+    """Compute the beams, draw them and group them in one part."""
     self.__init_parts()
     self.compute_beams()
     container = []
@@ -250,6 +287,7 @@ class Composition(Geom_Object):
     return self.__container_to_part(self._beams_part, container)
 
   def draw_mounts(self):
+    """Draw the mounts of all elements and group them in one part."""
     self.__init_parts()
     container = []
     for elm in self._elements:
@@ -261,6 +299,7 @@ class Composition(Geom_Object):
     return self.__container_to_part(self._mounts_part, container)
 
   def draw_alignment_posts(self):
+    """Draw an alignment holder at the position of every optical element (FreeCAD only)."""
     self.__init_parts()
     container = []
     for elm in self._elements:
@@ -279,11 +318,23 @@ class Composition(Geom_Object):
     return self.__container_to_part(self._alignment_post_part, container)
 
   def draw(self):
+    """Draw elements, beams and mounts of the composition."""
     self.draw_elements()
     self.draw_beams()
     self.draw_mounts()
 
   def post_positions(self, verbose=False, print_errors=True):
+    """Return the xy positions of the posts of all elements.
+
+    The post is taken as the last part of the composed mount of each element.
+
+    Parameters
+    ----------
+    verbose : bool
+      If True, return (name, xy) pairs instead of only xy. Default False.
+    print_errors : bool
+      Print a message for elements without a post. Default True.
+    """
     post_coordinate_list = []
     for elm in self._elements:
       try:
@@ -309,6 +360,7 @@ class Composition(Geom_Object):
 
   def posts_pq_on_table(self, verbose=True):
     # Gives the postions in hole p, q coordiantes plus offset accodring to xy_to_table_plus_offset
+    """Return the post positions as hole coordinates (p, q) plus offset on the optical table."""
     if verbose:
       return [(name, xy_to_table_plus_offset(*xy) ) for (name, xy) in self.post_positions(verbose=True)]
     else:
@@ -358,6 +410,7 @@ class Composition(Geom_Object):
   def new_catalogue_entry(self, item):
     #gibt jedem neuen Element einen Namen entsprechend seiner Klasse
     # key = item.class_name()
+    """Return a new unique name for <item> and register it in the catalogue."""
     key = item.name
     if key in self._catalogue:
          anz, names = self._catalogue[key]
@@ -398,6 +451,31 @@ class Composition(Geom_Object):
 
   def Kostenbauder_matrix(self, reference_ray=None, dimension=4,
                            reference_axis="z", text_explanation=False):
+    """Compute the Kostenbauder matrix of the composition numerically.
+
+    Six rays (reference, displaced in z and y, tilted in z and y and with a
+    slightly longer wavelength) are traced through the composition and the
+    derivatives at the end plane are evaluated. All entries are in SI units.
+
+    Parameters
+    ----------
+    reference_ray : Ray, optional
+      Start ray; default is the first ray of the optical axis. It should lie
+      in the xy plane.
+    dimension : int
+      4 for the matrix of one transverse axis (x, x', t, f), 6 for both
+      axes (z, z', y, y', t, f). Default 4.
+    reference_axis : str
+      "z" or "y", transverse axis used when dimension == 4. Default "z".
+    text_explanation : bool
+      If True, additionally return a text with the meaning and value of the
+      entries in practical units.
+
+    Returns
+    -------
+    matrix : numpy.ndarray or (numpy.ndarray, str)
+      -1 for invalid arguments.
+    """
     if reference_ray:
       ray0 = reference_ray
     else:
@@ -643,6 +721,7 @@ class Composition(Geom_Object):
 
 def next_name(name, prefix=""):
   # generiert einen neuen namen aus dem alten Element
+  """Return <name> with its trailing number increased by one, e.g. "Lens_01" -> "Lens_02"."""
   ind = name.rfind("_")
   try:
     num = int(name[ind+1::])+1
@@ -703,6 +782,27 @@ def calc_tikz_angle(mirror):
     return np.arctan2(mirror.normal[1], mirror.normal[0]) * 180 / np.pi
 
 def export_to_TikZ(Setup, draw_rays = False, draw_beams = False, beam_color="black", scale=10, filename=None):
+  """Print the elements of <Setup> as TikZ code (and append it to <filename>).
+
+  Every element becomes a coordinate and a symbol (mirror, curved mirror,
+  lens, TFP, ...); selected non-optical elements (laser, camera, Pockels
+  cell, ...) are added as well.
+
+  Parameters
+  ----------
+  Setup : Composition
+  draw_rays : bool
+    Also write a path along the optical axis. Default False.
+  draw_beams : bool
+    Also write the beams with their radii. Default False.
+  beam_color : str
+    TikZ color of the beams. Default "black".
+  scale : float
+    Positions in mm are divided by 10*scale, i.e. one TikZ unit is <scale>
+    cm. Default 10.
+  filename : str, optional
+    File to which the code is appended.
+  """
   scale *= 10  # convert mm to cm for TikZ
   start_coordinate = f"{Setup.pos[0]/scale:.2f}, {Setup.pos[1]/scale:.2f}"
   start_name = "Start_" + replace_string(Setup.name)
@@ -725,7 +825,7 @@ def export_to_TikZ(Setup, draw_rays = False, draw_beams = False, beam_color="bla
       mirror_width = f"{(mirror.aperture/25.4)**2/12+(mirror.aperture/25.4)/12 + 0.5:.2f}".rstrip('0').rstrip('.') 
       if hasattr(mirror, "radius"): mirror_name = "curvedmirror"
       if "TFP" in mirror.name: mirror_name = "TFP"
-      if "lens" in str.lower(mirror.name) or "Lens" == mirror.class_name: 
+      if "lens" in str.lower(mirror.name) or "Lens" == mirror.class_name(): 
          if mirror.focal_length < 0:
             mirror_name = "concavelens"
          else:
@@ -754,25 +854,25 @@ def export_to_TikZ(Setup, draw_rays = False, draw_beams = False, beam_color="bla
   for element in Setup.non_opticals:
       angle = calc_tikz_angle(element)
       name = replace_string(element.name)
-      if "Lambda_Plate" == element.class_name: element_name = "tinysplitter"
-      elif "pockels" in str.lower(element.name) or "Pockels_Cell" == element.class_name: element_name = "pockelscell"
+      if "Lambda_Plate" == element.class_name(): element_name = "tinysplitter"
+      elif "pockels" in str.lower(element.name) or "Pockels_Cell" == element.class_name(): element_name = "pockelscell"
       elif "laser" in str.lower(element.name): 
           element_name = "laser"
           angle += 180
-      elif "camera" in str.lower(element.name) or "Camera" == element.class_name:  element_name = "camera"
-      elif "diode" in str.lower(element.name) or "Diode" == element.class_name:  element_name = "diode"
+      elif "camera" in str.lower(element.name) or "Camera" == element.class_name():  element_name = "camera"
+      elif "diode" in str.lower(element.name) or "Diode" == element.class_name():  element_name = "diode"
       else: continue
 
-      coordinates_string += f"\\coordinate ({name}) at ({element.pos[0]/100:.1f}, {element.pos[1]/100:.1f});\n"
+      coordinates_string += f"\\coordinate ({name}) at ({element.pos[0]/scale:.2f}, {element.pos[1]/scale:.2f});\n"
       mirror_string += f"\\{element_name}[angle={angle:.1f}] at ({name});\n"
 
   endpoint = Setup.compute_beams()[-1].inner_ray().endpoint()
-  ray_string += f"({endpoint[0]/100:.1f}, {endpoint[1]/100:.1f});"
+  ray_string += f"({endpoint[0]/scale:.2f}, {endpoint[1]/scale:.2f});\n"
   try:
       beam_vector = endpoint - Setup._elements[-1].pos
       beam_vector /= np.linalg.norm(beam_vector)
       final_angle = np.arccos(beam_vector[0]) * 180 / np.pi
-      beam_string += f"\\drawbeam[{beam_radius[-1]}][{beam_radius[-1]}][{beam_color}]{{{names[-1]}}}{{{endpoint[0]/100:.1f}, {endpoint[1]/100:.1f}}}{{{angles[-1]}}}{{{final_angle:.2f}}};\n"
+      beam_string += f"\\drawbeam[{beam_radius[-1]}][{beam_radius[-1]}][{beam_color}]{{{names[-1]}}}{{{endpoint[0]/scale:.2f}, {endpoint[1]/scale:.2f}}}{{{angles[-1]}}}{{{final_angle:.2f}}};\n"
   except:
       pass
 

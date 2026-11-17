@@ -10,6 +10,7 @@ from .mount import Post_Marker
 from ..freecad_models.freecad_model_element_holder import Model_element_holder
 
 class Element_Marker(Post_Marker):
+  """Post_Marker that also shows a holder for an element with the given aperture and thickness."""
   def __init__(self, aperture = 25.4,thickness=5,size=2,**kwargs):
     self.size = size
     self.aperture = aperture
@@ -18,6 +19,7 @@ class Element_Marker(Post_Marker):
     self.freecad_model  = Model_element_holder()
 
   def update_draw_dict(self):
+    """Add aperture and thickness to <draw_dict>."""
     super().update_draw_dict()
     self.draw_dict["aperture"] = self.aperture
     self.draw_dict["thickness"] = self.thickness

@@ -13,6 +13,20 @@ X_STAGE_HEIGHT = 23.1
 
 
 class Delay_Stage(Composition):
+  """Delay line with two 90 degree mirrors on a linear stage (XR25C).
+
+  Parameters
+  ----------
+  name : str
+  path_length : float
+    Total path length through the delay stage in mm. Default 250.
+  left_turn : bool
+    Direction of the first turn. Default True.
+  xstage_distance : float
+    Distance between the two mirrors in mm. Default 38.
+  xstage_shift : float
+    Shift of the stage along the input axis in mm. Default 0.
+  """
   def __init__(self, name="NewDelayStage", path_length=250, left_turn=True,
                    xstage_distance = 38, xstage_shift=0, **kwargs):
     super().__init__(name=name, **kwargs)

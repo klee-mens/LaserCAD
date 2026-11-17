@@ -44,6 +44,15 @@ class Beam(Geom_Object):
     self.freecad_model = model_beam
 
   def make_cone_distribution(self, ray_count=2):
+    """Distribute the rays on a cone: one inner ray on the axis and
+    <ray_count>-1 outer rays on a circle with the beam radius and the
+    divergence angle of the beam.
+
+    Parameters
+    ----------
+    ray_count : int
+      Total number of rays including the inner ray. Default 2.
+    """
     self._ray_count = ray_count
     self._rays = [Ray() for n in range(self._ray_count)]
     mr = self._rays[0]
@@ -97,18 +106,33 @@ class Beam(Geom_Object):
     return novec, np.arctan(a/b)
 
   def get_all_rays(self, by_reference=False):
+    """Return all rays of the beam, the inner ray first.
+
+    Parameters
+    ----------
+    by_reference : bool
+      If True the internal list is returned (changes act on the beam),
+      otherwise a deep copy. Default False.
+    """
     if by_reference:
       return self._rays
     else:
       return deepcopy(self._rays)
 
   def inner_ray(self):
+    """Return a copy of the inner (central) ray of the beam."""
     return deepcopy(self._rays[0])
 
   def outer_rays(self):
+    """Return copies of all rays except the inner ray."""
     return deepcopy(self._rays[1::])
 
   def focal_length(self):
+    """Return the distance to the apex of the beam cone.
+
+    Negative for a diverging beam, positive for a converging beam and 0 for a
+    collimated beam (angle 0).
+    """
     r, alph = self.radius_angle()
     if alph == 0:
       return 0
@@ -116,21 +140,26 @@ class Beam(Geom_Object):
        return - r/np.tan(alph)
 
   def length(self):
+    """Return the propagation length of the beam (length of the inner ray)."""
     return self.inner_ray().length
 
   def set_length(self, x):
+    """Set the length of all rays of the beam to <x>."""
     for ray in self._rays:
       ray.length = x
 
   def set_wavelength(self, wl):
+    """Set the wavelength <wl> (in mm) of the beam and of all its rays."""
     self._Bwavelength = wl
     for ray in self._rays:
       ray.wavelength = wl
 
   def wavelength(self):
+    """Return the wavelength of the beam (wavelength of the inner ray) in mm."""
     return self._rays[0].wavelength
 
   def set_ray_color(self, color):
+    """Set the drawing color of all rays, e.g. (1.0, 0.0, 0.0)."""
     for ray in self._rays:
       ray.draw_dict["color"] = color
 
@@ -159,6 +188,7 @@ class Beam(Geom_Object):
     return txt
 
   def update_draw_dict(self):
+    """Add length, radius and angle of the beam cone to <draw_dict>."""
     super().update_draw_dict()
     radius, angle = self.radius_angle()
     self.draw_dict["length"] = self.length()
@@ -166,6 +196,11 @@ class Beam(Geom_Object):
     self.draw_dict["angle"] = angle
 
   def draw_freecad(self):
+    """Draw the beam in FreeCAD.
+
+    With draw_dict["model"] == "cone" a single cone is drawn, otherwise every
+    ray is drawn on its own and the rays are grouped in one part.
+    """
     if self.draw_dict["model"] == "cone":
       # radius, angle = self.radius_angle()
       self.update_draw_dict()
@@ -325,6 +360,12 @@ class RainbowBeam(Beam):
     self.draw_dict["model"] = "ray_group"
 
   def make_rainbow_distribution(self, ray_count=11):
+    """Create <ray_count> rays on the beam axis with wavelengths spread over the bandwidth.
+
+    The first ray has the central wavelength, followed by the shorter and then
+    the longer wavelengths. Every ray gets a color of the rainbow colormap
+    according to its wavelength.
+    """
     self._ray_count = ray_count
     # wavels = np.linspace(self._Bwavelength - self.bandwidth/2, self._Bwavelength + self.bandwidth/2, ray_count)
     rc_blue = ray_count//2 +1
@@ -401,9 +442,11 @@ class Gaussian_Beam(Ray):
 
   def set_length(self, length):
     # needed for consitency in next_beam function
+    """Set the propagation length of the Gaussian beam (used by next_beam)."""
     self.length = length
 
   def waist(self):
+    """Return the waist radius w0 = sqrt(wavelength/pi * Im(q)) in mm."""
     return np.sqrt( self.wavelength / np.pi * np.imag(self.q_para) )
 
   def __repr__(self):
@@ -414,6 +457,12 @@ class Gaussian_Beam(Ray):
     return txt
 
   def draw_freecad(self):
+    """Draw the Gaussian beam in FreeCAD.
+
+    draw_dict["model"] selects the shape: "Gaussian" draws the hyperbolic
+    beam envelope, "cone" a faster cone approximation. Returns -1 for other
+    models.
+    """
     if self.draw_dict["model"] == "Gaussian":
       return model_Gaussian_beam(name=self.name, q_para=self.q_para,
                                wavelength=self.wavelength,prop=self.length,
@@ -439,22 +488,33 @@ class Gaussian_Beam(Ray):
       return -1
 
   def update_draw_dict(self):
+    """Add name, wavelength, propagation length and geom to <draw_dict>."""
     self.draw_dict["name"] = self.name
     self.draw_dict["wavelength"] = self.wavelength
     self.draw_dict["prop"] = self.length
     self.draw_dict["geom"] = self.get_geom()
 
   def radius(self):
+    """Return the beam radius w(z) at the start of the beam in mm."""
     z = np.real(self.q_para)
     zr = np.imag(self.q_para)
     return self.waist() * np.sqrt(1 + (z/zr)**2)
 
   def divergence(self):
+    """Return the angle of the 1/e^2 envelope at the start of the beam.
+
+    The sign follows Re(q): positive behind the waist (diverging), negative in
+    front of it (converging).
+    """
     z = np.real(self.q_para)
     zr = np.imag(self.q_para)
     return np.sign(z) * self.waist() / zr
 
   def transform_to_cone_beam(self):
+    """Return a cone Beam with the same radius, divergence, geom and length.
+
+    Useful to draw or trace the Gaussian beam with ordinary rays.
+    """
     cone = Beam(name=self.name, radius=self.radius(), angle=self.divergence())
     cone.set_geom(self.get_geom())
     cone.set_length(self.length)
@@ -462,6 +522,7 @@ class Gaussian_Beam(Ray):
 
   # def get_all_rays(self, by_reference=True):
   def get_all_rays(self):
+    """Return a list with one ray on the beam axis (same geom, wavelength and length)."""
     ray = Ray()
     ray.set_geom(self.get_geom())
     ray.wavelength = self.wavelength
@@ -469,6 +530,19 @@ class Gaussian_Beam(Ray):
     return [ray]
 
   def draw_gaussian_profile(self,center_intensity= 2,norm=True):
+    """Plot the transverse intensity profile at the start of the beam with matplotlib.
+
+    Parameters
+    ----------
+    center_intensity : float
+      Peak value of the second curve. Default 2.
+    norm : bool
+      If True, additionally plot the profile normalized to 1. Default True.
+
+    Returns
+    -------
+    figure : matplotlib.figure.Figure
+    """
     sig = self.radius()
     fs = 24
     def Gaussian(x, mu, sig):
@@ -488,6 +562,7 @@ class Gaussian_Beam(Ray):
     return a1
 
   def inner_ray(self):
+    """Return the ray on the beam axis."""
     return self.get_all_rays()[0]
 
 if __name__ == "__main__":

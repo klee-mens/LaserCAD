@@ -70,6 +70,31 @@ Create a type II multipass amplifier like Make_Amplifier_Typ_II_Mirror, where th
 Make_Amplifier_Typ_II_plane(name='AmpTyp2s', focal_length=600, magnification=1, roundtrips2=2, aperture_small=25.4, beam_sep=15)
 ```
 
+Create a type II multipass amplifier with a large curved mirror, a small end mirror and a plane mirror.
+
+The aperture of the large mirror follows from the number of round trips
+and the beam separation.
+
+
+**Parameters**
+
+- `name` (str)
+- `focal_length` (float)
+  Focal length in mm that sets the scale of the setup.
+- `magnification` (float)
+  Magnification V; the end mirror has the radius V*focal_length.
+- `roundtrips2` (int)
+  Number of round trips.
+- `aperture_small` (float)
+  Aperture of end mirror and plane mirror in mm.
+- `beam_sep` (float)
+  Separation of the spots on the large mirror in mm.
+
+
+**Returns**
+
+- `composition` (Composition)
+
 ### Make_Amplifier_Typ_II_simple
 
 ```python
@@ -188,11 +213,18 @@ Create a grating compressor with a rooftop mirror for a spectrally broad beam.
 Make_Machzehnder_Interferometer()
 ```
 
+Return a Mach-Zehnder interferometer with two thin beam splitters as Multi_Beamline_Composition.
+
 ### Make_Michelson_Interferometer
 
 ```python
 Make_Michelson_Interferometer()
 ```
+
+Return a Michelson interferometer with a thin beam splitter as Multi_Beamline_Composition.
+
+The second arm is built as a second beam line from the alternative beam of
+the splitter.
 
 ### Make_Periscope
 
@@ -354,6 +386,21 @@ Delay_Stage(name='NewDelayStage', path_length=250, left_turn=True, xstage_distan
 
 *Inherits from:* `Composition`
 
+Delay line with two 90 degree mirrors on a linear stage (XR25C).
+
+
+**Parameters**
+
+- `name` (str)
+- `path_length` (float)
+  Total path length through the delay stage in mm. Default 250.
+- `left_turn` (bool)
+  Direction of the first turn. Default True.
+- `xstage_distance` (float)
+  Distance between the two mirrors in mm. Default 38.
+- `xstage_shift` (float)
+  Shift of the stage along the input axis in mm. Default 0.
+
 ### Transmission_Disk
 
 ```python
@@ -362,9 +409,25 @@ Transmission_Disk(name='NewExtended_TFP', refractive_index=1.5, AOI=56, thicknes
 
 *Inherits from:* `Composition`
 
+Plane parallel plate (e.g. extended TFP) that the beam passes under the angle AOI.
+
+Built from two refractive planes, so the lateral beam offset is
+included.
+
+
+**Parameters**
+
+- `refractive_index` (float)
+  Default 1.5.
+- `AOI` (float)
+  Angle of incidence in degree. Default 56.
+- `thickness, aperture` (float)
+  In mm.
+- `mount_reversed, mount_flipped` (bool)
+
 | Member | Description |
 |---|---|
-| `reflected_beam(beam)` |  |
+| `reflected_beam(beam)` | Return <beam> reflected at the front surface of the disk. |
 
 ### Motorized_TSF
 
@@ -374,6 +437,8 @@ Motorized_TSF(name='Motorized_TSF', flip=False, **kwargs)
 
 *Inherits from:* `Composition`
 
+Motorized filter holder: housing with two thin beam splitters (the filters) that the beam passes.
+
 | Member | Description |
 |---|---|
-| `add_housing()` |  |
+| `add_housing()` | Return a Component carrying the housing and its post (reversed if flip is True). |

@@ -8,6 +8,7 @@ Created on Sat Aug 19 14:40:56 2023
 import csv
 import os
 import numpy as np
+import warnings
 import math
 
 from .geom_object import Geom_Object, rotation_matrix
@@ -55,19 +56,40 @@ del a,b,c,i,SPECIAL_LIST1,LENS_LIST1,MIRROR_LIST1
 
 
 def get_mount_by_aperture_and_element(aperture, elm_type, elm_thickness):
+  """Return a default mount for an element.
+
+  Lenses get a lens mount on a 0.5 inch post, mirror-like elements a
+  POLARIS/KS mirror mount on a 1 inch post, chosen by the aperture. Other
+  element types, and lenses larger than 4 inch (with a warning), get an
+  invisible Unit_Mount.
+
+  Parameters
+  ----------
+  aperture : float
+    Diameter of the element in mm.
+  elm_type : str
+    Class name of the element, e.g. "Mirror" or "Lens".
+  elm_thickness : float
+    Thickness of the element in mm.
+  """
   if elm_type in ["Lens", "Thicklens"]:
     if aperture<= 25.4/2:
       model = "MLH05_M"
     elif aperture <= 25.4:
       model = "LMR1_M"
     elif aperture <= 25.4*1.5:
-      model = "LMR1.5_M"
+      model = "LMR15_M"
     elif aperture <=25.4*2:
       model = "LMR2_M"
     elif aperture <=25.4*3:
       model = "LMR3_M"
     elif aperture <=25.4*4:
       model = "LMR4_M"
+    else:
+      warnings.warn(f"No lens mount for an aperture of {aperture} mm "
+                    "(largest is 4 inch), the lens is drawn without a mount.",
+                    stacklevel=2)
+      return Unit_Mount()
     post = "0.5inch_post"
   elif elm_type in ["Mirror", "Curved_Mirror", "Beamsplitter", "Off_Axis_Parabola"]:
     post = "1inch_post"
@@ -128,6 +150,7 @@ class Unit_Mount(Geom_Object):
       # self.draw_dict["color"] = DEFAULT_MOUNT_COLOR
 
   def set_axes(self, new_axes):
+    """Set the axes; horizontal mounts keep their z axis vertical and only turn around it."""
     if self.is_horizontal:
       old_axes = self.get_axes()
       newx, newy, newz = new_axes[:,0], new_axes[:,1], new_axes[:,2]
@@ -197,18 +220,22 @@ class Unit_Mount(Geom_Object):
     return True
 
   def get_depth(self):
+    """Return the depth of the mount fringe in mm (needed for back mounting)."""
     return self.depth
 
   def reverse(self):
+    """Turn the mount by 180 degree around z and shift it by the element thickness."""
     x,y,z = self.get_coordinate_system()
     self.rotate(z, np.pi)
     self.pos += x * self.element_thickness
 
   def flip(self, angle=90):
+    """Rotate the drawn model by <angle> degree around the normal (only the drawing)."""
     self.flip_angle = angle
 
 
   def update_draw_dict(self):
+    """Add the STL file and the geom including the flip angle to <draw_dict>."""
     super().update_draw_dict()
     modified_axes = self.get_axes()
     modified_axes = np.matmul(rotation_matrix(self.normal, self.flip_angle/180*np.pi), modified_axes)
@@ -216,8 +243,10 @@ class Unit_Mount(Geom_Object):
     self.draw_dict["stl_file"] = self.path + self.model + ".stl"
 
   def draw_text(self):
+    """Return the text representation including the model name."""
     txt = super().draw_text()
     txt += " and the model " + self.model
+    return txt
 
   def __repr__(self):
     txt = super().__repr__()
@@ -253,12 +282,14 @@ class Post(Geom_Object):
     self.docking_obj = Geom_Object()
 
   def set_axes(self, new_axes):
+    """Keep the axes fixed (identity) if axis_fixed is True, otherwise set them."""
     if self.axis_fixed:
       self._axes = np.eye(3)
     else:
       super().set_axes(new_axes)
 
   def find_1inch_post(self):
+    """Return the FreeCAD model of the 1 inch post (RS..P4M) that fits the height between lower limit and position."""
     height = self.pos[2] - self._lower_limit
     if height<12.5:
       print("Warning, there is no suitable post holder at this height")
@@ -269,7 +300,7 @@ class Post(Geom_Object):
     model_name = ["RS05P4M","RS075P4M","RS1P4M","RS1.5P4M","RS2P4M","RS2.5P4M",
                   "RS3P4M","RS3.5P4M","RS4P4M","RS6P4M",""]
     for i in range(10):
-      if height < default_post_height[i+1] and height > default_post_height[i]:
+      if default_post_height[i] <= height < default_post_height[i+1]:
         model = model_name[i]
         height_difference = height - default_post_height[i]
     return draw_1inch_post(name=model,h_diff = height_difference,ll=self._lower_limit,
@@ -360,6 +391,7 @@ class Post(Geom_Object):
     return part
 
   def set_lower_limit(self,lower_limit):
+    """Set the lower end (z in mm) of the post, e.g. the height of a stage below it."""
     self._lower_limit = lower_limit
     self.docking_obj.pos = np.array((self.pos[0],self.pos[1],self._lower_limit))
 
@@ -367,6 +399,7 @@ class Post(Geom_Object):
     self.docking_obj.pos = np.array((self.pos[0],self.pos[1],self._lower_limit))
 
   def draw_freecad(self, **kwargs):
+    """Draw the post model (1 inch, 0.5 inch or large post)."""
     self.draw_dict["geom"]=self.get_geom()
     self.draw_dict["name"] = self.name
     if self.model == "dont_draw":
@@ -407,11 +440,13 @@ class Composed_Mount(Geom_Object):
       self.add(newmount)
 
   def add(self, mount):
+    """Append <mount> at the docking point of the last mount."""
     mount.set_geom(self.docking_obj.get_geom())
     self.mount_list.append(mount)
     self.docking_obj.set_geom(mount.docking_obj.get_geom())
 
   def draw_freecad(self):
+    """Draw all mounts and group them in one part."""
     part = initialize_composition_old(name="mount, post and base")
     container = []
     for mount in self.mount_list:
@@ -421,11 +456,13 @@ class Composed_Mount(Geom_Object):
     return part
 
   def reverse(self):
+    """Reverse the first mount and rearrange the others accordingly."""
     first = self.mount_list[0]
     first.reverse()
     self.set_geom(self.get_geom()) # to adjust the other elements
 
   def flip(self):
+    """Flip the drawing of the first mount."""
     first = self.mount_list[0]
     first.flip()
 
@@ -437,6 +474,7 @@ class Composed_Mount(Geom_Object):
    return txt2
 
   def get_depth(self):
+    """Return the depth of the first mount."""
     return self.mount_list[0].get_depth()
 
   def _pos_changed(self, old_pos, new_pos):
@@ -484,6 +522,7 @@ class Stages_Mount(Composed_Mount):
       self.mount_list[-1].normal = self.mount_list[0].normal
 
   def find_screw_hole(self):
+    """Shift the last part so that its screw hole lies on the 25 mm hole grid of the table."""
     angle=np.arccos(self.mount_list[-1].normal[0])
     hole = (25.4,95.3/2,self.mount_list[-1].pos[2])
     hole_pos = self.mount_list[-1].pos - (hole[0]*np.cos(angle)-hole[1]*np.sin(angle),
@@ -543,6 +582,7 @@ class Grating_Mount(Composed_Mount):
 
 
 class Post_Marker(Unit_Mount):
+  """Marker on the 25 mm table grid around the post position (shows the holes for a base plate)."""
   def __init__(self, name="Post_Marker",size=3,**kwargs):
     super().__init__(name,**kwargs)
     self.name = name + "'s holder"
@@ -574,6 +614,7 @@ class Post_Marker(Unit_Mount):
       self.h1=(self.h1[0],self.h1[1]+25)
 
   def update_draw_dict(self):
+    """Add the four corner holes h1 to h4 to <draw_dict>."""
     super().update_draw_dict()
     self.draw_dict["h1"] = self.h1
     self.draw_dict["h2"] = (self.h1[0]+(25*self.size),self.h1[1])
@@ -586,6 +627,7 @@ class Post_Marker(Unit_Mount):
 
 
 class Adaptive_Angular_Mount(Unit_Mount):
+  """Wedge-shaped mirror holder whose angle adapts to the vertical tilt of the element."""
   def __init__(self, aperture=25.4,angle = 30,**kwargs):
     super().__init__(**kwargs)
     self.aperture = aperture
@@ -598,11 +640,13 @@ class Adaptive_Angular_Mount(Unit_Mount):
     self.freecad_model = model_mirror_holder
 
   def update_draw_dict(self):
+    """Add aperture and wedge angle to <draw_dict>."""
     super().update_draw_dict()
     self.draw_dict["dia"] = self.aperture
     self.draw_dict["angle"] = self.rot_angle
 
   def set_axes(self, new_axes):
+    """Set the axes and update the wedge angle and the docking point from the vertical tilt."""
     if abs(new_axes[2][0])>0:
       z=-new_axes[2][0]
       self.angle = np.arcsin(z)*180/np.pi
@@ -624,6 +668,7 @@ class Adaptive_Angular_Mount(Unit_Mount):
     super().set_axes(new_axes)
 
 class Adapter_1inch(Composed_Mount):
+  """1 inch adapter plate with a mirror mount (default U100-A2K) and a post."""
   def __init__(self, angle=0, post="1inch_post", model="U100-A2K"):
     super().__init__()
     um = Unit_Mount()
@@ -640,6 +685,7 @@ class Adapter_1inch(Composed_Mount):
     self.add(Post(model=post))
 
 class Adapter_2inch(Composed_Mount):
+  """2 inch adapter plate with a mirror mount (default U200-A2K) and a post."""
   def __init__(self, angle=0, post="1inch_post", model="U200-A2K"):
     super().__init__()
     um = Unit_Mount()
@@ -655,6 +701,7 @@ class Adapter_2inch(Composed_Mount):
     self.add(Unit_Mount(model=model))
     self.add(Post(model=post))
   def reverse(self, thickness=7):
+    """Turn the mount by 180 degree around z and shift it by <thickness> against the normal."""
     self.rotate(vec=(0,0,1), phi=np.pi)
     self.pos += -self.normal*thickness
    
@@ -702,6 +749,7 @@ class KM100C(Composed_Mount):
     self.add(Post(model=post))
     
   def reverse(self, thickness=7):
+    """Turn the mount by 180 degree around z and shift it by <thickness> against the normal."""
     self.rotate(vec=(0,0,1), phi=np.pi)
     self.pos += -self.normal*thickness
 
@@ -753,11 +801,13 @@ class KM100C_flipped(Composed_Mount):
     self.add(Post(model=post))
 
   def reverse(self, thickness=7):
+    """Turn the mount by 180 degree around z and shift it by <thickness> against the normal."""
     self.rotate(vec=(0,0,1), phi=np.pi)
     self.pos += -self.normal*thickness
 
 
 class KM100CL(Composed_Mount):
+  """KM100C-like mount for large rectangular optics: upper part plus extensions according to the height."""
   def __init__(self, name="KM100CL", height=15, width=0, post="1inch_post", **kwargs):
     super().__init__(name=name, **kwargs)
     self.height = height
@@ -800,11 +850,13 @@ class KM100CL(Composed_Mount):
     self.add(Post(model=post))
 
   def reverse(self, thickness=7):
+    """Turn the mount by 180 degree around z and shift it by <thickness> against the normal."""
     self.rotate(vec=(0,0,1), phi=np.pi)
     self.pos += -self.normal*thickness
 
 
 class KM100CL_flipped(Composed_Mount):
+  """KM100CL turned by 90 degree for optics that are wider than high."""
   def __init__(self, name="KM100CL_flipped", height=15, width=0, post="1inch_post", **kwargs):
     super().__init__(name=name, **kwargs)
     self.height = height
@@ -850,6 +902,7 @@ class KM100CL_flipped(Composed_Mount):
     self.add(Post(model=post))
 
   def reverse(self, thickness=7):
+    """Turn the mount by 180 degree around z and shift it by <thickness> against the normal."""
     self.rotate(vec=(0,0,1), phi=np.pi)
     self.pos += -self.normal*thickness
     

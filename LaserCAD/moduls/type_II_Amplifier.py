@@ -253,6 +253,29 @@ def Make_Amplifier_Typ_II_UpDown(name="AmpTyp2sr", focal_length=600, magnificati
 
 def Make_Amplifier_Typ_II_plane(name="AmpTyp2s" ,focal_length=600 ,magnification=1,roundtrips2=2,aperture_small=1*inch ,beam_sep=15):
   # aperture_big = beam_sep * (roundtrips2+1)
+  """Create a type II multipass amplifier with a large curved mirror, a small end mirror and a plane mirror.
+
+  The aperture of the large mirror follows from the number of round trips
+  and the beam separation.
+
+  Parameters
+  ----------
+  name : str
+  focal_length : float
+    Focal length in mm that sets the scale of the setup.
+  magnification : float
+    Magnification V; the end mirror has the radius V*focal_length.
+  roundtrips2 : int
+    Number of round trips.
+  aperture_small : float
+    Aperture of end mirror and plane mirror in mm.
+  beam_sep : float
+    Separation of the spots on the large mirror in mm.
+
+  Returns
+  -------
+  composition : Composition
+  """
   aperture_big = 12 + (roundtrips2-1)*2*beam_sep
 
   Radius2 = magnification*focal_length

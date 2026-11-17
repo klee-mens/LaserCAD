@@ -31,12 +31,14 @@ class Table(Geom_Object):
     self.freecad_model = model_table
   
   def update_draw_dict(self):
+    """Add length, width and height to <draw_dict>."""
     super().update_draw_dict()
     self.draw_dict["length"] = self.length
     self.draw_dict["width"] = self.width
     self.draw_dict["height"] = self.height
   
   def draw_fc(self):
+    """Draw the table in FreeCAD and return the object."""
     self.update_draw_dict()
     obj=model_table(**self.draw_dict)
     return obj

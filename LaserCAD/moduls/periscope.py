@@ -77,12 +77,14 @@ class Rooftop_Mirror_Component(Component):
     self.set_mount_to_default()
     
   def set_mount_to_default(self):
+    """Use a Rooftop_Mirror_Mount behind the mirror."""
     smm = Rooftop_Mirror_Mount()
     smm.set_geom(self.get_geom())
     smm.pos += self.normal * self.aperture / 2
     self.Mount = smm
 
   def update_draw_dict(self):
+    """Add the aperture and the rooftop model type to <draw_dict>."""
     super().update_draw_dict()
     self.draw_dict["dia"] = self.aperture
     self.draw_dict["model_type"] = "Rooftop"    

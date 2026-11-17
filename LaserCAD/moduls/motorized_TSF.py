@@ -5,6 +5,7 @@ import numpy as np
 
 
 class Motorized_TSF(Composition):
+    """Motorized filter holder: housing with two thin beam splitters (the filters) that the beam passes."""
     def __init__(self, name="Motorized_TSF", flip=False, **kwargs):
         """Creates a motorized filter holder with two mirrors (non-interacting) and a housing.
         
@@ -33,6 +34,7 @@ class Motorized_TSF(Composition):
         
 
     def add_housing(self):
+        """Return a Component carrying the housing and its post (reversed if flip is True)."""
         Housing = Unit_Mount("Spiegelhalter_160021_V1")
         
         Rotator_box = Composed_Mount()

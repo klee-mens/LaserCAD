@@ -44,6 +44,12 @@ class Off_Axis_Parabola(Opt_Element):
     self._shift_mount()      
 
   def set_geom(self, geom):
+    """Set the geom and turn the parabola into its working orientation.
+
+    With colim=True the parabola collimates a beam coming from its focus,
+    otherwise it focuses a collimated beam. theta rotates the parabola around
+    its axis.
+    """
     super().set_geom(geom)
     if self.colim:      
       x0,y0,z0 = self.get_coordinate_system()
@@ -54,6 +60,7 @@ class Off_Axis_Parabola(Opt_Element):
       self.rotate(vec=self.normal, phi=self._theta/180*np.pi)
 
   def parent_parabola_apex(self):
+    """Return the position of the apex of the parent parabola."""
     x,y,z = self.get_coordinate_system()
     rfl = self.reflected_focal_length
     c = self.parent_parabola_curvature()
@@ -61,16 +68,23 @@ class Off_Axis_Parabola(Opt_Element):
     return self.pos + x*c*(sa*rfl)**2 + y*sa*rfl
 
   def parent_parabola_curvature(self):
+    """Return the coefficient a of the parent parabola x = a(y^2 + z^2)."""
     ca = np.cos(self.angle/180 * np.pi)
     sa = np.sin(self.angle/180 * np.pi)
     rfl = self.reflected_focal_length
     return np.sqrt( (ca/(2*sa**2*rfl))**2 + 1/(2*sa*rfl)**2 ) - ca/(2*sa**2*rfl)
 
   def parent_focal_length(self):
+    """Return the focal length 1/(4a) of the parent parabola."""
     return 1 / (4 * self.parent_parabola_curvature())
 
   def intersection(self, ray):
     # surface: x - ay² - az² = 0
+    """Return the intersection point of <ray> with the parabolic surface.
+
+    The nearer of the two solutions (closest to the element center) is used.
+    Note: the length of <ray> is set to the distance to that point.
+    """
     curv = self.parent_parabola_curvature()
     n0, y0, z0 = self.get_coordinate_system()
     n0 *= -1
@@ -96,6 +110,7 @@ class Off_Axis_Parabola(Opt_Element):
     return ray.endpoint()
 
   def next_ray(self, ray):
+    """Return the ray reflected at the parabolic surface (exact, not paraxial)."""
     ray2 = deepcopy(ray)
     intersec = self.intersection(ray)
     ray2.pos = intersec
@@ -109,6 +124,7 @@ class Off_Axis_Parabola(Opt_Element):
     return ray2
 
   def update_draw_dict(self):
+    """Add position and focal length of the parent parabola to <draw_dict>."""
     super().update_draw_dict()
     parentpos = self.parent_parabola_apex() - self.pos
     # self.draw_dict["parent_pos"] = parentpos[0:2]
@@ -124,6 +140,7 @@ class Off_Axis_Parabola(Opt_Element):
 
   @property
   def aperture(self):
+    """Diameter in mm. Setting it also sets a Thorlabs-like thickness and the default mount."""
     return self._aperture
   
   @aperture.setter

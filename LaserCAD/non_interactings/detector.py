@@ -23,6 +23,7 @@ class Detector(Component):
     self.set_mount_to_default()
 
   def set_mount_to_default(self):
+    """Use an invisible adapter on a 0.5 inch post."""
     invis_adapter = Unit_Mount()
     invis_adapter.docking_obj.pos += (10.5, 0, -25)
     comp = Composed_Mount(name=self.name + "_mount")

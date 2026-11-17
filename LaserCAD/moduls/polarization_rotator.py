@@ -4,6 +4,7 @@ from .. freecad_models.utils import load_STL
 import numpy as np
 
 class Polarization_Rotator(Composition):
+    """Polarization rotator: three mirrors in a housing that turn the polarization by 90 degree."""
     def __init__(self, name="Polarisationsdreher", flip=False, **kwargs):
         """Creates a polarization rotator with three mirrors and a housing.
         The mirrors are arranged in a way that the beam polarization is rotated by 90 degrees.
@@ -52,6 +53,7 @@ class Polarization_Rotator(Composition):
         PDM3.set_mount(Unit_Mount())
 
     def add_housing(self):
+        """Return a Component carrying the housing and its post (reversed if flip is True)."""
         Housing = Unit_Mount("Polarization_rotator-Fusion")
 
         Rotator_box = Composed_Mount()

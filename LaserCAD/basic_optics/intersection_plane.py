@@ -43,6 +43,7 @@ class Intersection_plane(Opt_Element):
     # self.interacts_with_rays = False
     
   def next_ray(self, ray):
+    """Return a copy of <ray> moved to the intersection point with the plane (direction unchanged)."""
     ray2=deepcopy(ray)
     ray2.pos = ray.intersection(self)
     # return ray2

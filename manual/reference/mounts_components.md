@@ -22,11 +22,11 @@ Example: cm = Composed_Mount(unit_model_list=["KS1", "1inch_post"])
 
 | Member | Description |
 |---|---|
-| `add(mount)` |  |
-| `draw_freecad()` | if FreeCAD is present, calls the corresponding drawing function from freecad_models, normally returns a reference to the corresponding FreeCAD object |
-| `flip()` |  |
-| `get_depth()` |  |
-| `reverse()` |  |
+| `add(mount)` | Append <mount> at the docking point of the last mount. |
+| `draw_freecad()` | Draw all mounts and group them in one part. |
+| `flip()` | Flip the drawing of the first mount. |
+| `get_depth()` | Return the depth of the first mount. |
+| `reverse()` | Reverse the first mount and rearrange the others accordingly. |
 
 ### Grating_Mount
 
@@ -50,7 +50,7 @@ Composed mount of a Thorlabs KM100C kinematic mirror mount on a post.
 
 | Member | Description |
 |---|---|
-| `reverse(thickness=7)` |  |
+| `reverse(thickness=7)` | Turn the mount by 180 degree around z and shift it by <thickness> against the normal. |
 
 ### KM100C_flipped
 
@@ -64,7 +64,7 @@ KM100C in flipped orientation.
 
 | Member | Description |
 |---|---|
-| `reverse(thickness=7)` |  |
+| `reverse(thickness=7)` | Turn the mount by 180 degree around z and shift it by <thickness> against the normal. |
 
 ### Post
 
@@ -86,11 +86,11 @@ Optical post with a base, standing under the element.
 
 | Member | Description |
 |---|---|
-| `draw_freecad(**kwargs)` | if FreeCAD is present, calls the corresponding drawing function from freecad_models, normally returns a reference to the corresponding FreeCAD object |
+| `draw_freecad(**kwargs)` | Draw the post model (1 inch, 0.5 inch or large post). |
 | `draw_post_part(name='post_part', base_exists=False, post_color=(0.8, 0.8, 0.8), holder_color=(0.2, 0.2, 0.2), geom=None)` | Draw the post part, including post, post holder and base Assuming that all optics are placed in the plane of z = 0. |
-| `find_1inch_post()` |  |
-| `set_axes(new_axes)` | Set the own coordinate system to <new_axes> and call _axes_changed. |
-| `set_lower_limit(lower_limit)` |  |
+| `find_1inch_post()` | Return the FreeCAD model of the 1 inch post (RS..P4M) that fits the height between lower limit and position. |
+| `set_axes(new_axes)` | Keep the axes fixed (identity) if axis_fixed is True, otherwise set them. |
+| `set_lower_limit(lower_limit)` | Set the lower end (z in mm) of the post, e.g. the height of a stage below it. |
 
 ### Rooftop_Mirror_Mount
 
@@ -127,13 +127,13 @@ Usually exists as part of the component
 
 | Member | Description |
 |---|---|
-| `draw_text()` | if FreeCAD is not available, the object will be "drawn" into the console. "drawn", i.e. all relevant parameters from the <draw_dict> will be by text, returns the text as str |
-| `flip(angle=90)` |  |
-| `get_depth()` |  |
-| `reverse()` |  |
-| `set_axes(new_axes)` | Set the own coordinate system to <new_axes> and call _axes_changed. |
+| `draw_text()` | Return the text representation including the model name. |
+| `flip(angle=90)` | Rotate the drawn model by <angle> degree around the normal (only the drawing). |
+| `get_depth()` | Return the depth of the mount fringe in mm (needed for back mounting). |
+| `reverse()` | Turn the mount by 180 degree around z and shift it by the element thickness. |
+| `set_axes(new_axes)` | Set the axes; horizontal mounts keep their z axis vertical and only turn around it. |
 | `set_by_table()` | sets the docking object and the model by reading the "the file.csv" Used to determine if there is a default suitable mount in the database. Returns ------- bool True: this mount was in the csv file, which can be read directy False: this mont was not in the csv file |
-| `update_draw_dict()` | is usually called for the draw_routines and can update the most important key word arguments of <draw_dict> if they have been changed (e.g. self.radius of have been changed (e.g. self.radius of Curved_Mirror). |
+| `update_draw_dict()` | Add the STL file and the geom including the flip angle to <draw_dict>. |
 
 ### Component
 
@@ -148,10 +148,10 @@ developes into Optical_Element and many non interactings
 
 | Member | Description |
 |---|---|
-| `aperture` (property) |  |
-| `draw_mount()` |  |
-| `set_mount(mount)` |  |
-| `set_mount_back_mounted()` |  |
-| `set_mount_face_mounted()` |  |
-| `set_mount_to_default()` |  |
-| `update_draw_dict()` | is usually called for the draw_routines and can update the most important key word arguments of <draw_dict> if they have been changed (e.g. self.radius of have been changed (e.g. self.radius of Curved_Mirror). |
+| `aperture` (property) | Diameter of the component in mm. Setting it also resets the mount to the default. |
+| `draw_mount()` | Draw the mount of the component and return the drawn object. |
+| `set_mount(mount)` | Use <mount> as mount of the component and move it to the geom of the component. |
+| `set_mount_back_mounted()` | Place the mount so that it holds the component at its back surface. |
+| `set_mount_face_mounted()` | Place the mount so that it holds the component at its front surface. |
+| `set_mount_to_default()` | Choose a mount that fits aperture, class and thickness and place it at the component. |
+| `update_draw_dict()` | Add aperture (as dia) and thickness to <draw_dict>. |

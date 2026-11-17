@@ -34,17 +34,20 @@ class NLO_Crystal(Opt_Element):
     self.draw_dict["color"] = DEFAULT_NLO_CRYSTAL_COLOR    
     
   def set_mount_to_default(self):
+    """Use a lambda_mirror_mount on a post."""
     self.Mount = Composed_Mount()
     self.Mount.add(Unit_Mount("lambda_mirror_mount"))
     self.Mount.add(Post())
     self.Mount.set_geom(self.get_geom())
   
   def next_ray(self, ray):
+    """Pass the ray through unchanged except for the wavelength, which is multiplied by wavelength_multiplier."""
     ray2 = self.just_pass_through(ray)
     ray2.wavelength = ray.wavelength * self.wavelength_multiplier
     return ray2
   
   def next_beam(self, beam):
+    """Pass the beam through (see next_ray) and give it the output color."""
     beam2 = super().next_beam(beam)
     # beam2.set_wavelength(beam.wavelength() * self.wavelength_multiplier)
     beam2.draw_dict["color"] = self.output_color

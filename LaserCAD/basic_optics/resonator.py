@@ -27,6 +27,7 @@ class LinearResonator(Composition):
     self.draw_dict["beam_model"] = "Gaussian"
 
   def add_output_coupler(self, item):
+    """Add the mirror <item> on the axis and mark it as output coupler. Returns -1 if <item> is not a Mirror."""
     if type(item) == type(Mirror()):
       self.add_on_axis(item)
       self._output_coupler_index = len(self._elements)-1
@@ -35,6 +36,7 @@ class LinearResonator(Composition):
       return -1
 
   def set_output_coupler_index(self, index):
+    """Mark the element with <index> as output coupler. Returns -1 if it is not a Mirror."""
     if type(self._elements[index]) == type(Mirror()):
       self._output_coupler_index = index
     else:
@@ -82,6 +84,7 @@ class LinearResonator(Composition):
     self._axes = np.eye(3)
       
   def output_beam(self):
+    """Compute the beams and return the beam that hits the output coupler."""
     self.compute_beams()
     return self._beams[self._output_coupler_index-1]
         
@@ -137,6 +140,7 @@ class LinearResonator(Composition):
     return q_para
 
   def compute_beams(self, external_source=None):
+    """Compute the eigenmode and the Gaussian beams between the end mirrors (drawn with the Gaussian model)."""
     self.compute_eigenmode()
     self.set_sequence([x for x in range(1, len(self._elements)-1)])
     super().compute_beams(external_source)
@@ -146,6 +150,7 @@ class LinearResonator(Composition):
         
     
   def transform_gauss_to_cone_beams(self):
+    """Compute the beams and return them as cone beams (see Gaussian_Beam.transform_to_cone_beam)."""
     self.compute_beams()
     cones = []
     for gb in self._beams:
@@ -163,6 +168,7 @@ class CircularResonator(LinearResonator):
     super().__init__(**kwargs)
     
   def Setting_last_element(self):
+    """Turn the last element so that it reflects from the second last to the first element. Returns -1 if it is not a Mirror."""
     item = self._elements[-1]
     if type(item) == type(Mirror()):
       p0 = self._elements[-2].pos
@@ -176,6 +182,15 @@ class CircularResonator(LinearResonator):
       return -1
   
   def compute_eigenmode(self, start_index=0):
+    """Compute the eigenmode of the ring resonator and use it as light source.
+
+    The round trip ABCD matrix gives the q parameter at the first element.
+
+    Returns
+    -------
+    q : complex
+      q parameter of the eigenmode, or -1 if the resonator is unstable.
+    """
     noe = len(self._elements)
     seq = [x for x in range(noe)]
     prop = np.linalg.norm(self._elements[-1].pos-self._elements[0].pos)

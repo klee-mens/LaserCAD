@@ -13,6 +13,11 @@ from LaserCAD import Beam, ThinBeamsplitter, Mirror, Rectangular_Thin_Beamsplitt
 # =============================================================================
 
 def Make_Michelson_Interferometer():
+  """Return a Michelson interferometer with a thin beam splitter as Multi_Beamline_Composition.
+
+  The second arm is built as a second beam line from the alternative beam of
+  the splitter.
+  """
   startbeam = Beam(radius=1)
   thinBS_t = Rectangular_Thin_Beamsplitter(transmission=True)
   # thinBS_t.set_mount(Composed_Mount(["KS1", "1inch_post"]))
@@ -58,6 +63,7 @@ def Make_Michelson_Interferometer():
 # # =============================================================================
 
 def Make_Machzehnder_Interferometer():
+  """Return a Mach-Zehnder interferometer with two thin beam splitters as Multi_Beamline_Composition."""
   mz_firstprop = 70
   mz_horiz = 180
   mz_vert = 80

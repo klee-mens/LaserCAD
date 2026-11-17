@@ -27,6 +27,7 @@ class Lambda_Plate(Component):
     self.draw_dict["color"] = DEFAULT_LAMBDA_PLATE_COLOR    
     
   def set_mount_to_default(self):
+    """Use a lambda_mirror_mount on a 0.5 inch post."""
     self.Mount = Composed_Mount()
     self.Mount.add(Unit_Mount("lambda_mirror_mount"))
     self.Mount.add(Post(model="0.5inch_post"))

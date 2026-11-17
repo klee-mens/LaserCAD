@@ -35,9 +35,22 @@ class Opt_Element(Component):
     self.length = 0 #Länge in mm, die meisten opt Elemente sind 2D, also 0
 
   def matrix(self, inray=Ray()):
+    """Return the 2x2 ABCD matrix of the element.
+
+    Parameters
+    ----------
+    inray : Ray
+      Incoming ray. Ignored here; elements whose matrix depends on the angle
+      of incidence (e.g. Grating) override this method.
+    """
     return np.array(self._matrix)
 
   def kostenbauder(self, inray=Ray()):
+    """Return the 4x4 Kostenbauder matrix of the element.
+
+    The upper left block is the ABCD matrix, the rest is the identity (no
+    dispersion). See matrix() for <inray>.
+    """
     kmatrix = np.eye(4)
     kmatrix[0:2, 0:2] = self.matrix(inray=inray)
     return np.array(kmatrix)
@@ -76,6 +89,7 @@ class Opt_Element(Component):
     return self.just_pass_through(ray)
 
   def just_pass_through(self, ray):
+    """Return a copy of <ray> moved to the intersection point with the element, the direction is not changed."""
     ray2 = deepcopy(ray)
     ray2.pos = self.intersection(ray) #dadruch wird ray.length verändert(!)
     return ray2
@@ -106,6 +120,13 @@ class Opt_Element(Component):
   #   return ray2
 
   def ABCD_refraction(self, ray):
+    """Return the outgoing ray, computed with the paraxial ABCD matrix of the element.
+
+    The ray is decomposed into its meridional and sagittal parts with respect to
+    the element center. Only the meridional part (height and angle) is
+    transformed with the matrix, the sagittal component of the direction is
+    kept.
+    """
     ray2 = deepcopy(ray)
     ray2.pos = self.intersection(ray) #dadruch wird ray.length verändert(!)
     norm = ray2.normal
@@ -177,6 +198,11 @@ class Opt_Element(Component):
     return newb
 
   def next_gauss(self,gaussian):
+      """Return the Gaussian beam behind the element.
+
+      The beam is propagated by its length to the element and the q parameter is
+      transformed with the ABCD matrix: q' = (A q + B) / (C q + D).
+      """
       next_gaussian = deepcopy(gaussian)
       next_middle = self.next_ray(gaussian) #change the length of Gaussian
       next_gaussian.set_geom(next_middle.get_geom())

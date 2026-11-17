@@ -157,10 +157,12 @@ class Grating(Opt_Element):
 
 
   def update_draw_dict(self):
+    """Add the dimensions (width, height, thickness) to <draw_dict>."""
     super().update_draw_dict()
     self.draw_dict["dimensions"] = (self.width, self.height, self.thickness)
 
   def set_mount_to_default(self):
+    """Use a Grating_Mount that fits height and thickness of the grating."""
     smm = Grating_Mount(height=self.height,thickness=self.thickness)
     smm.set_geom(self.get_geom())
     self.Mount = smm
@@ -190,6 +192,11 @@ class Grating(Opt_Element):
 
   def matrix(self, inray=Ray()):
     # optical matrix, see https://www.brown.edu/research/labs/mittleman/sites/brown.edu.research.labs.mittleman/files/uploads/lecture11.pdf
+    """Return the 2x2 ABCD matrix of the grating for <inray>.
+
+    A = cos(angle out) / cos(angle in) and D = 1/A, see e.g. the lecture
+    notes of the Mittleman group (Brown University), lecture 11.
+    """
     omatrix = np.eye(2)
     angleIN = self.angle_of_incidence(inray)
     try:
@@ -209,6 +216,11 @@ class Grating(Opt_Element):
 
   def kostenbauder(self, inray=Ray()):
     # kostenbauder matrix, see https://www.brown.edu/research/labs/mittleman/sites/brown.edu.research.labs.mittleman/files/uploads/lecture11.pdf
+    """Return the 4x4 Kostenbauder matrix of the grating for <inray>.
+
+    Contains the angular dispersion in addition to the ABCD matrix; the
+    diffraction angle follows from the grating equation.
+    """
     kmatrix = np.eye(4)
     aoi = self.angle_of_incidence(inray)
     # angleIN = aoi + np.pi/2 if aoi < 0 else aoi

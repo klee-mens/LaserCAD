@@ -30,27 +30,38 @@ class Multi_Beamline_Composition(Geom_Object):
     self._subcomps[0].set_light_source(beam)
 
   def add_on_axis(self, item):
+    """Add <item> on the axis of the active beam line."""
     self._subcomps[self._active_index].add_on_axis(item)
 
   def add_fixed_elm(self, item):
+    """Add <item> as fixed element to the active beam line."""
     self._subcomps[self._active_index].add_fixed_elm(item)
 
   def add_supcomposition_on_axis(self, scomp):
+    """Add the elements of <scomp> on the axis of the active beam line."""
     self._subcomps[self._active_index].add_supcomposition_on_axis(scomp)
 
   def add_supcomposition_fixed(self, scomb):
+    """Add the elements of <scomb> as fixed elements to the active beam line."""
     self._subcomps[self._active_index].add_supcomposition_fixed(scomb)
 
   def propagate(self, x):
+    """Propagate the active beam line by <x> mm."""
     self._subcomps[self._active_index].propagate(x)
 
   def get_acitve_index(self):
+    """Return the index of the active beam line."""
     return self._active_index
 
   def change_acitve_index(self, index):
+    """Make the beam line with <index> the active one."""
     self._active_index = index
 
   def add_new_line(self, beam):
+    """Start a new beam line with <beam> as light source and make it the active one.
+
+    Typical use: beam = splitter.get_alternative_beam() after compute_beams().
+    """
     newcomp = Composition(name=self.name+ f"Line{self._max_index+2}")
     newcomp.set_geom(beam.get_geom())
     newcomp.set_light_source(beam)
@@ -59,14 +70,17 @@ class Multi_Beamline_Composition(Geom_Object):
     self._max_index += 1
 
   def draw(self):
+    """Draw all beam lines."""
     for comp in self._subcomps:
       comp.draw()
 
   def compute_beams(self):
+    """Compute the beams of all beam lines."""
     for comp in self._subcomps:
       comp.compute_beams()
 
   def recompute_optical_axis(self):
+    """Recompute the optical axis of all beam lines."""
     for comp in self._subcomps:
       comp.recompute_optical_axis()
 

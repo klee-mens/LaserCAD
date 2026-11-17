@@ -28,13 +28,13 @@ geometrical optics (ABCD).
 
 | Member | Description |
 |---|---|
-| `ABCD_refraction(ray)` |  |
+| `ABCD_refraction(ray)` | Return the outgoing ray, computed with the paraxial ABCD matrix of the element. |
 | `intersection(ray)` | Return the intersection point of <ray> with the plane of the element. |
-| `just_pass_through(ray)` |  |
-| `kostenbauder(inray=Ray())` |  |
-| `matrix(inray=Ray())` |  |
+| `just_pass_through(ray)` | Return a copy of <ray> moved to the intersection point with the element, the direction is not changed. |
+| `kostenbauder(inray=Ray())` | Return the 4x4 Kostenbauder matrix of the element. |
+| `matrix(inray=Ray())` | Return the 2x2 ABCD matrix of the element. |
 | `next_beam(beam)` | Return the beam after the element, computed ray by ray with next_ray. |
-| `next_gauss(gaussian)` |  |
+| `next_gauss(gaussian)` | Return the Gaussian beam behind the element. |
 | `next_ray(ray)` | Return the ray after the element. |
 
 ### Curved_Mirror
@@ -69,7 +69,7 @@ vertical incidence planes).
 | `intersection(ray)` | Return the intersection point of <ray> with the spherical surface of the mirror. |
 | `matrix(inray=Ray())` | Return the 2x2 ABCD matrix of the mirror, see the class docstring for the angle dependence. |
 | `next_ray(ray)` | Return the next ray: analytic intersection of the ray with the sphere and the vectorial law of reflection (Springer Handbook of Lasers and Optics, p. 66 ff). |
-| `radius` (property) |  |
+| `radius` (property) | Radius of curvature in mm; 0 means a plane mirror. Setting it updates the ABCD matrix (C = -2/R). |
 | `update_draw_dict()` | Update the drawing parameters (draw_dict), including the radius of curvature. |
 
 ### Cylindrical_Mirror
@@ -91,8 +91,8 @@ points tp the z-axis. Use rotate function if you want to rotate the mirror.
 | Member | Description |
 |---|---|
 | `next_ray(ray)` | Return the next ray: analytic intersection of the ray with the cylinder and the vectorial law of reflection. |
-| `radius` (property) |  |
-| `update_draw_dict()` | Update the drawing parameters (draw_dict), including the radius of curvature. |
+| `radius` (property) | Radius of curvature in mm of the curved direction. |
+| `update_draw_dict()` | Add aperture, radius, height and thickness to <draw_dict>. |
 
 ### Mirror
 
@@ -159,7 +159,7 @@ Flat mirror with a rectangular shape.
 
 | Member | Description |
 |---|---|
-| `update_draw_dict()` | Update the drawing parameters (draw_dict) from the current attributes. |
+| `update_draw_dict()` | Add height, width and thickness to <draw_dict>. |
 
 ### Stripe_mirror
 
@@ -176,8 +176,8 @@ parameters are those of Curved_Mirror; the mount is a Stripe_Mirror_Mount.
 
 | Member | Description |
 |---|---|
-| `set_mount_to_default()` |  |
-| `update_draw_dict()` | Update the drawing parameters (draw_dict), including the radius of curvature. |
+| `set_mount_to_default()` | Use a Stripe_Mirror_Mount at the position of the mirror. |
+| `update_draw_dict()` | Add the height and the stripe model type to <draw_dict>. |
 
 ### Lens
 
@@ -201,7 +201,7 @@ Thin lens, described by its focal length.
 
 | Member | Description |
 |---|---|
-| `focal_length` (property) |  |
+| `focal_length` (property) | Focal length in mm; 0 means no refraction. Setting it updates the ABCD matrix. |
 | `next_ray(ray)` | Return the ray after the lens (thin lens refraction at the ray's intersection). |
 | `update_draw_dict()` | Update the drawing parameters (draw_dict) from the current attributes. |
 
@@ -248,16 +248,16 @@ Build a thick lens with given focal length, refractive index, aperture and edge 
 | Member | Description |
 |---|---|
 | `calc_principal_planes()` | Calculates the positions of the principal planes h1 and h2 relative to the lens center. Positive signs indicate the principle plane is located outside the lens, negative signs inside. |
-| `calc_thickness()` |  |
+| `calc_thickness()` | Return the center thickness from edge thickness, focal length, refractive index and aperture. |
 | `intersection(ray, radius)` | Return the intersection point of <ray> with a sphere of radius <radius> at the lens. |
 | `intersection_plane(ray)` | Calculates the intersection point of the ray with a plane given by a Geom_Object (e.g a thin lens). |
-| `next_ray(ray)` | Return the ray after the element. |
-| `radius1()` |  |
-| `radius2()` |  |
-| `radius_function(R)` |  |
-| `refraction(ray, R, from_material=False)` |  |
-| `set_Mount()` |  |
-| `update_draw_dict()` | is usually called for the draw_routines and can update the most important key word arguments of <draw_dict> if they have been changed (e.g. self.radius of have been changed (e.g. self.radius of Curved_Mirror). |
+| `next_ray(ray)` | Return the ray behind the lens, refracted at both surfaces. |
+| `radius1()` | Return the radius of curvature of the first surface in mm. |
+| `radius2()` | Return the radius of curvature of the second surface in mm (0 = plane for plano-convex lenses). |
+| `radius_function(R)` | Thick lens equation 1/f - (n-1)(2/R - (n-1)d/(nR^2)) of a symmetric biconvex lens; its root is the radius R. |
+| `refraction(ray, R, from_material=False)` | Return <ray> refracted at one spherical surface of the lens. |
+| `set_Mount()` | Set the default mount and shift it along the normal to the center (biconvex) or the back (plano-convex) of the lens. |
+| `update_draw_dict()` | Add the radii of both surfaces to <draw_dict>. |
 
 ### Grating
 
@@ -283,11 +283,11 @@ Diffraction grating.
 | Member | Description |
 |---|---|
 | `angle_of_incidence(ray=Ray())` | calulates the AOI of an incident or outgoing ray The angle is defined as the angle to the normal of the grating, the ray is projected in a plane of the grating normal and the grating vector (which is perpendicular to its lines/grooves) |
-| `kostenbauder(inray=Ray())` |  |
-| `matrix(inray=Ray())` |  |
+| `kostenbauder(inray=Ray())` | Return the 4x4 Kostenbauder matrix of the grating for <inray>. |
+| `matrix(inray=Ray())` | Return the 2x2 ABCD matrix of the grating for <inray>. |
 | `next_ray(ray, alternative_order=None)` | computes the diffracted beam by adding <diffraction_order> times a reciprocal grating vector to the parallel wave vector computes the diffraction in an alternative_order if given if there is now diffraction in this order, it gives out a standard Ray() and a warning, which should definitely be seen in the model as a huge error |
-| `set_mount_to_default()` |  |
-| `update_draw_dict()` | is usually called for the draw_routines and can update the most important key word arguments of <draw_dict> if they have been changed (e.g. self.radius of have been changed (e.g. self.radius of Curved_Mirror). |
+| `set_mount_to_default()` | Use a Grating_Mount that fits height and thickness of the grating. |
+| `update_draw_dict()` | Add the dimensions (width, height, thickness) to <draw_dict>. |
 
 ### Rectangular_Beamsplitter
 
@@ -301,8 +301,8 @@ ThickBeamsplitter with a rectangular shape (height, width in mm).
 
 | Member | Description |
 |---|---|
-| `set_mount_to_default()` |  |
-| `update_draw_dict()` | Update the drawing parameters (draw_dict) from the current attributes. |
+| `set_mount_to_default()` | Use a KM100C mount that fits height and width. |
+| `update_draw_dict()` | Add height, width and thickness to <draw_dict>. |
 
 ### Rectangular_Thin_Beamsplitter
 
@@ -316,8 +316,8 @@ ThinBeamsplitter with a rectangular shape (height, width in mm).
 
 | Member | Description |
 |---|---|
-| `set_mount_to_default()` |  |
-| `update_draw_dict()` | Update the drawing parameters (draw_dict) from the current attributes. |
+| `set_mount_to_default()` | Use a KM100C mount that fits height and width. |
+| `update_draw_dict()` | Add height, width and thickness to <draw_dict>. |
 
 ### TFP56
 
@@ -334,8 +334,8 @@ The mount orientation can be changed with the attributes `flip_mount`,
 
 | Member | Description |
 |---|---|
-| `update_mount()` |  |
-| `update_phi()` |  |
+| `update_mount()` | Build the mount (56 degree holder, POLARIS-K1, post) and apply flip and reverse options. |
+| `update_phi()` | Set the deflection angle phi from the angle of incidence and the direction (angle_positiv). |
 
 ### ThickBeamsplitter
 
@@ -362,7 +362,7 @@ Beam splitter with a plate of finite thickness and a refractive index.
 
 | Member | Description |
 |---|---|
-| `next_ray(ray)` | Return the transmitted ray if `transmission` is True, else the reflected one. |
+| `next_ray(ray)` | Return the reflected ray or, if transmission is True, the ray after refraction at both surfaces. |
 
 ### ThinBeamsplitter
 
@@ -416,14 +416,14 @@ Off-axis parabolic mirror.
 
 | Member | Description |
 |---|---|
-| `aperture` (property) |  |
-| `intersection(ray)` | Return the intersection point of <ray> with the plane of the element. |
-| `next_ray(ray)` | Return the ray after the element. |
-| `parent_focal_length()` |  |
-| `parent_parabola_apex()` |  |
-| `parent_parabola_curvature()` |  |
-| `set_geom(geom)` | Set (pos, axes) from <geom> by calling the corresponding setters. |
-| `update_draw_dict()` | is usually called for the draw_routines and can update the most important key word arguments of <draw_dict> if they have been changed (e.g. self.radius of have been changed (e.g. self.radius of Curved_Mirror). |
+| `aperture` (property) | Diameter in mm. Setting it also sets a Thorlabs-like thickness and the default mount. |
+| `intersection(ray)` | Return the intersection point of <ray> with the parabolic surface. |
+| `next_ray(ray)` | Return the ray reflected at the parabolic surface (exact, not paraxial). |
+| `parent_focal_length()` | Return the focal length 1/(4a) of the parent parabola. |
+| `parent_parabola_apex()` | Return the position of the apex of the parent parabola. |
+| `parent_parabola_curvature()` | Return the coefficient a of the parent parabola x = a(y^2 + z^2). |
+| `set_geom(geom)` | Set the geom and turn the parabola into its working orientation. |
+| `update_draw_dict()` | Add position and focal length of the parent parabola to <draw_dict>. |
 
 ### Refractive_plane
 
@@ -437,7 +437,7 @@ The class of Refractive_plane.
 
 | Member | Description |
 |---|---|
-| `next_ray(ray)` | Return the ray after the element. |
+| `next_ray(ray)` | Return the ray refracted at the plane (vector form of Snell's law). |
 
 ### Intersection_plane
 
@@ -453,7 +453,7 @@ plane
 
 | Member | Description |
 |---|---|
-| `next_ray(ray)` | Return the ray after the element. |
+| `next_ray(ray)` | Return a copy of <ray> moved to the intersection point with the plane (direction unchanged). |
 | `spot_diagram(beam, aberration_analysis=False, default_diagram_size=0, save=False, filename='spot_diagram.png', title=None, draw_rectangle=False, rectangle_size=(10, 10))` | Draw the Spot diagram at the intersection plane |
 
 ### NLO_Crystal
@@ -471,6 +471,6 @@ sets its color to a fixed, specified value <output_color>
 
 | Member | Description |
 |---|---|
-| `next_beam(beam)` | Return the beam after the element, computed ray by ray with next_ray. |
-| `next_ray(ray)` | Return the ray after the element. |
-| `set_mount_to_default()` |  |
+| `next_beam(beam)` | Pass the beam through (see next_ray) and give it the output color. |
+| `next_ray(ray)` | Pass the ray through unchanged except for the wavelength, which is multiplied by wavelength_multiplier. |
+| `set_mount_to_default()` | Use a lambda_mirror_mount on a post. |
