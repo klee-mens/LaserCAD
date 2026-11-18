@@ -244,10 +244,12 @@ Build a thick lens with given focal length, refractive index, aperture and edge 
     Calculates the refracted ray at a spherical surface with radius R. If from_material is True, the ray is refracted from the lens material to air, otherwise from air to lens material. Same notation as in Springer Handbook of Lasers and Optics page 68.
   next_ray(ray)
     Calculates the refracted ray through the thick lens by calculating the refraction at both surfaces using the refraction function.
+  matrix()
+    Exact paraxial ABCD matrix from the front vertex to the rear vertex (includes the propagation through the thickness of the lens).
 
 | Member | Description |
 |---|---|
-| `calc_principal_planes()` | Calculates the positions of the principal planes h1 and h2 relative to the lens center. Positive signs indicate the principle plane is located outside the lens, negative signs inside. |
+| `calc_principal_planes()` | Calculates the positions of the principal planes h1 and h2 relative to the lens vertices. Positive signs indicate the principle plane is located outside the lens, negative signs inside. h1 is measured from the front vertex against the propagation direction (the sign differs from the common convention on purpose), h2 from the rear vertex along the propagation direction. |
 | `calc_thickness()` | Return the center thickness from edge thickness, focal length, refractive index and aperture. |
 | `intersection(ray, radius)` | Return the intersection point of <ray> with a sphere of radius <radius> at the lens. |
 | `intersection_plane(ray)` | Calculates the intersection point of the ray with a plane given by a Geom_Object (e.g a thin lens). |

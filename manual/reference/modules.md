@@ -381,7 +381,7 @@ See Multipass cells on wikipedia or so
 ### Delay_Stage
 
 ```python
-Delay_Stage(name='NewDelayStage', path_length=250, left_turn=True, xstage_distance=38, xstage_shift=0, **kwargs)
+Delay_Stage(name='NewDelayStage', path_length=250, left_turn=True, xstage_distance=38, xstage_shift=0, beam_height=80, **kwargs)
 ```
 
 *Inherits from:* `Composition`
@@ -400,6 +400,9 @@ Delay line with two 90 degree mirrors on a linear stage (XR25C).
   Distance between the two mirrors in mm. Default 38.
 - `xstage_shift` (float)
   Shift of the stage along the input axis in mm. Default 0.
+- `beam_height` (float)
+  Height of the beam above the table in mm. Default 80. The stage itself
+  always stands on the table.
 
 ### Transmission_Disk
 

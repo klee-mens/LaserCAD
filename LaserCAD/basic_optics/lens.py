@@ -190,6 +190,8 @@ class Thicklens(Opt_Element):
       Calculates the refracted ray at a spherical surface with radius R. If from_material is True, the ray is refracted from the lens material to air, otherwise from air to lens material. Same notation as in Springer Handbook of Lasers and Optics page 68.
     next_ray(ray)
       Calculates the refracted ray through the thick lens by calculating the refraction at both surfaces using the refraction function.
+    matrix()
+      Exact paraxial ABCD matrix from the front vertex to the rear vertex (includes the propagation through the thickness of the lens).
   """
   def __init__(self, f=100, n=1.5, name="NewThickLens", aperture=1*inch, biconvex=False, thickness=None, edge_thickness=3, **kwargs):
     super().__init__(name=name, **kwargs)
@@ -203,6 +205,35 @@ class Thicklens(Opt_Element):
     self.calc_principal_planes()
     self.freecad_model = model_lens
     self.set_Mount()
+
+  @property
+  def _matrix(self):
+    """ABCD matrix from the front vertex to the rear vertex, see matrix()."""
+    return self._thick_lens_matrix()
+
+  @_matrix.setter
+  def _matrix(self, value):
+    # The matrix is always computed from the geometry (radii, thickness, n);
+    # the assignment in Opt_Element.__init__ is ignored on purpose.
+    pass
+
+  def _thick_lens_matrix(self):
+    """Return the exact paraxial ABCD matrix from the front to the rear vertex.
+
+    Refraction at the first surface (R1), propagation by the thickness d
+    inside the glass and refraction at the second surface (R2), for rays
+    (height, angle) in air. R = 0 is a plane surface. The result has
+    det = 1, C = -1/f, A = 1 + h2/f and D = 1 + h1/f.
+    """
+    n = self.refractive_index
+    d = self.thickness
+    R1, R2 = self.radius1(), self.radius2()
+    p1 = (n-1)/R1 if R1 != 0 else 0.0
+    p2 = (n-1)/R2 if R2 != 0 else 0.0
+    surface1 = np.array([[1, 0], [-p1/n, 1/n]])
+    inside = np.array([[1, d], [0, 1]])
+    surface2 = np.array([[1, 0], [p2, n]])
+    return surface2 @ inside @ surface1
 
   def set_Mount(self):
     """Set the default mount and shift it along the normal to the center (biconvex) or the back (plano-convex) of the lens."""
@@ -264,10 +295,16 @@ class Thicklens(Opt_Element):
 
   def calc_principal_planes(self):
     """
-    Calculates the positions of the principal planes h1 and h2 relative to the lens center.
+    Calculates the positions of the principal planes h1 and h2 relative to the lens vertices.
     Positive signs indicate the principle plane is located outside the lens, negative signs inside.
+    h1 is measured from the front vertex against the propagation direction
+    (the sign differs from the common convention on purpose), h2 from the rear
+    vertex along the propagation direction.
 
-    For an imaging with an object and image distance g and b, the distances to propagate are g+h1 and b+h2.
+    For an imaging with an object distance g (object to the first principal
+    plane) and an image distance b (second principal plane to the image),
+    1/g + 1/b = 1/f, the distances to propagate are g+h1 (to the front vertex)
+    and, after the lens, h2+b (from the rear vertex to the image).
     """
     R1 = self.radius1()
     R2 = self.radius2()

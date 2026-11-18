@@ -26,11 +26,14 @@ class Delay_Stage(Composition):
     Distance between the two mirrors in mm. Default 38.
   xstage_shift : float
     Shift of the stage along the input axis in mm. Default 0.
+  beam_height : float
+    Height of the beam above the table in mm. Default 80. The stage itself
+    always stands on the table.
   """
   def __init__(self, name="NewDelayStage", path_length=250, left_turn=True,
-                   xstage_distance = 38, xstage_shift=0, **kwargs):
+                   xstage_distance = 38, xstage_shift=0, beam_height= 80, **kwargs):
     super().__init__(name=name, **kwargs)
-
+    self.pos = (0,0,beam_height)
     FIRST_PROP = (path_length - xstage_distance) / 2
     sign = 1.0  if left_turn else -1.0
 

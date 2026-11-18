@@ -71,6 +71,22 @@ class TestDelayStage(unittest.TestCase):
     np.testing.assert_allclose(a._elements[0].pos, b._elements[0].pos)
     self.assertAlmostEqual(b.non_opticals[0].pos[0] - a.non_opticals[0].pos[0], 5)
 
+  def test_beam_height_sets_the_height_of_mirrors_and_beam(self):
+    for h in (80, 100, 120):
+      with self.subTest(beam_height=h):
+        ds = make(beam_height=h)
+        for m in ds._elements:
+          self.assertAlmostEqual(m.pos[2], h)
+        ray, _ = trace(ds, start=(0, 0, h))
+        self.assertAlmostEqual(ray.pos[2], h)
+        np.testing.assert_allclose(ray.normal, [-1, 0, 0], atol=1e-9)
+
+  def test_stage_stays_on_the_table_for_any_beam_height(self):
+    self.assertAlmostEqual(make(beam_height=120).non_opticals[0].pos[2], 0)
+
+  def test_default_beam_height_is_80(self):
+    self.assertAlmostEqual(make()._elements[0].pos[2], 80)
+
 
 if __name__ == "__main__":
   unittest.main()

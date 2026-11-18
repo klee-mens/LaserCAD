@@ -152,12 +152,11 @@ class TestRayTracing(unittest.TestCase):
     assert_allclose(r.pos, (0, 0, 82))
 
   def test_imaging_equation_with_principal_planes(self):
-    # g und b werden von den Scheiteln aus gemessen. h2 zählt in Ausbreitungs-
-    # richtung (negativ = innen), h1 ebenfalls vom vorderen Scheitel aus, d.h.
-    # H1 liegt bei x_vorn - h1. Der Abstand Objekt-H1 ist daher g - h1 und der
-    # Abstand H2-Bild b_H, mit b = b_H + h2.
-    # (Der Docstring von calc_principal_planes nennt "g+h1" - das passt nicht
-    # zum Vorzeichen von h1, siehe Bericht.)
+    # Hier ist g der Abstand Objekt -> vorderer Scheitel. H1 liegt bei
+    # x_vorn - h1, der Abstand Objekt-H1 ist daher g - h1; der Abstand
+    # H2-Bild b_H hängt mit dem Abstand b vom hinteren Scheitel über
+    # b = b_H + h2 zusammen. (Der Docstring von calc_principal_planes meint mit
+    # g und b dagegen die Abstände zu den Hauptebenen: Strecken g+h1 bzw. b+h2.)
     lens = make_lens(f=100, biconvex=True)
     g = 300.0
     r = Ray()
@@ -172,6 +171,120 @@ class TestRayTracing(unittest.TestCase):
     b = xs[0] - (LENS_POS[0] + lens.thickness)
     expected = 1 / (1 / lens.focal_length - 1 / (g - lens.h1)) + lens.h2
     self.assertAlmostEqual(b, expected, delta=0.05)
+
+
+class TestMatrix(unittest.TestCase):
+  """ABCD-Matrix von vorderem zu hinterem Scheitel (inkl. Glasweg)."""
+
+  def test_determinant_is_one(self):
+    for kw in CONFIGS:
+      with self.subTest(kw=kw):
+        self.assertAlmostEqual(np.linalg.det(make_lens(**kw).matrix()), 1, places=9)
+
+  def test_power_is_minus_one_over_f(self):
+    for kw in CONFIGS:
+      with self.subTest(kw=kw):
+        lens = make_lens(**kw)
+        self.assertAlmostEqual(lens.matrix()[1, 0], -1 / lens.focal_length,
+                               places=9)
+
+  def test_principal_planes_in_matrix(self):
+    # M = T(-h2) * L(f) * T(-h1)  ->  A = 1 + h2/f, D = 1 + h1/f
+    for kw in CONFIGS:
+      with self.subTest(kw=kw):
+        lens = make_lens(**kw)
+        M = lens.matrix()
+        self.assertAlmostEqual(M[0, 0], 1 + lens.h2 / lens.focal_length, places=9)
+        self.assertAlmostEqual(M[1, 1], 1 + lens.h1 / lens.focal_length, places=9)
+
+  def test_thin_limit(self):
+    lens = make_lens(f=100, biconvex=True, thickness=1e-9)
+    assert_allclose(lens.matrix(), [[1, 0], [-0.01, 1]], atol=1e-9)
+
+  def test_matrix_follows_changed_thickness(self):
+    lens = make_lens(f=100, biconvex=True)
+    d_old = lens.matrix()[0, 1]
+    lens.thickness *= 2
+    self.assertGreater(lens.matrix()[0, 1], d_old)
+
+  def test_matrix_returns_a_copy(self):
+    lens = make_lens(f=100)
+    M = lens.matrix()
+    M[0, 0] = 99
+    self.assertNotEqual(lens.matrix()[0, 0], 99)
+
+  def test_matrix_agrees_with_ray_tracing(self):
+    # paraxialer Strahl: Höhe/Winkel am vorderen Scheitel -> hinterer Scheitel
+    for kw in CONFIGS:
+      with self.subTest(kw=kw):
+        lens = make_lens(**kw)
+        h, alpha = 1e-3, 1e-4
+        r = Ray()
+        r.pos = LENS_POS - (10, 0, 0) + (0, 0, h)
+        r.normal = (np.cos(alpha), 0, np.sin(alpha))
+        out = lens.next_ray(r)
+        # Strahl auf die Ebene des vorderen Scheitels zurückrechnen
+        s = (LENS_POS[0] - r.pos[0]) / r.normal[0]
+        h_in = r.pos[2] + s * r.normal[2] - LENS_POS[2]
+        # und vorwärts auf die Ebene des hinteren Scheitels
+        x2 = LENS_POS[0] + lens.thickness
+        s2 = (x2 - out.pos[0]) / out.normal[0]
+        h_out = out.pos[2] + s2 * out.normal[2] - LENS_POS[2]
+        alpha_out = np.arctan2(out.normal[2], out.normal[0])
+        expected = lens.matrix() @ np.array([h_in, alpha])
+        assert_allclose([h_out, alpha_out], expected, rtol=1e-3, atol=1e-9,
+                        err_msg=str(kw))
+
+
+class TestImagingMatrix(unittest.TestCase):
+  """Die Composition-Matrix des Abbildungsrezepts muss abbilden (B = 0)."""
+
+  def test_composition_matrix_images(self):
+    from LaserCAD import Beam, Composition
+    for kw in CONFIGS:
+      with self.subTest(kw=kw):
+        lens = make_lens(**kw)
+        g = 300.0
+        b = 1 / (1 / lens.focal_length - 1 / g)
+        comp = Composition()
+        comp.set_light_source(Beam(radius=1, angle=0))
+        comp.propagate(g)
+        comp.propagate(lens.h1)
+        comp.add_on_axis(lens)
+        comp.propagate(lens.h2)
+        comp.propagate(b)
+        M = comp.matrix()
+        self.assertAlmostEqual(M[0, 1], 0, delta=1e-6)          # B = 0
+        self.assertAlmostEqual(M[0, 0], -b / g, places=6)       # Vergrößerung
+
+
+class TestImagingRecipe(unittest.TestCase):
+  """Abbildung wie im Docstring von calc_principal_planes beschrieben:
+  propagate(g), propagate(h1), add_on_axis(lens), propagate(h2), propagate(b)
+  mit g, b als Abstand zu H1 bzw. von H2 (1/g + 1/b = 1/f)."""
+
+  def test_image_position_matches_ray_tracing(self):
+    from LaserCAD import Beam, Composition
+    for kw in CONFIGS:
+      lens = make_lens(**kw)
+      g = 300.0
+      b = 1 / (1 / lens.focal_length - 1 / g)
+      comp = Composition()
+      comp.set_light_source(Beam(radius=1, angle=0))
+      comp.propagate(g)
+      comp.propagate(lens.h1)
+      comp.add_on_axis(lens)
+      comp.propagate(lens.h2)
+      comp.propagate(b)
+      image_x = comp.last_geom()[0][0]
+      xs = []
+      for ang in (0.001, 0.002):
+        r = Ray()
+        r.normal = (np.cos(ang), 0, np.sin(ang))   # Objektpunkt im Ursprung
+        out = lens.next_ray(r)
+        xs.append(focus_x_from_height(out, h=0.0, z_axis=r.pos[2]))
+      for x in xs:
+        self.assertAlmostEqual(x, image_x, delta=0.1, msg=str(kw))
 
 
 def focus_x_from_height(out, h, z_axis):
